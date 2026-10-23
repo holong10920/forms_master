@@ -51,7 +51,7 @@
 |---|---|---|---|---|
 | GIT-01 | Kiểm tra `git remote`, current user, `gh auth status` **không để lộ token**; xác nhận đúng GitHub owner/repo dự kiến. | DONE | docs/evidence/P00/environment.txt | remote holong10920/forms_master, PUBLIC; gh auth OK, token not printed |
 | GIT-02 | PoC phát triển mới từ đầu; không đưa source code/private docs/secrets của công ty vào GitHub cá nhân khi chưa được chủ sở hữu công ty cho… | IN_PROGRESS | .gitignore; ADR-001/007 | docs/internal + master prompt ignored; no company code |
-| GIT-03 | Nếu chưa có quyền đưa code lên personal GitHub: chỉ tạo local repo hoặc repo công ty được duyệt. Đánh dấu `BLOCKED` cho remote push; khôn… | BLOCKED | ADR-007 | local commits OK; push only after G9 |
+| GIT-03 | Nếu chưa có quyền đưa code lên personal GitHub: chỉ tạo local repo hoặc repo công ty được duyệt. Đánh dấu `BLOCKED` cho remote push; khôn… | BLOCKED | ADR-007 + addendum | local commit 0d4fe7b; push only after G9 |
 | GIT-04 | GitHub repo mặc định là **private**; `.env*`, local AWS config, dữ liệu thật, artifacts chứa PII, credentials không được commit. | BLOCKED | docs/evidence/P00/environment.txt | repo is PUBLIC, violates the default private requirement (B-01); .gitignore created |
 | GIT-05 | Có README, `CONTRIBUTING.md`, branch strategy, protected main/required checks nếu có quyền. | TODO | | |
 | GIT-06 | CI không có secret trên untrusted PRs; chỉ deploy từ trusted main/reviewed commit sau approval tương ứng. | TODO | | |
@@ -60,7 +60,7 @@
 
 | ID | Requirement (rút gọn) | Status | Evidence | Note |
 |---|---|---|---|---|
-| SP-01 | Kiểm tra Superpowers skills đang thực sự cài và phiên bản: `brainstorming`, `writing-plans`, `test-driven-development`, `systematic-debug… | BLOCKED | re-checked after G0: installed_plugins.json only has vercel | user installs it; skill availability must be verified before P01 |
+| SP-01 | Kiểm tra Superpowers skills đang thực sự cài và phiên bản: `brainstorming`, `writing-plans`, `test-driven-development`, `systematic-debug… | IN_PROGRESS | docs/evidence/P01/superpowers-install.txt | 7.0.0 installed (bb92a77); invocation must be verified in a new session |
 | SP-02 | Thực thi `superpowers:brainstorming`: explore repo/context, hỏi các câu cần thiết (mỗi lần một câu theo skill), mô tả 2–3 phương án, trad… | TODO | | |
 | SP-03 | Phải so sánh **Runtime JSON Renderer vs Code Generator vs Hybrid Compiler**; đưa recommendation nhưng không đóng kết luận trước khi khảo… | IN_PROGRESS | docs/discovery/P00_ARCHITECTURE_OPTIONS.md | preliminary matrix; not final |
 | SP-04 | Vì dự án lớn, chia thành các **subsystem specs**: schema/workflow, builder UI, runtime/compiler, publishing/AWS, migration/quality. Không… | TODO | | |
@@ -248,7 +248,7 @@
 | ID | Requirement (rút gọn) | Status | Evidence | Note |
 |---|---|---|---|---|
 | P00-01 | Check working directory, local repo, git status, installed tools/skills. | DONE | docs/evidence/P00/environment.txt |  |
-| P00-02 | Tạo 6–8 file quản trị context ở mục 0 (chỉ tài liệu/plan, không feature code). | DONE | CLAUDE.md + 6 docs + REQUIREMENTS_TRACEABILITY | docs only |
+| P00-02 | Tạo 6–8 file quản trị context ở mục 0 (chỉ tài liệu/plan, không feature code). | DONE | commit 0d4fe7b: CLAUDE.md + docs/* | docs only |
 | P00-03 | Nếu repo form cũ có sẵn và được phép đọc: audit component/flows/API/assets/build output; nếu không có, không bịa kết quả. | DONE | docs/internal/LEGACY_AUDIT_UI.md, docs/internal/LEGACY_AUDIT_API_EFO.md | read-only; dist sizes re-checked with du/stat |
 | P00-04 | Tạo `docs/FORM_CAPABILITY_MATRIX.md` map site × fields × steps × conditions × APIs × plugins × animation × unique business logic; phân bi… | DONE | docs/FORM_CAPABILITY_MATRIX.md | CONFIRMED/ASSUMED/UNKNOWN |
 | P00-05 | Chọn 2 form demo có flow khác nhau (mặc định Sports/PC), dùng mock nội dung Nhật, dữ liệu giả. | DONE | docs/discovery/P00_DISCOVERY.md §4; ADR-003 | approved at G0 |
@@ -259,7 +259,7 @@
 
 | ID | Requirement (rút gọn) | Status | Evidence | Note |
 |---|---|---|---|---|
-| P01-01 | Run installed `superpowers:brainstorming` theo skill thật. | BLOCKED | — | waiting on SP-01 |
+| P01-01 | Run installed `superpowers:brainstorming` theo skill thật. | TODO | — | starts in a new session once SP-01 is confirmed |
 | P01-02 | Design schema + workflow/rules. | TODO | | |
 | P01-03 | Design Admin UX + feature flags + capability registry. | TODO | | |
 | P01-04 | Design runtime/compiler + bundle strategy. | TODO | | |

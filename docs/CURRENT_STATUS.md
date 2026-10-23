@@ -1,12 +1,12 @@
 # Current Status
 
-> Last updated: 2026-10-23 (session 1, after G0)
+> Last updated: 2026-10-23 (session 1, after the P00 commit and the Superpowers install)
 
 | Item | Value |
 |---|---|
-| Active phase | **P00 DONE (G0 APPROVED WITH ADJUSTMENTS)** → **P01 BLOCKED** (Superpowers is not installed) |
+| Active phase | **P00 DONE (G0 APPROVED WITH ADJUSTMENTS)** → **P01 READY TO START IN A NEW SESSION** (Superpowers 7.0.0 is installed; the skill must be verified in a new session) |
 | Active plan | None. `writing-plans` runs only after G1. |
-| Git | `main` @ `c3a01b8`. All P00 docs are **uncommitted**: a hook requires the user to approve each commit. The local commit is waiting on the user. Not pushed. |
+| Git | local branch `p00-discovery`. **P00 checkpoint = `0d4fe7b`** (12 files). Not pushed. The user added an exception to the global hook so Claude can commit/push in this repo only. Push is still gated by G9 (ADR-007). |
 | Remote | personal GitHub repo, **PUBLIC**. G9 BLOCKED; the user is handling it. |
 | AWS | **NO WRITES**, and no AWS API has been called. The profile is not chosen (ADR-006). |
 | Environment | local macOS; Node 20.20.2; Python 3.9.6; Docker 29.1.3 |
@@ -18,11 +18,11 @@
 - G0 recorded → `docs/DECISIONS.md` gate log + ADR-001..007
 
 ## Blocked
-- **P01-01 / SP-01:** Superpowers is not installed. On 2026-10-23, after G0, `~/.claude/plugins/installed_plugins.json` listed only `vercel@claude-plugins-official`, and no superpowers `SKILL.md` was found.
+- **P01-01 / SP-01:** Superpowers 7.0.0 was installed on 2026-10-23 (`docs/evidence/P01/superpowers-install.txt`). In the install session, `Skill('superpowers:brainstorming')` returned `Unknown skill`, which is expected because skills load at session start. **A new session must verify it.**
 - G9 (GitHub) and G10 (AWS): waiting on the user.
 
 ## Next
-1. The user installs Superpowers and opens a **new session**, because the skill list loads at session start.
+1. Open a **new session**.
 2. Check that `superpowers:brainstorming` appears in the skill list, then invoke it with the Skill tool.
 3. P01 brainstorming, one spec per subsystem:
    1. schema + workflow DSL

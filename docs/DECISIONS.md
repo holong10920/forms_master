@@ -127,3 +127,7 @@ Only an ADR marked `ACCEPTED` with the user as approver is binding on implementa
   - `docs/internal/` is gitignored.
   - The master prompt file is gitignored until the user reviews it, because it mentions the internal AWS environment. The user can unignore it after review.
 - **Approver:** User (G0 §4). **Date:** 2026-10-23.
+- **Addendum (2026-10-23):**
+  - The user approved the P00 local commit (`0d4fe7b`) and allowed git work in this repo.
+  - The user personally edited the global hook `~/.claude/hooks/block-git-commit-push.sh` to allow commit/push only when cwd is `forms_master`. Claude was not allowed to edit it (Self-Modification).
+  - **Push remains BLOCKED until G9.** The hook technically allows it, but the gate still applies.
