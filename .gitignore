@@ -1,0 +1,30 @@
+# Company-derived audit notes: never push (repo remote is a personal account)
+docs/internal/
+
+# Secrets / local config
+.env
+.env.*
+!.env.example
+.aws/
+*.pem
+*.key
+
+# Build / deps
+node_modules/
+dist/
+build/
+.out/
+coverage/
+.venv/
+__pycache__/
+*.pyc
+playwright-report/
+test-results/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Master contract mentions internal AWS environment context: local only until user review (ADR-007)
+MASTER_PROMPT_MULTI_SITE_FORM_BUILDER_AWS_TRAINING.md
