@@ -78,6 +78,7 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-059 | OD5-04: retention submission tổng hợp 30 ngày ở PoC; logical expiration khi đọc/xử lý; TTL vật lý có thể trễ; không PII thật | **APPROVED** | User (spec #5 rev 1 review) | 2026-10-24 |
 | ADR-060 | OD-05 (spec #1): payload có field inactive → 422 với mã ổn định; backend tự tính field active; không lưu, không echo giá trị | **APPROVED** | User (spec #5 rev 1 review) | 2026-10-24 |
 | ADR-061 | OD4-07: P0 chỉ inspector tự sinh từ schema + control typed đã duyệt; không chạy code custom Inspector trong origin Admin; sandbox custom Inspector P1 | **APPROVED** | User (spec #5 rev 1 review) | 2026-10-24 |
+| ADR-062 | Spec #6: Motion phục vụ hiểu, phản hồi, liên tục — không trang trí; 4 tình huống (chuyển step, hiện nội dung theo điều kiện, phản hồi validation, phản hồi submit); preset đã duyệt + preview, không code; Motion không quyết định business state; reduced motion, a11y, hiệu năng, cô lập bundle | **APPROVED AS PRODUCT DIRECTION** | User (spec #6 Answer #1) | 2026-10-24 |
 
 ---
 
@@ -1114,3 +1115,22 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 - **Quyết định (user): APPROVED.** P0 chỉ dùng Inspector sinh từ schema và control typed đã duyệt. Không chạy code custom Inspector trong origin Admin. Sandbox cho custom Inspector chuyển P1.
 - Trước khi coi P0 đủ: xác minh các plugin cần cho Sports và PC đều cấu hình được qua Inspector tự sinh; nếu thiếu khả năng thiết yếu thì đề xuất một control typed built-in nhỏ, không mở thực thi code tùy ý.
 - **Người duyệt:** User (review spec #5 rev 1). **Ngày:** 2026-10-24.
+
+## ADR-062 — Motion Product Direction (spec #6 Answer #1)
+
+- **Quyết định (user): APPROVED AS PRODUCT DIRECTION.** Motion cải thiện **sự hiểu, phản hồi và tính liên tục**, không trang trí form. Business Editor mở tab モーション để chọn phong cách chuyển động hợp với website và xem trước ngay; không lập trình animation.
+- **Bốn tình huống ưu tiên:**
+  1. Chuyển step (次へ/戻る): nhẹ, biết mình ở bước nào, không đổi trang đột ngột, không mất giá trị, không hỏng history/focus.
+  2. Hiện nội dung theo điều kiện (ví dụ 店頭買取 → khu chọn cửa hàng; 宅配買取 → nhánh 宅配): Motion chỉ phản ánh state Workflow Engine đã quyết; không quyết field active; không trì hoãn invalidation hay server validation để chờ animation.
+  3. Phản hồi validation: lỗi rõ; nhấn nhẹ; không rung mạnh, không nhấp nháy, không tự cuộn gây mất phương hướng; screen reader đọc được; animation không thay message; không hiện thành công khi validation authoritative còn pending.
+  4. Phản hồi submit: pending đúng; success chỉ sau khi backend xác nhận; thất bại có lỗi + cách khắc phục; Motion không gây submit lần hai; không success vì animation kết thúc; không chạy effect/command từ animation callback.
+- **Preset P0:** hệ preset đã duyệt; đề xuất ban đầu `なし` / `控えめ` / `ガイド付き` (đề xuất sản phẩm, chưa phải registry cuối). Editor: chọn preset, xem trước, so On/Off, bật/tắt theo nhóm tương tác được hỗ trợ, xem reduced motion. Không chỉnh keyframe; không JS/CSS/script; không timeline editor, choreography graph, 3D. Override theo step chỉ vào P0 nếu thật sự cần cho demo Sports/PC.
+- **Ranh giới:** Workflow Engine giữ business state; Motion chỉ render transition đã xác nhận; tách domain/workflow state, validation/submission status, UI presentation state, animation lifecycle. Lifecycle của animation không được: commit navigation, authorize submission, sửa PII, dispatch server effect, override validation, mở khóa action bị disable. Motion lỗi không làm form không submit được; có fallback không animation.
+- **Contract khai báo có kiểu** (trigger, target là region đã đăng ký, preset ID + version, tham số có kiểu, biến thể reduced motion, tương thích runtime/build); không event handler/code/selector/DOM mutation tùy ý; validate, pin version, compile tất định, không phụ thuộc thời gian/ngẫu nhiên, parity Preview/Published.
+- **A11y:** `prefers-reduced-motion`; tắt chuyển động không thiết yếu; bàn phím; screen reader; focus sau chuyển step; không flash/strobe; không cần animation để hiểu/hoàn thành; Editor không override được tùy chọn của người dùng.
+- **Hiệu năng:** ưu tiên transform/opacity; không layout thrashing; không chặn input; không kéo dài; không layout shift bất ngờ; fallback thiết bị chậm. 120–250 ms chỉ là gợi ý cần kiểm chứng, không phải KPI. Đo bytes JS/CSS, initial vs lazy, request, T2/T3, INP, CLS, long task, overhead reduced motion, thiết bị chậm; không kết luận CWV PASS từ lab.
+- **Bundle:** theo spec #3 — Sports Motion-none không có Motion runtime trong toàn bộ artifact graph, không dynamic import, không preset thừa; PC chỉ bundle preset thực dùng, không registry toàn cục; lazy khi hợp lý mà không làm animation đến quá trễ; không ảnh hưởng tính tất định của Release Manifest.
+- **Builder UX:** tab モーション cho Business Editor: Preset Library trái, Visual Preview giữa, thuộc tính phải/Inspector, Preview On/Off, Preview Reduced Motion; tương thích Hybrid Workspace; preview chạy trong runtime cô lập (ADR-053). Editor thấy hiệu ứng áp ở đâu, khi nào, ảnh hưởng a11y/hiệu năng, Motion-none trông thế nào; không thấy DSL/code.
+- **Non-goals P0:** GSAP timeline, keyframe editor, CSS animation editor, scroll-linked, parallax, 3D, choreography toàn form, AI sinh script, script tùy ý theo plugin.
+- **Thành công:** Editor mở PC Builder → chọn preset → preview chuyển step → preview 店頭/宅配 → kiểm reduced motion → lưu draft → gửi review; không code, không DSL, không developer. Form khách đúng khi animation tắt hoặc không tải được.
+- **Người duyệt:** User (spec #6 Answer #1). **Ngày:** 2026-10-24.

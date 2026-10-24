@@ -2,6 +2,7 @@
 
 > **Trạng thái: PROPOSAL, revision 2** (2026-10-24) — **READY_FOR_CROSS_SPEC_REVIEW** (§21, §23).
 > - Review rev 1 (user): **SPEC5_REV1_CHANGES_REQUIRED**; phương án A giữ nguyên. OD5-01..04, OD-05, OD4-07 → ADR-056..061. **Security BLOCKER** (cửa sổ submit/revocation) sửa bằng submission admission gate (§9.3). Kiểm thêm publication (§5.3, §5.4, §6.6). Thay đổi: §24.
+> - Review rev 2 (user): READY_FOR_CROSS_SPEC_REVIEW **với verification items** V5-01 (tạo gate FBK, UNVERIFIED) và V5-02 (thực thi adapter, OD5-05) — §23.4.
 > - Rev 1 đã qua consistency review độc lập (§22). Rev 2 qua ba vòng targeted review (§23): admission gate dùng tập `blockers`, `CAPSTATUS` làm điểm CAS cho gate FBK, gate trước mọi lời gọi adapter.
 > - Hướng đi đã duyệt: ADR-054 (yêu cầu publication/rollback), ADR-055 (phương án A: Operation Record + Reconciler + Transactional Store). Cơ chế trong tài liệu này **PROPOSED**.
 > - **G1 NOT APPROVED.** G9, G10 BLOCKED. Không có code. Mọi nội dung về AWS là **thiết kế đích sau G10**, không phải thao tác đã làm; mặc định là demo local.
@@ -629,7 +630,16 @@ Mỗi phần tử ứng với đúng một nguồn, nên gỡ một nguồn khô
 
 SQLite: `BEGIN IMMEDIATE` tuần tự hóa mọi writer trên cả database; cùng contract, ngữ nghĩa chặt hơn; không có starvation do xung đột theo item.
 
-**Gate trước mọi lời gọi adapter (không chỉ ở commit).** Trước khi chạy **bất kỳ** code server của plugin — ở Form API (validate/recompute/`authoritativeCheck` khi submit, query `dataSource`, `serverValidator` lúc nhập), **ở Preview API** (`simulate-submit`, `queries`), và ở outbox worker (effect) — process đó đọc **nhất quán mạnh** gate form, gate release (nếu có release) và gate FBK theo **cùng thứ tự ưu tiên** với transaction: có `blockers` → 423, không gọi adapter; store không khả dụng → fail closed (503), không gọi adapter. Code của FBK đã bị revoke vì vậy không chạy trên input mới sau commit của revocation. Giới hạn trung thực: một lời gọi adapter **đã bắt đầu** trước commit có thể chạy xong; kết quả của nó không dẫn tới submission vì transaction submit kiểm lại gate.
+**Gate trước mọi lời gọi adapter (không chỉ ở commit).** Trước khi chạy **bất kỳ** code server của plugin — ở Form API (validate/recompute/`authoritativeCheck` khi submit, query `dataSource`, `serverValidator` lúc nhập), **ở Preview API** (`simulate-submit`, `queries`), và ở outbox worker (effect) — process đó đọc **nhất quán mạnh** gate form, gate release (nếu có release) và gate FBK theo **cùng thứ tự ưu tiên** với transaction: có `blockers` → 423, không gọi adapter; store không khả dụng → fail closed (503), không gọi adapter. Lời gọi có lần đọc gate **sau** commit của revocation không được chạy. Lần đọc **không khóa** gate, nên một lời gọi có lần đọc trước commit vẫn có thể bắt đầu sau commit (G-EXEC chưa được bảo đảm — xem bảng dưới và OD5-05); kết quả của nó không dẫn tới submission vì transaction submit kiểm lại gate.
+
+**Hai guarantee khác nhau (theo review spec #5 rev 2):**
+
+| Guarantee | Nội dung | Cơ chế | Trạng thái |
+|---|---|---|---|
+| **G-ADM: submission admission** | Revocation commit trước transaction submit → submit bị từ chối; submit commit trước → hợp lệ tại thời điểm admission | ConditionCheck gate trong transaction (linearization tại commit) | Có cơ chế chứng minh; kiểm chứng: TM-5G01..03, CT-08 |
+| **G-EXEC: adapter execution** | Không lời gọi adapter **mới** nào chạy sau commit của revocation | **Chưa có cơ chế chứng minh.** Đọc gate nhất quán mạnh **không khóa** gate: gate có thể bị revoke ngay sau lần đọc và trước khi adapter bắt đầu | **OD5-05** — chờ user duyệt (§17); không được tuyên bố là đã bảo đảm |
+
+Interleaving (TM-5G18): T1 đọc gate FBK = mở → T2 commit `revoked` → T3 gọi adapter. Với thiết kế hiện tại, T3 **chạy** (adapter thực thi một lần trên input của request đó). Hệ quả: query trả kết quả cho khách; trên đường submit, transaction submit vẫn bị từ chối (G-ADM giữ); ở outbox, effect có thể chạy một lần (P0 chỉ có mock effect). Lời gọi đã bắt đầu trước commit chạy tới hết, bị chặn trên bởi deadline của adapter (spec #2: cancel/deadline).
 
 **Revocation plugin toàn cục.** Mọi release dùng FBK đó kiểm **cùng một** gate FBK, nên **một** transaction (≤ 10 gate của PRK) là đủ: commit của nó là linearization point cho mọi release và form dùng **server FBK** đó — không cần fan-out. Giới hạn:
 - Gate chỉ chặn **phía server**. Plugin chỉ có browser facet (hoặc rủi ro nằm ở browser facet): submit vẫn được nhận cho tới khi áp M4/M5 **theo từng form**; mỗi form một transaction, nguyên tử với form đó nhưng **không** nguyên tử giữa các form. Incident hiển thị 「N / M フォームを停止済み」; không nói "đã chặn mọi form" trước khi N = M.
@@ -934,6 +944,7 @@ Ký hiệu: P = pointer, R7/R8 = release (synthetic PC).
 | TM-5G12 | Resume (a) trong grace; (b) sau `supportEndsAt` nhưng chưa retire; (c) sau retire | (a), (b) Resume được trên release cũ; (c) 410 / thông báo + Start Over trên active, draft không hydrate | status endpoint + gate release |
 | TM-5G13 | GC blob mồ côi, gồm snapshot blob mồ côi khi transaction tạo review thất bại, và Editor hoàn tác về nội dung cũ đúng lúc GC chạy | blob không được tham chiếu và không được touch > 24 giờ bị xóa + audit; blob của snapshot còn item và draft head còn; blob vừa được touch không bị xóa; không item nào trỏ tới blob đã xóa | danh sách tham chiếu + `BLOBTOUCH` trong store |
 | TM-5G14 | Payload có field inactive: đổi nhánh, field ẩn, payload cũ, gửi lại | 422 `E-INACTIVE-DATA-PRESENT` chỉ có path; không lưu; log không có giá trị; gửi lại sau khi runtime tính lại → 200 | response, store, log |
+| TM-5G18 | Interleaving: T1 đọc gate FBK = mở (hook dừng) → T2 commit `revoked` → T3 gọi adapter; lặp cho query, `serverValidator`, validate khi submit, effect | Theo OD5-05: (a) adapter **chạy** ở T3 (ghi nhận, không che), submit sau đó vẫn bị 423 (G-ADM), effect mock có thể chạy một lần; (b) T3 bị từ chối nếu permit đã hết hạn, và mọi thực thi kết thúc trước `commit + L_exec + skew + deadline` | hook thứ tự + spy adapter + đồng hồ giả |
 | TM-5G15 | Freshness trong Admin khi store chậm/không khả dụng | trạng thái hiện `cached`/`unknown` đúng nhãn; nút hành động bảo mật không dựa vào `cached` | response Admin |
 | TM-5G16 | Revocation dưới tải submit liên tục cùng FBK | transaction đóng gate commit được (retry không giới hạn có backoff); Admin hiện 「停止処理中」 tới khi commit; sau commit không submission nào lọt; đo độ trễ commit (VG-12 cho số thật) | thứ tự commit + gate |
 | TM-5G17 | Adapter của FBK đã revoke: query `dataSource`, `serverValidator` lúc nhập, validate khi submit, **`simulate-submit` và `queries` của Preview API**, effect ở outbox — sau commit của revocation | 423, adapter **không** được gọi (spy trên adapter); store không khả dụng → 503, adapter không được gọi; kết quả query cache không được trả khi gate đóng | spy adapter + gate |
@@ -981,7 +992,13 @@ Ký hiệu: P = pointer, R7/R8 = release (synthetic PC).
 
 **Đã quyết (review rev 1):** OD5-01 → ADR-056 · OD5-02 → ADR-057 · OD5-03 → ADR-058 · OD5-04 → ADR-059 · OD-05 (spec #1) → ADR-060 · OD4-07 (spec #4) → ADR-061.
 
-**Còn mở:** không có quyết định kiến trúc mở của spec #5. Các số chờ môi trường thật: `T_edge_max` (VG-10), throughput gate (VG-12), S3 conditional write (VG-11) — đều sau G10.
+**Còn mở:**
+
+| ID | Vấn đề | Phương án | Khuyến nghị | Hạn |
+|---|---|---|---|---|
+| **OD5-05** | Guarantee cho **thực thi adapter** sau revocation (G-EXEC, §9.3). Thực thi code bên ngoài không thể nằm trong transaction DB, nên "không lời gọi mới nào sau commit" không đạt được chỉ bằng đọc gate. | **(a)** P0 chỉ bảo đảm G-ADM (zero new admission sau commit) + best-effort cho thực thi: không lời gọi nào có lần đọc gate **sau** commit được chạy; lời gọi có lần đọc **trước** commit có thể bắt đầu (khoảng đọc→gọi, chưa đo, không bảo đảm) và chạy tới deadline. Không tốn thêm cơ chế. **(b)** Execution permit có lease: lần đọc gate cấp một permit hiệu lực `L_exec` *[Claude: 2 s]*; adapter host từ chối bắt đầu khi permit hết hạn; deadline lời gọi ≤ `L_exec`; revocation chỉ báo 「実行停止済み」 sau `commit + L_exec + lệch giờ tối đa`. Bảo đảm **có chặn trên**: không lời gọi nào bắt đầu sau `commit + L_exec + skew` hoặc chạy quá thời điểm đó + deadline. Cần đồng hồ đồng bộ, host kiểm permit. **(c)** Zero tuyệt đối: lời gọi giữ "read lock" trên gate (bộ đếm in-flight), revocation chờ đếm về 0 — chặn revocation sau lời gọi chậm, bộ đếm rò khi crash, tranh chấp cao. | **(a) cho P0** (dữ liệu hư cấu, effect chỉ là mock; G-ADM vẫn tuyệt đối), ghi rõ giới hạn; **(b) bắt buộc trước khi có effect hay connector thật** (P1). Không chọn (c). Đây là guarantee yếu hơn "zero new execution" — **cần user duyệt riêng vì có security impact**. | Trước plan |
+
+**Không còn quyết định kiến trúc mở khác** của spec #5.
 
 Các lựa chọn *[Claude]* có thể đổi trong review mà không ảnh hưởng kiến trúc: ngưỡng inline 256 KB, trần 2 MB, lease 5 phút, lệch giờ ≤ 30 s, `N = 5`, `N_effect = 8`, reconciler 30 s, `T_confirm` 10 phút, retry submit 3 lần, retry đóng gate không giới hạn (cảnh báo sau 30 s), một item gate, không shard ở P0, ≤ 10 server FBK mỗi plugin, GC 24 giờ, session 8 giờ / 30 phút, không khóa form, hai bảng, FastAPI.
 
@@ -1115,6 +1132,27 @@ Kết luận: fix B1 đúng nguyên lý; **3 MAJOR mới, 10 MINOR**. Đã xử 
 | m | Bảng §14 thiếu cột, thứ tự, tiêu đề | sửa |
 
 Không phát sinh BLOCKER. Các điểm còn lại chỉ đo được sau G10 (VG-10, VG-11, VG-12).
+
+### 23.4. Verification items bắt buộc cho Cross-Subsystem Review (theo review spec #5 rev 2)
+
+**V5-01 — `CAPSTATUS.version` và tạo gate FBK. Trạng thái: UNVERIFIED** (bản sửa §23.3 chưa qua review độc lập; không tuyên bố FIX VERIFIED cho tới khi có review + CT-26).
+
+Điều kiện chung: mọi transaction dưới đây đều có `Update CAPSTATUS#{PRK}` với `attribute_exists(PK) AND version = :v` → `version + 1` (CAS). Danh sách override mở được đọc nhất quán mạnh **trên bảng gốc** (không GSI) sau khi đọc `CAPSTATUS` ở version `v`; vì mọi thay đổi override đều CAS cùng `version`, danh sách đó không thể đổi giữa lần đọc và commit mà transaction vẫn thành công.
+
+| # | Tình huống | Transaction và điều kiện | Linearization / kết quả mong đợi |
+|---|---|---|---|
+| 1 | Tạo gate X đồng thời với override `revoked` B | tạo gate: CAS `v`, `ADD serverFbks X`, Put gate X (`attribute_not_exists`) với blockers khởi tạo · override: CAS `v`, `ADD override#B` trên gate trong `serverFbks` (đọc ở `v`) | đúng một bên commit ở `v`; bên kia hủy (`ConditionalCheckFailed` trên `CAPSTATUS`), đọc lại, làm lại ở `v+1`. Cuối cùng gate X có `override#B` |
+| 2 | Override B commit trước | override ở `v` → `v+1` (`serverFbks` chưa có X); tạo gate CAS `v` thất bại → đọc lại: B mở → Put gate X với `{override#B}` ở `v+1` | gate X **sinh ra đã đóng** |
+| 3 | Tạo gate X commit trước | tạo gate ở `v` → `v+1` (X mở, chưa có override); override CAS `v` thất bại → đọc lại `serverFbks` (có X) → `ADD override#B` lên X ở `v+1` | từ commit của override, X đóng; submit commit trước đó hợp lệ (G-ADM) |
+| 4 | CAS conflict + retry | thất bại do `version` hoặc `TransactionConflict` | revocation: retry không giới hạn, backoff, cảnh báo sau 30 s; tạo gate: retry tối đa 5 lần rồi báo vận hành (gate vẫn thiếu → fail closed) |
+| 5 | Gate thiếu | submit: ConditionCheck `attribute_exists(PK)` thất bại → 503; resume/close: Update có `attribute_exists` thất bại | không có gate nào được sinh ra ở trạng thái mở; submit bị từ chối |
+| 6 | Resume override A đồng thời revoke override B | resume: CAS `v`, `DELETE override#A`; revoke: CAS `v`, `ADD override#B` | tuần tự hóa bởi CAS; mọi thứ tự → cuối cùng gate có `override#B`, không có `override#A` |
+| 7 | Không tạo gate mở từ trạng thái đã revoked | tạo gate đọc `CAPSTATUS` ở `v` (`publishBlockers` có `ledger#revoked` / override `revoked`) → blockers khởi tạo chứa các phần tử đó; CAS `v` bảo đảm không đổi trước commit | gate sinh ra đã đóng |
+| 8 | Không gỡ blocker của nguồn khác | đóng override A chỉ `DELETE override#A`; ledger dùng `ledger#revoked`; M3 dùng `mitigation#M3#…` | các phần tử khác giữ nguyên; gate mở chỉ khi tập rỗng (CT-22, CT-25) |
+
+Cách kiểm chứng: CT-26 trên SQLite và DynamoDB Local với hook điều khiển thứ tự commit cho từng dòng; review độc lập đọc lại các điều kiện; evidence ghi rõ "emulator" cho DynamoDB Local.
+
+**V5-02 — Adapter execution vs revocation. Trạng thái: chờ OD5-05.** G-ADM có cơ chế chứng minh (§9.3). G-EXEC hiện **không** được bảo đảm (interleaving T1/T2/T3, TM-5G18). Phương án và khuyến nghị: OD5-05 (§17). Không tuyên bố "mọi adapter ngừng ngay sau revocation".
 
 ### 23.3. Lần kiểm cuối (phạm vi hẹp)
 

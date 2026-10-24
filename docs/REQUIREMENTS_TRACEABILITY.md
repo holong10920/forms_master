@@ -17,7 +17,7 @@
 | F-P0-06 Validation | — | — | — | — | TODO |
 | F-P0-07 Conditional Logic | — | — | — | — | TODO |
 | F-P0-08 Theme/Branding | — | — | — | — | TODO |
-| F-P0-09 Motion Animation | — | — | — | — | TODO |
+| F-P0-09 Motion Animation | spec #6 §4, §7, §10 | — | — | — | TODO (design) |
 | F-P0-10 Preview | — | — | — | — | TODO |
 | F-P0-11 JSON Definitions | — | — | — | — | TODO |
 | F-P0-12 Persistence | — | — | — | — | TODO |
@@ -35,7 +35,7 @@
 |---|---|---|---|
 | Schema & workflow | ARCH-01..10 | `docs/superpowers/specs/2026-10-23-form-schema-workflow-design.md` rev 3.1 §6–§16, §19 (PROPOSED; design direction ADR-017..022; chưa duyệt hoàn toàn). ARCH-09/ARCH-10 chi tiết → `docs/superpowers/specs/2026-10-24-plugin-contracts-capability-registry-design.md` rev 2 §5–§13 (PROPOSED; ADR-023..035). | TODO (design đang review) |
 | Compiler & isolation | BUILD-01..10 | Contract isolation (BUILD-02/04/05/06/08): spec #2 rev 2 §9–§11 (PROPOSED). Bundling, release, reproducible build: `docs/superpowers/specs/2026-10-24-compiler-bundle-release-design.md` rev 2 (PROPOSED; ADR-036..042). Bằng chứng mức spike (không phải implementation): `docs/evidence/P01/spike-gate-01/`. Bundling, Release Manifest: spec #3 (P01-04). | TODO |
-| Motion | MOTION-01..07 | — (P01-06) | TODO |
+| Motion | MOTION-01..07 | `docs/superpowers/specs/2026-10-24-motion-design.md` rev 1 (PROPOSED; ADR-062) | TODO (design đang review) |
 | Backend & publishing | API-01..10 | `docs/superpowers/specs/2026-10-24-api-persistence-publishing-design.md` rev 2 (PROPOSED; ADR-054..060; READY_FOR_CROSS_SPEC_REVIEW) | TODO (design xong, chờ cross-spec review) |
 | Admin UX | UX-01..05, UX-07 | `docs/superpowers/specs/2026-10-24-admin-form-builder-design.md` rev 2.3 (PROPOSED; ADR-046..053, ADR-061; test matrix §19 gồm 4Z01–4Z15; READY_FOR_CROSS_SPEC_REVIEW) | TODO (design đang review) |
 | Undo/redo | UX-06 | ADR-004: P1; design phải chừa chỗ cho nó | DEFERRED P1 (G0) |
