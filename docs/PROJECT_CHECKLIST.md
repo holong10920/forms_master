@@ -19,29 +19,29 @@
 
 | ID | Requirement (rút gọn) | Status | Evidence | Note |
 |---|---|---|---|---|
-| CTX-01 | Đọc TOÀN BỘ file này và kiểm tra trạng thái repo, docs, git status/log, test baseline trước khi quyết định bước kế tiếp. | DONE | master read in full; docs/evidence/P00/environment.txt | git status/log + tools checked; test baseline: no code yet |
+| CTX-01 | Đọc TOÀN BỘ file này và kiểm tra trạng thái repo, docs, git status/log, test baseline trước khi quyết định bước kế tiếp. | DONE | đã đọc toàn bộ master; docs/evidence/P00/environment.txt | đã kiểm tra git status/log + tools; test baseline: chưa có code |
 | CTX-02 | Tạo `CLAUDE.md` ở repo root; trong đó ghi rõ quy trình bắt buộc: trước khi sửa code phải đọc `docs/PROJECT_CHARTER.md`, `docs/PROJECT_CHE… | DONE | CLAUDE.md |  |
-| CTX-03 | Tạo `docs/PROJECT_CHARTER.md` mô tả mục tiêu, non-goals, constraints và định nghĩa thành công. | DONE | docs/PROJECT_CHARTER.md | updated after G0 |
-| CTX-04 | Tạo `docs/PROJECT_CHECKLIST.md` bằng cách sao chép các checklist ID quan trọng từ master prompt, bổ sung cột/trường evidence và trạng thá… | DONE | docs/PROJECT_CHECKLIST.md | 235/235 IDs, generated from master |
-| CTX-05 | Tạo `docs/DECISIONS.md` (ADR index; mỗi quyết định gồm context, options, decision, trade-offs, approver, date). | DONE | docs/DECISIONS.md | ADR-001..003 PROPOSED |
+| CTX-03 | Tạo `docs/PROJECT_CHARTER.md` mô tả mục tiêu, non-goals, constraints và định nghĩa thành công. | DONE | docs/PROJECT_CHARTER.md | cập nhật sau G0 |
+| CTX-04 | Tạo `docs/PROJECT_CHECKLIST.md` bằng cách sao chép các checklist ID quan trọng từ master prompt, bổ sung cột/trường evidence và trạng thá… | DONE | docs/PROJECT_CHECKLIST.md | 235/235 ID, sinh từ master |
+| CTX-05 | Tạo `docs/DECISIONS.md` (ADR index; mỗi quyết định gồm context, options, decision, trade-offs, approver, date). | DONE | docs/DECISIONS.md | ADR-000..007 ACCEPTED (G0, 2026-10-23) |
 | CTX-06 | Tạo `docs/CURRENT_STATUS.md` (phase active, done/next/blocked, test evidence, git SHA, environment, phạm vi đã được duyệt, URL nếu có). | DONE | docs/CURRENT_STATUS.md |  |
 | CTX-07 | Tạo `docs/CONTEXT_HANDOFF.md` ngắn gọn, cập nhật vào cuối mỗi phiên/milestone, đủ cho Claude mới tiếp tục không cần đọc toàn bộ transcrip… | DONE | docs/CONTEXT_HANDOFF.md |  |
 | CTX-08 | Tạo `docs/REQUIREMENTS_TRACEABILITY.md` map `Requirement ID → Design → Implementation → Tests → Evidence → Status`. | DONE | docs/REQUIREMENTS_TRACEABILITY.md |  |
-| CTX-09 | Nếu repo/docs chưa tồn tại, khởi tạo hồ sơ điều phối **trước**; không scaffold app/build features trước khi design được user duyệt. | IN_PROGRESS | governance docs created; no scaffold | continuous rule, held until G1 |
-| CTX-10 | Mỗi lần bắt đầu một phiên mới: đọc các file trên, báo cáo ngắn `vị trí hiện tại → checkpoint tiếp theo → điều kiện phê duyệt`, rồi mới ti… | IN_PROGRESS | CLAUDE.md §Bắt buộc mỗi phiên | applies to every session |
+| CTX-09 | Nếu repo/docs chưa tồn tại, khởi tạo hồ sơ điều phối **trước**; không scaffold app/build features trước khi design được user duyệt. | IN_PROGRESS | đã tạo governance docs; chưa scaffold | quy tắc liên tục, giữ đến G1 |
+| CTX-10 | Mỗi lần bắt đầu một phiên mới: đọc các file trên, báo cáo ngắn `vị trí hiện tại → checkpoint tiếp theo → điều kiện phê duyệt`, rồi mới ti… | IN_PROGRESS | CLAUDE.md §Bắt buộc mỗi phiên | áp dụng cho mọi phiên |
 
 ## 3.1. AWS training: CHẾ ĐỘ READ-ONLY MẶC ĐỊNH
 
 | ID | Requirement (rút gọn) | Status | Evidence | Note |
 |---|---|---|---|---|
-| SAFE-01 | Xác nhận AWS profile thực tế, account ID, Region bằng read-only, **không suy đoán** theo tên profile. Không in AWS credentials. | BLOCKED | ADR-006 | user confirms profile/account before G10; Claude does not choose one |
+| SAFE-01 | Xác nhận AWS profile thực tế, account ID, Region bằng read-only, **không suy đoán** theo tên profile. Không in AWS credentials. | BLOCKED | ADR-006 | user xác nhận profile/account trước G10; Claude không tự chọn |
 | SAFE-02 | Inventory read-only các tài nguyên liên quan nếu có quyền. Không dò/ngó sâu dữ liệu nhạy cảm không cần thiết. | TODO | | |
 | SAFE-03 | Đề xuất PoC isolated stack, prefix riêng ví dụ `form-builder-poc-*`, IAM role, tags, resource policy, network/auth, chi phí, teardown plan. | TODO | | |
 | SAFE-04 | Lập danh sách **exact planned AWS writes**: tài nguyên nào sẽ được tạo, account, region, CDK/Terraform plan, quyền cần dùng, rủi ro va ch… | TODO | | |
 | SAFE-05 | Chỉ thực hiện AWS write sau khi user xác nhận bằng lời cụ thể phạm vi **và** quyền chính sách công ty cho phép. Approval chỉ cho đúng sco… | TODO | | |
 | SAFE-06 | Tuyệt đối không update/delete/deploy đè resources sẵn có của account training (master §3.1), CloudFront/distributions sẵn có, bucket công ty khác, API hoặc database production. | TODO | | |
 | SAFE-07 | Không dùng AWS admin/owner permissions, không tạo access keys dài hạn, không bỏ bảo vệ S3/public access để làm demo nhanh. | TODO | | |
-| SAFE-08 | Nếu chưa được duyệt AWS: vẫn làm **local demo + CI checks + IaC plan** và ghi AWS deploy `BLOCKED`; không tự triển khai AWS. | IN_PROGRESS | CLAUDE.md, CURRENT_STATUS | AWS deploy BLOCKED; local by default |
+| SAFE-08 | Nếu chưa được duyệt AWS: vẫn làm **local demo + CI checks + IaC plan** và ghi AWS deploy `BLOCKED`; không tự triển khai AWS. | IN_PROGRESS | CLAUDE.md, CURRENT_STATUS | AWS deploy BLOCKED; mặc định chạy local |
 | SAFE-09 | Khi đã được duyệt: validate stack diff/plan và quyền IAM, deploy resource scoped, smoke test, rollback, xác nhận logging và cost controls. | TODO | | |
 | SAFE-10 | Teardown plan phải chỉ target đúng stack PoC, mọi hành động xóa cũng cần authorization cụ thể. Không cleanup shared resources. | TODO | | |
 
@@ -49,10 +49,10 @@
 
 | ID | Requirement (rút gọn) | Status | Evidence | Note |
 |---|---|---|---|---|
-| GIT-01 | Kiểm tra `git remote`, current user, `gh auth status` **không để lộ token**; xác nhận đúng GitHub owner/repo dự kiến. | DONE | docs/evidence/P00/environment.txt | remote holong10920/forms_master, PUBLIC; gh auth OK, token not printed |
-| GIT-02 | PoC phát triển mới từ đầu; không đưa source code/private docs/secrets của công ty vào GitHub cá nhân khi chưa được chủ sở hữu công ty cho… | IN_PROGRESS | .gitignore; ADR-001/007 | docs/internal + master prompt ignored; no company code |
-| GIT-03 | Nếu chưa có quyền đưa code lên personal GitHub: chỉ tạo local repo hoặc repo công ty được duyệt. Đánh dấu `BLOCKED` cho remote push; khôn… | BLOCKED | ADR-007 + addendum | local commit 0d4fe7b; push only after G9 |
-| GIT-04 | GitHub repo mặc định là **private**; `.env*`, local AWS config, dữ liệu thật, artifacts chứa PII, credentials không được commit. | BLOCKED | docs/evidence/P00/environment.txt | repo is PUBLIC, violates the default private requirement (B-01); .gitignore created |
+| GIT-01 | Kiểm tra `git remote`, current user, `gh auth status` **không để lộ token**; xác nhận đúng GitHub owner/repo dự kiến. | DONE | docs/evidence/P00/environment.txt | remote holong10920/forms_master, PUBLIC; gh auth OK, không in token |
+| GIT-02 | PoC phát triển mới từ đầu; không đưa source code/private docs/secrets của công ty vào GitHub cá nhân khi chưa được chủ sở hữu công ty cho… | IN_PROGRESS | .gitignore; ADR-001/007 | docs/internal + master prompt đã được gitignore; không có code công ty |
+| GIT-03 | Nếu chưa có quyền đưa code lên personal GitHub: chỉ tạo local repo hoặc repo công ty được duyệt. Đánh dấu `BLOCKED` cho remote push; khôn… | BLOCKED | ADR-007 + addendum | local commit 0d4fe7b; chỉ push sau G9 |
+| GIT-04 | GitHub repo mặc định là **private**; `.env*`, local AWS config, dữ liệu thật, artifacts chứa PII, credentials không được commit. | BLOCKED | docs/evidence/P00/environment.txt | repo đang PUBLIC, vi phạm yêu cầu mặc định private (B-01); đã tạo .gitignore |
 | GIT-05 | Có README, `CONTRIBUTING.md`, branch strategy, protected main/required checks nếu có quyền. | TODO | | |
 | GIT-06 | CI không có secret trên untrusted PRs; chỉ deploy từ trusted main/reviewed commit sau approval tương ứng. | TODO | | |
 
@@ -60,11 +60,11 @@
 
 | ID | Requirement (rút gọn) | Status | Evidence | Note |
 |---|---|---|---|---|
-| SP-01 | Kiểm tra Superpowers skills đang thực sự cài và phiên bản: `brainstorming`, `writing-plans`, `test-driven-development`, `systematic-debug… | IN_PROGRESS | docs/evidence/P01/superpowers-install.txt | 7.0.0 installed (bb92a77); invocation must be verified in a new session |
-| SP-02 | Thực thi `superpowers:brainstorming`: explore repo/context, hỏi các câu cần thiết (mỗi lần một câu theo skill), mô tả 2–3 phương án, trad… | TODO | | |
-| SP-03 | Phải so sánh **Runtime JSON Renderer vs Code Generator vs Hybrid Compiler**; đưa recommendation nhưng không đóng kết luận trước khi khảo… | IN_PROGRESS | docs/discovery/P00_ARCHITECTURE_OPTIONS.md | preliminary matrix; not final |
-| SP-04 | Vì dự án lớn, chia thành các **subsystem specs**: schema/workflow, builder UI, runtime/compiler, publishing/AWS, migration/quality. Không… | TODO | | |
-| SP-05 | Ghi design specs theo convention skill (ví dụ `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`), tự review và lấy user approval trướ… | TODO | | |
+| SP-01 | Kiểm tra Superpowers skills đang thực sự cài và phiên bản: `brainstorming`, `writing-plans`, `test-driven-development`, `systematic-debug… | DONE | docs/evidence/P01/superpowers-install.txt; docs/evidence/P01/superpowers-verify-session2.txt | 7.0.0 (bb92a77); đã invoke `superpowers:brainstorming` thành công ở phiên 2 (2026-10-23) |
+| SP-02 | Thực thi `superpowers:brainstorming`: explore repo/context, hỏi các câu cần thiết (mỗi lần một câu theo skill), mô tả 2–3 phương án, trad… | IN_PROGRESS | docs/evidence/P01/superpowers-verify-session2.txt; docs/discovery/P01_BRAINSTORM_NOTES.md | Q&A spec #1 đã đóng (Answer #1..#8); spec #2..#6 chưa brainstorm; chưa DONE |
+| SP-03 | Phải so sánh **Runtime JSON Renderer vs Code Generator vs Hybrid Compiler**; đưa recommendation nhưng không đóng kết luận trước khi khảo… | IN_PROGRESS | docs/discovery/P00_ARCHITECTURE_OPTIONS.md | matrix sơ bộ; chưa chốt |
+| SP-04 | Vì dự án lớn, chia thành các **subsystem specs**: schema/workflow, builder UI, runtime/compiler, publishing/AWS, migration/quality. Không… | IN_PROGRESS | docs/CURRENT_STATUS.md (thứ tự spec); docs/superpowers/specs/2026-10-23-form-schema-workflow-design.md | đã soạn spec #1 trên tổng số 6 |
+| SP-05 | Ghi design specs theo convention skill (ví dụ `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`), tự review và lấy user approval trướ… | IN_PROGRESS | docs/superpowers/specs/2026-10-23-form-schema-workflow-design.md | spec #1 revision 2 (đã áp dụng review #1); đang chờ user review lại; G1 NOT APPROVED |
 | SP-06 | Sau khi design được duyệt mới dùng `superpowers:writing-plans`, chia task nhỏ có dependency, target paths, commands, acceptance criteria. | TODO | | |
 | SP-07 | Với mỗi implementation unit: test trước khi code khi phù hợp, implement scoped, chạy checks, review spec compliance và code quality, cập… | TODO | | |
 | SP-08 | Nếu phải sửa architecture đã duyệt, ghi ADR và xin duyệt phần thay đổi quan trọng trước khi tiếp tục. | TODO | | |
@@ -85,13 +85,13 @@
 | F-P0-10 | Preview: desktop/mobile, thay dữ liệu giả lập, đi qua next/back/branch đầy đủ, preview draft khác bản publish. | TODO | | |
 | F-P0-11 | JSON Definitions: typed schema với `schemaVersion`, validator, JSON import/export an toàn, versioning và format ổn định. | TODO | | |
 | F-P0-12 | Persistence: save draft/load lại sau refresh, versions, optimistic concurrency hoặc conflict prevention; **không chỉ localStorage** ở dem… | TODO | | |
-| F-P0-13 | Basic Auth + Roles: admin login và role tối thiểu (editor vs publisher/viewer tùy thiết kế), server-side enforcement; không frontend-only… | TODO | ADR-004 | stays P0, scheduled after the vertical slice; confirm at G1 |
+| F-P0-13 | Basic Auth + Roles: admin login và role tối thiểu (editor vs publisher/viewer tùy thiết kế), server-side enforcement; không frontend-only… | TODO | ADR-004 | giữ P0, xếp lịch sau vertical slice; xác nhận ở G1 |
 | F-P0-14 | Publish/Build: compile JSON của một form thành static artifact tách biệt, giữ dependency tối thiểu, content hash, versioned release; chạy… | TODO | | |
 | F-P0-15 | Rollback: form có thể quay lại release trước an toàn, có evidence không mất artifact cũ. | TODO | | |
-| F-P0-16 | Audit: ghi ai/when/version/action cho create, edit, publish, rollback; không log PII. | TODO | ADR-004 | stays P0, scheduled after the vertical slice; confirm at G1 |
-| F-P0-17 | Demo Forms: tối thiểu **Sports demo và PC demo** (hoặc 2 site khác được phê duyệt), có flow/fields/conditions khác nhau; có thể thêm Gakk… | IN_PROGRESS | ADR-003 | scope approved at G0; implementation after G1 |
-| F-P0-18 | Submit Simulation: dữ liệu giả lập, request contract và idempotency; local stub hoặc isolated PoC API, tuyệt đối không gọi submit thật lê… | TODO | ADR-004 | stays P0, scheduled after the vertical slice; confirm at G1 |
-| F-P0-19 | Docs + CI/Tests: architecture, setup, user guide, automated checks, measured bundle report, traceability và rollback runbook. | TODO | ADR-004 | stays P0, scheduled after the vertical slice; confirm at G1 |
+| F-P0-16 | Audit: ghi ai/when/version/action cho create, edit, publish, rollback; không log PII. | TODO | ADR-004 | giữ P0, xếp lịch sau vertical slice; xác nhận ở G1 |
+| F-P0-17 | Demo Forms: tối thiểu **Sports demo và PC demo** (hoặc 2 site khác được phê duyệt), có flow/fields/conditions khác nhau; có thể thêm Gakk… | IN_PROGRESS | ADR-003 | scope đã duyệt ở G0; implement sau G1 |
+| F-P0-18 | Submit Simulation: dữ liệu giả lập, request contract và idempotency; local stub hoặc isolated PoC API, tuyệt đối không gọi submit thật lê… | TODO | ADR-004 | giữ P0, xếp lịch sau vertical slice; xác nhận ở G1 |
+| F-P0-19 | Docs + CI/Tests: architecture, setup, user guide, automated checks, measured bundle report, traceability và rollback runbook. | TODO | ADR-004 | giữ P0, xếp lịch sau vertical slice; xác nhận ở G1 |
 
 ## 5.2. P1 — Khả năng mở rộng sau khi MVP đạt
 
@@ -127,7 +127,7 @@
 | UX-03 | Flow editor hiển thị step nodes/edges rõ ràng, branch conditions debug được. | TODO | | |
 | UX-04 | Validation và errors cho Admin rõ ràng (field ID trùng, rule chu kỳ, undefined plugin, unreachable step, thiếu required config). | TODO | | |
 | UX-05 | Preview phải đúng runtime behavior, không tạo renderer/logic khác khiến preview một kiểu production một kiểu. | TODO | | |
-| UX-06 | Undo/redo và keyboard support: làm ở P0 nếu chi phí hợp lý, nếu không ghi rõ P1 và không hứa sai. | N/A (P0) → P1 | ADR-004 | User moved it to P1 at G0; architecture must allow adding it later (immutable doc + typed commands) |
+| UX-06 | Undo/redo và keyboard support: làm ở P0 nếu chi phí hợp lý, nếu không ghi rõ P1 và không hứa sai. | N/A (P0) → P1 | ADR-004 | User chuyển mục này sang P1 ở G0; architecture phải cho phép bổ sung sau (immutable doc + typed commands) |
 | UX-07 | Empty/loading/error states và accessibility đủ để demo như sản phẩm thật; không chỉ một dashboard đẹp nhưng không tương tác. | TODO | | |
 
 ## 6.3. Form schema và workflow
@@ -206,7 +206,7 @@
 
 | ID | Requirement (rút gọn) | Status | Evidence | Note |
 |---|---|---|---|---|
-| PERF-01 | Benchmark form hiện tại khi có quyền và tooling phù hợp; nếu không có source/baseline, công bố `baseline unavailable` chứ không fabricate. | TODO | ADR-005 | legacy numbers are indicative only (docs/internal), not a baseline |
+| PERF-01 | Benchmark form hiện tại khi có quyền và tooling phù hợp; nếu không có source/baseline, công bố `baseline unavailable` chứ không fabricate. | TODO | ADR-005 | số liệu legacy chỉ mang tính tham khảo (docs/internal), không phải baseline |
 | PERF-02 | Với 2 demo forms: ghi total uncompressed, gzip/Brotli JS/CSS, initial route assets, plugin chunks, requests, local build time, analyzed d… | TODO | | |
 | PERF-03 | LCP/INP/CLS trên demo mobile; nếu không đủ real-user data thì ghi **lab-only**, không trình bày là p75 production RUM. | TODO | | |
 | PERF-04 | Sử dụng profiler để tìm excessive React renders; chọn local subscriptions/memoization theo evidence, không blanket memo. | TODO | | |
@@ -248,25 +248,25 @@
 | ID | Requirement (rút gọn) | Status | Evidence | Note |
 |---|---|---|---|---|
 | P00-01 | Check working directory, local repo, git status, installed tools/skills. | DONE | docs/evidence/P00/environment.txt |  |
-| P00-02 | Tạo 6–8 file quản trị context ở mục 0 (chỉ tài liệu/plan, không feature code). | DONE | commit 0d4fe7b: CLAUDE.md + docs/* | docs only |
-| P00-03 | Nếu repo form cũ có sẵn và được phép đọc: audit component/flows/API/assets/build output; nếu không có, không bịa kết quả. | DONE | docs/internal/LEGACY_AUDIT_UI.md, docs/internal/LEGACY_AUDIT_API_EFO.md | read-only; dist sizes re-checked with du/stat |
+| P00-02 | Tạo 6–8 file quản trị context ở mục 0 (chỉ tài liệu/plan, không feature code). | DONE | commit 0d4fe7b: CLAUDE.md + docs/* | chỉ docs |
+| P00-03 | Nếu repo form cũ có sẵn và được phép đọc: audit component/flows/API/assets/build output; nếu không có, không bịa kết quả. | DONE | docs/internal/LEGACY_AUDIT_UI.md, docs/internal/LEGACY_AUDIT_API_EFO.md | read-only; đã kiểm tra lại dist sizes bằng du/stat |
 | P00-04 | Tạo `docs/FORM_CAPABILITY_MATRIX.md` map site × fields × steps × conditions × APIs × plugins × animation × unique business logic; phân bi… | DONE | docs/FORM_CAPABILITY_MATRIX.md | CONFIRMED/ASSUMED/UNKNOWN |
-| P00-05 | Chọn 2 form demo có flow khác nhau (mặc định Sports/PC), dùng mock nội dung Nhật, dữ liệu giả. | DONE | docs/discovery/P00_DISCOVERY.md §4; ADR-003 | approved at G0 |
-| P00-06 | Đưa 2–3 architecture approaches và decision matrix, xác định MVP scope/non-goals. | DONE | P00_ARCHITECTURE_OPTIONS.md; P00_DISCOVERY.md §5; ADR-002/004 | approved with adjustments at G0 |
+| P00-05 | Chọn 2 form demo có flow khác nhau (mặc định Sports/PC), dùng mock nội dung Nhật, dữ liệu giả. | DONE | docs/discovery/P00_DISCOVERY.md §4; ADR-003 | đã duyệt ở G0 |
+| P00-06 | Đưa 2–3 architecture approaches và decision matrix, xác định MVP scope/non-goals. | DONE | P00_ARCHITECTURE_OPTIONS.md; P00_DISCOVERY.md §5; ADR-002/004 | đã duyệt có điều chỉnh ở G0 |
 | P00-07 | Ghi các blockers: source permissions, GitHub personal policy, AWS write access. | DONE | docs/discovery/P00_DISCOVERY.md §6 | B-01..B-08 |
 
 ## PHASE 01 — Brainstorming, architecture specs (`P01`)
 
 | ID | Requirement (rút gọn) | Status | Evidence | Note |
 |---|---|---|---|---|
-| P01-01 | Run installed `superpowers:brainstorming` theo skill thật. | TODO | — | starts in a new session once SP-01 is confirmed |
-| P01-02 | Design schema + workflow/rules. | TODO | | |
+| P01-01 | Run installed `superpowers:brainstorming` theo skill thật. | IN_PROGRESS | docs/evidence/P01/superpowers-verify-session2.txt | đã invoke skill ở phiên 2; đang brainstorming spec #1 |
+| P01-02 | Design schema + workflow/rules. | IN_PROGRESS | docs/superpowers/specs/2026-10-23-form-schema-workflow-design.md; docs/discovery/P01_BRAINSTORM_NOTES.md | revision 2 sau review #1 (CHANGES / VERIFICATION REQUIRED); OD-02..13 OPEN; chưa duyệt |
 | P01-03 | Design Admin UX + feature flags + capability registry. | TODO | | |
 | P01-04 | Design runtime/compiler + bundle strategy. | TODO | | |
 | P01-05 | Design API/persistence/auth, publish/rollback và AWS PoC isolated architecture. | TODO | | |
 | P01-06 | Design Motion subsystem và reduced motion. | TODO | | |
-| P01-07 | Threat model, ADRs, milestones, acceptance matrix. | TODO | | |
-| P01-08 | Review docs, get explicit user approval; invoke `writing-plans` only after sign-off. | TODO | | |
+| P01-07 | Threat model, ADRs, milestones, acceptance matrix. | TODO | ADR-017, ADR-018; docs/superpowers/specs/2026-10-23-form-schema-workflow-design.md §25 | đã lên kế hoạch Cross-Subsystem Integration Review sau khi đủ 6 spec; threat model chưa làm |
+| P01-08 | Review docs, get explicit user approval; invoke `writing-plans` only after sign-off. | TODO | ADR-018 | G1 chỉ trình sau khi đủ 6 spec + Cross-Subsystem Review; G1 NOT APPROVED |
 
 ## PHASE 02 — Engineering foundation (`P02`)
 

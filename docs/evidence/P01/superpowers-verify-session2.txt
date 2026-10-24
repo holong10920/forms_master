@@ -1,0 +1,15 @@
+# SP-01 / P01-01 evidence: invocation verified in a new session
+## captured
+2026-10-23 (session 2), branch p00-discovery, HEAD 1e73312, working tree clean before this file
+## installed plugin record (~/.claude/plugins/installed_plugins.json)
+superpowers@claude-plugins-official  version 7.0.0  scope user  gitCommitSha bb92a77741419a4ab5f06e711a283343f1ada0c3
+## skill list at session start
+superpowers:brainstorming, writing-plans, test-driven-development, systematic-debugging,
+verification-before-completion, requesting-code-review, receiving-code-review, executing-plans,
+subagent-driven-development, dispatching-parallel-agents, using-git-worktrees,
+finishing-a-development-branch, writing-skills, diagnosing-superpowers, using-superpowers
+## invocation
+Skill('superpowers:brainstorming') -> "Launching skill: superpowers:brainstorming"
+Loaded from <plugin cache>/superpowers/7.0.0/skills/brainstorming (SKILL.md content returned)
+## result
+PASS: brainstorming skill is available and invoked. P01-01 brainstorming started (spec #1: schema + workflow DSL).

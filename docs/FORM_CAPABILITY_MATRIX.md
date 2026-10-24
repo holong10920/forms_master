@@ -1,70 +1,70 @@
 # Form Capability Matrix (P00-04)
 
-> Capability-level view of the legacy purchase forms. Built from a read-only audit on 2026-10-23.
-> Under ADR-001 this file is **abstract only**: no paths, endpoints, env names, library names, internal weaknesses, or legacy bundle numbers. Those details live in `docs/internal/`, which is gitignored.
-> Status: `CONFIRMED` = observed in the legacy system · `ASSUMED` = inferred · `UNKNOWN` = not checked.
-> The **PoC** column reflects the decisions at G0 (ADR-003/004). Every capability in the PoC is new code that runs on synthetic data.
+> Góc nhìn ở mức capability về các form thu mua legacy. Xây dựng từ audit read-only ngày 2026-10-23.
+> Theo ADR-001, file này **chỉ ở mức trừu tượng**: không có paths, endpoints, tên env, tên library, điểm yếu nội bộ, hay số bundle legacy. Các chi tiết đó nằm trong `docs/internal/`, thư mục bị gitignore.
+> Status: `CONFIRMED` = đã quan sát trong hệ thống legacy · `ASSUMED` = suy luận · `UNKNOWN` = chưa kiểm tra.
+> Cột **PoC** phản ánh các quyết định ở G0 (ADR-003/004). Mọi capability trong PoC đều là code mới chạy trên dữ liệu giả lập.
 
-## 1. Flow structure
+## 1. Cấu trúc flow
 
 | Capability | Sports | PC | Gakki | Status | PoC |
 |---|---|---|---|---|---|
-| Steps: product → product list → customer info → thanks | ✔ | ✔ | ✔ | CONFIRMED | MVP (multi-step engine). The demo uses a single product. |
-| Repeatable product items | ✔ | ✔ | ✔ | CONFIRMED | P1 (F-P1-01) |
-| Category drill-down (multi-level select) | ✔ | ✔ | ✔ | CONFIRMED | MVP |
-| Fields shown or hidden by category | ✔ | ✔ (heavy) | ✔ | CONFIRMED | MVP (rules AST) |
-| Purchase-method branch 店頭 / 宅配 / 出張 | 出張 only | 店頭 / 宅配 (+ server-decided 出張) | UNKNOWN | CONFIRMED (Sports, PC) | MVP: Sports 出張 only; PC 店頭/宅配 as a step branch. Full logic is P1 (F-P1-03). |
-| Method-specific sub-flow (store + date, delivery slot, packing kit) | — | ✔ | UNKNOWN | CONFIRMED (PC) | MVP simplified (select fields + `store-selector`). Date picker is P1. |
-| Separate completion per method | — | ✔ | UNKNOWN | CONFIRMED | MVP (a terminal step per branch) |
-| A/B pattern variants | ✔ | ✔ | ✔ | CONFIRMED | P2 (F-P2-01) |
-| Resume/prefill from a previous submission | ✔ | ✔ | ✔ | CONFIRMED | Out of PoC |
+| Steps: sản phẩm → danh sách sản phẩm → thông tin khách hàng → cảm ơn | ✔ | ✔ | ✔ | CONFIRMED | MVP (multi-step engine). Demo dùng một sản phẩm. |
+| Item sản phẩm lặp lại được | ✔ | ✔ | ✔ | CONFIRMED | P1 (F-P1-01) |
+| Drill-down theo category (select nhiều cấp) | ✔ | ✔ | ✔ | CONFIRMED | MVP |
+| Field hiện/ẩn theo category | ✔ | ✔ (nhiều) | ✔ | CONFIRMED | MVP (rules AST) |
+| Branch theo phương thức thu mua 店頭 / 宅配 / 出張 | chỉ 出張 | 店頭 / 宅配 (+ 出張 do server quyết định) | UNKNOWN | CONFIRMED (Sports, PC) | MVP: Sports chỉ 出張; PC 店頭/宅配 dưới dạng step branch. Logic đầy đủ là P1 (F-P1-03). |
+| Sub-flow riêng theo phương thức (cửa hàng + ngày, khung giờ giao, bộ đóng gói) | — | ✔ | UNKNOWN | CONFIRMED (PC) | MVP rút gọn (select fields + `store-selector`). Date picker là P1. |
+| Màn hoàn tất riêng theo phương thức | — | ✔ | UNKNOWN | CONFIRMED | MVP (một terminal step cho mỗi branch) |
+| Biến thể A/B pattern | ✔ | ✔ | ✔ | CONFIRMED | P2 (F-P2-01) |
+| Resume/prefill từ lần submit trước | ✔ | ✔ | ✔ | CONFIRMED | Ngoài PoC |
 
-## 2. Field types
+## 2. Loại field
 
-| Field type | Sports | PC | Gakki | Status | PoC |
+| Loại field | Sports | PC | Gakki | Status | PoC |
 |---|---|---|---|---|---|
 | Text / textarea / select / radio / checkbox | ✔ | ✔ | ✔ | CONFIRMED | MVP (F-P0-04) |
 | Checkbox array | — | ✔ | — | CONFIRMED | MVP |
-| Email | ✔ | ✔ | ✔ | CONFIRMED | MVP (format only) |
-| Phone (JP format) | ✔ | ✔ | ✔ | CONFIRMED | MVP (pattern) |
-| Postal code → address autofill | ✔ | ✔ | ✔ | CONFIRMED | P1 plugin `postal-code` (mock) |
-| Maker/model picker (remote catalog) | — | ✔ | — | CONFIRMED | P1 plugin `product-picker` (mock) |
-| Store selector | — | ✔ | UNKNOWN | CONFIRMED | **MVP plugin `store-selector`** (fictional stores). Only PC uses it; it is the plugin-isolation proof. |
-| Date / time slot picker | — | ✔ | UNKNOWN | CONFIRMED | P1 |
-| Image / file upload | — | — | — | CONFIRMED absent | P1 at most |
-| Help content blocks / modals | — | ✔ | UNKNOWN | CONFIRMED | P1 |
+| Email | ✔ | ✔ | ✔ | CONFIRMED | MVP (chỉ format) |
+| Số điện thoại (format JP) | ✔ | ✔ | ✔ | CONFIRMED | MVP (pattern) |
+| Mã bưu điện → tự điền địa chỉ | ✔ | ✔ | ✔ | CONFIRMED | P1 plugin `postal-code` (mock) |
+| Chọn maker/model (catalog từ xa) | — | ✔ | — | CONFIRMED | P1 plugin `product-picker` (mock) |
+| Chọn cửa hàng | — | ✔ | UNKNOWN | CONFIRMED | **MVP plugin `store-selector`** (cửa hàng hư cấu). Chỉ PC dùng; đây là bằng chứng cho plugin isolation. |
+| Chọn ngày / khung giờ | — | ✔ | UNKNOWN | CONFIRMED | P1 |
+| Upload ảnh / file | — | — | — | CONFIRMED không có | Tối đa P1 |
+| Block nội dung hướng dẫn / modals | — | ✔ | UNKNOWN | CONFIRMED | P1 |
 
-## 3. Validation and logic
+## 3. Validation và logic
 
 | Capability | Status | PoC |
 |---|---|---|
-| Conditional validation by category | CONFIRMED | MVP: one versioned contract for FE + BE (ARCH-07) |
-| Server-side validation | CONFIRMED | MVP: Python validates against the same contract |
-| Server errors mapped back to fields | CONFIRMED | MVP |
-| Submission idempotency | see `docs/internal/` | F-P0-18: idempotency key in the local stub |
-| Site-specific behavior configured as data (site registry) | see `docs/internal/` | MVP: site registry (F-P0-01) |
+| Validation có điều kiện theo category | CONFIRMED | MVP: một contract có versioning cho FE + BE (ARCH-07) |
+| Validation phía server | CONFIRMED | MVP: Python validate theo cùng contract |
+| Lỗi từ server map ngược về field | CONFIRMED | MVP |
+| Idempotency khi submit | xem `docs/internal/` | F-P0-18: idempotency key trong local stub |
+| Hành vi riêng của site được cấu hình dưới dạng data (site registry) | xem `docs/internal/` | MVP: site registry (F-P0-01) |
 
-## 4. Integrations
+## 4. Tích hợp
 
-| Integration | PoC |
+| Tích hợp | PoC |
 |---|---|
-| Submit/order backend | **Never called.** Local stub only (F-P0-18, API-10). |
+| Backend submit/order | **Không bao giờ gọi.** Chỉ dùng local stub (F-P0-18, API-10). |
 | Product catalog | Mock JSON (P1) |
-| Store/center list | Fictional mock (global rule: never call the real endpoints) |
-| Postal-code lookup | Mock dictionary (P1) |
-| Analytics, recommendation | Out of PoC (F-P1-08) |
+| Danh sách store/center | Mock hư cấu (global rule: không bao giờ gọi endpoint thật) |
+| Tra cứu mã bưu điện | Mock dictionary (P1) |
+| Analytics, recommendation | Ngoài PoC (F-P1-08) |
 
 ## 5. Animation
 
 | Capability | Status | PoC |
 |---|---|---|
-| Enter/exit reveals, animated modals and errors | CONFIRMED | MVP: preset registry (`fade-slide`, `scale-spring`, plus validation feedback) and reduced motion |
-| Animation configurable by non-developers | CONFIRMED absent | MVP: Motion preset config in Admin |
+| Hiệu ứng enter/exit, modal và lỗi có animation | CONFIRMED | MVP: preset registry (`fade-slide`, `scale-spring`, cùng validation feedback) và reduced motion |
+| Người không phải developer cấu hình được animation | CONFIRMED không có | MVP: cấu hình Motion preset trong Admin |
 
 ## 6. Build / delivery
 
 | Capability | Status | PoC |
 |---|---|---|
-| Per-form artifact isolation | CONFIRMED absent (many sites share one artifact) | MVP: one artifact per form, with analyzer evidence (ADR-005) |
-| Versioned release + rollback pointer | see `docs/internal/` | MVP: local publish/rollback (API-07 semantics) |
-| Performance baseline | not available as an official baseline | ADR-005: only numbers measured on PoC artifacts |
+| Cô lập artifact theo từng form | CONFIRMED không có (nhiều site dùng chung một artifact) | MVP: một artifact cho mỗi form, kèm evidence từ analyzer (ADR-005) |
+| Release có versioning + rollback pointer | xem `docs/internal/` | MVP: local publish/rollback (ngữ nghĩa API-07) |
+| Performance baseline | không có baseline chính thức | ADR-005: chỉ dùng số đo trên PoC artifacts |

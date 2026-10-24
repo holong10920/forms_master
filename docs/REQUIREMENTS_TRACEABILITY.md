@@ -5,7 +5,7 @@
 > Bảng này chỉ theo dõi requirement mang tính sản phẩm/kỹ thuật (F-*, UX-*, ARCH-*, BUILD-*, MOTION-*, API-*, PERF-*, TEST-*, SEC-*, CICD-*, DOD-*). Checklist quy trình (CTX/SAFE/GIT/SP/Pxx) theo dõi ở `PROJECT_CHECKLIST.md`.
 > Cột Design điền sau G1 (đường dẫn spec), Implementation/Tests sau G1. Trước đó mọi dòng là `TODO`.
 
-## P0 features
+## Tính năng P0
 
 | Req | Design | Implementation | Tests | Evidence | Status |
 |---|---|---|---|---|---|
@@ -25,27 +25,27 @@
 | F-P0-14 Publish/Build | — | — | — | — | TODO |
 | F-P0-15 Rollback | — | — | — | — | TODO |
 | F-P0-16 Audit | — | — | — | — | TODO |
-| F-P0-17 Demo Forms | `docs/discovery/P00_DISCOVERY.md` §4; ADR-003 (G0 approved) | — | — | — | TODO (scope approved) |
+| F-P0-17 Demo Forms | `docs/discovery/P00_DISCOVERY.md` §4; ADR-003 (đã duyệt ở G0) | — | — | — | TODO (scope đã duyệt) |
 | F-P0-18 Submit Simulation | — | — | — | — | TODO |
 | F-P0-19 Docs + CI/Tests | — | — | — | — | TODO |
 
 ## Architecture / build / motion / API
 
-| Req group | IDs | Design | Status |
+| Nhóm req | IDs | Design | Status |
 |---|---|---|---|
-| Schema & workflow | ARCH-01..10 | — (P01-02) | TODO |
+| Schema & workflow | ARCH-01..10 | `docs/superpowers/specs/2026-10-23-form-schema-workflow-design.md` §6–§14, §19 (**PROPOSED**, chưa duyệt) | TODO (design đang review) |
 | Compiler & isolation | BUILD-01..10 | — (P01-04) | TODO |
 | Motion | MOTION-01..07 | — (P01-06) | TODO |
 | Backend & publishing | API-01..10 | — (P01-05) | TODO |
 | Admin UX | UX-01..05, UX-07 | — (P01-03) | TODO |
-| Undo/redo | UX-06 | ADR-004: P1; design must leave room for it | DEFERRED P1 (G0) |
+| Undo/redo | UX-06 | ADR-004: P1; design phải chừa chỗ cho nó | DEFERRED P1 (G0) |
 
-## Quality
+## Chất lượng
 
-| Req group | IDs | Status |
+| Nhóm req | IDs | Status |
 |---|---|---|
-| Performance | PERF-01..07 | TODO — ADR-005: measured PoC artifacts only; budgets at G1 |
+| Hiệu năng | PERF-01..07 | TODO — ADR-005: chỉ dùng số đo trên PoC artifacts; budget chốt ở G1 |
 | Testing | TEST-01..11 | TODO |
-| Security | SEC-01..08 | TODO (threat model ở P01-07) |
+| Bảo mật | SEC-01..08 | TODO (threat model ở P01-07) |
 | CI/CD | CICD-01..10 | TODO (CD bị gate G10) |
 | Definition of Done | DOD-01..10 | TODO |
