@@ -942,3 +942,107 @@ Mọi thứ phụ thuộc vào câu trả lời lúc runtime **không** phải l
 ### OPEN
 
 - OD-02..OD-13 (spec #1 §21). Phải quyết trước khi brainstorm spec #2: **OD-02, OD-04, OD-07, OD-12**.
+
+## Session 3: Review #2 spec #1 (2026-10-24)
+
+> Verdict của user: **CONDITIONALLY ACCEPTED FOR DESIGN CONTINUATION.**
+> - User cho phép brainstorm spec #2. Spec #1 **chưa được duyệt hoàn toàn**, và chưa có quyền implement.
+> - G1 NOT APPROVED. G9/G10 BLOCKED.
+
+### CONFIRMED (user)
+
+- **OD-02 (APPROVED WITH CONDITIONS)** → ADR-019. JSON Schema 2020-12 dùng để mô tả và validate cấu trúc Form Definition.
+  - schema canonical có version
+  - không duy trì nhiều schema độc lập dễ drift giữa TS và Python
+  - tách structural / semantic / runtime
+  - JSON Schema không thay thế Workflow DSL
+  - business rule chỉ nằm trong typed DSL hoặc registered capability
+  - không expression, không JavaScript
+  - kiểm tra tương thích validator FE/BE, làm rõ `format` là annotation hay assertion
+  - fixture và conformance dùng chung
+  - definition đã publish không bị mutate khi schema lên version
+  - Claude đề xuất cơ chế sinh hoặc kiểm chứng contract TS/Python (không implement trước G1).
+- **OD-04 (APPROVED)** → ADR-020. Block có `exports` tường minh.
+  - export có định danh ổn định, chỉ tham chiếu được public export
+  - resolve theo instance và revision bất biến
+  - kiểm tra trùng, tham chiếu sai và thay đổi không tương thích
+  - thay đổi export được phản ánh trong version và impact analysis
+  - không dùng `latest`
+  - phân biệt field export, plugin output và integration output
+- **OD-07 (APPROVED)** → ADR-021. Developer/Platform đặt mức tối thiểu, Editor chỉ được tăng.
+  - field mới có mặc định an toàn, component nhạy cảm lấy chính sách từ registry
+  - platform và BE thực thi policy, JSON của Admin không vô hiệu hóa được
+  - P0 không lưu PII trong browser
+  - không có PII trong compiler metadata, manifest, log, analytics
+  - BE kiểm tra theo definition tin cậy và registry
+  - không xây policy language phức tạp
+- **OD-12 (APPROVED WITH RESTRICTIONS)** → ADR-022. `deferToSubmit`:
+  - chỉ cho validator trong allowlist có metadata tường minh
+  - phải xong trước khi BE xác nhận thành công
+  - failure semantics tất định, không fail-open
+  - không dùng để lách validation sai
+  - FE có phản hồi
+  - BE lo retry và idempotency
+  - tách khỏi side effect không rollback được
+  - có test cho success, failure, timeout, stale, duplicate, retry
+  - làm rõ khác biệt sync / async / submit-time
+- **Trước khi đánh dấu spec #1 READY_FOR_CROSS_REVIEW**, phải rà thêm:
+  - §7.6: canonicalization không làm mất dữ liệu quan trọng; type coercion; missing, null, empty, false, zero; overflow; độ dài Unicode; itemId; lọc field ẩn ở BE; kịch bản parity.
+  - §8.7: transition atomicity và race condition:
+    - 次へ khi đang pending
+    - sửa input khi async đang chạy
+    - response cũ về sau
+    - đổi branch khi đang điều hướng
+    - Back/Forward và reload
+    - step trở thành unreachable
+    - draft của revision cũ
+    - double-click
+    - validation thành công nhưng transition không còn hợp lệ
+  - Cần invariant và expected behavior, không chỉ happy path.
+- **Spec #2:** brainstorm Plugin Contracts & Capability Registry. Các chủ đề:
+  - identity và semver
+  - manifest
+  - các loại capability: field, validator, action, data source, layout, integration
+  - registry API và typed contract
+  - `configSchema` cho Inspector
+  - renderer interface và interface validation phía server
+  - output và dependency
+  - permission cho side effect
+  - lifecycle
+  - cancel và xử lý kết quả cũ
+  - compatibility và deprecation
+  - isolation trong compiler, tree-shaking
+  - conformance test
+  - bảo mật và ràng buộc dependency
+  - Không được biến registry thành global service locator, không load code tùy ý từ Admin.
+  - Phải xác định phần nào là P0, phần nào là P1/P2.
+
+### Đã thực hiện (Claude): spec #1 revision 3
+
+- §7.6.4/§7.6.5: **bỏ NFC cho văn bản tự do.**
+  - NFC đổi U+FA30 thành U+4FAE, tức mất 異体字 trong tên riêng. Đã kiểm chứng bằng Python và Node.
+  - Canonicalization chỉ áp cho field type có cấu trúc, idempotent, và phần bị bỏ được liệt kê tường minh.
+  - Phát hiện thêm: máy local đang có Node ở Unicode 17.0 và Python 3.9 ở Unicode 14.0.0.
+  - Chính file spec cũng bị công cụ tự chuẩn hóa U+FA30, nên fixture phải ghi ký tự bằng escape.
+- §7.6.9 type coercion, §7.6.10 ma trận parity.
+- §7.7 quản lý schema, §7.8 block exports.
+- §8.7.6: invariant INV-N1..N8 và các kịch bản C1–C10. Đã cập nhật NR-11 và T3.
+- §11 ba loại validation và `deferToSubmit`, §16 classification, §12 danh sách contract chuyển sang spec #2.
+- AC-34..AC-38. §21 cập nhật trạng thái OD. §26 mức độ sẵn sàng.
+- ADR-019..022 trong DECISIONS.md.
+
+### OPEN
+
+- Spec #1: user review rev 3, sau đó (nếu đồng ý) mới chuyển sang READY_FOR_CROSS_REVIEW.
+- OD-03, OD-05, OD-06, OD-08..OD-11, OD-13: vẫn OPEN.
+
+## Session 3: Spec #2, Plugin Contracts & Capability Registry (bắt đầu 2026-10-24)
+
+> Bối cảnh ràng buộc:
+> - ADR-016 (ranh giới plugin), ADR-019 (schema), ADR-020 (exports), ADR-021 (classification), ADR-022 (`deferToSubmit`)
+> - spec #1 §12 (contract chuyển sang spec #2)
+> - Chưa có quyết định nào của spec #2.
+
+### OPEN
+
+- Q2-1: Ai sẽ thực sự viết plugin? Chỉ team platform trong cùng repo, hay cả các team phụ trách từng site cũng tự viết và phát hành plugin riêng? (hỏi ở phiên 3)

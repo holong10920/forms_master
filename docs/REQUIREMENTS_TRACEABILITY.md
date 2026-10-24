@@ -33,7 +33,7 @@
 
 | Nhóm req | IDs | Design | Status |
 |---|---|---|---|
-| Schema & workflow | ARCH-01..10 | `docs/superpowers/specs/2026-10-23-form-schema-workflow-design.md` §6–§14, §19 (**PROPOSED**, chưa duyệt) | TODO (design đang review) |
+| Schema & workflow | ARCH-01..10 | `docs/superpowers/specs/2026-10-23-form-schema-workflow-design.md` rev 3 §6–§16, §19 (PROPOSED; design direction ADR-017..022; chưa duyệt hoàn toàn). ARCH-09 chi tiết → spec #2. | TODO (design đang review) |
 | Compiler & isolation | BUILD-01..10 | — (P01-04) | TODO |
 | Motion | MOTION-01..07 | — (P01-06) | TODO |
 | Backend & publishing | API-01..10 | — (P01-05) | TODO |

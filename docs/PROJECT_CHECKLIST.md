@@ -61,10 +61,10 @@
 | ID | Requirement (rút gọn) | Status | Evidence | Note |
 |---|---|---|---|---|
 | SP-01 | Kiểm tra Superpowers skills đang thực sự cài và phiên bản: `brainstorming`, `writing-plans`, `test-driven-development`, `systematic-debug… | DONE | docs/evidence/P01/superpowers-install.txt; docs/evidence/P01/superpowers-verify-session2.txt | 7.0.0 (bb92a77); đã invoke `superpowers:brainstorming` thành công ở phiên 2 (2026-10-23) |
-| SP-02 | Thực thi `superpowers:brainstorming`: explore repo/context, hỏi các câu cần thiết (mỗi lần một câu theo skill), mô tả 2–3 phương án, trad… | IN_PROGRESS | docs/evidence/P01/superpowers-verify-session2.txt; docs/discovery/P01_BRAINSTORM_NOTES.md | Q&A spec #1 đã đóng (Answer #1..#8); spec #2..#6 chưa brainstorm; chưa DONE |
+| SP-02 | Thực thi `superpowers:brainstorming`: explore repo/context, hỏi các câu cần thiết (mỗi lần một câu theo skill), mô tả 2–3 phương án, trad… | IN_PROGRESS | docs/evidence/P01/superpowers-verify-session2.txt; docs/discovery/P01_BRAINSTORM_NOTES.md | spec #1 Q&A đã đóng; spec #2 đang brainstorm (phiên 3); chưa DONE |
 | SP-03 | Phải so sánh **Runtime JSON Renderer vs Code Generator vs Hybrid Compiler**; đưa recommendation nhưng không đóng kết luận trước khi khảo… | IN_PROGRESS | docs/discovery/P00_ARCHITECTURE_OPTIONS.md | matrix sơ bộ; chưa chốt |
 | SP-04 | Vì dự án lớn, chia thành các **subsystem specs**: schema/workflow, builder UI, runtime/compiler, publishing/AWS, migration/quality. Không… | IN_PROGRESS | docs/CURRENT_STATUS.md (thứ tự spec); docs/superpowers/specs/2026-10-23-form-schema-workflow-design.md | đã soạn spec #1 trên tổng số 6 |
-| SP-05 | Ghi design specs theo convention skill (ví dụ `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`), tự review và lấy user approval trướ… | IN_PROGRESS | docs/superpowers/specs/2026-10-23-form-schema-workflow-design.md | spec #1 revision 2 (đã áp dụng review #1); đang chờ user review lại; G1 NOT APPROVED |
+| SP-05 | Ghi design specs theo convention skill (ví dụ `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`), tự review và lấy user approval trướ… | IN_PROGRESS | docs/superpowers/specs/2026-10-23-form-schema-workflow-design.md | spec #1 rev 3 (review #2: CONDITIONALLY ACCEPTED FOR DESIGN CONTINUATION); chưa duyệt hoàn toàn; G1 NOT APPROVED |
 | SP-06 | Sau khi design được duyệt mới dùng `superpowers:writing-plans`, chia task nhỏ có dependency, target paths, commands, acceptance criteria. | TODO | | |
 | SP-07 | Với mỗi implementation unit: test trước khi code khi phù hợp, implement scoped, chạy checks, review spec compliance và code quality, cập… | TODO | | |
 | SP-08 | Nếu phải sửa architecture đã duyệt, ghi ADR và xin duyệt phần thay đổi quan trọng trước khi tiếp tục. | TODO | | |
@@ -260,8 +260,8 @@
 | ID | Requirement (rút gọn) | Status | Evidence | Note |
 |---|---|---|---|---|
 | P01-01 | Run installed `superpowers:brainstorming` theo skill thật. | IN_PROGRESS | docs/evidence/P01/superpowers-verify-session2.txt | đã invoke skill ở phiên 2; đang brainstorming spec #1 |
-| P01-02 | Design schema + workflow/rules. | IN_PROGRESS | docs/superpowers/specs/2026-10-23-form-schema-workflow-design.md; docs/discovery/P01_BRAINSTORM_NOTES.md | revision 2 sau review #1 (CHANGES / VERIFICATION REQUIRED); OD-02..13 OPEN; chưa duyệt |
-| P01-03 | Design Admin UX + feature flags + capability registry. | TODO | | |
+| P01-02 | Design schema + workflow/rules. | IN_PROGRESS | docs/superpowers/specs/2026-10-23-form-schema-workflow-design.md; docs/DECISIONS.md ADR-017..022 | rev 3; chờ user review trước READY_FOR_CROSS_REVIEW; OD-03/05/06/08..11/13 OPEN |
+| P01-03 | Design Admin UX + feature flags + capability registry. | IN_PROGRESS | docs/discovery/P01_BRAINSTORM_NOTES.md (Session 3) | capability registry: spec #2 bắt đầu brainstorm; Admin UX (spec #4) chưa bắt đầu |
 | P01-04 | Design runtime/compiler + bundle strategy. | TODO | | |
 | P01-05 | Design API/persistence/auth, publish/rollback và AWS PoC isolated architecture. | TODO | | |
 | P01-06 | Design Motion subsystem và reduced motion. | TODO | | |

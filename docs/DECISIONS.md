@@ -35,6 +35,10 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-016 | Ranh giới plugin: plugin mở rộng capability; engine sở hữu lifecycle, điều hướng, điều phối validation và submit | ACCEPTED ở mức nguyên tắc spec #1 (P01 Answer #8); contract PL-01..PL-10 **PROPOSED**; triển khai → G1 | User (P01 Answer #8) | 2026-10-23 |
 | ADR-017 | Parity FE/BE: evaluator TS ở FE + evaluator Python ở BE, một DSL semantic contract, conformance fixtures có version (OD-01) | **APPROVED AS DESIGN DIRECTION** (review #1 spec #1); điều kiện parity bắt buộc; triển khai → G1 | User (review #1) | 2026-10-23 |
 | ADR-018 | G1 chỉ sau khi đủ 6 subsystem spec + Cross-Subsystem Integration Review; spike thực thi cần gate riêng (OD-14) | **APPROVED AS DESIGN DIRECTION** (review #1 spec #1) | User (review #1) | 2026-10-23 |
+| ADR-019 | Quản lý schema: JSON Schema 2020-12 canonical, ba lớp validation, không có schema thứ hai (OD-02) | **APPROVED AS DESIGN DIRECTION** kèm điều kiện (review #2 spec #1); cơ chế chi tiết PROPOSED | User (review #2) | 2026-10-24 |
+| ADR-020 | Block `exports` tường minh, chỉ tham chiếu được public export (OD-04) | **APPROVED AS DESIGN DIRECTION** (review #2 spec #1); cú pháp PROPOSED | User (review #2) | 2026-10-24 |
+| ADR-021 | Classification: platform đặt mức tối thiểu, Editor chỉ được tăng (OD-07) | **APPROVED AS DESIGN DIRECTION** (review #2 spec #1); bảng mức tối thiểu PROPOSED | User (review #2) | 2026-10-24 |
+| ADR-022 | `deferToSubmit` có giới hạn, không fail-open (OD-12) | **APPROVED AS DESIGN DIRECTION** kèm giới hạn (review #2 spec #1) | User (review #2) | 2026-10-24 |
 
 ---
 
@@ -468,3 +472,80 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
   - Spike thực thi (để kiểm một giả thuyết) phải được đề xuất thành **gate riêng**, ghi rõ scope, mục đích, output và cleanup policy. Chỉ chạy sau khi user phê duyệt.
 - **Trạng thái:** APPROVED AS DESIGN DIRECTION. G1 NOT APPROVED.
 - **Người duyệt:** User (review #1 spec #1). **Ngày:** 2026-10-23.
+
+## ADR-019 — Quản lý schema (OD-02)
+
+- **Bối cảnh:** cần một chuẩn duy nhất để mô tả và validate cấu trúc Form Definition ở cả FE (TS) và BE (Python), tránh drift.
+- **Quyết định (user, review #2):** JSON Schema Draft 2020-12, APPROVED AS DESIGN DIRECTION. **Điều kiện:**
+  - Có schema canonical với version rõ ràng. Không duy trì nhiều schema độc lập giữa TS và Python.
+  - Tách rõ Structural Validation, Semantic Validation và Runtime Evaluation. JSON Schema không thay thế Workflow DSL.
+  - Business rule tùy biến chỉ nằm trong typed DSL hoặc registered capability. Admin không viết expression hay JavaScript.
+  - Kiểm tra tương thích của validator JSON Schema ở FE và BE. Làm rõ `format` là annotation hay assertion.
+  - Có schema fixture và conformance test dùng chung.
+  - Definition đã publish không bị mutate khi schema lên version.
+- **Đề xuất của Claude (PROPOSED, spec #1 §7.7):**
+  - Mỗi `schemaVersion` có một bộ schema bất biến.
+  - Type TS và model Python (nếu có) được **sinh** từ schema canonical, CI có drift check.
+  - Chỉ dùng danh sách keyword được phép. Không dùng `pattern`, vì dialect regex của JS và Python khác nhau.
+  - `format` chỉ là annotation, cấu hình tường minh ở cả hai phía.
+  - Fixture `valid/` và `invalid/` so sánh theo JSON Pointer + keyword. Validator pass phần tương ứng của JSON-Schema-Test-Suite.
+  - Definition đã publish được validate bằng schema của chính version của nó.
+- **Trạng thái:** APPROVED AS DESIGN DIRECTION. Cơ chế chi tiết PROPOSED. Không implement trước G1.
+- **Người duyệt:** User (review #2 spec #1). **Ngày:** 2026-10-24.
+
+## ADR-020 — Block exports (OD-04)
+
+- **Quyết định (user, review #2):** shared block khai báo `exports` tường minh, APPROVED AS DESIGN DIRECTION. **Yêu cầu:**
+  - Export có định danh ổn định.
+  - Rule của form bên ngoài chỉ tham chiếu được public export, không được truy cập tùy ý field nội bộ của block.
+  - Export được resolve theo block instance identity và revision bất biến.
+  - Có kiểm tra export trùng, tham chiếu không hợp lệ và thay đổi không tương thích.
+  - Thay đổi public export contract phải thể hiện trong block versioning và impact analysis.
+  - Không resolve động tới `latest` khi build form đã publish.
+  - Phân biệt field export, plugin output và output của API integration.
+- **Đề xuất của Claude (PROPOSED, spec #1 §7.8):**
+  - Export là `{ id, field, type, classification }`. Bên ngoài tham chiếu bằng `inst:@id`.
+  - Mã lỗi: `E-REF-NOT-EXPORTED`, `E-EXPORT-DUPLICATE`, `E-EXPORT-DANGLING`.
+  - Changelog phân loại: thêm export là compatible, đổi classification là contract-change, xóa hoặc đổi kiểu là breaking.
+  - Plugin output tham chiếu được nếu manifest khai báo. Output của integration không tham chiếu trực tiếp, chỉ được map vào field.
+- **Trạng thái:** APPROVED AS DESIGN DIRECTION. Cú pháp PROPOSED.
+- **Người duyệt:** User (review #2 spec #1). **Ngày:** 2026-10-24.
+
+## ADR-021 — Classification dữ liệu (OD-07)
+
+- **Quyết định (user, review #2):** Developer/Platform xác định chính sách classification tối thiểu. Business Editor chỉ được tăng mức bảo vệ, không được hạ dưới mức tối thiểu của platform. APPROVED AS DESIGN DIRECTION. **Yêu cầu:**
+  - Field mới có classification mặc định an toàn. Component nhạy cảm có chính sách lấy từ registry.
+  - Persistence policy và submission policy do platform và backend thực thi. JSON của Admin không vô hiệu hóa được.
+  - P0 không lưu PII bền vững ở browser.
+  - Không đưa PII vào compiler metadata, build manifest, log hay analytics.
+  - Backend kiểm tra data policy dựa trên definition tin cậy và registry.
+  - Thiết kế mở rộng được, nhưng không xây một security-policy language phức tạp trong MVP.
+- **Đề xuất của Claude (PROPOSED, spec #1 §16):**
+  - Thứ tự `public` < `personal` < `secret`.
+  - Bảng mức tối thiểu theo field type. Văn bản tự do tối thiểu là `personal`. Field plugin dùng `minClassification` trong manifest. Giá trị dẫn xuất dùng taint.
+  - Mã lỗi `E-CLASS-BELOW-MIN` và `E-STATIC-PII`.
+  - P0 không có cơ chế ngoại lệ.
+- **Trạng thái:** APPROVED AS DESIGN DIRECTION. Bảng mức tối thiểu PROPOSED.
+- **Người duyệt:** User (review #2 spec #1). **Ngày:** 2026-10-24.
+
+## ADR-022 — Validation lúc submit: `deferToSubmit` (OD-12)
+
+- **Quyết định (user, review #2):** cho phép `deferToSubmit` với một số validation được khai báo rõ, APPROVED AS DESIGN DIRECTION. **Ràng buộc:**
+  - Validator phải thuộc capability registry allowlist và có metadata cho phép chạy lúc submit.
+  - Validation bắt buộc phải xong trước khi backend xác nhận submit thành công.
+  - Timeout, bị từ chối hay backend không khả dụng đều phải có failure semantics tất định. Không fail-open với validation bắt buộc.
+  - Không dùng `deferToSubmit` để lách một validation không hợp lệ.
+  - Frontend hiển thị phản hồi hợp lý cho khách.
+  - Backend xử lý retry và idempotency, bảo vệ dữ liệu khi validator chạy nhiều lần.
+  - Tách business validation khỏi side effect không rollback được.
+  - Test case cho: success, failure, timeout, stale response, duplicate submit và retry.
+  - Làm rõ khác biệt giữa sync, async và submit-time validation.
+- **Đề xuất của Claude (PROPOSED, spec #1 §11):**
+  - Bảng ba loại validation.
+  - Điều kiện: manifest có `allowsDeferToSubmit: true` và `authority: authoritative`.
+  - Reject → 422. Timeout hoặc không khả dụng → 503 `E-VALIDATION-UNAVAILABLE`, bài nộp không được ghi.
+  - Validator chỉ được có `sideEffects: none | idempotentRead`.
+  - Bài nộp được ghi nguyên tử cùng bản ghi idempotency. Side effect chỉ chạy sau khi đã ghi.
+  - AC-35.
+- **Trạng thái:** APPROVED AS DESIGN DIRECTION.
+- **Người duyệt:** User (review #2 spec #1). **Ngày:** 2026-10-24.

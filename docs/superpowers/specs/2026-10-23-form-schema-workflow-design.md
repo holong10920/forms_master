@@ -1,6 +1,9 @@
 # Spec #1: Form Definition Schema & Workflow DSL (Architecture Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.** Đã áp dụng review #1 của user (verdict: CHANGES / VERIFICATION REQUIRED). Chờ user review lại. **G1 NOT APPROVED.** G9 và G10 đang BLOCKED.
+> **Trạng thái: PROPOSAL, revision 3** (2026-10-24).
+> - Review #1: CHANGES / VERIFICATION REQUIRED.
+> - Review #2: CONDITIONALLY ACCEPTED FOR DESIGN CONTINUATION. User cho phép brainstorm spec #2, nhưng spec #1 **chưa được duyệt hoàn toàn**.
+> - **G1 NOT APPROVED.** G9 và G10 đang BLOCKED.
 > Ngày: 2026-10-23 (phiên 2). Nguồn:
 > - [P01_BRAINSTORM_NOTES.md](../../discovery/P01_BRAINSTORM_NOTES.md) (Answer #1..#8)
 > - [DECISIONS.md](../../DECISIONS.md) (ADR-002..016)
@@ -39,6 +42,10 @@
 | ADR-016 | Ranh giới plugin | ACCEPTED (nguyên tắc). Contract PL-01..PL-10: **PROPOSED** |
 | ADR-017 | OD-01: hai evaluator (TS ở FE, Python ở BE) cùng một semantic contract và bộ conformance fixture | **APPROVED AS DESIGN DIRECTION** (review #1). Điều kiện parity xem §18. |
 | ADR-018 | OD-14: G1 sau khi đủ 6 spec và có Cross-Subsystem Integration Review. Spike phải qua gate riêng. | **APPROVED AS DESIGN DIRECTION** (review #1) |
+| ADR-019 | OD-02: JSON Schema 2020-12 canonical, ba lớp validation (§7.7) | **APPROVED AS DESIGN DIRECTION** kèm điều kiện (review #2). Cơ chế chi tiết PROPOSED. |
+| ADR-020 | OD-04: block có `exports` tường minh (§7.8) | **APPROVED AS DESIGN DIRECTION** (review #2). Cú pháp PROPOSED. |
+| ADR-021 | OD-07: platform đặt mức classification tối thiểu, Editor chỉ được tăng (§16) | **APPROVED AS DESIGN DIRECTION** (review #2). Bảng mức tối thiểu PROPOSED. |
+| ADR-022 | OD-12: `deferToSubmit` có giới hạn, không fail-open (§11) | **APPROVED AS DESIGN DIRECTION** kèm giới hạn (review #2) |
 
 ---
 
@@ -249,6 +256,7 @@ stateDiagram-v2
 | `motion` | cấu hình preset. Thuộc spec #6, spec #1 chỉ giữ chỗ. |
 | `dependencies` | `blocks` và `capabilities`, pin chính xác (`name → id@version`). Không có `latest` hay wildcard. |
 | `blockInstances` | `{ id, alias, block: alias trong dependencies, inputs }`. *[Claude]* `inputs` ở P0 **chỉ là hằng số**. Compiler gập chúng lại khi expand, nên chúng không trở thành node trong dependency graph. Bind input vào field hoặc điều kiện là việc của P1, cần ADR. |
+| `exports` (chỉ có ở block) | public contract của block (§7.8, OD-04) |
 | `fields` | field local của form |
 | `sections` | `{ id, title, visibleWhen?, content }`, là container hiển thị bên trong step. Xem §7.5. |
 | `conditions` | **named conditions**, dùng lại được trong rule editor |
@@ -264,7 +272,10 @@ stateDiagram-v2
   "blockId": "blk_customer_info",
   "revision": "r2",
   "inputs": { "requireKana": { "type": "boolean", "default": true } },
-  "exports": ["fld_prefecture", "fld_email"],
+  "exports": [
+    { "id": "prefecture", "field": "fld_prefecture", "type": "enum", "classification": "public" },
+    { "id": "email", "field": "fld_email", "type": "string", "classification": "personal" }
+  ],
   "fields": [
     { "id": "fld_name", "key": "name", "type": "text", "label": { "ja": "お名前" },
       "required": true, "classification": "personal" },
@@ -292,7 +303,7 @@ stateDiagram-v2
 ```
 
 *Ghi chú:*
-- `exports` thuộc OD-04: chỉ field được export mới tham chiếu được từ bên ngoài instance.
+- `exports` (OD-04, ADR-020): bên ngoài instance chỉ tham chiếu được export, theo cú pháp `inst:@id` (§7.8).
 - `input` chỉ đọc tham số của instance.
 
 ### 7.3. Ví dụ đoạn form PC (minh họa)
@@ -482,42 +493,45 @@ Engine chỉ có **một** khái niệm "không có giá trị".
   - Phép chia chỉ được dùng khi có khai báo scale và rounding.
 - Khi đưa vào cần: tăng minor `schemaVersion`, thêm fixture biên, và ghi ADR.
 
-#### 7.6.4. Unicode
+#### 7.6.4. Unicode (revision 3)
 
-- **Chuẩn hóa lưu trữ:** chỉ dùng **NFC** cộng trim. NFC là tương đương chuẩn, không đổi nghĩa văn bản.
-- **Độ dài = số code point sau NFC.**
-  - Không đếm theo grapheme cluster, vì cách tách grapheme phụ thuộc phiên bản Unicode/ICU (`Intl.Segmenter` so với thư viện Python), tức một nguồn lệch FE/BE.
-  - `maxLength` là giới hạn dữ liệu, không phải giới hạn hiển thị.
-  - Bộ đếm ký tự trên UI (nếu có) dùng cùng cách đếm.
+- **Văn bản tự do không chuẩn hóa Unicode.** Giá trị được lưu đúng như khách nhập, chỉ trim khoảng trắng ở hai đầu.
+  - *Lý do sửa so với revision 2:* NFC **không lossless** với chữ Hán tương thích (CJK Compatibility Ideographs). Ví dụ U+FA30 `侮` bị NFC đổi thành U+4FAE `侮`. Hai glyph có thể trông giống nhau, nhưng code point khác nhau, và người Nhật phân biệt chúng trong tên riêng. Với tên riêng tiếng Nhật (異体字), đây là mất dữ liệu quan trọng.
+- **Độ dài = số code point của giá trị đã lưu** (sau trim). Không đếm theo grapheme cluster, vì cách tách grapheme phụ thuộc phiên bản Unicode/ICU (`Intl.Segmenter` so với thư viện Python), tức một nguồn lệch FE/BE. `maxLength` là giới hạn dữ liệu, không phải giới hạn hiển thị. Bộ đếm trên UI dùng cùng cách đếm.
 
-| Chuỗi | Code point sau NFC | Ghi chú |
+| Chuỗi nhập | Code point | Ghi chú |
 |---|---|---|
 | `が` (U+304C) | 1 | |
-| `か` + `゙` (U+304B U+3099) | 1 | NFC ghép lại thành `が` |
+| `か` + `゙` (U+304B U+3099) | 2 | Không ghép, vì không chuẩn hóa. Được ghi rõ trong tài liệu cho Editor. |
 | `𠮷` | 1 | UTF-16 tính là 2. Đếm theo `.length` của JS sẽ **sai**. |
-| `👨‍👩‍👧` | 5 | Hiển thị như 1 grapheme. Được ghi rõ trong tài liệu cho Editor. |
-| `ｶﾞ` (半角) | 2 | NFC không ghép. Field `katakana` chuyển nó thành `ガ` (1) theo §7.6.5. |
+| `侮` (U+FA30) | 1 | **Giữ nguyên** U+FA30, không đổi thành U+4FAE |
+| `👨‍👩‍👧` | 5 | Hiển thị như 1 grapheme |
+| `ｶﾞ` (半角) | 2 | Field `katakana` chuyển thành `ガ` (1) theo §7.6.5. Field `text` giữ nguyên. |
 
+- Validator nào cần so sánh "tương đương" (ví dụ chống trùng) thì tự chuẩn hóa **nội bộ** để so sánh, không sửa giá trị (§7.6.5).
 - **Phiên bản Unicode:** CI ghi lại phiên bản ICU của Node và `unicodedata.unidata_version` của Python. Fixture có ký tự mới để phát hiện lệch.
+  - *Đo trên máy local ngày 2026-10-24:* Node 20.20.2 dùng ICU 78.2 / Unicode 17.0, Python 3.9.6 hệ thống dùng Unicode 14.0.0. Hai phía **đang khác phiên bản**. Vì văn bản tự do không chuẩn hóa và độ dài đếm theo code point, khác biệt này không ảnh hưởng tới §7.6.4, nhưng phải được tính đến cho mọi phép dựa trên bảng Unicode, như phân loại ký tự trong validator `katakana`. Việc chọn phiên bản Python ở P02 phải xét điểm này.
+- **Fixture phải ghi ký tự bằng escape** (`\uFA30`), không ghi glyph. Chính file spec này cũng bị công cụ soạn thảo tự chuẩn hóa U+FA30 thành U+4FAE ở revision đầu tiên của rev 3. Đây là bằng chứng thực tế rằng các công cụ có thể âm thầm đổi dữ liệu.
 
 #### 7.6.5. Chuẩn hóa tiếng Nhật và canonicalization theo validator
 
-**Nguyên tắc**, để không âm thầm phá dữ liệu gốc:
-1. Mỗi phép biến đổi do **field type khai báo**, có version và fixture.
-2. Áp dụng khi **commit** (blur hoặc `compositionend`), và **hiển thị lại giá trị đã chuẩn hóa cho khách**. Khách luôn thấy chính xác cái sẽ được gửi.
-3. Văn bản tự do chỉ dùng NFC + trim.
-4. BE áp lại cùng phép biến đổi, idempotent. Nếu giá trị gửi lên chưa ở dạng chuẩn, BE chuẩn hóa, validate trên dạng chuẩn, và log lệch (không ghi PII).
+**Nguyên tắc** để không âm thầm phá dữ liệu gốc (revision 3):
+1. Canonicalization chỉ áp cho **field type có cấu trúc** (`tel`, `postal`, `number`, `email`, `katakana`), do field type khai báo, có version và fixture. Văn bản tự do (`text`, `textarea`) **chỉ trim**.
+2. Mỗi phép biến đổi phải **idempotent** (`c(c(x)) = c(x)`) và chỉ bỏ những gì **không mang nghĩa đối với kiểu đó**, như dấu gạch trong số điện thoại hay độ rộng ký tự của chữ số. Phần bị bỏ được liệt kê tường minh trong bảng dưới đây.
+3. Áp dụng khi **commit** (blur hoặc `compositionend`) và **hiển thị lại giá trị đã chuẩn hóa cho khách**, để khách luôn thấy chính xác cái sẽ được gửi.
+4. BE áp lại cùng phép biến đổi. Nếu giá trị gửi lên chưa ở dạng chuẩn, BE chuẩn hóa, validate trên dạng chuẩn, và log lệch (không ghi PII).
+5. Không có phép biến đổi nào ngoài bảng này. Thêm một phép mới cần một version mới của field type, kèm fixture.
 
-| Field type | Canonicalization | Ví dụ |
-|---|---|---|
-| `text` (tên, địa chỉ chi tiết…) | NFC, trim. **Không** đổi độ rộng ký tự. | `　山田　太郎 ` thành `山田　太郎` |
-| `textarea` | NFC, đổi CRLF thành LF, trim hai đầu, giữ dòng ở giữa | |
-| `email` | NFC, trim, ASCII 全角 thành 半角. Giữ nguyên hoa/thường. | `ｔａｒｏ＠ｅｘａｍｐｌｅ．ｊｐ` thành `taro@example.jp` |
-| `tel` | số 全角 thành 半角, bỏ khoảng trắng và các loại gạch (`-` `－` `ー` `‐`). Dạng chuẩn = chỉ chữ số. | `０９０－１２３４－５６７８` thành `09012345678` |
-| `postal` | như `tel`. Dạng chuẩn = 7 chữ số. | `１２３－４５６７` thành `1234567` |
-| `number` | số 全角 thành 半角, bỏ `,` phân cách hàng nghìn, rồi parse theo §7.6.2 | `１，２００` thành `1200` |
-| `katakana` | 半角カナ thành 全角カナ. **Không** tự đổi ひらがな; validator báo lỗi. | `ﾔﾏﾀﾞ` thành `ヤマダ` |
-| `choice.*` | không chuẩn hóa. Phải khớp đúng option `value`. | |
+| Field type | Canonicalization | Phần bị bỏ (có chủ đích) | Ví dụ |
+|---|---|---|---|
+| `text` (tên, địa chỉ chi tiết…) | trim | khoảng trắng ở hai đầu | `　山田　太郎 ` thành `山田　太郎` |
+| `textarea` | đổi CRLF thành LF, trim hai đầu | ký tự xuống dòng kiểu CR, khoảng trắng hai đầu | |
+| `email` | trim, ASCII 全角 thành 半角 | độ rộng ký tự | `ｔａｒｏ＠ｅｘａｍｐｌｅ．ｊｐ` thành `taro@example.jp` |
+| `tel` | số 全角 thành 半角, bỏ khoảng trắng và các loại gạch (`-` `－` `ー` `‐`) | dấu phân cách, độ rộng ký tự | `０９０－１２３４－５６７８` thành `09012345678` |
+| `postal` | như `tel`. Dạng chuẩn = 7 chữ số. | dấu phân cách, độ rộng ký tự | `１２３－４５６７` thành `1234567` |
+| `number` | số 全角 thành 半角, bỏ `,` phân cách hàng nghìn, parse theo §7.6.2 | định dạng hiển thị | `１，２００` thành `1200` |
+| `katakana` | 半角カナ thành 全角カナ. **Không** tự đổi ひらがな (validator báo lỗi). | độ rộng của kana | `ﾔﾏﾀﾞ` thành `ヤマダ` |
+| `choice.*` | không biến đổi. Phải khớp đúng option `value`. | — | |
 
 - **Canonicalization riêng của validator:**
   - Validator là hàm thuần và **không sửa giá trị**.
@@ -557,6 +571,113 @@ Engine chỉ có **một** khái niệm "không có giá trị".
   - Thêm một field mới sẽ có identity mới và không dùng lại được key cũ.
 - **Không ảnh hưởng:** revision cũ, dữ liệu đã submit và draft của khách.
 - **Migration `schemaVersion`:** theo R-07.
+
+#### 7.6.9. Type coercion (revision 3)
+
+- **Không có implicit coercion ở bất kỳ đâu trong DSL.**
+- **Compile time:** kiểu của toán hạng phải khớp nhau, ví dụ number với number, hay option value (string) với const string. Viết `eq(numberField, "1")` sẽ báo `E-TYPE-OPERATOR`. P0 không cho dùng `lt`/`gt` trên string.
+- **Payload:** mỗi field có `valueSchema` nghiêm ngặt.
+  - Field số nhận JSON integer. Field chuỗi nhận JSON string. Boolean chỉ nhận `true` hoặc `false`. Multi-choice là mảng string không trùng nhau.
+  - Sai kiểu thì BE trả **422 `E-TYPE`**. BE không đổi `"12"` thành `12`.
+- **Parse đầu vào:** việc chuyển chuỗi từ DOM sang số chỉ diễn ra trong adapter field ở FE, thông qua canonicalization (§7.6.2), trước khi giá trị vào engine. Đó là parse, không phải coercion lúc đánh giá.
+- **So sánh:**
+  - Số so theo giá trị số.
+  - Chuỗi so bằng nhau theo từng **code point**. Không dùng locale collation, không chuẩn hóa.
+
+#### 7.6.10. Ma trận kịch bản parity FE/BE cho §7.6 (ADR-017)
+
+| Nhóm quy tắc | Kịch bản bắt buộc (fixture chung, chạy ở cả TS và Python) |
+|---|---|
+| Rỗng (§7.6.1) | Mỗi dạng đầu vào (missing, `""`, chuỗi toàn khoảng trắng, `null`, `[]`, `false`, `0`) × (`isEmpty`, `eq`, `neq`, `not(eq)`, `required`, aggregate) |
+| Số (§7.6.2) | `2^53−1`, `−(2^53−1)`, `2^53`, `-0`, `007`, `1.0`, `1e3`, `１，２００`, overflow sau `add`/`multiply`/`sum` |
+| Unicode (§7.6.4) | Từng dòng của bảng §7.6.4 × `minLength`/`maxLength` ở đúng biên |
+| Canonicalization (§7.6.5) | Từng dòng của bảng §7.6.5. Kiểm idempotent (`c(c(x)) = c(x)`). Giá trị chưa chuẩn được gửi thẳng tới BE. |
+| Coercion (§7.6.9) | Mọi cặp kiểu sai trong payload → 422 `E-TYPE`. Mọi cặp kiểu sai trong rule → lỗi compile. |
+| Phần tử lặp (§7.6.6) | Thêm, xóa, đổi thứ tự. Lỗi gắn đúng `itemId`. `itemId` trùng hoặc sai định dạng → 422. |
+| Projection (§7.6.7) | Key inactive, key lạ, `displayOnly` → 422. Giá trị `calculated` bị sửa → BE tính lại. |
+| Rename / xóa (§7.6.8) | Submit vào revision cũ dùng key cũ. Key đã reserved không gán được cho identity khác. |
+
+Mỗi nhóm có **golden fixture** (đầu vào và kết quả kỳ vọng) cùng **differential test** dùng dữ liệu sinh ngẫu nhiên có seed (AC-29..AC-31).
+
+### 7.7. Quản lý schema (OD-02, ADR-019, APPROVED AS DESIGN DIRECTION; cơ chế chi tiết PROPOSED)
+
+**Một nguồn duy nhất:**
+- Mỗi `schemaVersion` có **một** bộ JSON Schema Draft 2020-12 canonical (`$schema` 2020-12, `$id` mang version).
+- Bộ schema đã phát hành thì **bất biến**.
+- Không ai viết tay một schema thứ hai bằng TS hay Python.
+
+**Ba lớp kiểm tra, không lẫn vào nhau:**
+
+| Lớp | Công cụ | Kiểm gì | Không kiểm |
+|---|---|---|---|
+| Structural validation | JSON Schema 2020-12, cùng bộ schema ở FE (Admin, analyzer) và BE | hình dạng, kiểu, key bắt buộc, enum, `additionalProperties: false`, hình dạng node AST | ý nghĩa: tham chiếu, kiểu toán tử, graph |
+| Semantic validation | analyzer (§14) | tham chiếu, exports, kiểu toán tử, graph, permission, classification, ledger, định dạng định danh | giá trị của khách |
+| Runtime evaluation | engine TS và evaluator Python (ADR-017) | activity, rule, derived, validation trên giá trị | cấu trúc definition |
+
+- **JSON Schema không thay thế Workflow DSL.** Business rule chỉ nằm trong typed DSL (§7.4) hoặc registered capability (§12). Admin không viết expression hay JavaScript.
+
+**Sinh hoặc kiểm chứng contract TS/Python** (PROPOSED; chọn công cụ ở P02):
+- Type TS được **sinh** từ schema canonical.
+- Phía Python validate bằng một validator 2020-12 trên cùng file schema. Nếu dùng model typed thì model cũng được **sinh**, không viết tay.
+- CI có **drift check**: sinh lại mà ra diff thì fail.
+
+**Tương thích validator FE/BE:**
+- Schema chỉ dùng một **danh sách keyword được phép**: `type`, `properties`, `required`, `additionalProperties`, `items`, `enum`, `const`, `minItems`/`maxItems`, `minLength`/`maxLength`, `minimum`/`maximum`, `$ref`/`$defs`, `oneOf` có `const` làm discriminator.
+- **Không dùng `pattern`** trong structural schema, vì dialect regex của ECMA-262 và Python `re` khác nhau. Định dạng định danh được kiểm ở lớp semantic, có fixture chung.
+- Validator ở FE và BE phải pass phần JSON-Schema-Test-Suite tương ứng với danh sách keyword trên. Kết quả được lưu làm evidence.
+
+**`format`:**
+- Trong 2020-12, `format` mặc định chỉ là **annotation**, và mức hỗ trợ assertion khác nhau giữa các thư viện.
+- Quyết định: schema canonical **không dựa vào `format` để assert**. Nếu có xuất hiện thì chỉ để làm tài liệu, và cả hai validator được cấu hình **tường minh** ở chế độ annotation.
+- Định dạng thật sự (id, semver, ngày) được kiểm ở lớp semantic.
+
+**Fixture và conformance:**
+- Mỗi `schemaVersion` có thư mục `valid/` và `invalid/`.
+- FE và BE phải cho **cùng kết quả**: hợp lệ hay không, kèm vị trí lỗi (JSON Pointer + keyword). Nội dung message được phép khác nhau.
+
+**Tiến hóa schema:**
+- Definition đã publish được validate bằng **schema của chính `schemaVersion` của nó**. Schema cũ được giữ vĩnh viễn.
+- Nâng schema **không bao giờ** mutate definition đã publish. Migration chỉ áp dụng cho draft (R-07).
+- `configSchema` của capability (spec #2) dùng cùng dialect và cùng danh sách keyword.
+
+### 7.8. Block exports (OD-04, ADR-020, APPROVED AS DESIGN DIRECTION; cú pháp PROPOSED)
+
+```json
+"exports": [
+  { "id": "prefecture", "field": "fld_prefecture", "type": "enum", "classification": "public" },
+  { "id": "email",      "field": "fld_email",      "type": "string", "classification": "personal" }
+]
+```
+
+- **Stable identifier:**
+  - Export `id` là tên public ổn định của block.
+  - Bên ngoài tham chiếu theo dạng `{ "ref": "inst_customer:@prefecture" }`. Tiền tố `@` đánh dấu đây là export.
+  - Bên trong block vẫn dùng `fieldDefId`.
+  - Nhờ vậy tác giả block có thể thay field nội bộ (replace field) mà vẫn giữ export, miễn kiểu tương thích.
+- **Chỉ tham chiếu được export.** Tham chiếu tới field nội bộ từ bên ngoài báo `E-REF-NOT-EXPORTED`.
+- **Resolve** theo `blockInstanceId` và **block revision đã pin**. Không bao giờ dùng `latest` khi build (R-05).
+- **Kiểm tra của analyzer:**
+  - `id` export trùng → `E-EXPORT-DUPLICATE`
+  - export trỏ tới field không tồn tại → `E-EXPORT-DANGLING`
+  - tham chiếu tới export không tồn tại → `E-REF-DANGLING`
+  - kiểu không khớp với toán tử → `E-TYPE-OPERATOR`
+- **Contract của export được version theo block revision.**
+  - Changelog phân loại theo R-02:
+    - thêm export: compatible
+    - đổi classification: contract-change
+    - xóa export, hoặc đổi kiểu: breaking
+  - Impact analysis liệt kê các form đang tham chiếu tới export bị đổi.
+  - Nâng tới một revision có breaking change ở export đang được dùng sẽ bị chặn cho đến khi form sửa xong tham chiếu.
+
+**Phân biệt ba loại "output":**
+
+| Loại | Nguồn | Tham chiếu được từ rule? | Kiểu do ai khai báo |
+|---|---|---|---|
+| Field export | field của shared block | được, dạng `inst:@exportId` | khai trong block |
+| Plugin output | capability instance, ví dụ `store-selector` sinh ra `region` | được, dạng `inst:fld_store/outputId`, nếu manifest khai `outputs` | manifest (spec #2) |
+| Integration/lookup output | phản hồi của connector | **không trực tiếp**. Chỉ được map vào field đích, rồi rule tham chiếu field đó. | `outputSchema` (spec #2) |
+
+- Rule không bao giờ đọc phản hồi API thô.
 
 ## 8. Workflow DSL và ngữ nghĩa điều hướng (ADR-014, PROPOSED)
 
@@ -692,7 +813,7 @@ Các kiểm tra graph khác (đều chặn publish):
 | NR-08 | **Resolve step được yêu cầu** (deep link, popstate, reload): xem bảng T2. Đích dự phòng là `firstIncomplete(values)`, tức step đầu tiên trên `derivedPath` (tính tới `review`) chưa hoàn tất. Nếu không có step nào như vậy thì đích là `review`. |
 | NR-09 | **Khôi phục draft:** áp NR-08 với giá trị đã khôi phục (không có PII). Step chứa PII required sẽ là `firstIncomplete`, kèm lời giải thích. |
 | NR-10 | **Có vòng:** compile báo lỗi `E-GRAPH-CYCLE` và hiện đường vòng theo label. Phòng thủ thêm ở runtime: vòng duyệt `derivedPath` dừng sau tối đa N bước (N = số step). Vượt quá thì form báo lỗi cấp form, và BE từ chối. Sau khi compile pass, tình huống này không thể xảy ra. |
-| NR-11 | **Async chưa xong lúc 次へ:** lookup và advisory không chặn. `authoritative` thì chờ tới timeout: valid thì đi tiếp, invalid thì ở lại, timeout thì ở lại kèm 再試行 (hoặc `deferToSubmit`, OD-12). Khách sửa giá trị trong lúc chờ → hủy request (đổi fingerprint) và đánh giá lại. |
+| NR-11 | **Async chưa xong lúc 次へ:** lookup và advisory không chặn. `authoritative` thì vào `awaitingValidation` (§8.7.6 C1) và chờ tới timeout: valid thì đi tiếp, invalid thì ở lại, timeout thì ở lại kèm 再試行. Validator `deferToSubmit` không chạy ở FE (§11). Khách sửa giá trị trong lúc chờ → hủy request (đổi fingerprint) và đánh giá lại. |
 
 #### 8.7.2. T1: chọn transition tại step S
 
@@ -718,10 +839,12 @@ Các kiểm tra graph khác (đều chặn publish):
 
 | Sự kiện | Guard | Kết quả |
 |---|---|---|
-| 次へ ở step `form` | mọi field active của step hợp lệ, và không có `authoritative` đang chờ | `current` = step kế tiếp trên `derivedPath` |
+| 次へ / 戻る (mọi loại) | `fromStep` ≠ `current` | **bỏ qua** (INV-N3, chặn double-click) |
+| 次へ ở step `form` | mọi field active của step hợp lệ, và không có `authoritative` đang chờ | `current` = step kế tiếp trên `derivedPath`, tính từ state hiện tại (INV-N2) |
 | 次へ | có field không hợp lệ | ở lại, V-04 |
-| 次へ | có `authoritative` đang chờ | NR-11 |
-| 次へ ở `review` | toàn bộ đường đi hợp lệ | submit pipeline (§8.6) |
+| 次へ | có `authoritative` đang chờ | `awaitingValidation` (NR-11, C1) |
+| Input, 戻る hoặc popstate | đang `awaitingValidation` | hủy ý định 次へ (INV-N8) |
+| 次へ ở `review` | toàn bộ đường đi hợp lệ, và không có submit nào đang chạy | submit pipeline (§8.6). Nếu đang có submit thì bỏ qua (INV-N5). |
 | 戻る | `current` ≠ step đầu | `current` = step đứng trước (NR-07) |
 | Đổi giá trị ở step hiện tại | — | tính lại `derivedPath`. `current` không đổi (nhờ NR-03). |
 | Kết quả async đổi giá trị phía trước | fingerprint khớp, và khách chưa sửa field đó | tính lại. Nếu `current` ∉ path thì NR-06. |
@@ -744,6 +867,44 @@ Các kiểm tra graph khác (đều chặn publish):
 | E10 | Step hiện tại không còn trên đường đi | *(Giả định; demo P0 không có lookup ảnh hưởng nhánh.)* Lookup về trễ đổi field ở step 2, làm transition ở step 2 đổi | `current` = step 2, tức step rẽ nhánh, kèm thông báo (NR-06) |
 
 Các bảng T1–T3 và ví dụ E1–E10 sẽ thành **test dạng bảng** chạy trên cả evaluator TS lẫn Python (AC-33).
+
+
+#### 8.7.6. Tính nguyên tử và race condition (revision 3)
+
+**Mô hình xử lý:**
+- Engine là **một writer duy nhất**. Mọi tác động đều đi vào một **hàng đợi sự kiện tuần tự**: input, 次へ, 戻る, popstate, kết quả async, kết quả submit.
+- Mỗi sự kiện được xử lý trọn vẹn trên **một snapshot state** và tạo ra một state mới có `stateVersion + 1`.
+- Sự kiện điều hướng mang theo `fromStep` và `stateVersion` tại thời điểm khách thao tác.
+
+**Invariant:**
+
+| ID | Invariant |
+|---|---|
+| INV-N1 | Chỉ có một writer. Không có hai sự kiện nào được xử lý song song. |
+| INV-N2 | Mọi transition được tính từ **chính state mà nó commit vào**, không dùng state cũ. |
+| INV-N3 | Sự kiện điều hướng có `fromStep` ≠ `current` thì bị **bỏ qua**, không có tác dụng gì. |
+| INV-N4 | Kết quả async chỉ được áp dụng khi `fingerprint` và `seq` khớp với yêu cầu mới nhất của node đó, node còn active, và khách chưa sửa field đích. |
+| INV-N5 | Mỗi phiên form có tối đa **một submit đang chạy**. Mọi lần thử lại dùng cùng `idempotencyKey`. |
+| INV-N6 | Sau mọi sự kiện, `current ∈ derivedPath(values)`. Nếu không thỏa, NR-06 được áp dụng **trong cùng sự kiện đó**. |
+| INV-N7 | Chỉ vào được `complete` sau khi BE xác nhận thành công. |
+| INV-N8 | Khi có một "ý định 次へ" đang chờ validation, **mọi thay đổi input, 戻る hoặc popstate đều hủy ý định đó**. Engine không bao giờ tự chuyển step sau khi khách đã sửa dữ liệu. |
+
+**Kịch bản và hành vi mong đợi:**
+
+| # | Kịch bản | Hành vi |
+|---|---|---|
+| C1 | Bấm 次へ khi validation `authoritative` đang `pending` | Step vào trạng thái `awaitingValidation`, ghi lại `{fromStep, stateVersion, fingerprint}`, nút 次へ hiện đang xử lý. Khi kết quả về và fingerprint khớp: hợp lệ thì chuyển step, transition **được tính lại** từ state hiện tại (INV-N2); không hợp lệ thì ở lại và hiện lỗi; timeout thì ở lại và hiện 再試行. |
+| C2 | Khách sửa input khi async validation đang chạy | Request bị hủy bằng `AbortSignal` và fingerprint mới được tạo. Nếu đang `awaitingValidation` thì ý định 次へ bị hủy (INV-N8), khách phải bấm 次へ lại. |
+| C3 | Response cũ về sau response mới | `seq` hoặc fingerprint không khớp nên response cũ bị bỏ (INV-N4) |
+| C4 | Branch đổi trong lúc đang điều hướng, ví dụ kết quả lookup đổi field phía trước khi đang `awaitingValidation` | Sự kiện async được xử lý trước. Nếu `current` ∉ path thì áp NR-06 và ý định 次へ bị hủy. Nếu `current` vẫn trên path thì kết quả validation chỉ được dùng khi fingerprint của step còn khớp, và transition được tính từ state mới. |
+| C5 | Browser Back/Forward và reload | popstate trở thành sự kiện `navigateTo(r)` và được resolve theo T2. Nếu đang chờ thì hủy ý định 次へ (INV-N8). Reload theo NR-08/NR-09. |
+| C6 | Step hiện tại không còn reachable | NR-06 trong cùng sự kiện (INV-N6) |
+| C7 | Khôi phục draft khi revision đã khác | Artifact đang chạy có revision R. Draft có revision ≠ R thì **không được áp dụng**: không migrate, không đoán (ADR-012). Khách thấy thông báo và bắt đầu lại, draft cũ bị xóa. Riêng tab đang mở từ trước khi publish vẫn submit theo revision cũ, và BE chấp nhận nếu revision đó còn được nhận (OD-09). |
+| C8 | Double-click 次へ | Click thứ hai mang `fromStep` = step cũ, khác `current` mới, nên bị bỏ qua (INV-N3). Không có chuyện **nhảy qua hai step**. |
+| C9 | Double-click Submit | Click đầu khóa runtime (`disabled`) và tạo một submit duy nhất (INV-N5). Click sau bị bỏ qua. Mạng lỗi rồi thử lại thì dùng cùng `idempotencyKey`, và BE trả về kết quả đã lưu. |
+| C10 | Validation thành công nhưng transition không còn hợp lệ vì state đã đổi | Không thể dùng transition cũ (INV-N2). Kết quả validation chỉ được dùng nếu fingerprint của step còn khớp. Nếu không khớp thì validate lại. |
+
+Các dòng C1–C10 được thêm vào T3 dưới dạng sự kiện và guard, và thành test dạng bảng (AC-34).
 
 ---
 
@@ -833,6 +994,36 @@ Các bảng T1–T3 và ví dụ E1–E10 sẽ thành **test dạng bảng** ch�
 
 Khái niệm `failOpen` ở đề xuất trước bị loại bỏ, thay bằng phân loại trên.
 
+**Ba loại validation theo thời điểm chạy** (OD-12, ADR-022, APPROVED AS DESIGN DIRECTION kèm giới hạn):
+
+| Loại | Chạy ở đâu và khi nào | Ví dụ | Ảnh hưởng tới 次へ | BE |
+|---|---|---|---|---|
+| **Synchronous** | FE: khi change, blur hoặc 次へ. BE: lúc submit. | `required`, `maxLength`, `jpPhone`, `exclusiveOption` | Chặn nếu sai | Luôn chạy lại |
+| **Asynchronous (lúc ở step)** | FE gọi qua connector khi commit hoặc 次へ | kiểm tra tồn tại hoặc khả dụng (giả định) | `authoritative`: chờ tới timeout, chặn nếu sai hoặc timeout (C1). `advisory`: không chặn. | `authoritative`: bắt buộc chạy lại lúc submit |
+| **Submit-time (`deferToSubmit`)** | **Chỉ BE**, trong submit pipeline | kiểm tra đắt hoặc cần dữ liệu phía server (giả định) | Không chặn 次へ. 確認 hiện câu 「最終確認は送信時に行います」. | Bắt buộc. Submit chỉ thành công khi kiểm tra pass. |
+
+**Ràng buộc của `deferToSubmit`:**
+- Validator phải nằm trong registry allowlist, manifest khai `allowsDeferToSubmit: true`, và có `authority: authoritative`.
+- Editor chỉ bật được tùy chọn này cho validator có cờ đó.
+- Không được dùng `deferToSubmit` để bỏ qua một validation đã sai ở FE. Nếu FE đã biết giá trị sai (sync) thì vẫn chặn.
+
+**Ngữ nghĩa thất bại tất định** (không bao giờ fail-open):
+
+| Kết quả của validator lúc submit | Phản hồi BE | Bài nộp | FE |
+|---|---|---|---|
+| pass | tiếp tục pipeline | được ghi khi mọi kiểm tra pass | — |
+| reject | **422**, lỗi theo external path (V-08) | **không ghi** | đưa khách tới step có lỗi, focus field đó |
+| timeout | **503 `E-VALIDATION-UNAVAILABLE`**, retryable | **không ghi** | ở lại 確認, hiện 再試行, giữ draft và state |
+| validator hoặc BE không khả dụng | **503**, retryable | **không ghi** | như timeout |
+
+**Retry, idempotency và side effect:**
+- Validator chỉ được có `sideEffects: none | idempotentRead` (PL-03). Chạy nhiều lần (retry hoặc submit trùng) không làm thay đổi dữ liệu ở đâu.
+- Bài nộp được ghi **một cách nguyên tử** cùng bản ghi idempotency, và chỉ sau khi mọi validation bắt buộc pass.
+- Submit trùng với cùng `idempotencyKey` sẽ nhận lại kết quả đã lưu. Trường hợp hai request đồng thời được quyết ở spec #5.
+- **Side effect không rollback được** (gửi mail, đẩy sang integration) chỉ chạy **sau khi bài nộp đã được ghi**, qua cơ chế action (spec #2/#5). Không bao giờ chạy bên trong validator.
+
+**Test bắt buộc (AC-35):** success, reject, timeout, response cũ về sau (stale), submit trùng, retry sau 503, và thử dùng `deferToSubmit` cho validator không có cờ (phải ra lỗi compile).
+
 ---
 
 ## 12. Extension points và plugin contract (ADR-016)
@@ -856,6 +1047,15 @@ Khái niệm `failOpen` ở đề xuất trước bị loại bỏ, thay bằng 
 **Quy tắc:**
 - Khi spec #2, #3, #5 hoặc #6 được duyệt, mục tương ứng ở spec #1 chỉ còn là **tham chiếu**.
 - Nếu phát hiện mâu thuẫn, spec chuyên trách thắng. Spec #1 phải được sửa trong **cùng thay đổi**, và mâu thuẫn được ghi vào cross-subsystem review (§25).
+
+**Contract chuyển sang spec #2 làm nguồn sự thật** (revision 3):
+- **Danh sách loại capability.** Spec #1 dùng các tên tạm `fieldType`, `validator`, `lookup`, `motionPreset`, `derivedFn`, `template`. Review #2 nêu các loại field, validator, action, data source, layout, integration. **Spec #2 sẽ chốt danh sách cuối cùng.** Các loại mới (action, layout) vẫn phải nằm trong ranh giới ADR-016: không loại nào được override navigation hoặc submit.
+- Định dạng manifest, registry API, `configSchema` cho Inspector, interface renderer và interface validation phía server.
+- Từ vựng permission và side effect, `minClassification`, `allowsDeferToSubmit`, `outputs`.
+- Lifecycle, hủy (cancel) và xử lý kết quả cũ (stale) ở cấp capability. Spec #1 chỉ giữ các invariant INV-N4 và INV-N8.
+- Compatibility và deprecation, conformance test của plugin, ràng buộc dependency và bảo mật.
+- Plugin isolation và tree-shaking. Spec #2 định nghĩa contract, spec #3 lo phần bundling.
+
 
 
 | P0 cho phép | P0 không cho phép |
@@ -950,15 +1150,37 @@ flowchart TD
 | Backend evaluator | dựng lại đường đi active, validate, tính lại, chạy validator authoritative | tin metadata hay giá trị dẫn xuất do client gửi |
 | Admin preview | engine giống runtime, registry đầy đủ, mock lookup được gắn nhãn rõ ràng (BUILD-08) | dùng renderer hay logic riêng |
 
-## 16. Privacy và bảo mật (PROPOSED cho mức phân loại)
+## 16. Privacy và bảo mật (OD-07, ADR-021, APPROVED AS DESIGN DIRECTION; bảng mức tối thiểu PROPOSED)
 
-- **Classification:**
-  - `public` (danh mục, tình trạng sản phẩm…)
-  - `personal` (PII: tên, điện thoại, email, địa chỉ chi tiết, file upload)
-  - `secret` (OTP, token)
-- **Mặc định persistence:** `public` được lưu; `personal` không lưu ở P0 (ADR-012); `secret` không lưu, và bắt buộc `clearOnDeactivate`.
-- **Ai đặt classification** *(OD-07)*: Developer gắn mặc định cho capability và field type. Platform Admin quản lý ngoại lệ. Business Editor chỉ được **tăng** mức bảo vệ, không được giảm (ADR-012).
-- **Bảo mật:**
+**Classification:** `public` < `personal` < `secret`. Đây là một enum có thứ tự. Thêm mức mới cần ADR. P0 không có policy language.
+
+**Mức tối thiểu do platform đặt.** Editor chỉ được **tăng**, không được hạ thấp hơn mức này.
+
+| Field type / nguồn | Mức tối thiểu (P0) | Lý do |
+|---|---|---|
+| `choice.*` (option do Editor định nghĩa) | `public` | Giá trị là mã option, không phải nội dung tự do |
+| `number` | `public` | |
+| `text`, `textarea` | **`personal`** | Văn bản tự do có thể chứa PII |
+| `tel`, `email`, `postal`, `katakana` (tên), địa chỉ | `personal` | PII |
+| file upload (P1) | `personal` | |
+| OTP, token | `secret` | |
+| Field của plugin | `minClassification` trong manifest | Khai bởi developer (spec #2) |
+| `calculated`, prefill, lookup | **taint** = mức cao nhất của các input, cộng với mức tối thiểu của field đích | D-07 |
+
+- **Field mới mặc định** nhận mức tối thiểu của type đó. Không có field "chưa phân loại".
+- **Thực thi:**
+  - Analyzer báo `E-CLASS-BELOW-MIN` khi definition (kể cả JSON import) đặt mức thấp hơn tối thiểu.
+  - BE kiểm tra lại theo **IR chính thức và registry** khi submit và khi lưu.
+  - JSON của Admin không vô hiệu hóa được các chính sách này.
+  - Persistence policy (ADR-012) và submission policy do platform và BE thực thi.
+- **Ngoại lệ:** P0 không có. Muốn hạ mức tối thiểu thì developer sửa registry, tạo một version mới, qua review.
+- **PII không được rời khỏi đúng chỗ của nó:**
+  - P0 không lưu PII bền vững trong browser.
+  - IR, compiler metadata, Release Manifest và diagnostic chỉ chứa **định nghĩa**, không chứa giá trị của khách.
+  - Giá trị tĩnh (default, prefill hằng, `const` trong rule) chỉ được phép ở field `public`. Nếu không thì báo `E-STATIC-PII`.
+  - Log của evaluator chỉ ghi identity và mã lỗi, không ghi giá trị.
+  - Analytics (P1) chỉ nhận field `public`.
+- **Bảo mật chung:**
   - Không `eval` hay `new Function` (SEC-02).
   - Label và message là text thuần. Markup được escape mặc định (SEC-05, stored XSS). Rich text, nếu có, thuộc P1 và cần sanitizer.
   - Connector chỉ nằm trong allowlist phía server (ARCH-10, SEC-03).
@@ -1024,6 +1246,11 @@ sequenceDiagram
 | AC-31 | **Differential tests:** sinh definition và giá trị ngẫu nhiên có seed (tái hiện được), chạy qua hai evaluator, so sánh activity, path, lỗi và `calculated`. Mọi khác biệt đều fail. Hai evaluator cùng PASS các test đơn giản **không** được coi là bằng chứng đủ về parity. |
 | AC-32 | CI ghi lại phiên bản Unicode/ICU của Node và Python. Fixture có ký tự để phát hiện lệch phiên bản. |
 | AC-33 | Bảng T1–T3 và ví dụ E1–E10 (§8.7) chạy như test dạng bảng ở engine TS. Các phần liên quan tới submit (T1, T2, projection) chạy ở cả Python. |
+| AC-34 | Kịch bản C1–C10 (§8.7.6) chạy như test dạng bảng, kể cả response về sai thứ tự, double-click và popstate trong lúc `awaitingValidation`. Các invariant INV-N1..N8 được kiểm sau mỗi sự kiện bằng property test. |
+| AC-35 | `deferToSubmit`: success, reject (422), timeout và không khả dụng (503, không ghi bài nộp), stale, submit trùng, retry. Dùng cho validator không có cờ thì ra lỗi compile. |
+| AC-36 | Fixture `valid/` và `invalid/` của schema cho cùng kết quả (JSON Pointer + keyword) ở validator FE và BE. Drift check của type sinh ra pass. Validator FE và BE pass phần JSON-Schema-Test-Suite của danh sách keyword cho phép. |
+| AC-37 | Exports: trùng `id`, export treo, tham chiếu tới field không export, và breaking change ở export đang được dùng đều bị chặn kèm diagnostic đúng. |
+| AC-38 | Classification: `E-CLASS-BELOW-MIN` khi JSON import hạ mức. `E-STATIC-PII`. Quét IR, manifest, diagnostic và log không thấy giá trị của khách. |
 
 ## 19. Requirements được bao phủ
 
@@ -1074,26 +1301,28 @@ Cột "Thiết kế ở spec #1" là phần contract được chốt ngay bây g
 - OD-01: chọn (a), dùng evaluator TS ở FE và evaluator Python ở BE, kèm điều kiện parity (§18, AC-29..AC-33). Nếu chi phí bảo trì không chấp nhận được thì mở lại ADR **kèm evidence**. Không tự chuyển sang Node service.
 - OD-14: chọn (a), G1 chỉ được trình sau khi đủ 6 spec và có Cross-Subsystem Integration Review (§25). Spike muốn chạy được thì phải qua một gate riêng.
 
-**OD-02..OD-13: OPEN, user chưa duyệt.** Cột "Khuyến nghị" chỉ là đề xuất của Claude.
+**OD-02, OD-04, OD-07, OD-12: APPROVED AS DESIGN DIRECTION kèm điều kiện** (review #2): ADR-019, ADR-020, ADR-021, ADR-022, áp dụng ở §7.7, §7.8, §16 và §11.
+
+**OD-03, OD-05, OD-06, OD-08..OD-11, OD-13: vẫn OPEN, user chưa duyệt.** Cột "Khuyến nghị" chỉ là đề xuất của Claude.
 
 | ID | Vấn đề | Phương án | Khuyến nghị | Lý do | Trade-off | Ảnh hưởng P0 | Phụ thuộc spec | Hạn quyết |
 |---|---|---|---|---|---|---|---|---|
-| OD-02 | Nguồn sự thật của schema | (a) JSON Schema 2020-12 là chuẩn, sinh type TS từ đó. (b) Zod là gốc, export JSON Schema. | (a) | Trung lập ngôn ngữ, Python validate trực tiếp được, khớp ADR-017 | Phải chọn công cụ sinh type. Lỗi schema kém thân thiện hơn Zod. | Cấu trúc của `form-schema` | #2 (`configSchema` dùng cùng định dạng), #3 | **Trước spec #2** |
+| OD-02 ✅ *(APPROVED AS DESIGN DIRECTION)* | Nguồn sự thật của schema | (a) JSON Schema 2020-12 là chuẩn, sinh type TS từ đó. (b) Zod là gốc, export JSON Schema. | (a) | Trung lập ngôn ngữ, Python validate trực tiếp được, khớp ADR-017 | Phải chọn công cụ sinh type. Lỗi schema kém thân thiện hơn Zod. | Cấu trúc của `form-schema` | #2 (`configSchema` dùng cùng định dạng), #3 | **Trước spec #2** |
 | OD-03 | Cách biểu diễn rule | (a) Gắn điều kiện vào đích, cộng named conditions. (b) Rule ECA. | (a) | Không xung đột, không phụ thuộc thứ tự, phân tích được | UI phải ánh xạ câu "khi X thì A, B, C" thành nhiều điều kiện | Engine, analyzer, IR | #3 (IR), #4 (rule editor) | Trước spec #3 |
-| OD-04 | Đóng gói block | (a) Chỉ field trong `exports` mới tham chiếu được từ ngoài. (b) Tham chiếu được mọi field. | (a) | Nâng block chỉ phải kiểm phần export, giảm coupling | Tác giả block phải khai `exports` | Analyzer, định nghĩa block | #2 (template), #4 | Trước spec #2 |
+| OD-04 ✅ *(APPROVED AS DESIGN DIRECTION)* | Đóng gói block | (a) Chỉ field trong `exports` mới tham chiếu được từ ngoài. (b) Tham chiếu được mọi field. | (a) | Nâng block chỉ phải kiểm phần export, giảm coupling | Tác giả block phải khai `exports` | Analyzer, định nghĩa block | #2 (template), #4 | Trước spec #2 |
 | OD-05 | Field inactive có trong payload | (a) 422 nghiêm ngặt. (b) Lặng lẽ loại bỏ. | (a) | Khớp điểm 7 của Answer #6, phát hiện tamper và bug client | Bug client lộ ra thành lỗi submit | Evaluator BE | #5 | Trước spec #5 |
 | OD-06 | Step graph ở P0 | (a) Chỉ DAG. (b) Cho vòng có giới hạn. | (a) | Kiểm tra graph đơn giản và chắc chắn kết thúc (NR-10). Nhóm lặp đáp ứng nhu cầu "thêm sản phẩm". | Không hỗ trợ flow dạng lặp | Engine, analyzer | #3, #4 (flow editor) | Trước spec #3 |
-| OD-07 | Ai đặt classification | (a) Developer đặt mặc định, Platform Admin quản lý ngoại lệ, Editor chỉ được tăng. (b) Editor tự chọn. | (a) | ADR-012: Editor không được nới hạn chế PII | Editor phụ thuộc mặc định do developer đặt | Taint, persistence, permission plugin | **#2** (`acceptsClassifications`), #4, #5 | **Trước spec #2** |
+| OD-07 ✅ *(APPROVED AS DESIGN DIRECTION)* | Ai đặt classification | (a) Developer đặt mặc định, Platform Admin quản lý ngoại lệ, Editor chỉ được tăng. (b) Editor tự chọn. | (a) | ADR-012: Editor không được nới hạn chế PII | Editor phụ thuộc mặc định do developer đặt | Taint, persistence, permission plugin | **#2** (`acceptsClassifications`), #4, #5 | **Trước spec #2** |
 | OD-08 | TTL của draft khách | con số do nghiệp vụ quyết | Chưa đề xuất con số | Là quyết định nghiệp vụ và quyền riêng tư | — | Adapter draft | #5 | Tại G1 |
 | OD-09 | Thời gian revision cũ còn nhận submit | (a) Đến khi bị retire thủ công. (b) Theo TTL. | (a), với điều kiện ≥ TTL draft | Không từ chối khách đang điền dở | Phải có thao tác retire | Evaluator BE, store | #5 | Trước spec #5 |
 | OD-10 | Phép chia và toán ngày tháng trong `calculated` | (a) Hoãn sang P1 (§7.6.3). (b) Có ngay ở P0. | (a) | Cần chốt rounding và xử lý chia cho 0 trước | Một số phép tính phải đi qua plugin | Catalog toán tử | #2 (derivedFn) | Tại G1 |
 | OD-11 | Ngôn ngữ của Admin (message, diagnostic) | ja / vi / en / nhiều ngôn ngữ | Chưa khuyến nghị | Phụ thuộc người dùng Admin thực tế | — | Catalog message của Admin | #4 | Trước spec #4 |
-| OD-12 | Ngoại lệ `deferToSubmit` cho validator authoritative | (a) Cho phép, có khai báo, BE bắt buộc kiểm. (b) Không ở P0. | (a) | Tránh phải sửa contract về sau. Demo không dùng tới. | Thêm một nhánh hành vi cần test | Validator contract | **#2** | **Trước spec #2** |
+| OD-12 ✅ *(APPROVED AS DESIGN DIRECTION)* | Ngoại lệ `deferToSubmit` cho validator authoritative | (a) Cho phép, có khai báo, BE bắt buộc kiểm. (b) Không ở P0. | (a) | Tránh phải sửa contract về sau. Demo không dùng tới. | Thêm một nhánh hành vi cần test | Validator contract | **#2** | **Trước spec #2** |
 | OD-13 | Block instance trải trên nhiều step | (a) Không ở P0. (b) Có. | (a) | Hàm activity và layout đơn giản hơn | Block lớn phải tách nhỏ | Analyzer | #4 | Trước spec #4 |
 | *(G0)* | F-P0-13/16/18/19 vẫn là P0, làm sau vertical slice | — | Giữ nguyên P0 | ADR-004 | — | Lịch làm việc | #5 | Tại G1 |
 | *(G0)* | Spike đo bundle isolation | phải qua gate riêng (ADR-018) | Đề xuất cùng spec #3 | ADR-005 | — | — | #3 | Khi viết spec #3 |
 
-**Cần quyết trước khi brainstorm spec #2:** OD-02, OD-04, OD-07, OD-12.
+**Các quyết định cần có trước spec #2 (OD-02, OD-04, OD-07, OD-12) đã được user đưa ra ở review #2.** Các OD còn lại có hạn theo cột cuối.
 
 ## 22. Rủi ro và trade-off
 
@@ -1161,19 +1390,27 @@ Một subagent mới, đóng vai builder không có ngữ cảnh hội thoại, 
 
 Kết quả của review là một tài liệu riêng gồm danh sách conflict, phụ thuộc vòng và quyết định còn mở. **Chỉ sau tài liệu này mới được trình G1.**
 
-## 26. Mức độ sẵn sàng của spec #1 sau review #1
+## 26. Mức độ sẵn sàng của spec #1 (revision 3)
 
-| Phần | Trạng thái | Còn thiếu gì |
+| Phần | Trạng thái | Còn mở |
 |---|---|---|
 | Mô hình thực thể (§5) | Sẵn sàng để user duyệt | — |
 | Định danh, ledger, migration (§6, R-01..R-08) | Sẵn sàng để user duyệt | — |
-| Ngữ nghĩa dữ liệu (§7.6) | **Mới viết**, chờ user review | — |
+| Ngữ nghĩa dữ liệu (§7.6) | **Đã sửa ở rev 3:** bỏ NFC cho văn bản tự do; thêm coercion (§7.6.9) và ma trận parity (§7.6.10). Chờ user review. | — |
+| Quản lý schema (§7.7) | Hướng đi đã duyệt (ADR-019). Chờ user review cơ chế. | Công cụ sinh type: chọn ở P02 |
+| Block exports (§7.8) | Hướng đi đã duyệt (ADR-020). Chờ user review cú pháp. | — |
 | Rule AST và catalog toán tử (§7.4) | Chờ quyết định | OD-03, OD-10 |
-| Container (§7.5), block inputs | Sẵn sàng để user duyệt | OD-04, OD-13 |
-| Điều hướng (§8, NR-01..NR-11, T1–T3) | **Mới viết**, chờ user review | OD-06 |
+| Container (§7.5), block inputs | Sẵn sàng để user duyệt | OD-13 |
+| Điều hướng (§8, NR, T1–T3, C1–C10, INV-N1..N8) | **Đã bổ sung ở rev 3:** race condition và tính nguyên tử. Chờ user review. | OD-06 |
 | Derived state (§10) | Sẵn sàng để user duyệt (ADR-013 PROPOSED) | OD-10 |
-| Validation contract (§11) | Sẵn sàng để user duyệt | OD-12 |
-| Plugin contract (§12) | Chỉ mức cao. Chi tiết ở spec #2. | OD-07, OD-12 |
-| Versioning và compiler (§13, §14) | Mức khái niệm. Chi tiết ở spec #3. | OD-02 |
-| Parity FE/BE (ADR-017) | Hướng đi đã được duyệt. Test matrix chi tiết viết trong P01, trước G1. | — |
-| G1 | **NOT APPROVED** | Đủ 6 spec, review §25, user duyệt |
+| Validation contract (§11) | Ba loại validation, `deferToSubmit` (ADR-022) | — |
+| Classification (§16) | Hướng đi đã duyệt (ADR-021). Bảng mức tối thiểu PROPOSED. | — |
+| Plugin contract (§12) | Mức cao. **Nguồn sự thật chuyển sang spec #2.** | spec #2 |
+| Versioning và compiler (§13, §14) | Mức khái niệm. Chi tiết ở spec #3. | spec #3 |
+| Parity FE/BE (ADR-017) | Hướng đi đã duyệt. Ma trận kịch bản §7.6.10, AC-29..38. | Test matrix đầy đủ: viết trong P01, trước G1 |
+
+**Đề xuất:** nếu user không thấy vấn đề ở các phần mới trong rev 3 (§7.6.4/§7.6.5, §7.6.9/§7.6.10, §7.7, §7.8, §8.7.6, §11, §16), spec #1 có thể chuyển sang **READY_FOR_CROSS_REVIEW**. Trạng thái này chỉ được ghi khi user xác nhận. Claude không tự đánh dấu.
+
+**Blocking issue của spec #1:** không có mục nào chặn việc brainstorm spec #2.
+- Các OD còn mở (OD-03, OD-05, OD-06, OD-08..11, OD-13) có hạn ở spec #3–#5 hoặc G1.
+- Việc user review rev 3 là điều kiện để chuyển sang READY_FOR_CROSS_REVIEW.
