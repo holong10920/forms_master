@@ -1,7 +1,8 @@
 # Spec #3: Compiler, Bundle & Release Architecture (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.1** (2026-10-24).
-> - Rev 2.1: thêm mode `preview` của front-end compiler (§5.1) theo spec #4 §14.1. Không đổi gì khác.
+> **Trạng thái: PROPOSAL, revision 2.2** (2026-10-24).
+> - Rev 2.1: thêm mode `preview` (§5.1) theo spec #4.
+> - Rev 2.2: theo spec #4 review #1: `preview` là **tập con phân tích an toàn cho browser**, không có node hoàn tất tổng hợp (dùng `PREVIEW_ONLY_UNCONFIGURED_PATH`); thêm mode **`preflight`** phía server, authoritative (§5.1).
 > - Review #1 (rev 1): **CONDITIONALLY ACCEPTED FOR TECHNICAL VERIFICATION**; OD3-01 → ADR-041, OD3-02 → ADR-042 (SPIKE-GATE-01).
 > - Rev 2 cập nhật theo **evidence của SPIKE-GATE-01** ([báo cáo](../../discovery/P01_SPIKE_GATE_01_REPORT.md), `docs/evidence/P01/spike-gate-01/`) và thêm pipeline consistency review (§5.4, §5.5). Thay đổi so với rev 1: §27.
 > - Hướng đi đã duyệt: ADR-036..040 (spec #3 Answer #1..#5). Cơ chế trong tài liệu này **PROPOSED**.
@@ -147,7 +148,8 @@ Spec #5 tạo Build Request khi một revision được duyệt publish. Mọi t
 ```
 
 - `mode`: `release` (trusted) · `rebuild-verify` · `dev` (không trusted, cho phát triển) · *(rev 2.1)* `preview`.
-- **`preview`** (spec #4 §14.1): chỉ chạy **K1–K6** trong Admin (trình duyệt) bằng cùng package TS; input là draft + block revision đã pin + catalog/ledger snapshot do Admin tải (spec #5). Khác `release`: (1) chỉ dừng ở diagnostic có `gate: preview`; lỗi chỉ chặn review không chặn sinh IR; (2) transition `default` còn trống được lower thành cạnh tới step hoàn tất tổng hợp `__preview_end__`, **chỉ** có trong IR preview. Không K7–K14, không artifact, không trusted. Server tự sinh lại IR preview từ snapshot khi chạy Submission Simulation, không tin IR của Admin.
+- **`preview`** (spec #4 §14.1; rev 2.2): **không** phải cả pipeline. Admin chỉ chạy **tập con thuần, tất định, an toàn cho browser**: kiểm cấu trúc (K1), version gate (K2), kiểm tra resolve **chỉ đọc** trên catalog snapshot (K3, không đọc store), expand/lower (K4), phân tích ngữ nghĩa (K5), sinh IR (K6) — bằng **cùng package TS và cùng version** với server. Package này không phụ thuộc code server-only, không I/O, không nạp plugin source. Input do Admin tải qua API (draft, block revision đã pin, catalog/ledger snapshot). Khác `release`: chỉ dừng ở diagnostic `gate: preview`; đích transition còn trống được lower thành node **`PREVIEW_ONLY_UNCONFIGURED_PATH`** (spec #1 §8.1: điểm dừng bị chặn, **không** phải hoàn tất). Không K7–K14, không artifact, **không authoritative**.
+- **`preflight`** (rev 2.2): K0–K6 chạy **phía server** (build worker), cùng package, input theo digest; là kết quả **authoritative** cho mức Review-ready, cho Submission Simulation (IR do server sinh, không tin IR của Admin) và trước publish. IR preflight không bao giờ chứa `PREVIEW_ONLY_UNCONFIGURED_PATH` (`E-IR-PREVIEW-NODE`). Kết quả gồm version analyzer, `inputIds` (`draftVersion`, `catalogSnapshotId`, `ledgerSnapshotId`, `runtimeOverrideSnapshotId`) và digest **chỉ** của diagnostic K1–K6 để Admin phát hiện lệch (spec #4 §14.3); kết quả kiểm của spec #5 (ledger hiện tại, support matrix) trả riêng, ngoài digest.
 - `previousDataContract` vắng khi là revision đầu.
 - `bootstrap` và `releaseHtmlTemplate` (template `index.html` + CSS shell) là **platform asset** do trusted pipeline phát hành vào release store, được pin bằng digest như plugin (§14.1).
 - `ledgerSnapshotId` và `runtimeOverrideSnapshotId` cho K3 một snapshot cố định của trạng thái plugin, nên K3 là hàm thuần. Spec #5 kiểm lại trạng thái **hiện tại** trước activation.

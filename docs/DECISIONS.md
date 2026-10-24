@@ -64,6 +64,11 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-045 | Toolchain Node.js: Node 20 đã EOL; chỉ giữ để tái hiện spike; P02 đánh giá Node 24 LTS | **ACCEPTED** (spike review); version cụ thể chốt ở P02 | User (spike review) | 2026-10-24 |
 | ADR-046 | Spec #4: Business-first Visual Form Builder, Developer-extensible Architecture; persona và hành trình ngày đầu; tiêu chí thành công A/B; nguyên tắc UX | **APPROVED AS PRODUCT DIRECTION** (spec #4 Answer #1); IA, mô hình UI, chỉ số PROPOSED | User (spec #4 Answer #1) | 2026-10-24 |
 | ADR-047 | Spec #4: Hybrid Workspace (Outline · Canvas · Inspector; 作成/フロー/プレビュー/設定), P0 giới hạn; tách 5 loại state; single selection; typed command; ba mức draft; autosave + optimistic locking | **APPROVED AS PRODUCT/UX DESIGN DIRECTION** (spec #4 Answer #2); cơ chế PROPOSED (spec #4) | User (spec #4 Answer #2) | 2026-10-24 |
+| ADR-048 | OD4-01: Admin P0 dùng tiếng Nhật qua message catalog | **APPROVED** (spec #4 review #1) | User (spec #4 review #1) | 2026-10-24 |
+| ADR-049 | OD4-02: điều kiện gắn với đích (transition first-match có thứ tự + `それ以外`) và named condition có ID ổn định; cho phép đóng OD-03 sau khi mapping nhất quán | **APPROVED WITH CONDITIONS** (spec #4 review #1) | User (spec #4 review #1) | 2026-10-24 |
+| ADR-050 | OD4-03: được sửa draft khi review đang chờ; review luôn trên snapshot bất biến; stale-review detection | **APPROVED** (spec #4 review #1) | User (spec #4 review #1) | 2026-10-24 |
+| ADR-051 | OD4-04: P0 shared block chỉ chèn/xem/pin/nâng version tường minh có preview impact; sửa block ở P1 | **APPROVED** (spec #4 review #1) | User (spec #4 review #1) | 2026-10-24 |
+| ADR-052 | OD4-05: optimistic concurrency, không merge tự động; giữ thay đổi local, xem bản server và khác biệt, áp lại thủ công | **APPROVED** (spec #4 review #1) | User (spec #4 review #1) | 2026-10-24 |
 
 ---
 
@@ -988,3 +993,31 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
   - **UX acceptance:** task-based test 9 task với persona không biết code; KPI đề xuất chưa phải acceptance; không tuyên bố usability PASS chỉ từ developer tự test.
 - **Trạng thái:** APPROVED AS PRODUCT/UX DESIGN DIRECTION. Cơ chế PROPOSED ở spec #4. G1 NOT APPROVED.
 - **Người duyệt:** User (spec #4 Answer #2). **Ngày:** 2026-10-24.
+
+## ADR-048 — Ngôn ngữ Admin P0 (OD4-01)
+
+- **Quyết định (user): APPROVED.** P0 Admin dùng tiếng Nhật. Mọi nhãn, lỗi, trạng thái, help text hướng tới người nghiệp vụ đi qua **message catalog tiếng Nhật**; không hardcode chuỗi trong business logic; mở đường thêm ngôn ngữ sau. Identifier kỹ thuật và diagnostic nội bộ không nhất thiết dịch.
+- Đóng spec #1 OD-11 cho P0.
+- **Người duyệt:** User (spec #4 review #1). **Ngày:** 2026-10-24.
+
+## ADR-049 — Biểu diễn điều kiện (OD4-02; spec #1 OD-03)
+
+- **Quyết định (user): APPROVED WITH CONDITIONS.** Điều kiện gắn với đích (transition destination; field visible/required), có named condition.
+- **Bắt buộc làm rõ:** ưu tiên khi nhiều điều kiện cùng đúng; first-match hay loại trừ lẫn nhau; `それ以外`; ngữ nghĩa missing/null/empty/type theo spec #1; named condition dùng ID ổn định, phát hiện tham chiếu vòng; diagnostic khi xung đột, nhánh không tới được, transition chưa đủ; mapping chuẩn từ Visual Rule Editor sang typed DSL.
+- Được phép đóng spec #1 OD-03 **sau khi** hoàn tất mapping nhất quán và xác minh không có mâu thuẫn ngữ nghĩa (thực hiện ở spec #4 rev 2 §11, spec #1 rev 3.4).
+- **Người duyệt:** User (spec #4 review #1). **Ngày:** 2026-10-24.
+
+## ADR-050 — Review trên snapshot bất biến (OD4-03)
+
+- **Quyết định (user): APPROVED.** Editor được tiếp tục sửa draft khi review đang chờ, nhưng: review request luôn tham chiếu **snapshot bất biến** đã gửi; Reviewer không review draft đang đổi; sửa sau khi gửi không đổi nội dung đang review; publish dùng **snapshot đã approve** và chạy lại preflight/compatibility gate cần thiết; nếu active revision hoặc dependency đổi trong lúc review thì phải **phát hiện review cũ (stale)**; không ngầm approve draft mới hơn snapshot đã xem; P0 không cần multi-review nâng cao.
+- **Người duyệt:** User (spec #4 review #1). **Ngày:** 2026-10-24.
+
+## ADR-051 — Shared block trong Builder P0 (OD4-04)
+
+- **Quyết định (user): APPROVED.** P0: chèn shared block đã approve; xem cấu hình/dependency; pin revision bất biến; nâng sang revision khác một cách tường minh; xem trước impact trước khi nâng; **không** sửa nội dung gốc của shared block trong Builder P0; không tự nâng các form khác. Soạn/sửa shared block chuyển sang P1.
+- **Người duyệt:** User (spec #4 review #1). **Ngày:** 2026-10-24.
+
+## ADR-052 — Xung đột khi lưu (OD4-05)
+
+- **Quyết định (user): APPROVED.** P0 dùng optimistic concurrency, không merge tự động. Khi xung đột: giữ thay đổi chưa lưu; hiện bản server mới hơn; cho xem khác biệt theo step/field/rule; hướng dẫn áp lại thủ công; không ghi đè ngầm; không báo 保存済み khi server chưa xác nhận; không CRDT hay collaboration real-time.
+- **Người duyệt:** User (spec #4 review #1). **Ngày:** 2026-10-24.

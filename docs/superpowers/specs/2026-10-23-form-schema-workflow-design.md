@@ -1,6 +1,7 @@
 # Spec #1: Form Definition Schema & Workflow DSL (Architecture Proposal)
 
-> **Trạng thái: PROPOSAL, revision 3.3** (2026-10-24).
+> **Trạng thái: PROPOSAL, revision 3.4** (2026-10-24).
+> - Rev 3.4: theo spec #4 review #1 (ADR-048, ADR-049): named condition tham chiếu bằng `conditionId` ổn định (§7.1, §7.3, §7.4); đóng OD-03 và OD-11 (§21); node `PREVIEW_ONLY_UNCONFIGURED_PATH` chỉ có trong IR preview (§8.1); `draftVersion` là metadata do server quản lý (§7.1). Chưa có review mới của user cho spec #1.
 > - Rev 3.3: thêm trạng thái chờ capability lazy (`awaitingCapability`, C11, INV-N9) theo spec #3 §15.1 (ADR-040); sửa C7 cho khớp ADR-037 (không xóa draft ngầm, đề xuất Resume đúng release). Chưa có review mới của user cho spec #1.
 > - Rev 3.2: chỉ **đồng bộ draft recovery với ADR-037** (spec #3 Answer #2): draft và session pin `releaseId`; §9 `session`, §13. Chưa có review mới của user cho spec #1.
 > - Rev 3.1: chỉ **đồng bộ contract plugin với spec #2 rev 2** (theo yêu cầu của spec #2 review #1). Không đổi ngữ nghĩa DSL ngoài các mục liệt kê ở spec #2 §19 (Cross-Spec Interface Matrix). Chưa có review mới của user cho spec #1.
@@ -253,7 +254,7 @@ stateDiagram-v2
 |---|---|
 | `schemaVersion` | semver của định dạng DSL, ví dụ `1.0.0` |
 | `formId`, `siteId` | định danh ổn định |
-| `revision` / `draftVersion` | revision cho bản publish, `draftVersion` cho draft |
+| `revision` / `draftVersion` | revision cho bản publish, `draftVersion` cho draft. *(Rev 3.4)* Cả hai là **metadata do server quản lý** (envelope, spec #4 §15, spec #5), không phải nội dung mà typed command của Admin sửa. |
 | `locale` | `{ default: "ja", supported: ["ja"] }` |
 | `themeRef` | tham chiếu theme đã pin. Theme thuộc spec #4/#6. |
 | `motion` | cấu hình preset. Thuộc spec #6, spec #1 chỉ giữ chỗ. |
@@ -263,7 +264,7 @@ stateDiagram-v2
 | `exports` (chỉ có ở block) | public contract của block (§7.8, OD-04) |
 | `fields` | field local của form. Field plugin: `type: "plugin:<alias>"`, `config` theo `configSchema`, `inputs` map port (spec #2 §6.6). Validator: `validators: [{ use: alias, params? }]`, `params` mặc định `{}`. |
 | `sections` | `{ id, title, visibleWhen?, content }`, là container hiển thị bên trong step. Xem §7.5. |
-| `conditions` | **named conditions**, dùng lại được trong rule editor |
+| `conditions` | **named conditions**, dùng lại được trong rule editor. *(Rev 3.4, ADR-049)* Map `conditionId → { label, when }`: `conditionId` do platform sinh, ổn định, không dùng lại; `label` (tiếng Nhật) đổi tự do. Tham chiếu luôn bằng `conditionId`. |
 | `steps` | gồm `kind`: `form` / `review` / `complete`, `content`, và `transitions` có thứ tự |
 | `dataPolicy` | mặc định về classification và persistence. Business Editor chỉ được *tăng* mức bảo vệ (§16). |
 
@@ -347,7 +348,7 @@ stateDiagram-v2
     { "id": "fld_battery", "key": "batteryHealth", "type": "choice.select",
       "label": { "ja": "バッテリー状態" }, "classification": "public",
       "visibleWhen": { "op": "in", "args": [{ "ref": "$local:fld_device" }, { "const": ["laptop", "tablet"] }] },
-      "requiredWhen": { "cond": "isPortable" },
+      "requiredWhen": { "cond": "cnd_portable" },
       "options": [{ "value": "good", "label": { "ja": "良好" } }, { "value": "poor", "label": { "ja": "劣化あり" } }] },
     { "id": "fld_defects", "key": "defects", "type": "choice.checkboxes", "label": { "ja": "不具合" },
       "classification": "public",
@@ -367,8 +368,10 @@ stateDiagram-v2
       "formula": { "op": "count", "args": [{ "ref": "$local:fld_defects" }] } }
   ],
   "conditions": {
-    "isPortable": { "op": "in", "args": [{ "ref": "$local:fld_device" }, { "const": ["laptop", "tablet"] }] },
-    "isStore": { "op": "eq", "args": [{ "ref": "$local:fld_method" }, { "const": "store" }] }
+    "cnd_portable": { "label": { "ja": "持ち運べる機種の場合" },
+      "when": { "op": "in", "args": [{ "ref": "$local:fld_device" }, { "const": ["laptop", "tablet"] }] } },
+    "cnd_store": { "label": { "ja": "店頭買取の場合" },
+      "when": { "op": "eq", "args": [{ "ref": "$local:fld_method" }, { "const": "store" }] } }
   },
   "steps": [
     { "id": "stp_category", "kind": "form", "title": { "ja": "機種カテゴリ" },
@@ -380,7 +383,7 @@ stateDiagram-v2
       "transitions": [{ "default": "stp_method" }] },
     { "id": "stp_method", "kind": "form", "title": { "ja": "買取方法" },
       "content": [{ "field": "$local:fld_method" }],
-      "transitions": [{ "when": { "cond": "isStore" }, "to": "stp_store" },
+      "transitions": [{ "when": { "cond": "cnd_store" }, "to": "stp_store" },
                       { "default": "stp_takuhai" }] },
     { "id": "stp_store", "kind": "form", "content": [{ "field": "$local:fld_store" }],
       "transitions": [{ "default": "stp_customer" }] },
@@ -389,7 +392,7 @@ stateDiagram-v2
     { "id": "stp_customer", "kind": "form", "content": [{ "block": "inst_customer" }],
       "transitions": [{ "default": "stp_review" }] },
     { "id": "stp_review", "kind": "review",
-      "transitions": [{ "when": { "cond": "isStore" }, "to": "stp_done_store" },
+      "transitions": [{ "when": { "cond": "cnd_store" }, "to": "stp_done_store" },
                       { "default": "stp_done_takuhai" }] },
     { "id": "stp_done_store", "kind": "complete", "title": { "ja": "ご来店予約完了" } },
     { "id": "stp_done_takuhai", "kind": "complete", "title": { "ja": "宅配キット申込完了" } }
@@ -409,12 +412,12 @@ stateDiagram-v2
 - **Lá:**
   - `{ "ref": identity }`
   - `{ "const": value }`
-  - `{ "cond": name }`, tham chiếu một named condition
+  - `{ "cond": conditionId }`, tham chiếu một named condition bằng **ID ổn định** (rev 3.4; trước đây ghi là `name`). Named condition là node trong dependency graph (D-04); vòng giữa các named condition → lỗi compile `E-COND-CYCLE`, hiển thị đường vòng theo label.
   - `{ "input": name }`, tham số của block instance
   - `{ "item": fieldDefId }`, viết tắt của `$item:`
 - Business Editor không bao giờ thấy AST. Rule editor trực quan sinh ra nó.
 
-**Gắn điều kiện vào đích** *(PROPOSED, OD-03)*:
+**Gắn điều kiện vào đích** *(ADR-049; OD-03 đóng ở rev 3.4)*:
 - Mỗi thuộc tính có đúng một điều kiện: `visibleWhen`, `requiredWhen`, option `availableWhen`, transition `when`, và `skipWhen` (dạng viết tắt, xem §8.1).
 - Ưu điểm so với rule kiểu sự kiện–điều kiện–hành động (ECA): không có xung đột "hai rule cùng đặt visible", không phụ thuộc thứ tự, và phân tích được.
 - Nhu cầu "khi X thì hiện A, B, C" được Admin UI đáp ứng bằng cách gán cùng một named condition cho A, B và C.
@@ -693,6 +696,7 @@ Mỗi nhóm có **golden fixture** (đầu vào và kết quả kỳ vọng) cù
 
 - **Loại step:** `form`, `review` (確認, nơi chạy submit) và `complete` (terminal). Mỗi nhánh có thể có `complete` riêng.
 - **Transition** là danh sách có thứ tự gồm `when → to`. **Điều kiện đầu tiên khớp sẽ thắng**, và bắt buộc có `default`, nên việc chọn nhánh luôn tất định.
+- *(Rev 3.4, spec #4 §14)* **Node `PREVIEW_ONLY_UNCONFIGURED_PATH`**: chỉ tồn tại trong IR sinh ở mode `preview` (spec #3 §5.1), thay cho `default`/đích còn trống của draft. Ngữ nghĩa: điểm dừng **bị chặn**, không phải `complete` — không submit, không màn hoàn tất, không đi tiếp. IR release/preflight chứa node này → lỗi (`E-IR-PREVIEW-NODE`); backend từ chối.
 - **P0 chỉ cho phép DAG** *(OD-06)*. Nhu cầu "thêm sản phẩm" dùng nhóm lặp, không dùng vòng lặp graph.
 - Tùy chọn "bỏ qua step khi…" trong Admin (`skipWhen`) chỉ là dạng viết tắt. *[Claude]* Ở P0, `skipWhen` **chỉ dùng được cho step mà transition duy nhất là `default`**, và điều kiện skip **không được tham chiếu field của chính step đó**. Vi phạm một trong hai điều này là lỗi compile.
   - Lowering: mọi cạnh `X → S` được thay bằng `[when skip(S) → default(S)], [else → S]`.
@@ -1330,12 +1334,12 @@ Cột "Thiết kế ở spec #1" là phần contract được chốt ngay bây g
 
 **OD-02, OD-04, OD-07, OD-12: APPROVED AS DESIGN DIRECTION kèm điều kiện** (review #2): ADR-019, ADR-020, ADR-021, ADR-022, áp dụng ở §7.7, §7.8, §16 và §11.
 
-**OD-03, OD-05, OD-06, OD-08..OD-11, OD-13: vẫn OPEN, user chưa duyệt.** Cột "Khuyến nghị" chỉ là đề xuất của Claude.
+**OD-05, OD-06, OD-08..OD-10, OD-13: vẫn OPEN, user chưa duyệt.** OD-03 đóng theo ADR-049 sau khi spec #4 rev 2 §11 hoàn tất mapping nhất quán; OD-11 đóng cho P0 theo ADR-048. Cột "Khuyến nghị" chỉ là đề xuất của Claude.
 
 | ID | Vấn đề | Phương án | Khuyến nghị | Lý do | Trade-off | Ảnh hưởng P0 | Phụ thuộc spec | Hạn quyết |
 |---|---|---|---|---|---|---|---|---|
 | OD-02 ✅ *(APPROVED AS DESIGN DIRECTION)* | Nguồn sự thật của schema | (a) JSON Schema 2020-12 là chuẩn, sinh type TS từ đó. (b) Zod là gốc, export JSON Schema. | (a) | Trung lập ngôn ngữ, Python validate trực tiếp được, khớp ADR-017 | Phải chọn công cụ sinh type. Lỗi schema kém thân thiện hơn Zod. | Cấu trúc của `form-schema` | #2 (`configSchema` dùng cùng định dạng), #3 | **Trước spec #2** |
-| OD-03 | Cách biểu diễn rule | (a) Gắn điều kiện vào đích, cộng named conditions. (b) Rule ECA. | (a) | Không xung đột, không phụ thuộc thứ tự, phân tích được | UI phải ánh xạ câu "khi X thì A, B, C" thành nhiều điều kiện | Engine, analyzer, IR | #3 (IR), #4 (rule editor) | Trước spec #3 |
+| OD-03 ✅ *(đóng — ADR-049, rev 3.4)* | Cách biểu diễn rule | (a) Gắn điều kiện vào đích, cộng named conditions. (b) Rule ECA. | (a) | Không xung đột, không phụ thuộc thứ tự, phân tích được | UI phải ánh xạ câu "khi X thì A, B, C" thành nhiều điều kiện | Engine, analyzer, IR | #3 (IR), #4 (rule editor) | Trước spec #3 |
 | OD-04 ✅ *(APPROVED AS DESIGN DIRECTION)* | Đóng gói block | (a) Chỉ field trong `exports` mới tham chiếu được từ ngoài. (b) Tham chiếu được mọi field. | (a) | Nâng block chỉ phải kiểm phần export, giảm coupling | Tác giả block phải khai `exports` | Analyzer, định nghĩa block | #2 (template), #4 | Trước spec #2 |
 | OD-05 | Field inactive có trong payload | (a) 422 nghiêm ngặt. (b) Lặng lẽ loại bỏ. | (a) | Khớp điểm 7 của Answer #6, phát hiện tamper và bug client | Bug client lộ ra thành lỗi submit | Evaluator BE | #5 | Trước spec #5 |
 | OD-06 | Step graph ở P0 | (a) Chỉ DAG. (b) Cho vòng có giới hạn. | (a) | Kiểm tra graph đơn giản và chắc chắn kết thúc (NR-10). Nhóm lặp đáp ứng nhu cầu "thêm sản phẩm". | Không hỗ trợ flow dạng lặp | Engine, analyzer | #3, #4 (flow editor) | Trước spec #3 |
@@ -1343,7 +1347,7 @@ Cột "Thiết kế ở spec #1" là phần contract được chốt ngay bây g
 | OD-08 | TTL của draft khách | con số do nghiệp vụ quyết | Chưa đề xuất con số | Là quyết định nghiệp vụ và quyền riêng tư | — | Adapter draft | #5 | Tại G1 |
 | OD-09 | Thời gian revision cũ còn nhận submit | (a) Đến khi bị retire thủ công. (b) Theo TTL. | (a), với điều kiện ≥ TTL draft | Không từ chối khách đang điền dở | Phải có thao tác retire | Evaluator BE, store | #5 | Trước spec #5 |
 | OD-10 | Phép chia và toán ngày tháng trong `calculated` | (a) Hoãn sang P1 (§7.6.3). (b) Có ngay ở P0. | (a) | Cần chốt rounding và xử lý chia cho 0 trước | Một số phép tính phải đi qua plugin | Catalog toán tử | #2 (derivedFn) | Tại G1 |
-| OD-11 | Ngôn ngữ của Admin (message, diagnostic) | ja / vi / en / nhiều ngôn ngữ | Chưa khuyến nghị | Phụ thuộc người dùng Admin thực tế | — | Catalog message của Admin | #4 | Trước spec #4 |
+| OD-11 ✅ *(đóng cho P0 — ADR-048: tiếng Nhật qua message catalog)* | Ngôn ngữ của Admin (message, diagnostic) | ja / vi / en / nhiều ngôn ngữ | Chưa khuyến nghị | Phụ thuộc người dùng Admin thực tế | — | Catalog message của Admin | #4 | Trước spec #4 |
 | OD-12 ✅ *(APPROVED AS DESIGN DIRECTION)* | Ngoại lệ `deferToSubmit` cho validator authoritative | (a) Cho phép, có khai báo, BE bắt buộc kiểm. (b) Không ở P0. | (a) | Tránh phải sửa contract về sau. Demo không dùng tới. | Thêm một nhánh hành vi cần test | Validator contract | **#2** | **Trước spec #2** |
 | OD-13 | Block instance trải trên nhiều step | (a) Không ở P0. (b) Có. | (a) | Hàm activity và layout đơn giản hơn | Block lớn phải tách nhỏ | Analyzer | #4 | Trước spec #4 |
 | *(G0)* | F-P0-13/16/18/19 vẫn là P0, làm sau vertical slice | — | Giữ nguyên P0 | ADR-004 | — | Lịch làm việc | #5 | Tại G1 |
@@ -1426,7 +1430,7 @@ Kết quả của review là một tài liệu riêng gồm danh sách conflict,
 | Ngữ nghĩa dữ liệu (§7.6) | **Đã sửa ở rev 3:** bỏ NFC cho văn bản tự do; thêm coercion (§7.6.9) và ma trận parity (§7.6.10). Chờ user review. | — |
 | Quản lý schema (§7.7) | Hướng đi đã duyệt (ADR-019). Chờ user review cơ chế. | Công cụ sinh type: chọn ở P02 |
 | Block exports (§7.8) | Hướng đi đã duyệt (ADR-020). Chờ user review cú pháp. | — |
-| Rule AST và catalog toán tử (§7.4) | Chờ quyết định | OD-03, OD-10 |
+| Rule AST và catalog toán tử (§7.4) | Chờ quyết định | OD-10 (OD-03 đóng, ADR-049) |
 | Container (§7.5), block inputs | Sẵn sàng để user duyệt | OD-13 |
 | Điều hướng (§8, NR, T1–T3, C1–C10, INV-N1..N8) | **Đã bổ sung ở rev 3:** race condition và tính nguyên tử. Chờ user review. | OD-06 |
 | Derived state (§10) | Sẵn sàng để user duyệt (ADR-013 PROPOSED) | OD-10 |
@@ -1439,5 +1443,5 @@ Kết quả của review là một tài liệu riêng gồm danh sách conflict,
 **Đề xuất:** nếu user không thấy vấn đề ở các phần mới trong rev 3 (§7.6.4/§7.6.5, §7.6.9/§7.6.10, §7.7, §7.8, §8.7.6, §11, §16), spec #1 có thể chuyển sang **READY_FOR_CROSS_REVIEW**. Trạng thái này chỉ được ghi khi user xác nhận. Claude không tự đánh dấu.
 
 **Blocking issue của spec #1:** không có mục nào chặn việc brainstorm spec #2.
-- Các OD còn mở (OD-03, OD-05, OD-06, OD-08..11, OD-13) có hạn ở spec #3–#5 hoặc G1.
+- Các OD còn mở (OD-05, OD-06, OD-08..10, OD-13; OD-03 và OD-11 đã đóng ở rev 3.4) có hạn ở spec #3–#5 hoặc G1.
 - Việc user review rev 3 là điều kiện để chuyển sang READY_FOR_CROSS_REVIEW.
