@@ -792,7 +792,7 @@ Các kiểm tra graph khác (đều chặn publish):
 
 1. Validate toàn bộ field active trên đường đi.
 2. Build payload chỉ gồm giá trị active và `include`, theo key của Data Contract.
-3. Gửi `{ formId, revision, schemaVersion, values, idempotencyKey }`. Chi tiết idempotency thuộc spec #5.
+3. Gửi `{ formId, releaseId, revision, schemaVersion, values, idempotencyKey }` (thêm `releaseId` theo spec #5 rev 1 §10.2; backend chỉ dùng `formId`/`revision` để so khớp với release record). Chi tiết idempotency thuộc spec #5.
 4. **Backend:**
    - Tải IR của đúng revision từ registry chính thức. Revision không tồn tại hoặc không còn được hỗ trợ thì từ chối.
    - Dựng lại đường đi active bằng cùng hàm activity.

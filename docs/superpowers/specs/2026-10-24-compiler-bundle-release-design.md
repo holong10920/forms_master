@@ -787,6 +787,7 @@ Ràng buộc (chưa có con số; chờ OD-08, OD2-09):
 | Tạm thời không khả dụng | `E-CAPABILITY-UNAVAILABLE` | 503 + `Retry-After` | có |
 | Retired | `E-RELEASE-RETIRED` | 410 | không |
 | Security suspended | `E-RELEASE-SUSPENDED`, `E-CAPABILITY-BLOCKED` | 423 | không |
+| Form tạm ngừng (spec #5 §9.1, M4/M5) | `E-FORM-SUBMISSION-PAUSED`, `E-FORM-SUSPENDED` | 423 | không |
 | Validation | (spec #1 V-08) | 422 | không |
 | Idempotency key dùng lại với payload khác | `E-IDEMPOTENCY-KEY-REUSED` | 409 | không |
 

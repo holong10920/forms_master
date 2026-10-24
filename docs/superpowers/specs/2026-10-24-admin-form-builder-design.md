@@ -1,6 +1,7 @@
 # Spec #4: Admin Form Builder — UX & Architecture (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.1** (2026-10-24) — đề xuất **READY_FOR_CROSS_SPEC_REVIEW** (§31).
+> **Trạng thái: PROPOSAL, revision 2.2** (2026-10-24) — **READY_FOR_CROSS_SPEC_REVIEW** (điều kiện của ADR-055 đã thực hiện: targeted review §27a); OD4-07 cần quyết trước plan (§23).
+> - Rev 2.2: sửa theo targeted independent review của Preview isolation (§27a): §14.7 viết lại (site khác nhau kể cả local, header, handshake `preview.hello`, `targetOrigin` chính xác, vòng đời và cách truyền preview session); §9 D5/D7 trung thực hơn; OD4-07 mới (design binding trong origin Admin); test 4Z10–4Z15. Spec #2 rev 2.8.
 > - Review rev 2: **CONDITIONALLY ACCEPTED — targeted corrections only**. Refinement của ADR-047 được duyệt; OD4-06 → ADR-053 (Preview cô lập trên origin riêng). Rev 2.1 chỉ sửa có trọng tâm: §14.1 (mức sẵn sàng), §14.7 (mới, cô lập Preview), §8.2 (khôi phục trùng key), §14.3, §19, §21, §23. Thay đổi: §30.
 > - Review #1 (rev 1): **SPEC4_REV1_CHANGES_REQUIRED**; OD4-01..05 → ADR-048..052. Rev 2 sửa BLOCKER A (Design Canvas), BLOCKER B (Preview), cùng các điểm còn lại. Thay đổi so với rev 1: §30.
 > - Hướng đi đã duyệt: ADR-046, ADR-047 (kèm refinement), ADR-048..053. Cơ chế trong tài liệu này **PROPOSED** (danh sách giả định §28).
@@ -64,7 +65,7 @@ Hiện nay mọi thay đổi field hay flow đều cần developer. Spec #4 đ�
 - JSON/DSL/regex/expression lộ ra cho Business Editor.
 - Nhiều panel tự sửa document.
 - Canvas mount component hành vi của plugin; coi `inert`, `pointer-events` hay CSS là ranh giới an toàn.
-- Chạy code hành vi của plugin trong cùng document hoặc cùng execution context với Admin đã xác thực (ADR-053), kể cả như phương án dự phòng.
+- Chạy component hành vi của plugin cho khách (`Component`, engine, connector) trong cùng document hoặc cùng execution context với Admin đã xác thực (ADR-053), kể cả như phương án dự phòng. Code plugin còn lại trong origin Admin (`presentation`, design binding) là rủi ro được nêu rõ và quyết ở OD4-07, không bị coi là đã cô lập.
 - Preview "đi tới" màn hoàn tất không có thật; Partial Preview được coi là bằng chứng form hợp lệ.
 - Báo 保存済み / 公開しました khi server chưa xác nhận.
 - Ngầm đổi version plugin, ngầm bỏ hay sửa tính năng chỉ đọc.
@@ -274,7 +275,7 @@ Admin
 ```mermaid
 flowchart LR
   DOC["Document (draft)"] --> DA["Design-time Adapter<br/>dựng props hiển thị từ document<br/>+ dữ liệu mẫu (previewFixtures)"]
-  DA --> PR["Presentational Renderer<br/>core: component hiển thị thuần<br/>plugin: export Presentation (spec #2 rev 2.6)"]
+  DA --> PR["Presentational Renderer<br/>core: component hiển thị thuần<br/>plugin: export Presentation (spec #2 rev 2.6–2.8)"]
   PR --> SL["Selection Layer<br/>khung chọn có thể focus,<br/>nhận click / bàn phím"]
   SL -->|select(target)| SEL["Selection store"]
   SL -->|＋ / di chuyển| CMD["Typed command"]
@@ -295,12 +296,12 @@ flowchart LR
 | # | Lớp | Bắt được |
 |---|---|---|
 | D1 | Contract: canvas chỉ mount `Presentation`/component hiển thị core | component hành vi chạy effect lúc mount |
-| D2 | Conformance của registry: `Presentation` mount dưới spy (`fetch`, `XMLHttpRequest`, `WebSocket`, `sendBeacon`, timer, storage, indexedDB) → **0 lời gọi**; negative fixture phải làm test fail đúng lý do | `Presentation` vi phạm |
+| D2 | Conformance của registry: `Presentation` (và design binding) import + mount dưới spy (danh sách mở rộng, spec #2 rev 2.8 §17.2) → **0 lời gọi**; negative fixture phải làm test fail đúng lý do | `Presentation` vi phạm trong harness (phát hiện, không chứng minh) |
 | D3 | Static boundary của spec #2 (L3): browser facet không dùng API mạng trực tiếp | gọi mạng trong code plugin |
 | D4 | Không có context runtime trong cây canvas: hook cần engine/connector sẽ ném lỗi → khung hiện thẻ lỗi hiển thị, không crash Builder | code cố dùng runtime |
-| D5 | CSP của Admin: `connect-src` chỉ origin API của Admin; `frame-src` chỉ origin preview; Admin API yêu cầu xác thực và chống CSRF (spec #5) | lời gọi mạng lọt qua D1–D4 |
-| D7 | Admin build chỉ chứa design facet + entry `presentation` của plugin; code hành vi (`Component`) không có trong origin Admin (spec #2 rev 2.7 §10.1) | code hành vi bị import/evaluate trong Admin |
+| D5 | Header của Admin (§14.7): CSP đầy đủ (`script-src 'self'`, `connect-src` chỉ Admin API, `frame-src` chỉ preview, `object-src`/`base-uri` `'none'`, `frame-ancestors 'none'`), CORP, `Referrer-Policy` | lời gọi tới đích **ngoài** Admin API; chèn script ngoài. **Không** chặn được code trong origin Admin gọi Admin API (cùng origin, đọc được CSRF token) — xem OD4-07 |
 | D6 | Test E2E âm (TM-4C01..C04, §19) chạy Builder thật, không click gì, quan sát request và storage | hồi quy của cả hệ |
+| D7 | Admin build tuân INV-A1 (spec #2 rev 2.8 §11.1): không `Component`, không code runtime; L1b + L5 với canary trong module `Component` (4Z10) | code hành vi bị import/evaluate trong Admin |
 
 ## 10. Properties Inspector
 
@@ -597,69 +598,84 @@ Ví dụ: draft có thể đồng thời 「保存済み」, 「一部プレビ�
 - Document đổi sau khi vào preview → banner 「下書きが変更されました。[最新の内容で再読み込み]」; preview không ghi ngược Document.
 - Draft khách trong preview không lưu bền vững; không PII thật.
 
-### 14.7. Cô lập Interactive Preview (ADR-053)
+### 14.7. Cô lập Interactive Preview (ADR-053; sửa ở rev 2.2 theo targeted review)
 
 ```mermaid
 flowchart LR
-  subgraph AO["Origin Admin (đã xác thực)"]
-    ADM["Admin app<br/>Canvas = Presentation thuần"]
-    API["Admin API<br/>cookie __Host-, SameSite=Strict, CSRF"]
+  subgraph AO["Site/origin Admin (đã xác thực)"]
+    ADM["Admin app<br/>Canvas = Presentation thuần<br/>(+ design binding: OD4-07)"]
+    API["Admin API<br/>cookie __Host-, CSRF synchronizer,<br/>Origin + Sec-Fetch-Site"]
   end
-  subgraph PO["Origin preview riêng (không có credential Admin)"]
-    IF["iframe sandbox<br/>Preview build: engine + browser facet đã approve"]
-    PAPI["Preview API<br/>chỉ mock / dữ liệu tổng hợp, không ghi"]
+  subgraph PO["Site/origin preview riêng (không có credential Admin)"]
+    IF["iframe sandbox<br/>Preview build (INV-A2)"]
+    PAPI["Preview API<br/>chỉ dữ liệu tổng hợp, không ghi"]
   end
-  ADM -- "postMessage có kiểu<br/>(IR preview, kịch bản, lệnh reset)" --> IF
-  IF -- "postMessage có kiểu<br/>(trạng thái, lỗi, step hiện tại)" --> ADM
+  ADM -- "postMessage có kiểu (targetOrigin chính xác)" --> IF
+  IF -- "postMessage có kiểu (targetOrigin chính xác)" --> ADM
   ADM -->|"tạo preview session"| API
   API -. "đăng ký session (server-to-server)" .-> PAPI
-  IF -->|"IR do server sinh, simulation<br/>(theo previewSessionId)"| PAPI
-  IF -. "✘ chặn: CSP, CORS, cookie host-only" .-> API
+  IF -->|"header X-Preview-Session"| PAPI
+  IF -. "✘ request bị Admin API từ chối:<br/>Origin/Sec-Fetch-Site sai, thiếu CSRF token,<br/>CORS không cho origin preview" .-> API
 ```
 
-**Origin và sandbox**
+**Origin, site và header**
 
-- Preview chạy ở **origin riêng** (khác scheme/host/port với Admin), *[Claude]* tốt nhất là **site khác** (registrable domain khác): nếu chỉ khác subdomain thì SameSite không ngăn request same-site, nên Admin API vẫn phải dựa vào CSRF token + CORS + cookie host-only (`__Host-` prefix, không có `Domain`) để không nhận request từ origin preview. Chọn domain thực tế: spec #5 / G10.
-- `<iframe sandbox="allow-scripts allow-same-origin">` trỏ tới origin preview *[Claude]*:
-  - `allow-same-origin` ở đây cho iframe **origin thật của nó (origin preview)**, không phải origin Admin. Rủi ro "sandbox tự gỡ" của `allow-scripts` + `allow-same-origin` chỉ xảy ra khi nội dung iframe **cùng origin với trang cha**; điều này bị cấm (một test kiểm cấu hình).
-  - Lý do giữ `allow-same-origin`: origin cụ thể → Admin kiểm `event.origin` bằng giá trị chính xác thay vì `"null"`; Preview API cấu hình CORS cho một origin cụ thể, **không bao giờ** cho `null`; storage của preview tách khỏi Admin.
-  - Phương án thay thế: bỏ `allow-same-origin` (origin mờ `null`). Khi đó mọi frame sandbox đều có origin `null`, nên kiểm message phải dựa vào `event.source === iframe.contentWindow` + nonce phiên, và Preview API phải chấp nhận `Origin: null` — khó giữ policy rõ. Không chọn cho P0.
-  - **Không** cấp: `allow-top-navigation*`, `allow-popups*`, `allow-modals`, `allow-downloads`, `allow-forms` (engine không dùng submit gốc của form), `allow-storage-access-by-user-activation`. Thuộc tính `allow` (Permissions Policy) rỗng: không camera, mic, geolocation, payment, clipboard-write.
-- **CSP của trang preview:** `default-src 'none'`; `script-src` chỉ asset của Preview build (hash/self, không `unsafe-eval`, không `unsafe-inline`); `connect-src` chỉ Preview API; `frame-ancestors` chỉ origin Admin; `form-action 'none'`; `base-uri 'none'`.
-- **Code plugin** chỉ đến từ Preview build (danh sách PRK trong Admin build manifest). IR tham chiếu capability theo PRK/CK; iframe resolve trong module map tĩnh của build; PRK không có → hiện thẻ lỗi. Không có URL code nào từ JSON hay message.
+- Preview chạy ở **site khác** Admin (registrable domain khác; với host là IP hay `localhost` thì host khác là site khác). Chỉ khác cổng hoặc subdomain là **same-site**: cookie `SameSite=Strict` của Admin **vẫn được gửi** theo request từ preview, có rủi ro cookie tossing qua domain cha, và trình duyệt có thể không tách process. Vì vậy:
+  - **Local demo** *[Claude]*: Admin ở `http://localhost:<port A>`, preview ở `http://127.0.0.1:<port B>` (hai site khác nhau). Môi trường AWS: domain khác nhau, chọn ở G10.
+  - Admin API **không dựa vào cookie để phân biệt nguồn**: mọi request thay đổi trạng thái phải có `Origin` khớp chính xác origin Admin, `Sec-Fetch-Site: same-origin`, và CSRF token theo mô hình synchronizer (token trong phiên phía server, gửi qua header). Cookie phiên dùng tiền tố `__Host-` (`Secure` ở môi trường HTTPS, không `Domain`, `Path=/`).
+  - Cả hai origin gửi `Origin-Agent-Cluster: ?1`; Admin không bao giờ set `document.domain`.
+- **Header của Admin** (bổ sung D5): CSP `default-src 'self'; script-src 'self'` (không `unsafe-eval`, không `unsafe-inline`); `style-src 'self'` (+ hash nếu cần); `img-src 'self' data:`; `font-src 'self'`; `connect-src` chỉ origin Admin API; `frame-src` chỉ origin preview; `object-src 'none'`; `base-uri 'none'`; `form-action 'self'`; `frame-ancestors 'none'` (chống clickjacking nút 公開) + `X-Frame-Options: DENY`; `Referrer-Policy: no-referrer`; Admin API trả `Cross-Origin-Resource-Policy: same-origin`.
+- **Iframe:** `<iframe sandbox="allow-scripts allow-same-origin" allow="" referrerpolicy="no-referrer">`:
+  - `allow-same-origin` ở đây cho iframe **origin thật của nó (origin preview)**. Rủi ro "sandbox tự gỡ" của `allow-scripts` + `allow-same-origin` chỉ có khi nội dung iframe **cùng origin với trang cha**; điều này bị cấm và được test (4Z09).
+  - Lý do giữ `allow-same-origin`: hai phía kiểm origin bằng giá trị chính xác thay vì `"null"`; Preview API cấu hình CORS cho một origin cụ thể, **không bao giờ** cho `null`.
+  - Phương án thay thế (origin mờ `null`): kiểm message chỉ dựa vào `event.source` + nonce, Preview API phải chấp nhận `Origin: null` — không chọn cho P0.
+  - **Không** cấp: `allow-top-navigation*`, `allow-popups*`, `allow-modals`, `allow-downloads`, `allow-forms`, `allow-storage-access-by-user-activation`.
+- **Header của trang preview:** CSP `default-src 'none'`; `script-src` chỉ asset Preview build (`'self'`/hash, không `unsafe-eval`/`unsafe-inline`); `style-src 'self'` (+ hash cho theme); `img-src 'self' data:`; `font-src 'self'`; `connect-src` chỉ Preview API; `frame-ancestors` chỉ origin Admin; `form-action 'none'`; `base-uri 'none'`; `report-to` endpoint báo cáo vi phạm của Preview API (để test 4Z03 kiểm được). `Permissions-Policy` đóng mọi tính năng (camera, microphone, geolocation, payment, clipboard-write, …). `Referrer-Policy: no-referrer`.
+- **Code plugin** chỉ đến từ Preview build (INV-A2; danh sách PRK trong Admin build manifest). IR tham chiếu capability theo PRK/CK; iframe resolve trong module map tĩnh; không có PRK → thẻ lỗi. Không chuỗi nào từ IR hay message trở thành URL hay specifier để tải code (4Z11).
 
-**postMessage protocol** *[Claude]*
+**postMessage protocol `fb-preview` v1** *[Claude]*
 
-`{ protocol: "fb-preview", v: 1, previewSessionId, seq, type, payload }`
+Phong bì: `{ protocol: "fb-preview", v: 1, previewSessionId?, seq, type, payload }`.
 
-| Hướng | `type` | `payload` |
-|---|---|---|
-| Admin → Preview | `session.start` | `{ mode: partial \| simulation, ir? (chỉ partial), scenario, theme, viewport }` |
-| | `session.replace` | như `session.start`, với `previewSessionId` mới |
-| | `preview.reset`, `preview.gotoStep` | `{ stepId }` |
-| Preview → Admin | `preview.ready`, `preview.state` | `{ stepId, blocked?: { code, nodeId } }` |
-| | `preview.error` | `{ code, nodeId? }` (không stack, không giá trị field) |
-| | `preview.focusRequest` | `{ nodeId }` (Admin chọn đối tượng, §7) |
+| Bước / hướng | `type` | `payload` | Ghi chú |
+|---|---|---|---|
+| 1. Preview → Admin | `preview.hello` | `{ buildManifestHash, engineVersion }` | không có session; gửi khi iframe sẵn sàng |
+| 2. Admin → Preview | `session.start` | `{ previewSessionId, mode: partial \| simulation \| review, ir? (chỉ partial), scenario, theme, viewport }` | chỉ sau `hello` hợp lệ và `buildManifestHash` khớp Admin build manifest; lệch → không start, hiện 「プレビューの版が管理画面と一致しません。再読み込みしてください。」 |
+| Admin → Preview | `session.replace` | như `session.start`, `previewSessionId` mới | |
+| Admin → Preview | `preview.reset`, `preview.gotoStep` | `{ stepId }` | |
+| Preview → Admin | `preview.ready` | `{}` | xác nhận đã nạp session |
+| Preview → Admin | `preview.state` | `{ stepId, blocked?: { code, nodeId } }` | |
+| Preview → Admin | `preview.error` | `{ code, nodeId? }` | không stack, không giá trị field |
+| Preview → Admin | `preview.focusRequest` | `{ nodeId }` | xem giới hạn dưới |
 
-- Hai phía: kiểm `event.origin` bằng giá trị chính xác **và** `event.source` đúng cửa sổ; validate schema (JSON Schema, kích thước tối đa); `previewSessionId` khác phiên hiện tại → bỏ; `seq` không tăng → bỏ. Message không hợp lệ → bỏ, đếm, không throw.
-- Payload chỉ là dữ liệu (IR, kịch bản tổng hợp). Không credential, token Admin, cookie, PII. Không `eval`, `Function`, hay HTML từ message. IR trong `session.start` được iframe validate theo schema IR trước khi chạy.
-- Iframe không gửi lệnh nào làm thay đổi Document; `focusRequest` chỉ đổi Selection.
+- **Gửi:** luôn `postMessage(msg, <origin chính xác của phía kia>)`; **không bao giờ** `"*"` (kiểm tĩnh bằng lint + test 4Z12). Iframe biết origin Admin mong đợi từ cấu hình đóng gói trong Preview build, không từ URL hay message.
+- **Nhận (hai phía):** `event.origin` khớp chính xác **và** `event.source` đúng cửa sổ (iframe: `window.parent`; Admin: `iframe.contentWindow`); `event.ports.length === 0` (không nhận MessagePort/transferable); `event.data` là object JSON thuần, validate theo JSON Schema của `type`; kích thước tối đa: `session.start`/`session.replace` ≤ 2 MB (IR), mọi loại khác ≤ 16 KB; message không hợp lệ → bỏ, đếm, không throw.
+- **Session và `seq`:** `seq` tăng đơn điệu **theo từng chiều**, reset khi bắt đầu session mới. Phía preview chấp nhận `previewSessionId` mới **chỉ** trong `session.start`/`session.replace`; mọi message khác mang id khác phiên hiện tại → bỏ. Admin bỏ message có id khác phiên hiện tại (trừ `preview.hello`).
+- **Iframe nạp lại** (sự kiện `load` lần hai) → Admin hủy phiên hiện tại, chờ `hello` mới rồi tạo phiên mới.
+- **`focusRequest`:** chỉ nhận `nodeId` có trong Document; chỉ áp khi iframe đang là `document.activeElement` (người dùng đang thao tác trong preview); giới hạn 2 lần/giây; không bao giờ lấy focus khỏi ô đang nhập của Inspector; chỉ đổi Selection, không đổi Document.
+- Payload chỉ là dữ liệu. Không credential Admin, cookie, PII. Không `eval`, `Function`, HTML hay URL code từ message. IR trong `session.start` được iframe validate theo schema IR trước khi chạy.
 
 **Preview session**
 
-- Admin gọi Admin API `POST …/preview-sessions { draftVersion, mode }` → `previewSessionId` (ngẫu nhiên, hết hạn ngắn, gắn form + người dùng + `draftVersion`) (spec #5). Server đăng ký phiên với Preview API phía server.
-- Với Full Simulation, iframe dùng `previewSessionId` để lấy **IR do server sinh** và gọi Submission Simulation trên Preview API. `previewSessionId` là **capability hẹp**: chỉ đọc IR của snapshot đó và chạy simulation không ghi trên dữ liệu tổng hợp; không phải credential của Admin, không dùng được với Admin API.
-- Draft đổi (draftVersion mới) → Admin tạo phiên mới và gửi `session.replace`; phiên cũ bị Preview API thu hồi; message của phiên cũ bị bỏ.
-- Iframe crash hoặc không phản hồi (không `preview.ready` trong *[Claude: 10 s]*) → Admin hiện 「プレビューを表示できませんでした」 + [再読み込み] (tạo iframe và phiên mới); Builder không bị ảnh hưởng.
-- Iframe dùng **đúng package engine và version** của Published Runtime (cùng semantic engine; TM-4Z08).
+- Admin gọi Admin API `POST …/preview-sessions` (spec #5 §7.2):
+  - `mode: partial` → gắn `formId` + `catalogSnapshotId` + người dùng. IR do Admin gửi qua `session.start`. Preview API kiểm mọi lời gọi `dataSource` theo capability **trong catalog snapshot của form** (không tin IR do client gửi để mở quyền).
+  - `mode: simulation` → gắn `draftVersion`; Preview API phục vụ **IR do server sinh** cho đúng version đó và Submission Simulation.
+  - `mode: review` → gắn `snapshotId` của review (Reviewer xem vN, ADR-050); như `simulation` nhưng trên snapshot.
+- `previewSessionId` là **bearer capability hẹp** (ngẫu nhiên ≥ 128 bit): chỉ đọc IR của đúng phiên và chạy simulation không ghi trên dữ liệu tổng hợp; không dùng được với Admin API; không phải credential của Admin (phù hợp ADR-053 vì phạm vi của nó chỉ là dữ liệu tổng hợp).
+- **Truyền:** chỉ qua `session.start`/`session.replace`; iframe giữ trong bộ nhớ; gửi tới Preview API bằng header `X-Preview-Session`. **Không** đặt trong URL, query, fragment, storage; `Referrer-Policy: no-referrer`; Preview API che (redact) header này trong log (4Z13).
+- **Hết hạn và thu hồi:** TTL *[Claude: 30 phút]*; thu hồi khi: có phiên mới cho cùng người + form, người dùng đăng xuất, mất membership/vai trò của site, iframe nạp lại, người dùng bấm 再読み込み. Preview API trả `410 PREVIEW_SESSION_EXPIRED`.
+- **Draft đổi** (khớp §14.6): **không** tự thay phiên. Banner 「下書きが変更されました。[最新の内容で再読み込み]」; người dùng bấm → phiên mới + `session.replace`. Autosave vì vậy không tạo phiên liên tục.
+- Iframe không gửi `preview.hello`/`preview.ready` trong *[Claude: 10 s]*, hoặc crash → 「プレビューを表示できませんでした」 + [再読み込み]; Builder không bị ảnh hưởng.
+- Iframe dùng **đúng package engine và version** của Published Runtime (4Z08).
+- Preview API không có cấu hình, credential hay đường mạng tới hệ thống production (kiểm cấu hình, 4Z14).
 
-**Giới hạn:** iframe và CSP giảm rủi ro nhưng **không** làm Preview "an toàn tuyệt đối". Admin API và Preview API vẫn phải kiểm authorization ở server cho mọi request. Preview API không có kết nối tới hệ thống production.
+**Giới hạn:** iframe, CSP và header giảm rủi ro nhưng **không** làm Preview "an toàn tuyệt đối". Admin API và Preview API vẫn kiểm authorization ở server cho mọi request. Code plugin vẫn còn trong origin Admin dưới dạng `presentation` và design binding — xem OD4-07.
 
 ---
 
 ## 15. Autosave và xung đột (ADR-052)
 
-- Transport (spec #5): `PUT /drafts/{draftId}` với envelope `{ draftVersion (base), document, saveSeq }` → `200 { draftVersion }` hoặc `409 { currentDraftVersion }`. `draftVersion` là **metadata của envelope** do server quản lý (spec #1 rev 3.4 §7.1).
+- Transport (spec #5 §7.2): `PUT /forms/{formId}/draft` với envelope `{ draftVersion (base), document, saveSeq }` → `200 { draftVersion }` hoặc `409 { currentDraftVersion }`. `draftVersion` là **metadata của envelope** do server quản lý (spec #1 rev 3.4 §7.1).
 - Autosave: debounce *[Claude: 1.5 s]* và checkpoint khi đổi chế độ, rời trang, gửi review. Một request lưu tại một thời điểm; command mới trong lúc lưu được gộp vào lần lưu sau. Phản hồi chỉ áp nếu `saveSeq` là mới nhất. Phản hồi thành công chỉ cập nhật Persistence; Document không bị thay.
 - Trạng thái: 保存済み ✓ · 保存中… · 未保存の変更があります · 保存できませんでした [再試行]. **Không hiện 保存済み khi server chưa xác nhận.** Rời trang khi còn thay đổi chưa lưu → cảnh báo trình duyệt.
 - `pending` không khóa sửa; chỉ レビューを依頼, 複製, rời trang phải chờ lưu xong.
@@ -697,10 +713,10 @@ stateDiagram-v2
   Stale --> Draft: phải gửi review mới (active revision đổi, hoặc preflight lại fail)
 ```
 
-- **Gửi review** (chỉ khi レビュー依頼可 và đã lưu): tóm tắt thay đổi so với bản đang công khai bằng ngôn ngữ nghiệp vụ; xác nhận đã biết thay đổi Data Contract; ghi chú cho Reviewer; kết quả preflight → tạo **ReviewRequest** `{ reviewId, snapshotVersion vN, snapshotDigest, baseActiveRevision, dependencyDigest (block revision đã pin + phần identity của Capability Lock), preflightResult }` (lưu: spec #5).
+- **Gửi review** (chỉ khi レビュー依頼可 và đã lưu): tóm tắt thay đổi so với bản đang công khai bằng ngôn ngữ nghiệp vụ; xác nhận đã biết thay đổi Data Contract; ghi chú cho Reviewer; kết quả preflight → tạo **ReviewRequest** `{ reviewId, snapshotVersion vN, snapshotDigest, basePointerVersion (+ activeReleaseId lúc gửi), dependencyDigest (block revision đã pin + phần identity của Capability Lock), preflightResult }` (lưu: spec #5).
 - **Snapshot vN bất biến.** Editor tiếp tục sửa draft (vN+1…) với banner 「レビュー中の内容 (vN) には、この後の変更は含まれません」. Reviewer chỉ thấy vN (preview do server sinh IR từ vN), không bao giờ thấy draft đang đổi.
 - **Stale-review detection** (khi mở review, khi 承認, khi 公開):
-  - `baseActiveRevision` ≠ active revision hiện tại (có người khác đã publish) → `要再確認：公開中の版が変わりました`; **không** approve được; Editor phải gửi review mới từ draft đã cập nhật.
+  - `basePointerVersion` ≠ `pointerVersion` hiện tại (spec #5 §8) (có người khác đã publish) → `要再確認：公開中の版が変わりました`; **không** approve được; Editor phải gửi review mới từ draft đã cập nhật.
   - Trạng thái dependency đổi (plugin thành `vulnerable`/`revoked`, adapter không còn trong support matrix) → `要再確認`; Reviewer chạy lại preflight trên vN; chỉ approve được khi pass.
 - **Publish** dùng **đúng vN đã approve**; chạy lại preflight và compatibility gate ngay trước build (spec #5); fail → không publish, bản đang công khai không đổi, thông báo bằng ngôn ngữ nghiệp vụ.
 - **Không bao giờ ngầm approve hay publish bản mới hơn vN.** Không multi-review nâng cao ở P0.
@@ -764,7 +780,13 @@ Loại: **A** automated · **M** manual · **U** usability (người không ph�
 | 4Z06 | Preview isolation | Runtime trong iframe throw / treo | Admin hiện thông báo + 再読み込み; Document, Selection, Persistence không đổi | A |
 | 4Z07 | Preview isolation | Sửa draft trong lúc preview | phiên mới, `session.replace`; phiên cũ bị Preview API thu hồi; message phiên cũ bị bỏ | A |
 | 4Z08 | Preview isolation | Cùng fixture chạy trong iframe preview và trong artifact đã publish | cùng step đi qua, cùng kết quả validation (cùng package/version engine) | A |
-| 4Z09 | Preview isolation | Cấu hình iframe | origin iframe ≠ origin Admin; sandbox không có cờ cấm; CSP preview đúng như §14.7 | A |
+| 4Z09 | Preview isolation | Cấu hình iframe và header | site iframe ≠ site Admin (kể cả local); sandbox không có cờ cấm; CSP/Permissions-Policy/Referrer-Policy/frame-ancestors của hai origin đúng §14.7 | A |
+| 4Z10 | Build boundary | Module stats của Admin build và Preview build; fixture đặt canary trong module `Component` và `design` | Admin build không có canary `Component`; Preview build không có canary `design`; negative fixture (import tương đối `../browser/…` từ `presentation/`) làm L1b/L3 fail đúng lý do (spec #2 §17.3) | A |
+| 4Z11 | Nạp code | IR hoặc message chứa URL / specifier lạ ở vị trí PRK hay chuỗi bất kỳ | không request tải code nào; thẻ lỗi | A |
+| 4Z12 | postMessage | Lint + test runtime: mọi lời gọi `postMessage` có `targetOrigin` chính xác; message có `ports`, kích thước vượt, `previewSessionId` lạ ngoài `session.*`, `hello` với `buildManifestHash` lệch | không có `"*"`; các message đều bị bỏ / không start | A |
+| 4Z13 | Preview session | Kiểm URL iframe, history, `Referer`, storage, log của Preview API | `previewSessionId` không xuất hiện ở đâu ngoài bộ nhớ và header; log đã redact; thu hồi khi logout / mất quyền / reload / phiên mới | A |
+| 4Z14 | Preview API | Kiểm cấu hình và egress | không credential, endpoint hay route mạng tới hệ thống production | A + M |
+| 4Z15 | Same-site | Request thay đổi trạng thái tới Admin API từ origin cùng site khác cổng (giả lập) có cookie | bị từ chối vì `Origin`/`Sec-Fetch-Site`/CSRF | A |
 | 4E01 | Effect | Thử cấu hình effect với URL/JS qua JSON nhập | bị từ chối (schema/allowlist); server không thực thi | A |
 | 4I01 | i18n | Quét mã nguồn Admin | không có chuỗi hiển thị hardcode ngoài catalog | A |
 | 4A01 | A11y | Các luồng chính bằng bàn phím; axe | không lỗi nghiêm trọng | A + M |
@@ -787,19 +809,19 @@ Loại: **A** automated · **M** manual · **U** usability (người không ph�
 | # | Interface | Spec khác | Spec #4 | Trạng thái |
 |---|---|---|---|---|
 | I4-01 | Document = DSL; command sinh DSL | spec #1 §7 | §8 | Đồng bộ |
-| I4-02 | Tập con phân tích an toàn cho browser; server preflight authoritative; phát hiện lệch | spec #1 §14; spec #3 §5.1 (`preview`, `preflight`, rev 2.2) | §14.2, §14.3 | Đồng bộ |
+| I4-02 | Tập con phân tích an toàn cho browser; server preflight authoritative; phát hiện lệch | spec #1 §14; spec #3 §5.1 (`preview`, `preflight`, rev 2.2–2.3) | §14.2, §14.3 | Đồng bộ |
 | I4-03 | Rule: gắn đích, first-match, `それ以外`, named condition theo `conditionId`, `E-COND-CYCLE` | spec #1 rev 3.4 §7.1, §7.4, §8.1 | §11 | Đồng bộ; **OD-03 đóng** |
 | I4-04 | Step graph DAG | spec #1 OD-06 | §11.2 | Chờ OD-06 |
 | I4-05 | Block exports; block không trải nhiều step; block instance không có điều kiện | spec #1 ADR-020, OD-13, §7.1 | §6, §10 | Chờ OD-13 |
 | I4-06 | Catalog, design binding, inspector tự sinh, `title` tiếng Nhật, `paramsSchema` | spec #2 §6.3, §7.2 | §10 | Đồng bộ |
 | I4-07 | `Presentation` thuần của `fieldType` (sub-entry riêng) + conformance không side effect, cả lúc import | spec #2 rev 2.7 §7.4, §17.2 | §9 | Đồng bộ |
-| I4-08 | Admin capability set; kiểm `compat` theo facet có mặt | spec #2 §6.2, §10.1 (rev 2.6) | §8.3, §14.4 | Đồng bộ |
+| I4-08 | Admin capability set; kiểm `compat` theo facet có mặt | spec #2 §6.2, §10.1 (rev 2.6–2.8) | §8.3, §14.4 | Đồng bộ |
 | I4-09 | Node `PREVIEW_ONLY_UNCONFIGURED_PATH` | spec #1 rev 3.4 §8.1; spec #3 rev 2.2 | §14.5 | Đồng bộ |
 | I4-10 | `draftVersion` là metadata envelope | spec #1 rev 3.4 §7.1 | §15 | Đồng bộ |
 | I4-11 | Preview ≠ release; engine giống runtime | spec #3 §5.1; spec #1 §15; BUILD-08 | §14 | Đồng bộ |
 | I4-15 | Mã diagnostic mới (§13.2) | spec #3 rev 2.3 §18.1a | §13.2 | Đồng bộ |
-| I4-16 | Preview cô lập: Admin build / Preview build, entry `presentation` | spec #2 rev 2.7 §7.4, §10.1, L3; spec #3 rev 2.3 §5.1 | §9 (D7), §14.4, §14.7 | Đồng bộ |
-| I4-17 | Preview session API, Preview API (IR server, simulation), origin preview, CSP/CORS/cookie của hai origin | spec #5 | §14.7 | **Chuyển spec #5** |
+| I4-16 | Preview cô lập: Admin build / Preview build (INV-A1/A2), entry `presentation`, binding `presentation` | spec #2 rev 2.8 §6.2.1, §6.5, §7.4, §10.1, §11.1, L1b, L3, §17.2; spec #3 rev 2.3 §5.1 | §9 (D7), §14.4, §14.7 | Đồng bộ |
+| I4-17 | Preview session API (`partial`/`simulation`/`review`), Preview API, header `X-Preview-Session`, origin/site preview, CSP/CORS/CORP/cookie/CSRF/`Sec-Fetch-Site` của hai origin, build và deploy Admin build / Preview build | spec #5 rev 1 §7 | §14.7 | Đồng bộ một phần (spec #5 §7.1–§7.3) |
 | I4-12 | Ngôn ngữ Admin | spec #1 OD-11 (đóng cho P0, ADR-048) | §3 | Đồng bộ |
 | I4-13 | Draft API, envelope, tải kèm block/catalog/ledger/key ledger; preflight; simulation; ReviewRequest + stale; approve/reject/publish; rollback; support matrix; quyền (Editor, Reviewer, Publisher, quyền 詳細設定); CSRF/CSP; Admin build manifest | spec #5 | §14–§17, §10.1 | **Chuyển spec #5** |
 | I4-14 | Theme đã duyệt theo site; Motion preset; reduced motion; token editor P1 | spec #6 | §16 | **Chuyển spec #6** |
@@ -830,7 +852,11 @@ Loại: **A** automated · **M** manual · **U** usability (người không ph�
 
 **Đã quyết (review rev 2):** OD4-06 → ADR-053 (bác (a); P0 dùng iframe sandbox trên origin riêng). Refinement ADR-047 được duyệt.
 
-**OPEN của spec #4:** không còn.
+**OPEN:**
+
+| ID | Vấn đề | Phương án | Khuyến nghị | Hạn |
+|---|---|---|---|---|
+| **OD4-07** | Code plugin còn chạy trong origin Admin đã xác thực: design binding (custom Inspector, React có state) và `presentation` (thuần, có spy). Code cùng origin gọi được Admin API và đọc được CSRF token; spy và L3 chỉ phát hiện, không chống mã độc cố ý (spec #2 rev 2.8 §7.2). | (a) Giữ cả hai trong origin Admin, dựa trên trust model ADR-023 + trusted pipeline + conformance + CSP; sandbox ở P1. (b) **P0 không nạp design binding**: chỉ inspector tự sinh từ schema (§10.2); capability có cấu hình ngoài tập con tự sinh thì chỉ đọc ở P0; `presentation` giữ trong origin Admin (thuần, spy, L3, INV-A1). Custom Inspector chạy trong iframe sandbox ở P1. (c) Đưa cả Canvas (`presentation`) và custom Inspector vào iframe sandbox trên origin riêng ngay P0: không còn code plugin nào trong origin Admin, nhưng Selection Layer, focus và a11y phải đi qua postMessage — phức tạp hơn nhiều. | **(b)**: hai plugin P0 (`storeSelector`, `jpPhone`) có cấu hình nằm trong tập con tự sinh (cần xác nhận khi viết plan); loại bỏ phần code có state/handler, chỉ còn code thuần hiển thị. Rủi ro còn lại của `presentation` được ghi rõ. | Trước plan |
 
 **Chuyển sang spec #5:** I4-13, I4-17 (API, persistence, ReviewRequest, stale data, preflight/simulation endpoint, support matrix, quyền, CSRF/CSP, Admin build manifest). **Chuyển sang spec #6:** I4-14. **Còn mở từ spec khác:** spec #1 OD-06, OD-13; OD2-08/09; VG-01..10.
 
@@ -854,6 +880,24 @@ Thư viện UI, drag-and-drop, cấu trúc component; thuật toán bố cục F
 ## 26. Builder check rev 1 (reviewer độc lập)
 
 Đã xử lý ở rev 1 (bảng giữ nguyên ý): cách draft thành IR; facet plugin vào Admin; draft dở; phạm vi DSL P0; vai trò Advanced và xác nhận Data Contract; sinh key/mã option; pin version; container của block; danh sách field cho điều kiện; `それ以外` và `E-GRAPH-NO-DEFAULT`; hình dạng diagnostic; contract-change vs breaking; `draftVersion`; ghi đè token theme; inspector tự sinh lộ tên thuộc tính; key thô; ngữ nghĩa phủ định khi chưa trả lời. Rev 2 sửa tiếp phần preview và canvas theo review #1 (hai cách sửa ở rev 1 — `inert` và `__preview_end__` — đã bị bác).
+
+## 27a. Targeted review Preview isolation rev 2.1 (reviewer độc lập, chỉ đọc; điều kiện của ADR-055)
+
+Phạm vi: §9, §14.1, §14.4, §14.7, §19, §21 của spec #4; spec #2 rev 2.7 (facet boundary); spec #3 rev 2.3 §5.1; ADR-053. Kết quả: **0 BLOCKER**, 6 MAJOR, 6 MINOR; tất cả đã xử lý ở rev 2.2 (riêng M1 thành OD4-07).
+
+| # | Phát hiện | Xử lý |
+|---|---|---|
+| M1 | Design binding (React có state) vẫn chạy trong origin Admin; L3 lách được; D5 không chặn gọi Admin API cùng origin | ghi trung thực (spec #2 §7.2, D5); spy cho design binding; CSP Admin đầy đủ; **OD4-07** |
+| M2 | Admin build / Preview build không có invariant, L1b, L5, test | INV-A1/INV-A2, L1b/L5 cho hai build, canary, 4Z10; owner: toolchain spec #3, deploy spec #5 |
+| M3 | Manifest/exports chưa có `presentation`; L3 còn "`design` → browser"; SDK chưa tách entry | binding + export `./presentation`, `@platform/sdk-browser/presentation`, L3 viết lại (spec #2 rev 2.8) |
+| M4 | Local demo cùng site; `SameSite`/`__Host-` không chặn request | site khác nhau kể cả local; `Origin` + `Sec-Fetch-Site` + CSRF synchronizer; `Origin-Agent-Cluster`; sửa sơ đồ; 4Z15 |
+| M5 | Handshake, `targetOrigin`, ngoại lệ session id, `seq` theo chiều, kích thước, transferable, lệch version, iframe reload | `preview.hello` + `buildManifestHash`; quy tắc gửi/nhận §14.7; 4Z12 |
+| M6 | Cách truyền, TTL, thu hồi preview session; mâu thuẫn tự động/thủ công; phiên `partial` gắn gì; review dùng snapshot | header `X-Preview-Session`, không URL; TTL 30 phút; danh sách thu hồi; thủ công qua banner; `partial` gắn catalog snapshot; `mode: review` + `snapshotId`; 4Z13 |
+| m1–m2 | CSP preview thiếu directive, `report-to`; thiếu `frame-ancestors`/XFO, `Permissions-Policy`, CORP | bổ sung §14.7 |
+| m3 | `focusRequest` có thể bị lạm dụng | giới hạn §14.7 |
+| m4 | Spy chỉ phát hiện; danh sách thiếu | mở rộng + chạy dưới CSP Admin + ghi giới hạn (spec #2 §17.2) |
+| m5 | Thiếu test URL code, `targetOrigin`, session id trong URL, egress production, D7 | 4Z10–4Z14 |
+| m6 | Tham chiếu cũ, thứ tự bảng D, sơ đồ spec #2 §4 | sửa |
 
 ## 27. Consistency review rev 2 (reviewer độc lập, chỉ đọc)
 
@@ -903,6 +947,13 @@ Không có mâu thuẫn chặn sau khi đồng bộ spec #1 rev 3.4, spec #2 rev
 
 ## 30. Thay đổi
 
+### Revision 2.2 (so với rev 2.1; targeted review Preview isolation)
+
+- §14.7 viết lại: site khác nhau (cả local), header hai origin, handshake `preview.hello`, quy tắc gửi/nhận postMessage, vòng đời và cách truyền preview session (`partial`/`simulation`/`review`).
+- §2 anti-goal, §9 D2/D5/D7 ghi trung thực phần code plugin còn trong origin Admin; OD4-07 mới.
+- §19: 4Z09 mở rộng, 4Z10–4Z15. §21: I4-02, I4-08, I4-16, I4-17. §27a mới.
+- Đồng bộ: spec #2 rev 2.8; spec #5 rev 1 §7.
+
 ### Revision 2.1 (so với rev 2; review rev 2: targeted corrections)
 
 - ADR-047 refinement được duyệt; §14.1 thêm bảng bốn mức sẵn sàng (entry criteria, diagnostic chặn, hành động được phép) và tách khỏi trạng thái lưu, vòng đời review, trạng thái revision đã publish.
@@ -930,9 +981,9 @@ Không có mâu thuẫn chặn sau khi đồng bộ spec #1 rev 3.4, spec #2 rev
 - §19 mới: acceptance/test matrix.
 - Đồng bộ: spec #1 rev 3.4, spec #2 rev 2.6, spec #3 rev 2.2.
 
-## 31. Mức độ sẵn sàng (revision 2.1)
+## 31. Mức độ sẵn sàng (revision 2.2)
 
-Đề xuất trạng thái **READY_FOR_CROSS_SPEC_REVIEW**: không còn blocker hay OD mở của spec #4; phụ thuộc còn mở nằm ở spec khác (OD-06, OD-13) và spec #5 (I4-13, I4-17).
+**READY_FOR_CROSS_SPEC_REVIEW** (theo ADR-055: targeted review đã chạy, 0 BLOCKER, mọi phát hiện đã xử lý). OD4-07 phải quyết trước plan. Phụ thuộc khác nằm ở spec #1 (OD-06, OD-13) và spec #5.
 
 
 | Phần | Trạng thái | Còn mở |
@@ -943,6 +994,6 @@ Không có mâu thuẫn chặn sau khi đồng bộ spec #1 rev 3.4, spec #2 rev
 | Inspector (§10) | Chờ final review | — |
 | Rule Editor, Flow (§11, §12) | Điều kiện ADR-049 đáp ứng | OD-06, OD-13 |
 | Diagnostics (§13) | Chờ final review | — |
-| Preview/Simulation (§14) | Viết lại theo BLOCKER B; cô lập theo ADR-053 | API: spec #5 |
+| Preview/Simulation (§14) | Viết lại theo BLOCKER B; cô lập theo ADR-053; targeted review §27a | OD4-07 |
 | Autosave (§15), theme (§16), review (§17) | Theo ADR-050/052 | transport: spec #5 |
 | Test matrix (§19), usability (§20) | Chờ final review | ngưỡng PASS |
