@@ -1,0 +1,14 @@
+# Security Risk Register (P0, synthetic PoC)
+
+> Danh sách rủi ro bảo mật đã biết của thiết kế P0. Mỗi mục ghi trạng thái theo phân loại của Cross-Subsystem Review: **ACCEPTED_RISK** (user đã chấp nhận có điều kiện), **VERIFICATION_PENDING** (thiết kế có cơ chế, chưa kiểm chứng), **OPEN** (chưa có quyết định). Không mục nào ở đây được coi là đã giải quyết khi chưa có quyết định hoặc evidence tương ứng.
+> Cập nhật: 2026-10-24.
+
+| ID | Rủi ro | Nguồn | Trạng thái | Điều kiện / kiểm chứng | Phải xem lại khi |
+|---|---|---|---|---|---|
+| SR-01 | **G-EXEC TOCTOU:** sau commit của revocation plugin, adapter (kể cả read-only) vẫn có thể **bắt đầu** chạy nếu lần đọc gate xảy ra trước commit; không có guarantee zero new execution | spec #5 §9.3, §23.4 V5-02; ADR-063 | **ACCEPTED_RISK** — chỉ PoC synthetic | dữ liệu synthetic; không PII thật; không connector/effect thật; mock không chạm hệ thống thật; không secret thật; network theo allowlist đã kiểm chứng; store không khả dụng → fail closed; TM-5G18 ghi nhận hành vi | bất kỳ điều kiện nào đổi; trước mọi tích hợp thật (cần security gate riêng) |
+| SR-02 | **Race tạo gate FBK** với override/đồng bộ ledger (`CAPSTATUS.version` CAS) | spec #5 §9.3, §23.3, §23.4 V5-01; ADR-063 | **VERIFICATION_PENDING** | independent design review (Cross-Subsystem Review); CT-26 có interleaving commit — post-G1 implementation verification gate; emulator PASS không đủ cho AWS | khi có code (post-G1); trước AWS |
+| SR-03 | Revocation do rủi ro **browser facet**: code đã trong artifact, chỉ chặn được bằng M4/M5 theo từng form, **không nguyên tử** giữa các form; chịu độ trễ entry/CDN | spec #5 §9.3; spec #2 §16.3 | OPEN (đã nêu trong thiết kế, chưa có quyết định chấp nhận riêng) | tiến độ N/M trong incident; không tuyên bố chặn toàn bộ trước khi xong | trước G1 (cần user phân loại) |
+| SR-04 | `presentation` của plugin là code chạy trong origin Admin; spy/conformance chỉ phát hiện, không chứng minh; chống developer thiện chí, không chống mã độc | spec #2 §7.2, §17.2; spec #4 §9; ADR-061 | OPEN (giới hạn đã ghi) | P0 không design binding; INV-A1; CSP Admin; L3 | khi có plugin từ bên ngoài platform |
+| SR-05 | `previewSessionId` là bearer capability hẹp (chỉ dữ liệu tổng hợp) | spec #4 §14.7; spec #5 §7.3 | OPEN (thiết kế theo ADR-053) | header, không URL, redact log, TTL 30 phút, thu hồi | nếu preview được nối tới dữ liệu thật |
+| SR-06 | Cache thông tin ≤ 60 s khi store không khả dụng có thể hiển thị dữ liệu đã cũ | spec #5 §9.3; ADR-057 | ACCEPTED_RISK (ADR-057, chỉ thông tin) | không dùng cho quyết định bảo mật; nhãn freshness | nếu danh sách query "thông tin" mở rộng |
+| SR-07 | Contention trên gate dùng chung có thể làm revocation commit chậm dưới tải | spec #5 §9.3; VG-12 | VERIFICATION_PENDING (sau G10) | `GATEINTENT`, retry không giới hạn; đo VG-12 | trước tải thật |

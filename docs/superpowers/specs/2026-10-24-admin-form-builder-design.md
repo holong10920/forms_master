@@ -1,6 +1,7 @@
 # Spec #4: Admin Form Builder — UX & Architecture (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.3** (2026-10-24) — **READY_FOR_CROSS_SPEC_REVIEW** (điều kiện của ADR-055 đã thực hiện: targeted review §27a); OD4-07 đã quyết (ADR-061).
+> **Trạng thái: PROPOSAL, revision 2.4** (2026-10-24) — **READY_FOR_CROSS_SPEC_REVIEW** (điều kiện của ADR-055 đã thực hiện: targeted review §27a); OD4-07 đã quyết (ADR-061).
+> - Rev 2.4: đồng bộ spec #6 (I6-05): §16 tab 設定 › モーション; command Motion; diagnostics `E-MOTION-*`, `E-ADMIN-MOTION-NOT-BUNDLED`; postMessage `preview.demo`, `preview.motionMode`; review diff Motion.
 > - Rev 2.3: ADR-061 (P0 chỉ inspector tự sinh + control typed, không design binding trong origin Admin): §2, §9 D2, §10, §10.2, §14.7, §23; ADR-057: Admin hiển thị freshness `authoritative/cached/unknown` (§13.5, I4-18); spec #5 rev 2 đồng bộ (I4-17).
 > - Rev 2.2: sửa theo targeted independent review của Preview isolation (§27a): §14.7 viết lại (site khác nhau kể cả local, header, handshake `preview.hello`, `targetOrigin` chính xác, vòng đời và cách truyền preview session); §9 D5/D7 trung thực hơn; OD4-07 mới (design binding trong origin Admin); test 4Z10–4Z15. Spec #2 rev 2.8.
 > - Review rev 2: **CONDITIONALLY ACCEPTED — targeted corrections only**. Refinement của ADR-047 được duyệt; OD4-06 → ADR-053 (Preview cô lập trên origin riêng). Rev 2.1 chỉ sửa có trọng tâm: §14.1 (mức sẵn sàng), §14.7 (mới, cô lập Preview), §8.2 (khôi phục trùng key), §14.3, §19, §21, §23. Thay đổi: §30.
@@ -208,7 +209,7 @@ Admin
 | Plugin | `UpdateCapabilityConfig`, `SetCapabilityInputs`, `UpgradeCapability{plugin, toVersion}` | diff `valueSchema` → Data Contract; xung đột với block (ADR-031) |
 | Field tính toán | `AddCalculatedField{template}`, `UpdateCalculation` (chỉ template có kiểu đã duyệt) | vòng phụ thuộc; input đang dùng |
 | Sau khi gửi | `SetEffects{effects}` (chỉ binding đã approve, cấu hình allowlist) | — |
-| Giao diện | `SetTheme`, `SetMotionPreset` | — |
+| Giao diện | `SetTheme`, `SetMotionPreset{id, version}`, `SetMotionCategory{category, on}`, `SetMotionSpeed{speed}`, `UpgradeMotionPreset{toVersion}` (spec #6 §10) | `UpgradeMotionPreset`: diff hiển thị |
 | Nâng cao (vai trò 詳細設定) | `ChangeFieldKey`, `ChangeOptionValue` | Data Contract (contract-change, R-02) |
 
 - `UpdateFieldProperty.property` thuộc tập đóng theo loại field; không có "patch JSON tùy ý".
@@ -487,6 +488,9 @@ Ví dụ (draft dở, có một lỗi gieo sẵn: 宅配情報 chưa có đích 
 | `W-CAP-DEPRECATED` | none | 部品「店舗選択」のこの版は将来廃止予定です。 | 更新を確認 |
 | `W-FIELD-NEVER-VISIBLE` | none | 項目「SIM情報」はどの条件でも表示されません。 | mở rule |
 | `W-MAYBE-INACTIVE` | none | 条件で使っている「店舗選択」は、経路によっては表示されません。 | mở rule |
+| `E-MOTION-PRESET-UNKNOWN`, `E-MOTION-CATEGORY-UNSUPPORTED`, `E-MOTION-PRESET-INCOMPATIBLE` | preview | このモーション設定は利用できません。 | mở 設定 › モーション |
+| `E-ADMIN-MOTION-NOT-BUNDLED` | preview | このモーションの版はプレビューで利用できません。 | — |
+| `W-MOTION-PRESET-DEPRECATED` | none | このモーションは将来廃止予定です。 | 更新を確認 |
 | `W-RULE-SHADOWED` | none | 分岐 2 の条件は、上の分岐の条件にすべて含まれるため使われません。 | mở 次のステップ |
 
 - **Nguồn mã:** spec #1 (`E-REF-DANGLING`, `E-TYPE-OPERATOR`, `E-GRAPH-CYCLE`, `E-COND-CYCLE`, `E-FORWARD-REF`, `E-GRAPH-NO-DEFAULT`, `E-CLASS-BELOW-MIN`, `W-FIELD-NEVER-VISIBLE`, `W-MAYBE-INACTIVE`, `E-CONTRACT-BREAKING`, `E-IR-PREVIEW-NODE`); spec #2 §9.2/§16.3 (`E-CAP-MISSING`, `E-CAP-CONFIG-INVALID`, `E-CAP-VERSION-CONFLICT`, `E-CAP-REVOKED`, `E-CAP-VULNERABLE`, `W-CAP-DEPRECATED`). **Mã mới do spec #4 đề xuất** (bổ sung vào catalog diagnostic của spec #3 khi đồng bộ): `E-GRAPH-UNREACHABLE`, `E-GRAPH-NO-TERMINAL`, `E-GRAPH-REVIEW-ORDER`, `E-TRANSITION-TARGET-UNSET`, `E-TRANSITION-SHADOWED` (đặt tên cho kiểm tra đã có ở spec #1 §8.5); `W-RULE-SHADOWED`, `W-CONTRACT-CHANGE`, `E-LABEL-MISSING`, `E-READONLY-FEATURE-BROKEN`, `E-ADMIN-CAP-NOT-BUNDLED`.
@@ -663,6 +667,8 @@ Phong bì: `{ protocol: "fb-preview", v: 1, previewSessionId?, seq, type, payloa
 | Preview → Admin | `preview.state` | `{ stepId, blocked?: { code, nodeId } }` | |
 | Preview → Admin | `preview.error` | `{ code, nodeId? }` | không stack, không giá trị field |
 | Preview → Admin | `preview.focusRequest` | `{ nodeId }` | xem giới hạn dưới |
+| Admin → Preview | `preview.demo` *(rev 2.4)* | `{ action: next \| back \| setOption \| showValidation \| simulatePending, fieldId?, optionValue? }` | spec #6 §10: ID phải có trong IR của phiên; `setOption` đi qua engine; `simulatePending` dùng adapter submit mock |
+| Admin → Preview | `preview.motionMode` *(rev 2.4)* | `{ motion: on \| off, reducedMotion: emulate \| system }` | chỉ có trong preview |
 
 - **Gửi:** luôn `postMessage(msg, <origin chính xác của phía kia>)`; **không bao giờ** `"*"` (kiểm tĩnh bằng lint + test 4Z12). Iframe biết origin Admin mong đợi từ cấu hình đóng gói trong Preview build, không từ URL hay message.
 - **Nhận (hai phía):** `event.origin` khớp chính xác **và** `event.source` đúng cửa sổ (iframe: `window.parent`; Admin: `iframe.contentWindow`); `event.ports.length === 0` (không nhận MessagePort/transferable); `event.data` là object JSON thuần, validate theo JSON Schema của `type`; kích thước tối đa: `session.start`/`session.replace` ≤ 2 MB (IR), mọi loại khác ≤ 16 KB; message không hợp lệ → bỏ, đếm, không throw.
@@ -711,7 +717,7 @@ Phong bì: `{ protocol: "fb-preview", v: 1, previewSessionId?, seq, type, payloa
 
 - **フォーム情報:** tên, mô tả nội bộ.
 - **テーマ (P0, đã duyệt):** chỉ chọn trong theme đã duyệt của site; preview và canvas dùng đúng theme đó; không CSS editor, không sửa token tự do (token editor: P1, spec #6).
-- **モーション:** chọn preset đã duyệt theo contract spec #6; xem thử; công tắc 「動きを減らす設定で確認」. Animation không điều khiển business state.
+- **モーション:** tab 設定 › モーション theo spec #6 §10 (Preset Library / preview cô lập / thuộc tính; chọn preset, bật/tắt nhóm, `速さ`, so On/Off, 「動きを減らす設定で確認」). Review diff hiện thay đổi Motion bằng ngôn ngữ nghiệp vụ (「モーション: 控えめ → ガイド付き」). Animation không điều khiển business state (ADR-062).
 - **送信後の処理:** chọn effect đã approve cho site (P0 chỉ mock); mapping mặc định; tùy chỉnh mapping chỉ với quyền 詳細設定 và trong allowlist.
 
 ## 17. Review và version (ADR-050)
@@ -841,7 +847,7 @@ Loại: **A** automated · **M** manual · **U** usability (người không ph�
 | I4-18 | Freshness của trạng thái bảo mật/hỗ trợ | spec #5 rev 2 §7.2, §9.3 (ADR-057) | §13.5 | Đồng bộ |
 | I4-12 | Ngôn ngữ Admin | spec #1 OD-11 (đóng cho P0, ADR-048) | §3 | Đồng bộ |
 | I4-13 | Draft API, envelope, tải kèm block/catalog/ledger/key ledger; preflight; simulation; ReviewRequest + stale; approve/reject/publish; rollback; support matrix; quyền (Editor, Reviewer, Publisher, quyền 詳細設定); CSRF/CSP; Admin build manifest | spec #5 | §14–§17, §10.1 | **Chuyển spec #5** |
-| I4-14 | Theme đã duyệt theo site; Motion preset; reduced motion; token editor P1 | spec #6 | §16 | **Chuyển spec #6** |
+| I4-14 | Theme đã duyệt theo site; Motion preset, nhóm, speed; reduced motion; token editor P1 | spec #6 rev 2 §7, §10 | §8, §13.2, §14.7, §16 | Đồng bộ (rev 2.4) |
 
 ## 22. Phạm vi P0 / P1 / P2
 

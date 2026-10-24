@@ -1,7 +1,9 @@
 # Spec #6: Motion (Architecture Proposal)
 
-> **Trạng thái: PROPOSAL, revision 1** (2026-10-24). Chưa được user review. Đã qua builder check + consistency review độc lập và sửa (§19: 0 BLOCKER, 5 MAJOR, 9 MINOR).
-> - Hướng đi đã duyệt: ADR-062 (Motion Product Direction). Ràng buộc có sẵn: ADR-016 (Motion preset qua animation lifecycle), ADR-033 (Motion là core P0, không có plugin kind `motionPreset` ở P0), ADR-038/ADR-040 (CSR, group `motion` lazy, Motion-none bắt buộc), ADR-047/ADR-053 (Hybrid Workspace, Preview cô lập). Cơ chế trong tài liệu này **PROPOSED**.
+> **Trạng thái: PROPOSAL, revision 2** (2026-10-24).
+> - Review rev 1 (user): direction approved with targeted corrections; OD6-01..04 → ADR-064..067. Rev 2: §7.4 reduced motion & lazy import, §6.3 bóng exit không PII, §6.4 chuyển nhanh & hủy, §12 test bổ sung, §14 truy vết MOTION-01. Thay đổi: §20.
+> - Rev 1 đã qua builder check + consistency review độc lập (§19).
+> - Hướng đi đã duyệt: ADR-062 (Motion Product Direction), ADR-064..067 (kiến trúc B, preset, per-step P1, tham số trong recipe). Ràng buộc có sẵn: ADR-016 (Motion preset qua animation lifecycle), ADR-033 (Motion là core P0, không có plugin kind `motionPreset` ở P0), ADR-038/ADR-040 (CSR, group `motion` lazy, Motion-none bắt buộc), ADR-047/ADR-053 (Hybrid Workspace, Preview cô lập). Cơ chế trong tài liệu này **PROPOSED**.
 > - **G1 NOT APPROVED.** G9, G10 BLOCKED. Không có code. Không có số đo nào trong tài liệu này; mọi con số về thời lượng là giá trị đề xuất cần kiểm chứng (ADR-005).
 > - Nguồn: [notes](../../discovery/P01_BRAINSTORM_NOTES.md) (Spec #6 Answer #1); [DECISIONS.md](../../DECISIONS.md); [spec #1 rev 3.5](2026-10-23-form-schema-workflow-design.md) §7.1 (`motion`), §8.4, §9; [spec #2 rev 2.9](2026-10-24-plugin-contracts-capability-registry-design.md) §7.1, §11; [spec #3 rev 2.4](2026-10-24-compiler-bundle-release-design.md) §7, §8, §10, §15.2; [spec #4 rev 2.3](2026-10-24-admin-form-builder-design.md) §14.7, §16; master F-P0-09, F-P1-09, MOTION-01..07, PERF-07, TEST-07, DOD-03.
 >
@@ -76,11 +78,11 @@ Lần render đầu của form không có animation (không có "intro").
 | Khớp master | **lệch** master §6.5 → cần ADR + duyệt | **khớp** | **lệch** ADR-033 ở P0 |
 | Rủi ro chính | bug presence/a11y tự viết | byte tăng; thư viện có thể kéo thêm feature nếu cấu hình sai (K10 phải bắt) | mở cửa cho code animation không kiểm soát |
 
-**Khuyến nghị: B**, với hai điều kiện:
+**Đã quyết: B (ADR-064)** — thư viện Motion sau **Motion Adapter do platform sở hữu**, pin exact version; kèm hai điều kiện:
 1. **Adapter cách ly thư viện** (§6.2): engine và renderer không biết đến `motion`; chỉ module của group `motion` import thư viện. Đổi sang A sau này chỉ thay implementation của adapter.
 2. **Cổng đo**: khi P04 (Shared UI + Motion) có artifact thật, đo bytes của group `motion` cho PC, INP/long task trên CPU chậm (lab), so sánh với A dựng thử tối thiểu nếu số đo vượt ngân sách user chốt. Không có số đo thì không tuyên bố B "nhẹ" hay "đủ nhẹ".
 
-C bị loại cho P0 (ADR-033; spec #2 §7.1 xếp `motionPreset` ở mức contract, implement P1). **OD6-01.**
+C bị loại cho P0 (ADR-033; spec #2 §7.1 xếp `motionPreset` ở mức contract, implement P1). Không tuyên bố thư viện nhẹ hơn CSS/WAAPI khi chưa benchmark.
 
 ---
 
@@ -116,15 +118,24 @@ flowchart LR
 ### 6.3. Hành vi chi tiết bảo vệ business state
 
 - **Chuyển step:** engine commit `nav` → renderer render step mới; adapter React chuyển focus tới tiêu đề step mới **ngay**, trước khi animation bắt đầu (quy tắc focus này **chưa có** trong spec #1 — bổ sung qua I6-02); step cũ bị gỡ ngay *[Claude]*; enter animation chạy trên container bằng transform/opacity. History do engine quản lý; Motion chỉ dùng `direction`.
-- **Node vừa inactive (exit) — chỉ khi Motion có mặt:**
-  - Engine đã đánh dấu inactive, xử lý giá trị theo spec #1 (kể cả `clearOnDeactivate`) và bỏ qua mọi input từ node inactive.
-  - `AnimatePresence` trong `MotionPresenceSlot` giữ **bóng**: một bản **đóng băng** của phần hiển thị tại thời điểm cuối cùng node còn active — không subscribe selector của engine (nên không hiện giá trị vừa bị xóa), không mount component hành vi của plugin, không chạy effect.
-  - Bóng `aria-hidden="true"`, `inert`, không focus được, không nằm trong payload (payload luôn dựng từ engine state). Ở đây `inert` là biện pháp a11y, không phải ranh giới an toàn.
-  - Bóng nằm **ngoài flow** (định vị tuyệt đối tại chỗ cũ) để phần còn lại của layout cập nhật ngay; exit tối đa thời lượng recipe, timeout an toàn *[Claude: 400 ms]*.
-  - Nếu focus đang ở trong node vừa inactive: adapter React chuyển focus tới phần tử điều khiển đã gây thay đổi (thường là lựa chọn vừa bấm) — bất kể có Motion hay không.
+- **Node vừa inactive (exit) — chỉ khi Motion có mặt; không bao giờ giữ PII:**
+  - Engine invalidate giá trị **ngay** khi state đổi (kể cả `clearOnDeactivate`) và bỏ qua mọi input từ node inactive; không có gì chờ animation.
+  - `AnimatePresence` trong `MotionPresenceSlot` chỉ giữ một **presentation shell đã làm sạch**: khung có cùng kích thước, nhãn và chú thích lấy từ **definition** (không phải dữ liệu khách), ô nhập được thay bằng khối trống trung tính. **Không** có giá trị khách (tên, điện thoại, email, địa chỉ, văn bản tự do, lựa chọn, giá trị vừa bị invalidation xóa), **không** input/control tương tác, **không** component của plugin, **không** subscribe engine.
+  - Shell `aria-hidden="true"`, `inert`, không focus được, không nằm trong accessibility tree, không nằm trong payload, không chạy effect. `inert` ở đây là biện pháp a11y, không phải ranh giới an toàn.
+  - Shell nằm **ngoài flow** (định vị tuyệt đối tại chỗ cũ); exit tối đa thời lượng recipe, timeout an toàn *[Claude: 400 ms]*; sau đó gỡ khỏi DOM.
+  - Nếu focus đang ở trong node vừa inactive: adapter React chuyển focus tới điều khiển đã gây thay đổi (thường là lựa chọn vừa bấm) — bất kể có Motion hay không.
+  - Negative test TM-6R12: đổi nhánh khi field cũ có PII giả có marker → marker không xuất hiện trong DOM của shell, accessibility tree hay bất kỳ snapshot nào.
 - **Node vừa active (enter):** có mặt trong layout ngay; chỉ opacity/transform của chính nó được animate. Không animate chiều cao.
 - **Validation:** message và `aria-describedby`/`aria-live` có mặt ngay; animation chỉ là opacity của message và một lần nhấn mạnh viền. Theo spec #1 §11: khi submit/next thất bại, focus tới **field lỗi đầu tiên** và scroll tới đó; tóm tắt lỗi thông báo qua `aria-live`. Scroll kiểu `nearest`, tức thời khi reduced motion.
 - **Submit:** engine khóa runtime (`disabled`, spec #1 C9/INV-N5) trong lúc `pending`, dùng cùng idempotency key (spec #5); animation không đụng tới trạng thái nút. Success chỉ khi engine nhận phản hồi backend.
+
+### 6.4. Chuyển nhanh và hủy animation
+
+- Mỗi region có tối đa **một** animation đang chạy; `TransitionNotice` mới cho cùng region **hủy/thay** animation cũ ngay (không xếp hàng).
+- Callback hoàn tất của animation chỉ dọn shell/style của chính nó; **không** có quyền khôi phục hay ghi lại workflow state cũ, không đổi focus/aria.
+- Focus và aria do engine/lớp a11y của adapter React quyết định theo state hiện tại, không chờ animation.
+- Component unmount giữa transition → animation bị hủy cùng component; không callback nào chạy sau unmount gây tác dụng phụ.
+- Preview reset giữa animation → iframe hủy mọi animation đang chạy rồi áp state mới.
 
 ---
 
@@ -166,8 +177,8 @@ Package `@platform/motion-presets` (core, phát hành qua trusted pipeline, có 
 - Ví dụ của spec #3 dùng tên `fade-slide` / `scale-spring` cho preset; spec #3 cần đổi sang `subtle` (`sports-demo`) và `guided` (`pc-demo`); `sports-demo-nomotion` là biến thể Motion-none (I6-04). P0 **không** dùng spring: `scale-in` là tween có thời lượng (spring là F-P1-09).
 - **Recipe** = mô tả có kiểu: thuộc tính animate (chỉ `opacity`, `transform`, và `box-shadow` cho `outline-pulse-once`), bảng `speed → durationMs` (thuộc dữ liệu preset có version; khoảng đề xuất 120–250 ms, chưa phải KPI), `delayMs` cố định trong recipe (P0: 0), easing (enum), hướng, và **biến thể reduced motion = không chuyển động**.
 - **Tương thích:** mỗi bản `motion-presets` khai `compat.engine` (range version engine/renderer core) và version thư viện `motion` được pin. Compiler kiểm khi resolve (`E-MOTION-PRESET-INCOMPATIBLE`). Nâng version preset là thao tác chủ động (`UpgradeMotionPreset`, §10), không tự động.
-- **Độ lệch có chủ ý so với MOTION-01** (trigger, duration, delay, easing/spring ở mức config): P0 để trigger/duration/delay/easing ở mức **recipe do platform duyệt**; Editor chỉ chọn preset, nhóm và `speed`. Cần user chấp nhận — **OD6-04**.
-- Danh sách preset/recipe cuối là **OD6-02**.
+- **Độ lệch có chủ ý so với MOTION-01** (trigger, duration, delay, easing/spring ở mức config): P0 để trigger/duration/delay/easing ở mức **recipe do platform duyệt**; Editor chỉ chọn preset, nhóm và `speed`. Đã duyệt (ADR-067): giữ khả năng duration/delay/easing ở mức recipe/engine; UI P0 không mở tham số thấp cấp; chỉnh nâng cao P1 nếu có nhu cầu.
+- Bộ preset đã duyệt (ADR-065): `none` / `subtle` / `guided`, recipe tween có ID + version ổn định, không spring. `guided` **không** auto-advance hay chọn thay khách.
 
 ### 7.3. Compile (spec #3)
 
@@ -177,10 +188,19 @@ Package `@platform/motion-presets` (core, phát hành qua trusted pipeline, có 
 - K10: kiểm Motion-none (đã có, `E-ARTIFACT-MOTION-PRESENT`); thêm canary cho **từng recipe** → recipe không dùng mà có mặt là lỗi (`E-ARTIFACT-MOTION-UNUSED-RECIPE`); không có feature thư viện ngoài danh sách cho phép (ví dụ layout animation).
 - LRM: version package `motion-presets` và thư viện `motion` là input của `releaseId`; recipe tất định (không thời gian/ngẫu nhiên ảnh hưởng tới cấu hình hay workflow).
 
-### 7.4. Runtime
+### 7.4. Runtime: tải và reduced motion
 
-- Group `motion` tải theo spec #3 §15.2 (sau T3, không khi reduced motion). Chưa tải xong → transition không có animation; không bao giờ chờ.
-- **Tín hiệu `reduced` nội bộ** = `matchMedia('(prefers-reduced-motion: reduce)')` (theo dõi thay đổi giữa phiên), hoặc cờ giả lập **chỉ có trong preview**. Đây là cơ chế "equivalent" của MOTION-03: khi `reduced`: group chưa tải thì không tải; đã tải thì `MotionConfig reducedMotion="always"` **và** recipe trả biến thể "không chuyển động" (thư viện ở chế độ `user` vẫn có thể chạy opacity, nên không dựa vào riêng nó). Khi `reduced` tắt giữa phiên: group được tải theo quy tắc thường (spec #3 §15.2). Không có cấu hình nào cho Editor vượt qua tùy chọn này.
+| Trường hợp | Hành vi |
+|---|---|
+| Form **không** dùng Motion | không emit runtime, chunk hay `import()` nào của Motion (K10, TM-6B03) |
+| Form dùng Motion, `reduced` bật **từ đầu** | kiểm `reduced` **trước** `import()` và **trước** mọi prefetch → không tải group `motion`; không prefetch; form chạy không chuyển động (TM-6B04) |
+| Form dùng Motion, `reduced` tắt | tải group theo spec #3 §15.2 (sau T3, không chờ); chưa tải xong → không animation |
+| `reduced` **bật giữa phiên** | hủy ngay mọi animation đang chạy; mọi animation sau đó dùng biến thể không chuyển động. Module đã tải **không** được unload khỏi bộ nhớ — chỉ không được dùng để chuyển động |
+| `reduced` **tắt giữa phiên** | group được tải theo quy tắc thường |
+| Group lỗi khi tải / khi chạy | không thử lại liên tục; render không chuyển động; workflow, navigation, a11y nguyên vẹn (TM-6R08) |
+
+- **Tín hiệu `reduced` nội bộ** = `matchMedia('(prefers-reduced-motion: reduce)')` (theo dõi thay đổi), hoặc cờ giả lập **chỉ có trong preview**. Khi `reduced`: `MotionConfig reducedMotion="always"` **và** recipe trả biến thể không chuyển động. `reducedMotion="user"` của thư viện **không** được dùng làm bằng chứng rằng Motion JS không được tải — việc không tải được bảo đảm bằng kiểm tra trước `import()`/prefetch.
+- Không có cấu hình nào cho Editor vượt qua tùy chọn này của khách.
 
 ---
 
@@ -266,6 +286,18 @@ Package `@platform/motion-presets` (core, phát hành qua trusted pipeline, có 
 | TM-6R11 | Focus đang ở trong node vừa inactive | focus về điều khiển gây thay đổi, có và không có Motion | A |
 | TM-6A03 | Preview build | chứa mọi version `motion-presets` được hỗ trợ (INV-A2); preset pin không có → `E-ADMIN-MOTION-NOT-BUNDLED` | A |
 | TM-6A04 | `preview.demo` | chỉ nhận `fieldId`/`optionValue` có trong IR; `setOption` đi qua engine; `simulatePending` dùng adapter mock, không gọi mạng | A |
+| TM-6R12 | Bóng exit không PII: đổi nhánh khi field cũ có PII giả có marker (tên, điện thoại, email, địa chỉ) | marker không có trong DOM của shell, accessibility tree, snapshot | A |
+| TM-6R13 | 店頭 → 宅配 → 店頭 rất nhanh | activity/giá trị đúng engine; animation cũ bị thay; không shell còn sót | A |
+| TM-6R14 | 次へ → 戻る trước khi animation xong | step và focus đúng state cuối; không animation cũ ghi đè | A |
+| TM-6R15 | Lỗi validation đến giữa animation | lỗi hiện ngay, focus field lỗi đầu tiên | A |
+| TM-6R16 | Submit pending → failure; pending → success | chỉ báo đúng; success chỉ sau phản hồi backend; không submit lần hai | A |
+| TM-6R17 | `reduced` đổi giữa phiên (bật và tắt) | bật: hủy animation ngay; tắt: tải group theo quy tắc | A |
+| TM-6R18 | Component unmount giữa transition | không callback sau unmount; không lỗi | A |
+| TM-6R19 | Focus target đã inactive | focus về điều khiển gây thay đổi | A |
+| TM-6A05 | Preview reset giữa animation | hủy animation, áp state mới | A |
+| TM-6B03 | `sports-demo-nomotion`: toàn bộ emitted artifact graph | không module, chunk, `import()`, file `motion.*`; workflow đầy đủ | A |
+| TM-6B04 | Form có Motion, `reduced` bật từ đầu | không request tới chunk `motion` ở route đầu, kể cả prefetch | A (network log) |
+| TM-6P02 | CLS khi reveal/exit; long task khi chuyển step | đo trên artifact, báo cáo kèm môi trường; không tuyên bố CWV PASS từ lab | đo |
 | TM-6B01 | Artifact PC | chỉ recipe của `guided`; canary recipe khác không có; không feature thư viện ngoài danh sách | A |
 | TM-6B02 | Rebuild cùng input | cùng `releaseId` (Motion không phá tính tất định) | A |
 | TM-6P01 | Đo bytes, request, T2/T3, INP, long task, CLS, reduced motion, CPU chậm | báo cáo số đo kèm môi trường; không tuyên bố PASS CWV từ lab | đo |
@@ -288,14 +320,14 @@ Package `@platform/motion-presets` (core, phát hành qua trusted pipeline, có 
 
 | # | Interface | Spec khác | Spec #6 | Trạng thái |
 |---|---|---|---|---|
-| I6-01 | Schema slot `motion` trong definition; IR `motion` | spec #1 §7.1 (giữ chỗ) | §7.1, §7.3 | **Cần cập nhật spec #1** khi spec #6 được duyệt |
-| I6-02 | `TransitionNotice`; trạng thái `submit` (`idle/pending/succeeded/failed`); focus tới tiêu đề step khi chuyển step; focus khi node chứa focus thành inactive | spec #1 §8.4, §9, §11 (engine, adapter React) | §6.2, §6.3 | **Cần bổ sung vào spec #1** |
-| I6-03 | Motion là core, không plugin ở P0; luật L3 cho package `motion-presets` (không import dispatcher/store/selector của engine, không mạng/storage) | spec #2 §7.1, §11.2 (ADR-033) | §6.2, TM-6R09 | Cần thêm luật L3 |
-| I6-04 | Codegen group `motion` chỉ recipe dùng; K10 canary recipe (`E-ARTIFACT-MOTION-UNUSED-RECIPE`); LRM chứa version; mã `E-MOTION-*` vào catalog; đổi tên preset ví dụ `fade-slide`/`scale-spring` → `subtle`/`guided` | spec #3 §7, §8, §10, §11.1, §13, §18.1a | §7.3 | Cần cập nhật spec #3 |
-| I6-05 | Tab モーション; command `SetMotionCategory`, `SetMotionSpeed`, `UpgradeMotionPreset`; diagnostics; review diff; `preview.demo` / `preview.motionMode` | spec #4 §8, §13.2, §14.7, §16, §17 (I4-14) | §10 | Cần cập nhật spec #4 |
-| I6-06 | Preview build chứa Motion runtime + mọi version `motion-presets` được hỗ trợ (INV-A2, L1b); phát hành preset qua trusted pipeline | spec #2 §10.1, §11.1 (INV-A2 hiện **chưa** có Motion); spec #5 I5-09 | §7.2, §10 | **Cần cập nhật spec #2** |
+| I6-01 | Schema slot `motion` trong definition; IR `motion` | spec #1 §7.1 (giữ chỗ) | §7.1, §7.3 | Đồng bộ (spec #1 rev 3.6) |
+| I6-02 | `TransitionNotice`; trạng thái `submit` (`idle/pending/succeeded/failed`); focus tới tiêu đề step khi chuyển step; focus khi node chứa focus thành inactive | spec #1 §8.4, §9, §11 (engine, adapter React) | §6.2, §6.3 | Đồng bộ (spec #1 rev 3.6) |
+| I6-03 | Motion là core, không plugin ở P0; luật L3 cho package `motion-presets` (không import dispatcher/store/selector của engine, không mạng/storage) | spec #2 §7.1, §11.2 (ADR-033) | §6.2, TM-6R09 | Đồng bộ (spec #2 rev 2.10) |
+| I6-04 | Codegen group `motion` chỉ recipe dùng; K10 canary recipe (`E-ARTIFACT-MOTION-UNUSED-RECIPE`); LRM chứa version; mã `E-MOTION-*` vào catalog; đổi tên preset ví dụ `fade-slide`/`scale-spring` → `subtle`/`guided` | spec #3 §7, §8, §10, §11.1, §13, §18.1a | §7.3 | Đồng bộ (spec #3 rev 2.5) |
+| I6-05 | Tab モーション; command `SetMotionCategory`, `SetMotionSpeed`, `UpgradeMotionPreset`; diagnostics; review diff; `preview.demo` / `preview.motionMode` | spec #4 §8, §13.2, §14.7, §16, §17 (I4-14) | §10 | Đồng bộ (spec #4 rev 2.4) |
+| I6-06 | Preview build chứa Motion runtime + mọi version `motion-presets` được hỗ trợ (INV-A2, L1b); phát hành preset qua trusted pipeline | spec #2 §10.1, §11.1 (INV-A2 hiện **chưa** có Motion); spec #5 I5-09 | §7.2, §10 | Đồng bộ (spec #2 rev 2.10, spec #5 I5-09) |
 
-**Truy vết requirement → test:** F-P0-09 → TM-6R02, TM-6R05, TM-6R07, TM-6A02, TM-6U01 · MOTION-01 → §7 (+ OD6-04) · MOTION-02 → TM-6R02, TM-6A01, TM-6A02 · MOTION-03 → TM-6R07 · MOTION-04 → TM-6B01 · MOTION-05 → TM-6P01, §9 · MOTION-06 → TM-6R03, TM-6R04, TM-6R10, TM-6R11 · MOTION-07 → TM-6R01, TM-6B01 · PERF-07 → TM-6P01 · TEST-07 → TM-6R02..R07 · DOD-03 → TM-6A01, TM-6A02.
+**Truy vết requirement → test:** F-P0-09 → TM-6R02, TM-6R05, TM-6R07, TM-6A02, TM-6U01 · MOTION-01 → §7.2 (engine/recipe hỗ trợ duration/delay/easing; UI P0 không mở tham số thấp cấp — ADR-067; **không** DONE vì đổi scope) · MOTION-02 → TM-6R02, TM-6A01, TM-6A02 · MOTION-03 → TM-6R07 · MOTION-04 → TM-6B01 · MOTION-05 → TM-6P01, §9 · MOTION-06 → TM-6R03, TM-6R04, TM-6R10..R19 · MOTION-07 → TM-6R01, TM-6B01, TM-6B03, TM-6B04 · PERF-07 → TM-6P01, TM-6P02 · TEST-07 → TM-6R02..R07 · DOD-03 → TM-6A01, TM-6A02.
 
 ## 15. Rủi ro
 
@@ -307,29 +339,27 @@ Package `@platform/motion-presets` (core, phát hành qua trusted pipeline, có 
 | Group `motion` tải muộn làm vài chuyển step đầu không có animation | Thấp | chấp nhận (không bao giờ chờ); đo thời điểm tải |
 | Cấu hình thư viện kéo feature thừa | Thấp | feature bundle tối thiểu; K10 kiểm |
 
-## 16. Quyết định cần user
+## 16. Quyết định
 
-| ID | Vấn đề | Phương án | Khuyến nghị |
-|---|---|---|---|
-| **OD6-01** | Kiến trúc Motion P0 | A CSS/WAAPI tự viết (lệch master §6.5) · B thư viện `motion` sau adapter · C preset là plugin (lệch ADR-033) | **B**, kèm adapter cách ly và cổng đo ở P04 |
-| **OD6-02** | Bộ preset P0 | `none` / `subtle` (控えめ) / `guided` (ガイド付き) với recipe §7.2 | chấp nhận làm registry v1; tên hiển thị theo ADR-062 |
-| **OD6-03** | Override theo step | P0 / P1 | **P1** — demo Sports/PC không cần; giữ contract đơn giản |
-| **OD6-04** | Độ lệch MOTION-01: trigger/duration/delay/easing nằm ở recipe do platform duyệt, Editor chỉ có preset + nhóm + `speed` | (a) chấp nhận độ lệch bằng ADR; (b) mở thêm tham số có giới hạn (ví dụ `delay`, `easing` enum) cho Editor | **(a)** — đúng tinh thần ADR-062 (không lập trình animation); mở rộng ở P1 nếu có nhu cầu |
+**Đã quyết (review rev 1):** OD6-01 → ADR-064 (B, Motion Adapter) · OD6-02 → ADR-065 (preset, tween) · OD6-03 → ADR-066 (per-step P1) · OD6-04 → ADR-067 (tham số trong recipe). Không còn quyết định mở của spec #6.
 
-Các lựa chọn *[Claude]*: step cũ biến mất ngay (chỉ enter cho step); `speed` ba mức; timeout bóng 400 ms, bóng ngoài flow; `outline-pulse-once` cho validation; không intro animation; `simulatePending` bằng adapter submit mock trong iframe; không spring ở P0.
+Các lựa chọn *[Claude]*: step cũ biến mất ngay (chỉ enter cho step); `speed` ba mức; timeout shell 400 ms, shell ngoài flow, không giá trị khách; `outline-pulse-once` cho validation; không intro animation; `simulatePending` bằng adapter submit mock trong iframe.
 
 ## 17. Để builder tự quyết
 
 Tên component, cách tổ chức recipe trong package, easing cụ thể trong enum, cách đếm "nơi áp dụng" từ IR, bố cục chi tiết tab モーション.
 
-## 18. Mức độ sẵn sàng (revision 1)
+## 18. Mức độ sẵn sàng (revision 2)
+
+Đề xuất **READY_FOR_CROSS_SPEC_REVIEW** sau khi đồng bộ I6-01..06 (đã làm cùng rev 2).
+
 
 | Phần | Trạng thái | Còn mở |
 |---|---|---|
 | Tình huống, ranh giới (§4, §6) | Chờ review | — |
-| Kiến trúc (§5) | Chờ quyết định | OD6-01 |
-| Độ lệch MOTION-01 | Chờ quyết định | OD6-04 |
-| Contract, preset (§7) | Chờ review | OD6-02, OD6-03 |
+| Kiến trúc (§5) | ADR-064 | — |
+| Độ lệch MOTION-01 | ADR-067 | — |
+| Contract, preset (§7) | ADR-065, ADR-066 | — |
 | A11y, hiệu năng (§8, §9) | Chờ review; số đo ở P04/P07 | — |
 | Builder UX (§10) | Chờ review | — |
 | Kiểm tra độc lập | §19 | — |
@@ -357,3 +387,11 @@ Kết luận: đúng mọi điểm của ADR-062, không overclaim; **0 BLOCKER,
 | — | Builder hỏi: spring ở P0 | bỏ; P0 chỉ tween |
 | — | Builder hỏi: độ lệch MOTION-01 | **OD6-04** cho user |
 
+## 20. Thay đổi so với revision 1
+
+- ADR-064..067 áp vào §5, §7.2, §16, §18.
+- §6.3: bóng exit thành presentation shell đã làm sạch, không giá trị khách; TM-6R12.
+- §6.4 mới: một animation mỗi region, hủy/thay; callback không khôi phục state.
+- §7.4 viết lại: bảng tải/reduced motion (không Motion; reduced từ đầu — kiểm trước `import()`/prefetch; đổi giữa phiên; module đã tải không unload); không dùng `reducedMotion="user"` làm bằng chứng không tải.
+- §12: TM-6R12..R19, TM-6A05, TM-6B03, TM-6B04, TM-6P02. §14: truy vết MOTION-01 theo ADR-067.
+- Đồng bộ I6-01..06: spec #1 rev 3.6, spec #2 rev 2.10, spec #3 rev 2.5, spec #4 rev 2.4, spec #5 (I5-09).

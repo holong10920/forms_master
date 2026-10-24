@@ -1,6 +1,7 @@
 # Spec #1: Form Definition Schema & Workflow DSL (Architecture Proposal)
 
-> **Trạng thái: PROPOSAL, revision 3.5** (2026-10-24).
+> **Trạng thái: PROPOSAL, revision 3.6** (2026-10-24).
+> - Rev 3.6: đồng bộ spec #6 (I6-01, I6-02): schema slot `motion` (§7.1); quy tắc focus khi chuyển step và khi node chứa focus thành inactive (§8.4); trạng thái `submit` và selector `transitionNotices` (§9).
 > - Rev 3.5: mã 422 field inactive là `E-INACTIVE-DATA-PRESENT` (dạng mã lỗi runtime công khai, spec #3 §16.4); body submit có `releaseId` (§8.6, spec #5 §10.2); đóng OD-05 (ADR-060), OD-08 và OD-09 (ADR-058, P0 defaults); TTL draft kiểm logic (§9).
 > - Rev 3.4: theo spec #4 review #1 (ADR-048, ADR-049): named condition tham chiếu bằng `conditionId` ổn định (§7.1, §7.3, §7.4); đóng OD-03 và OD-11 (§21); node `PREVIEW_ONLY_UNCONFIGURED_PATH` chỉ có trong IR preview (§8.1); `draftVersion` là metadata do server quản lý (§7.1). Chưa có review mới của user cho spec #1.
 > - Rev 3.3: thêm trạng thái chờ capability lazy (`awaitingCapability`, C11, INV-N9) theo spec #3 §15.1 (ADR-040); sửa C7 cho khớp ADR-037 (không xóa draft ngầm, đề xuất Resume đúng release). Chưa có review mới của user cho spec #1.
@@ -258,7 +259,7 @@ stateDiagram-v2
 | `revision` / `draftVersion` | revision cho bản publish, `draftVersion` cho draft. *(Rev 3.4)* Cả hai là **metadata do server quản lý** (envelope, spec #4 §15, spec #5), không phải nội dung mà typed command của Admin sửa. |
 | `locale` | `{ default: "ja", supported: ["ja"] }` |
 | `themeRef` | tham chiếu theme đã pin. Theme thuộc spec #4/#6. |
-| `motion` | cấu hình preset. Thuộc spec #6, spec #1 chỉ giữ chỗ. |
+| `motion` | *(rev 3.6, spec #6 §7.1)* `{ preset: { id, package, version }, categories: { stepTransition, conditionalReveal, validationFeedback, submitFeedback: "on" \| "off" }, speed: "slow" \| "standard" \| "fast" }`; `preset.id = "none"` hoặc không có `motion` → Motion-none. Không selector, code, URL, CSS. |
 | `dependencies` | `blocks` (`alias → id@revision`) và `capabilities` (`alias → { plugin, version, capability, kind }`, spec #2 §5.2, §6.6), pin chính xác. Không có `latest` hay wildcard. Một version mỗi `pluginId` trong một form release (ADR-031). |
 | `effects` | binding tới post-commit effect đã được platform approve: `{ id, use: alias, on: "submission.committed", inputs }` (spec #2 §15.3, ADR-034). Không có trigger khác ở P0. |
 | `blockInstances` | `{ id, alias, block: alias trong dependencies, inputs }`. *[Claude]* `inputs` ở P0 **chỉ là hằng số**. Compiler gập chúng lại khi expand, nên chúng không trở thành node trong dependency graph. Bind input vào field hoặc điều kiện là việc của P1, cần ADR. |
@@ -767,6 +768,7 @@ Runtime, preview và backend evaluator đều dùng hàm này với cùng bộ f
   - Field vừa sửa kéo theo việc tính lại và revalidate **toàn bộ** phần phụ thuộc phía sau, trên mọi step của đường đi.
   - Nút "quay lại 確認" chỉ xuất hiện khi đường đi không đổi **và** toàn bộ đường đi hợp lệ.
   - 確認 luôn render từ state mới, không dùng bản tóm tắt cũ.
+- **Focus (rev 3.6, spec #6 §6.3):** khi `current` đổi, adapter React chuyển focus tới tiêu đề step mới **ngay** khi state commit (không chờ animation). Khi node đang chứa focus thành inactive, focus chuyển tới điều khiển đã gây thay đổi. Khi 次へ/submit thất bại: focus field lỗi đầu tiên (§11).
 - **Deep link và reload (N-10, A2):**
   - Một step chỉ được chấp nhận nếu **mọi step trước nó trên đường đi được dựng lại đều hoàn tất**. "Hoàn tất" được tính **từ dữ liệu thực sự còn tồn tại và validation hiện hành**, không dựa vào cờ completion được lưu trữ.
   - Nếu không thỏa, khách được đưa tới step chưa hoàn tất đầu tiên.
@@ -933,6 +935,7 @@ Các dòng C1–C10 được thêm vào T3 dưới dạng sự kiện và guard,
 | `async` | theo node: `idle` / `pending` / `success` / `error` / `timeout`, kèm `fingerprint` và `seq` |
 | `nav` | `current`, `furthestReached`. Đường đi **không lưu** mà được dẫn xuất qua `derivedPath(values)` (§8.2). |
 | `session` | `formId`, `revision`, `releaseId`, identity của Capability Lock, `schemaVersion`, `sessionId`, dấu thời gian. Lấy từ release đang chạy, **không** từ active pointer (ADR-037). **Không chứa PII.** |
+| `submit` *(rev 3.6)* | `idle` / `pending` / `succeeded` / `failed` — suy ra từ effect `submit` đang chạy và `submitResult`; `pending` trùng với khóa runtime `disabled` (C9, INV-N5). Không chứa giá trị. |
 
 - **Engine là reducer thuần:** `(state, event) → (state', effects[])`.
   - Event gồm:
@@ -943,6 +946,7 @@ Các dòng C1–C10 được thêm vào T3 dưới dạng sự kiện và guard,
     - `submitResult`, `restoreDraft`, `startOver`
   - Effect là *mô tả*, ví dụ `lookup`, `asyncValidate`, `submit`, `saveDraft`, `cancel`. Effect runner trong adapter thực thi chúng.
   - Nhờ vậy engine tất định, test được không cần DOM, và chạy được hoàn toàn trong bộ nhớ khi persistence bị tắt (ADR-012).
+- **`transitionNotices(prev, next)`** *(rev 3.6, spec #6 §6.2)*: selector thuần sinh `stepChanged` / `nodeActivity` / `validationShown` / `submitStatus` từ diff của state đã commit; không chứa giá trị field; chỉ đọc (Motion không có API dispatch).
 - **Selector theo node:** adapter React chỉ subscribe phần mình cần, để tránh re-render toàn form (PERF-04, đo bằng profiler).
 - **`DraftPersistenceAdapter`:** là một effect handler.
   - Chỉ ghi giá trị **active**, có `persist: allowed` và không bị taint PII.

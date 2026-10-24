@@ -79,6 +79,11 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-060 | OD-05 (spec #1): payload có field inactive → 422 với mã ổn định; backend tự tính field active; không lưu, không echo giá trị | **APPROVED** | User (spec #5 rev 1 review) | 2026-10-24 |
 | ADR-061 | OD4-07: P0 chỉ inspector tự sinh từ schema + control typed đã duyệt; không chạy code custom Inspector trong origin Admin; sandbox custom Inspector P1 | **APPROVED** | User (spec #5 rev 1 review) | 2026-10-24 |
 | ADR-062 | Spec #6: Motion phục vụ hiểu, phản hồi, liên tục — không trang trí; 4 tình huống (chuyển step, hiện nội dung theo điều kiện, phản hồi validation, phản hồi submit); preset đã duyệt + preview, không code; Motion không quyết định business state; reduced motion, a11y, hiệu năng, cô lập bundle | **APPROVED AS PRODUCT DIRECTION** | User (spec #6 Answer #1) | 2026-10-24 |
+| ADR-063 | OD5-05: G-ADM bắt buộc; G-EXEC (zero adapter execution sau revocation) **không** được bảo đảm ở P0 — TOCTOU được chấp nhận **chỉ** cho PoC synthetic với điều kiện chặt; gate bảo mật riêng trước mọi tích hợp thật | **APPROVED WITH STRICT P0 RESTRICTIONS** | User (spec #5 security decision) | 2026-10-24 |
+| ADR-064 | OD6-01: thư viện Motion sau Motion Adapter do platform sở hữu; pin version; MotionHost chỉ nhận TransitionNotice chỉ đọc; đo ở P04 | **APPROVED** | User (spec #6 rev 1 review) | 2026-10-24 |
+| ADR-065 | OD6-02: preset P0 `none` / `subtle` / `guided`, recipe tween có ID + version, không spring; guided không auto-advance | **APPROVED** | User (spec #6 rev 1 review) | 2026-10-24 |
+| ADR-066 | OD6-03: override Motion theo step → P1 | **APPROVED** | User (spec #6 rev 1 review) | 2026-10-24 |
+| ADR-067 | OD6-04: duration/delay/easing trong recipe có version do platform kiểm soát; Editor chỉ chọn preset, nhóm, speed | **APPROVED AS P0 SCOPE REFINEMENT** | User (spec #6 rev 1 review) | 2026-10-24 |
 
 ---
 
@@ -1134,3 +1139,33 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 - **Non-goals P0:** GSAP timeline, keyframe editor, CSS animation editor, scroll-linked, parallax, 3D, choreography toàn form, AI sinh script, script tùy ý theo plugin.
 - **Thành công:** Editor mở PC Builder → chọn preset → preview chuyển step → preview 店頭/宅配 → kiểm reduced motion → lưu draft → gửi review; không code, không DSL, không developer. Form khách đúng khi animation tắt hoặc không tải được.
 - **Người duyệt:** User (spec #6 Answer #1). **Ngày:** 2026-10-24.
+
+## ADR-063 — Thực thi adapter sau revocation (OD5-05)
+
+- **Quyết định (user): APPROVED WITH STRICT P0 RESTRICTIONS** — phương án (a), chỉ cho PoC synthetic P0.
+- **G-ADM (bắt buộc):** revocation commit trước transaction submit → submit thất bại; submit commit trước → có thể hợp lệ; ConditionCheck nằm trong cùng transaction ghi submission/outbox; retry idempotent của submission đã commit không tạo admission mới; gate thiếu → fail closed.
+- **G-EXEC (không bảo đảm):** không có guarantee "không adapter mới nào chạy sau commit của revocation". Đọc nhất quán mạnh không khóa gate; adapter có thể **bắt đầu** sau commit nếu lần đọc gate xảy ra trước đó. Đây là giới hạn **TOCTOU**, không chỉ là "lời gọi đang dở chạy tiếp". Adapter **read-only** cũng nằm trong phạm vi rủi ro, không riêng effect.
+- **Điều kiện để chấp nhận:** dữ liệu synthetic; không PII thật; không connector ngoài thật; không effect đặc quyền thật; mock adapter không truy cập hệ thống nghiệp vụ thật; mock effect không gửi email/SMS hay sửa dữ liệu thật; adapter không có secret thật; network access giới hạn theo allowlist và được kiểm chứng; runtime policy store không khả dụng → fail closed cho mọi quyết định nhạy cảm về bảo mật; giới hạn G-EXEC có trong security risk register và đánh giá G1 cuối. **Điều kiện thay đổi → approval hết hiệu lực.**
+- **Trước tích hợp thật:** trước bất kỳ connector thật, PII thật hay effect đặc quyền nào phải có một security verification/approval gate riêng. Phương án (b) lease/permit chỉ là **ứng viên nghiên cứu**, chưa phải giải pháp mặc định; cần xét lease acquisition/expiry, clock skew và giả định lỗi, fencing token, revoke đồng thời, hủy lời gọi đang chạy, lời gọi đã admit chưa thực thi, dịch vụ ngoài có hỗ trợ fencing/idempotency không, guarantee chính xác trước/sau commit. Không hứa zero execution khi chưa có cơ chế chứng minh; không tự chọn thời lượng lease hay dung sai lệch giờ.
+- **V5-01 giữ UNVERIFIED:** cần independent design review cho thay đổi `CAPSTATUS.version`; CT-26 có interleaving commit có kiểm soát; cùng domain contract trên SQLite và DynamoDB Local ở pha kiểm chứng; emulator PASS không phải bằng chứng đủ cho AWS production; CT-26 chỉ chạy được sau G1 → đánh dấu **post-G1 implementation verification gate**, không tuyên bố PASS trong P01. Cross-Subsystem Review phải phân loại rõ: design contradiction / accepted risk / verification pending / blocker thật.
+- **Người duyệt:** User (spec #5 security decision). **Ngày:** 2026-10-24.
+
+## ADR-064 — Kiến trúc Motion (OD6-01)
+
+- **Quyết định (user): APPROVED** — phương án B: thư viện Motion sau **Motion Adapter do platform sở hữu**. Runtime không phụ thuộc trực tiếp API thư viện ngoài adapter; pin exact version thư viện và tương thích build; MotionHost nhận `TransitionNotice` chỉ đọc; không engine dispatch hay callback nghiệp vụ đặc quyền; Motion không điều khiển validation, navigation, submission, effect; có fallback không chuyển động; P04 đo bundle/hiệu năng thật. Không tuyên bố thư viện nhẹ hơn CSS/WAAPI khi chưa benchmark.
+- **Người duyệt:** User. **Ngày:** 2026-10-24.
+
+## ADR-065 — Preset Motion P0 (OD6-02)
+
+- **Quyết định (user): APPROVED** — `none` (なし), `subtle` (控えめ), `guided` (ガイド付き); recipe dạng tween, không spring. Recipe có ID + version ổn định, mapping target/trigger đã duyệt, cấu hình tất định, biến thể reduced motion, không chạy code từ cấu hình Admin, không ảnh hưởng domain state. `guided` không có nghĩa auto-advance hay chọn thay khách.
+- **Người duyệt:** User. **Ngày:** 2026-10-24.
+
+## ADR-066 — Override Motion theo step (OD6-03)
+
+- **Quyết định (user): APPROVED** — chuyển P1. P0: preset cấp form; bật/tắt theo nhóm tương tác được hỗ trợ; speed ba mức đã duyệt; preview Motion On/Off; preview reduced motion. Không per-step choreography hay timeline editor.
+- **Người duyệt:** User. **Ngày:** 2026-10-24.
+
+## ADR-067 — Tham số thấp cấp của Motion (OD6-04)
+
+- **Quyết định (user): APPROVED AS P0 SCOPE REFINEMENT** — duration/delay/easing nằm trong recipe có version do platform kiểm soát; Business Editor không chỉnh ms, easing curve hay thuộc tính animation tùy ý; chỉ chọn preset, nhóm, speed. Traceability MOTION-01: engine/recipe vẫn hỗ trợ duration/delay/easing; UI P0 không mở tham số thấp cấp; chỉnh nâng cao chuyển P1 nếu có nhu cầu. **Không** đánh dấu requirement DONE chỉ vì đã sửa scope.
+- **Người duyệt:** User. **Ngày:** 2026-10-24.

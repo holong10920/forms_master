@@ -1,6 +1,7 @@
 # Spec #3: Compiler, Bundle & Release Architecture (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.4** (2026-10-24).
+> **Trạng thái: PROPOSAL, revision 2.5** (2026-10-24).
+> - Rev 2.5: đồng bộ spec #6 (I6-04): preset ví dụ đổi thành `subtle`/`guided`; group `motion` chỉ chứa recipe dùng, canary từng recipe (`E-ARTIFACT-MOTION-UNUSED-RECIPE`); kiểm reduced motion **trước** `import()` và prefetch; mã `E-MOTION-*` vào catalog; version `motion-presets` và thư viện Motion là input của LRM.
 > - Rev 2.4: error contract thêm 423 cho form availability (§16.4, spec #5 §9.1); §16.1 dùng P0 defaults của ADR-058 (`TTL_draft` 72 giờ, `G` 7 ngày, `T_edge_max` là mục kiểm chứng khi deploy); bootstrap kiểm TTL draft theo logic (`savedAt`).
 > - Rev 2.3: đồng bộ catalog diagnostic với spec #4 rev 2.1 (§18.1a); IR preview chỉ được thực thi trong runtime preview cô lập trên origin riêng (ADR-053, §5.1).
 > - Rev 2.1: thêm mode `preview` (§5.1) theo spec #4.
@@ -287,7 +288,7 @@ flowchart LR
 | Core field component được form dùng | `text`, `choice.radio`, `tel` | entry *[Claude]* |
 | Validator (`cross-runtime-pure`, bản TS) | `jpPhone`, `katakana` | entry *[Claude]* |
 | `fieldType` plugin (browser facet) | `storeSelector` | entry nếu dùng ở step đầu; ngược lại **lazy** |
-| Motion runtime + preset của form (core, spec #6) | `fade-slide`, `scale-spring` | **lazy** group `motion`; không có nếu form không dùng Motion |
+| Motion runtime + recipe của preset (core, spec #6) | preset `subtle` (recipe `fade-slide`, `fade`, `outline-pulse-once`), `guided` (`slide-directional`, `scale-in`, …) — chỉ recipe thực dùng | **lazy** group `motion`; không có nếu form không dùng Motion |
 
 *[Claude]* Core field và validator luôn ở entry vì nhỏ và cần cho validation; tách chúng tạo nhiều chunk rất nhỏ (over-splitting). Điều chỉnh theo kích thước chỉ sau khi có số đo (P1).
 
@@ -310,13 +311,13 @@ flowchart LR
 
 ### 7.3. Chunk graph: Sports
 
-`sports-demo` (Motion `fade-slide`) và `sports-demo-nomotion`. Không có plugin `fieldType`; validator `katakana`, `jpPhone` từ block `customer-info`.
+`sports-demo` (Motion preset `subtle`) và `sports-demo-nomotion` (Motion-none). Không có plugin `fieldType`; validator `katakana`, `jpPhone` từ block `customer-info`.
 
 ```mermaid
 flowchart LR
   subgraph SP["sports-demo"]
     E1["entry<br/>core fields · katakana · jpPhone"] --> C1["core<br/>engine · React · SDK"]
-    E1 -.->|"lazy, sau khi ready,<br/>không reduced motion"| M1["motion<br/>runtime + fade-slide"]
+    E1 -.->|"lazy, sau khi ready,<br/>không reduced motion"| M1["motion<br/>runtime + recipe của subtle"]
     M1 --> C1
   end
   subgraph SN["sports-demo-nomotion"]
@@ -329,14 +330,14 @@ flowchart LR
 
 ### 7.4. Chunk graph: PC
 
-`pc-demo` (Motion `scale-spring`). `storeSelector` chỉ dùng ở `stp_store` (nhánh 店頭).
+`pc-demo` (Motion preset `guided`). `storeSelector` chỉ dùng ở `stp_store` (nhánh 店頭).
 
 ```mermaid
 flowchart LR
   E["entry<br/>core fields · katakana · jpPhone"]
   C["core<br/>engine · React · SDK"]
   G["g-stp_store<br/>@platform/store-selector@1.0.0<br/>#storeSelector/browser (+ CSS)"]
-  M["motion<br/>runtime + scale-spring"]
+  M["motion<br/>runtime + recipe của guided"]
   SH["shared chunk (nếu bundler tách)<br/>module dùng chung g-stp_store và motion"]
   E --> C
   E -.->|"lazy; prefetch khi 買取方法 = 店頭<br/>đã commit và hợp lệ"| G
@@ -397,6 +398,7 @@ Chạy trên output thật của K9, không tin lớp nào trước đó (spec #
 | Không module/marker của design facet, `fixtures/`, test, mock (INV-F2); không file `.py` hay mã Python (INV-F4 phía artifact) | module graph + quét nội dung | `E-ARTIFACT-FORBIDDEN-FACET` |
 | Đúng một React, một React DOM (INV-F7) | module graph | `E-ARTIFACT-DUPLICATE-SINGLETON` |
 | Chunk thực tế khớp Chunk Plan: mỗi group có chunk; không chunk ngoài plan trừ shared chunk được ghi nhận; không module của group A xuất hiện ở entry | module graph + plan | `E-ARTIFACT-UNEXPECTED-CHUNK`, `E-CHUNK-PLAN-MISMATCH` |
+| *(rev 2.5)* Form có Motion: chỉ recipe trong IR; canary của recipe khác không có; không feature thư viện ngoài danh sách cho phép | module graph + canary | `E-ARTIFACT-MOTION-UNUSED-RECIPE` |
 | Form không Motion: không module Motion, không `import()` tới Motion | module graph + quét specifier | `E-ARTIFACT-MOTION-PRESENT` |
 | Đồ thị import **tĩnh** giữa chunk là DAG; entry → group chỉ qua `import()`; `core` không import entry/group | module graph | `E-ARTIFACT-CHUNK-CYCLE` |
 | Không `.map` trong thư mục phục vụ; không comment `sourceMappingURL` | inventory + quét | `E-ARTIFACT-PUBLIC-SOURCEMAP` |
@@ -427,6 +429,7 @@ Output: **Chunk Manifest** (private, digest trong LRM): `{ chunkManifestFormat: 
 - **Hash:** SHA-256. Digest viết `sha256:<64 hex>`.
 - **Path:** tương đối với gốc release; `/`; `[a-z0-9._/-]`; cấm `..`, `./`, `/` đầu, `//`, rỗng; trùng khi bỏ hoa/thường → lỗi; sắp xếp theo byte UTF-8.
 - **`contentType`:** từ bảng cố định theo đuôi file.
+- *(rev 2.5)* Form có Motion: version `@platform/motion-presets`, version thư viện Motion (pin chính xác) và IR `motion` đã chuẩn hóa là input của LRM (spec #6 §7.3).
 - **Không thuộc LRM** (để `releaseId` không đổi khi chúng đổi): resolution context của lock (hash catalog, ledger/override snapshot), `buildOptions` (ví dụ `sourcemap: private`), platform commit, thời điểm, pipeline, operator. Chúng nằm trong provenance.
 - **Khóa sắp xếp:** `inventory` theo `path` (byte UTF-8); `sharedExternals` theo tên; các mảng của Chunk Plan, Chunk Manifest như §7.2, §10; lock theo chuỗi CK rồi FBK; `resolvedDependencies` của provenance theo `name` rồi `version`.
 
@@ -584,7 +587,7 @@ private (không phục vụ):
   assets/entry.<h12>.js                core fields · katakana · jpPhone
   assets/g-stp_store.<h12>.js          @platform/store-selector@1.0.0#storeSelector/browser
   assets/g-stp_store.<h12>.css         (nếu plugin có CSS)
-  assets/motion.<h12>.js               Motion runtime + scale-spring
+  assets/motion.<h12>.js               Motion runtime + recipe của guided
   assets/shared.<h12>.js               (chỉ khi bundler tách module dùng chung; ghi trong Chunk Manifest)
   assets/form.<h12>.css
   assets/form-ir.<h12>.json
@@ -705,7 +708,7 @@ Prefetch group `g` khi **tất cả** điều kiện sau đúng:
 - **Cơ chế:** `fetch()` độ ưu tiên thấp tới URL của JS và CSS của group (và shared chunk phụ thuộc, lấy từ khối `groups` trong `index.html`) để đưa vào HTTP cache. **Không** dùng `modulepreload` cho prefetch: nếu prefetch thất bại, nó không được làm hỏng module map dùng cho lần tải thật *[Claude]*.
 - *(Rev 2, EXP-01)* Chromium 156 và Firefox 157 dùng lại response của prefetch cho lần tải module (2 request tổng); **WebKit 27.2 thì không** (4 request: JS và CSS bị tải hai lần). Cách xử lý trên WebKit: **OD3-03**.
 - Prefetch **không** khởi tạo module, không đổi state, không phải validation hay transition. Branch đổi sau khi đã prefetch → byte nằm trong cache, không có gì được khởi tạo.
-- Group `motion`: tải (không phải prefetch) sau T3 nếu form có Motion và `prefers-reduced-motion` không bật. Chưa tải xong thì step transition không có animation; không bao giờ chờ Motion.
+- Group `motion`: tải (không phải prefetch) sau T3 nếu form có Motion và `prefers-reduced-motion` không bật — *(rev 2.5)* điều kiện này được kiểm **trước** `import()` và trước mọi prefetch; reduced motion bật thì không tải, không prefetch (spec #6 §7.4). Chưa tải xong thì step transition không có animation; không bao giờ chờ Motion.
 
 ### 15.3. Chunk failure: phân loại và recovery
 
@@ -860,6 +863,11 @@ Ràng buộc (P0 defaults theo ADR-058: `TTL_draft` 72 giờ, `G` 7 ngày; `T_ed
 | `E-LABEL-MISSING` | error | ✔ | field/step thiếu nhãn `ja` | spec #4 §13.2 |
 | `E-READONLY-FEATURE-BROKEN` | error | ✔ | prefill/lookup/`skipWhen`/nhóm lặp tham chiếu thứ không còn hợp lệ | spec #4 §8.1 |
 | `E-ADMIN-CAP-NOT-BUNDLED` | error (chỉ Admin) | — (compiler **không** phát) | version đã pin không có trong Admin/Preview build | spec #4 §14.4 |
+
+| `E-MOTION-PRESET-UNKNOWN` | error | ✔ | preset/version không có trong catalog | spec #6 §7.3 |
+| `E-MOTION-CATEGORY-UNSUPPORTED` | error | ✔ | nhóm không được preset hỗ trợ | spec #6 §7.3 |
+| `E-MOTION-PRESET-INCOMPATIBLE` | error | ✔ | `compat.engine` của preset không chứa engine | spec #6 §7.2 |
+| `W-MOTION-PRESET-DEPRECATED` | warning | ✘ | preset deprecated | spec #6 §7.3 |
 
 Phân biệt: `E-GRAPH-NO-DEFAULT` (spec #1) là thiếu `default`; `E-TRANSITION-TARGET-UNSET` là thiếu đích của dòng có điều kiện.
 

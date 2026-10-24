@@ -637,9 +637,9 @@ SQLite: `BEGIN IMMEDIATE` tuần tự hóa mọi writer trên cả database; cù
 | Guarantee | Nội dung | Cơ chế | Trạng thái |
 |---|---|---|---|
 | **G-ADM: submission admission** | Revocation commit trước transaction submit → submit bị từ chối; submit commit trước → hợp lệ tại thời điểm admission | ConditionCheck gate trong transaction (linearization tại commit) | Có cơ chế chứng minh; kiểm chứng: TM-5G01..03, CT-08 |
-| **G-EXEC: adapter execution** | Không lời gọi adapter **mới** nào chạy sau commit của revocation | **Chưa có cơ chế chứng minh.** Đọc gate nhất quán mạnh **không khóa** gate: gate có thể bị revoke ngay sau lần đọc và trước khi adapter bắt đầu | **OD5-05** — chờ user duyệt (§17); không được tuyên bố là đã bảo đảm |
+| **G-EXEC: adapter execution** | Không lời gọi adapter **mới** nào chạy sau commit của revocation | **Không được bảo đảm ở P0 (ADR-063).** Đọc gate nhất quán mạnh **không khóa** gate → giới hạn **TOCTOU**: adapter có thể **bắt đầu** sau commit nếu lần đọc gate xảy ra trước commit. Áp cho **mọi** adapter, kể cả read-only (query, `serverValidator`), không riêng effect | **ACCEPTED_RISK chỉ cho PoC synthetic** với điều kiện ADR-063; có trong `docs/SECURITY_RISK_REGISTER.md` (SR-01); gate bảo mật riêng trước mọi tích hợp thật |
 
-Interleaving (TM-5G18): T1 đọc gate FBK = mở → T2 commit `revoked` → T3 gọi adapter. Với thiết kế hiện tại, T3 **chạy** (adapter thực thi một lần trên input của request đó). Hệ quả: query trả kết quả cho khách; trên đường submit, transaction submit vẫn bị từ chối (G-ADM giữ); ở outbox, effect có thể chạy một lần (P0 chỉ có mock effect). Lời gọi đã bắt đầu trước commit chạy tới hết, bị chặn trên bởi deadline của adapter (spec #2: cancel/deadline).
+Interleaving (TM-5G18): T1 đọc gate FBK = mở → T2 commit `revoked` → T3 gọi adapter. Với thiết kế hiện tại, T3 **chạy** (adapter **bắt đầu** sau commit của revocation — TOCTOU, không chỉ là lời gọi đang dở). Hệ quả: query trả kết quả cho khách; trên đường submit, transaction submit vẫn bị từ chối (G-ADM giữ); ở outbox, effect có thể chạy một lần (P0 chỉ có mock effect). Lời gọi đã bắt đầu trước commit chạy tới hết, bị chặn trên bởi deadline của adapter (spec #2: cancel/deadline).
 
 **Revocation plugin toàn cục.** Mọi release dùng FBK đó kiểm **cùng một** gate FBK, nên **một** transaction (≤ 10 gate của PRK) là đủ: commit của nó là linearization point cho mọi release và form dùng **server FBK** đó — không cần fan-out. Giới hạn:
 - Gate chỉ chặn **phía server**. Plugin chỉ có browser facet (hoặc rủi ro nằm ở browser facet): submit vẫn được nhận cho tới khi áp M4/M5 **theo từng form**; mỗi form một transaction, nguyên tử với form đó nhưng **không** nguyên tử giữa các form. Incident hiển thị 「N / M フォームを停止済み」; không nói "đã chặn mọi form" trước khi N = M.
@@ -986,17 +986,17 @@ Ký hiệu: P = pointer, R7/R8 = release (synthetic PC).
 | I5-06 | Draft khách, `TTL_draft` 72 h (logical expiration ở bootstrap), resume | spec #1 §9, §13 (OD-08 đóng, ADR-058), spec #3 §14.2, §16.1 | §9.4 | Đồng bộ |
 | I5-07 | PII classification, retention 30 ngày | spec #1 §16 | §10.4 | Đồng bộ (ADR-059) |
 | I5-08 | Theme/Motion | spec #6 | — | không ảnh hưởng |
-| I5-09 | Build và deploy Admin build / Preview build (INV-A1/A2), Admin build manifest (`buildManifestHash`), header hai origin | spec #2 rev 2.9 §11.1; spec #4 rev 2.3 §14.4, §14.7 | §4 (deploy Admin cùng Admin API; build bằng toolchain spec #3 trong trusted pipeline) | Đồng bộ; chi tiết pipeline ở plan |
+| I5-09 | Build và deploy Admin build / Preview build (INV-A1/A2; Preview build có Motion runtime + mọi version `motion-presets` được hỗ trợ, spec #6 I6-06), Admin build manifest (`buildManifestHash`), header hai origin | spec #2 rev 2.9 §11.1; spec #4 rev 2.3 §14.4, §14.7 | §4 (deploy Admin cùng Admin API; build bằng toolchain spec #3 trong trusted pipeline) | Đồng bộ; chi tiết pipeline ở plan |
 
 ## 17. Quyết định
 
 **Đã quyết (review rev 1):** OD5-01 → ADR-056 · OD5-02 → ADR-057 · OD5-03 → ADR-058 · OD5-04 → ADR-059 · OD-05 (spec #1) → ADR-060 · OD4-07 (spec #4) → ADR-061.
 
-**Còn mở:**
+**Đã quyết (security):**
 
-| ID | Vấn đề | Phương án | Khuyến nghị | Hạn |
+| ID | Vấn đề | Phương án | Quyết định | Hạn |
 |---|---|---|---|---|
-| **OD5-05** | Guarantee cho **thực thi adapter** sau revocation (G-EXEC, §9.3). Thực thi code bên ngoài không thể nằm trong transaction DB, nên "không lời gọi mới nào sau commit" không đạt được chỉ bằng đọc gate. | **(a)** P0 chỉ bảo đảm G-ADM (zero new admission sau commit) + best-effort cho thực thi: không lời gọi nào có lần đọc gate **sau** commit được chạy; lời gọi có lần đọc **trước** commit có thể bắt đầu (khoảng đọc→gọi, chưa đo, không bảo đảm) và chạy tới deadline. Không tốn thêm cơ chế. **(b)** Execution permit có lease: lần đọc gate cấp một permit hiệu lực `L_exec` *[Claude: 2 s]*; adapter host từ chối bắt đầu khi permit hết hạn; deadline lời gọi ≤ `L_exec`; revocation chỉ báo 「実行停止済み」 sau `commit + L_exec + lệch giờ tối đa`. Bảo đảm **có chặn trên**: không lời gọi nào bắt đầu sau `commit + L_exec + skew` hoặc chạy quá thời điểm đó + deadline. Cần đồng hồ đồng bộ, host kiểm permit. **(c)** Zero tuyệt đối: lời gọi giữ "read lock" trên gate (bộ đếm in-flight), revocation chờ đếm về 0 — chặn revocation sau lời gọi chậm, bộ đếm rò khi crash, tranh chấp cao. | **(a) cho P0** (dữ liệu hư cấu, effect chỉ là mock; G-ADM vẫn tuyệt đối), ghi rõ giới hạn; **(b) bắt buộc trước khi có effect hay connector thật** (P1). Không chọn (c). Đây là guarantee yếu hơn "zero new execution" — **cần user duyệt riêng vì có security impact**. | Trước plan |
+| **OD5-05** ✅ | Guarantee cho thực thi adapter sau revocation | — | **Đã quyết (ADR-063):** (a) chỉ cho PoC synthetic P0, với điều kiện: dữ liệu synthetic, không PII thật, không connector/effect thật, mock không chạm hệ thống thật, không secret thật, network theo allowlist đã kiểm chứng, store không khả dụng → fail closed cho mọi quyết định bảo mật; giới hạn có trong risk register và đánh giá G1. Điều kiện đổi → approval hết hiệu lực. Trước tích hợp thật: gate bảo mật riêng; (b) lease/permit chỉ là ứng viên nghiên cứu (không tự chọn lease/skew). | — |
 
 **Không còn quyết định kiến trúc mở khác** của spec #5.
 
@@ -1135,7 +1135,7 @@ Không phát sinh BLOCKER. Các điểm còn lại chỉ đo được sau G10 (V
 
 ### 23.4. Verification items bắt buộc cho Cross-Subsystem Review (theo review spec #5 rev 2)
 
-**V5-01 — `CAPSTATUS.version` và tạo gate FBK. Trạng thái: UNVERIFIED** (bản sửa §23.3 chưa qua review độc lập; không tuyên bố FIX VERIFIED cho tới khi có review + CT-26).
+**V5-01 — `CAPSTATUS.version` và tạo gate FBK. Trạng thái: VERIFICATION_PENDING / UNVERIFIED** (ADR-063). Cần: (1) independent design review của thay đổi `CAPSTATUS.version` — thực hiện trong Cross-Subsystem Review; (2) CT-26 với interleaving commit có kiểm soát trên SQLite và DynamoDB Local — chỉ chạy được khi có code, nên là **post-G1 implementation verification gate**; không tuyên bố PASS trong P01; emulator PASS không đủ cho AWS production.
 
 Điều kiện chung: mọi transaction dưới đây đều có `Update CAPSTATUS#{PRK}` với `attribute_exists(PK) AND version = :v` → `version + 1` (CAS). Danh sách override mở được đọc nhất quán mạnh **trên bảng gốc** (không GSI) sau khi đọc `CAPSTATUS` ở version `v`; vì mọi thay đổi override đều CAS cùng `version`, danh sách đó không thể đổi giữa lần đọc và commit mà transaction vẫn thành công.
 
@@ -1152,7 +1152,7 @@ Không phát sinh BLOCKER. Các điểm còn lại chỉ đo được sau G10 (V
 
 Cách kiểm chứng: CT-26 trên SQLite và DynamoDB Local với hook điều khiển thứ tự commit cho từng dòng; review độc lập đọc lại các điều kiện; evidence ghi rõ "emulator" cho DynamoDB Local.
 
-**V5-02 — Adapter execution vs revocation. Trạng thái: chờ OD5-05.** G-ADM có cơ chế chứng minh (§9.3). G-EXEC hiện **không** được bảo đảm (interleaving T1/T2/T3, TM-5G18). Phương án và khuyến nghị: OD5-05 (§17). Không tuyên bố "mọi adapter ngừng ngay sau revocation".
+**V5-02 — Adapter execution vs revocation. Trạng thái: ACCEPTED_RISK (P0 synthetic, ADR-063) + VERIFICATION_PENDING cho G-ADM.** G-ADM có cơ chế; kiểm chứng bằng TM-5G01..03, TM-5G07, CT-08, CT-09 (post-G1). G-EXEC **không** được bảo đảm (TOCTOU, TM-5G18 ghi nhận hành vi, không che). Không tuyên bố "mọi adapter ngừng ngay sau revocation". Điều kiện chấp nhận: ADR-063, SR-01.
 
 ### 23.3. Lần kiểm cuối (phạm vi hẹp)
 
