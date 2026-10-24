@@ -1,6 +1,6 @@
 # Spec #5: API, Persistence & Publishing (Architecture Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2 + C1** (2026-10-24). Cross-Subsystem Review: NOT READY FOR G1 → vòng sửa C1 (ADR-068) đã áp: §5, §6.2, §6.5, §6.6, §6.8 (mới), §7, §8, §9.2, §9.3 (viết lại), §9.6 (mới), §13, §14, §16. Trạng thái các finding: `docs/discovery/P01_CROSS_SUBSYSTEM_REVIEW.md` §10.
+> **Trạng thái: PROPOSAL, revision 2 + C1 + C1b** (2026-10-25). C1b: sửa theo targeted re-review sau C1 (report §10.4) — §9.7 mới (platform release, ledger, catalog snapshot), gate chỉ CAS ở item authoritative, hold theo nguồn cho M4/M5 và security của release, `blockedPrks` tới iframe, snapshot đầu vào lấy lại được, chọn bootstrap theo khả năng tương thích, kiểm semantic khi activate, `inputIds` thống nhất. Cross-Subsystem Review: NOT READY FOR G1 → vòng sửa C1 (ADR-068) đã áp: §5, §6.2, §6.5, §6.6, §6.8 (mới), §7, §8, §9.2, §9.3 (viết lại), §9.6 (mới), §13, §14, §16. Trạng thái các finding: `docs/discovery/P01_CROSS_SUBSYSTEM_REVIEW.md` §10.
 > - Review rev 1 (user): **SPEC5_REV1_CHANGES_REQUIRED**; phương án A giữ nguyên. OD5-01..04, OD-05, OD4-07 → ADR-056..061. **Security BLOCKER** (cửa sổ submit/revocation) sửa bằng submission admission gate (§9.3). Kiểm thêm publication (§5.3, §5.4, §6.6). Thay đổi: §24.
 > - Review rev 2 (user): READY_FOR_CROSS_SPEC_REVIEW **với verification items** V5-01 (tạo gate FBK, UNVERIFIED) và V5-02 (thực thi adapter, OD5-05) — §23.4.
 > - Rev 1 đã qua consistency review độc lập (§22). Rev 2 qua ba vòng targeted review (§23): admission gate dùng tập `blockers`, `CAPSTATUS` làm điểm CAS cho gate FBK, gate trước mọi lời gọi adapter.
@@ -155,17 +155,18 @@ flowchart LR
 | Draft head | có (`draftVersion`) | `PayloadRef` của definition, `savedBy/At`, `baseReleaseId` | `fb_control` + blob nếu lớn | ref ≤ 1 KB; nội dung ≤ 2 MB |
 | Key ledger | chỉ thêm, bất biến | entry `(key, releaseId) → identity`; key được giữ khi entry thuộc release **đã từng active** (§6.4 R4) | `fb_control`, mỗi entry một item | nhỏ |
 | Review snapshot | **bất biến** | `snapshotVersion`, `PayloadRef` (luôn blob), digest, block revision đã pin | `fb_control` (metadata) + blob | ref nhỏ |
-| ReviewRequest | có (`version`) | trạng thái, snapshot, `basePointerVersion`, `dependencyDigest`, preflight ref, người gửi/duyệt | `fb_control` | nhỏ |
-| Release record | trạng thái có (`version`); identity bất biến | `releaseId`, form, revision, snapshot digest, `lrmDigest`, `artifactSetDigest`, `indexHtmlSha256`, attestation ref, 4 chiều trạng thái (§9.1), `serverHostApi`, backend deployment version | `fb_control` | nhỏ |
+| ReviewRequest | có (`version`) | trạng thái (§8.1), `staleReason?`, snapshot, `basePointerVersion`, `platformReleaseId`, `preflight { inputIds, digests, analyzerVersion, engineVersion }`, `revision?`, `buildRequestDigest?`, `dataContractAck`, người gửi/duyệt | `fb_control` | nhỏ |
+| Release record | trạng thái có (`version`); identity bất biến | `releaseId`, form, revision, snapshot digest, `buildRequestDigest`, `dataContractDigest`, `draftFormat`, `loadFormat`, `securityHolds { <incidentId>: … }` (C1b, N3), `lrmDigest`, `artifactSetDigest`, `indexHtmlSha256`, attestation ref, 4 chiều trạng thái (§9.1), `serverHostApi`, backend deployment version | `fb_control` | nhỏ |
 | Active pointer | có (`pointerVersion`, `entryVersion`) | `activeReleaseId`, `lastOperationId`; `entryVersion` tăng mỗi khi pointer **hoặc** availability đổi (§6.6) | `fb_control`, một item mỗi form | nhỏ |
-| Form availability | có (`version`) | `live` / `degraded` (M4: ngừng nhận submit) / `suspended` (M5: trang bảo trì), lý do, `incidentId` (spec #2 §16.1) | `fb_control`, một item mỗi form | nhỏ |
+| Form availability | có (`version`) | `holds: { <holdId>: { kind: M4 \| M5, incidentId?, actor, role, reasonCode, createdAt } }` — **mỗi nguồn một hold** (C1b, N3); trạng thái suy ra: có M5 → `suspended`, có M4 → `degraded`, rỗng → `live` | `fb_control`, một item mỗi form | nhỏ |
 | Backend deployment | có (`version`) | `deploymentVersion`, `serverHostApi`, adapter inventory hash, kết quả deploy gate | `fb_control`, item `DEPLOYMENT#CURRENT` | nhỏ |
 | Preview session | có, TTL | `previewSessionId` (hash), người dùng, form, `mode`, `draftVersion`/`snapshotId`/`catalogSnapshotId`, **`platformReleaseId`**, `blockedPrks`, `expiresAt`, `revoked` (SR-05, §7.3) | `fb_control` | nhỏ |
-| Admission gate | có (`blockers` SS, `capVersion`/`relVersion`/`availabilityVersion`) | gate form / release / server FBK — **phép chiếu** của item authoritative, ghi cùng transaction (§9.3.1) | `fb_control` | nhỏ |
+| Admission gate | có (`blockers` SS) | gate form / release / server FBK — **phép chiếu** của item authoritative, chỉ ghi trong transaction CAS item đó; bản thân gate chỉ có điều kiện `attribute_exists` (§9.3.1) | `fb_control` | nhỏ |
 | Plugin usage | chỉ thêm | `PRKUSE#{prk}/{releaseId}`: release nào dùng plugin version nào (ghi khi đăng ký release) — để liệt kê chính xác form bị ảnh hưởng (§9.3.8) | `fb_control` | nhỏ |
 | Site policy | có (`version`) | `SITEPOLICY#{siteId}`: `allowedEffects` (spec #2 §13.3); snapshot digest đi vào preflight và Build Request | `fb_control` | nhỏ |
-| Platform release | bất biến | `PLATFORMREL#{id}`: digest/version của engine, analyzer, compiler, bundler, builder image, bootstrap, template HTML, Admin build, Preview build, `motion-presets` được hỗ trợ, evaluator (`supportedIrFormats`); `current` = bản đang deploy (§6.8, CSR-10) | `fb_control` | nhỏ |
-| Catalog snapshot | bất biến | `CATSNAP#{id}`: digest catalog plugin + ledger status tại thời điểm tạo (mỗi lần ingestion tạo bản mới) | `fb_control` + blob | nhỏ |
+| Platform release | `PLATFORMREL#{id}` **bất biến**; `PLATFORMREL#CURRENT` là **con trỏ** thay đổi được (CAS) | `PLATFORMREL#{id}`: digest/version của engine, analyzer, compiler, bundler, builder image, template HTML, Admin build, Preview build, evaluator (`semanticVersion`, `supportedIrFormats`), danh sách bootstrap (`version`, `digest`, `supportedDraftFormats`, `supportedLoadFormats`), `motion-presets` được hỗ trợ kèm trạng thái (`active`/`deprecated`/`revoked`) — vòng đời §9.7 | `fb_control` | nhỏ |
+| Catalog snapshot | `CATSNAP#{id}` bất biến; `CATSNAP#CURRENT` con trỏ (CAS) | catalog plugin + trạng thái ledger của mọi PRK đã ingest, lưu blob content-addressed; tạo bởi mỗi ingestion và mỗi đồng bộ ledger (§9.7) | `fb_control` + blob | nhỏ |
+| Ledger state | có (`ledgerVersion`) | `LEDGER#{prk}`: trạng thái status ledger (Git) đã đồng bộ, `ledgerCommit` | `fb_control` | nhỏ |
 | Capability status (policy hiệu lực theo plugin) | có (`capVersion`, CAS) | `CAPSTATUS#{PRK}`: `serverFbks` (bất biến), `sources` (ledger, override mở, mitigation M3), `publishBlockers`, `fbkBlockers` (§9.3.2) — **nguồn sự thật duy nhất** cho trạng thái hiệu lực của plugin version | `fb_control` | ≤ 64 KB |
 | Blob touch | có | `BLOBTOUCH#{sha256}`: `touchedAt`, `gcState` (bảo vệ blob khỏi GC, §5.3) | `fb_control` | nhỏ |
 | Admin session (BFF) | có, TTL | `sessionId` (hash), `userId`, token OIDC **mã hóa**, CSRF token, `expiresAt`, `idleExpiresAt` | `fb_control` | nhỏ |
@@ -208,6 +209,8 @@ flowchart LR
 | Policy | `POLICY#{target}` | `{createdAt}#{overrideId}` | — |
 | Policy version | `POLICY#STATE` | `META` (`policyVersion`; **không** bị submit chạm) | — |
 | Gate | `GATE#FORM#{formId}` · `GATE#REL#{releaseId}` · `GATE#FBK#{fbk}` | `META` (P0 một item, không shard) | — |
+| Ledger state | `LEDGER#{prk}` | `META` | — |
+| Catalog snapshot (con trỏ) | `CATSNAP#CURRENT` | `META` | — |
 | Plugin usage | `PRKUSE#{prk}` | `{releaseId}` | — |
 | Site policy | `SITEPOLICY#{siteId}` | `META` | — |
 | Platform release | `PLATFORMREL#{id}` · `PLATFORMREL#CURRENT` | `META` | — |
@@ -245,7 +248,7 @@ PayloadRef = { inline?: <canonical JSON>, blobKey?: "sha256/<hex>", sha256: "<he
   1. Ghi blob tại key `sha256/<hex>` **có điều kiện không tồn tại** (S3 `If-None-Match: *`; local: tạo file độc quyền). Đã tồn tại → đọc lại, so hash; trùng thì là no-op (idempotent).
   2. Ghi item DB có điều kiện (ví dụ `draftVersion = :base`), lưu `PayloadRef`.
   3. Bước 2 thất bại → **blob mồ côi** (không item nào tham chiếu). Blob mồ côi vẫn là dữ liệu của form (định nghĩa, có thể chứa giá trị `const`/default `public`), nên có chính sách dọn:
-     - **GC mark-and-sweep** *[Claude]* chạy hằng ngày (P0, cả local; xóa thật, không chỉ báo cáo): tập được tham chiếu = draft head hiện tại ∪ mọi snapshot ∪ Build Request ∪ preflight result còn được review tham chiếu. Với mỗi blob **không** được tham chiếu và `BLOBTOUCH.touchedAt` **cũ hơn 24 giờ**: (a) `UpdateItem BLOBTOUCH SET gcState = deleting WHERE touchedAt = :seen AND attribute_not_exists(gcState)` — thất bại nghĩa là có writer vừa touch → bỏ qua; (b) kiểm lại tham chiếu (nhất quán mạnh) — **có** tham chiếu thì `REMOVE gcState` và dừng; (c) xóa blob; (d) xóa `BLOBTOUCH`. Writer gặp `gcState = deleting` thì chờ tới khi (d) xong. **Khôi phục sau crash:** mỗi lần chạy, GC xử lý trước các `BLOBTOUCH` đang `deleting` quá 10 phút: kiểm lại tham chiếu → có thì `REMOVE gcState`, không thì làm tiếp (c)(d). **Blob không có `BLOBTOUCH`** (ví dụ ghi trước khi có cơ chế, hoặc crash trước bước 0): GC tạo `BLOBTOUCH` với `touchedAt = now` (`attribute_not_exists`) và chỉ xét lại sau 24 giờ. **Giới hạn writer:** từ bước 0 tới commit bước 2 không quá 1 giờ *[Claude]*; quá thì writer touch lại trước khi commit (24 giờ ≫ 1 giờ nên GC không thể chen vào). **Local FS:** ghi file tạm rồi `link()` (thất bại nếu đã tồn tại) để không để lại file ghi dở; file đã tồn tại mà hash lệch → `E-PAYLOAD-INTEGRITY`, sự cố. Draft blob cũ bị thay bởi version mới hơn, và **snapshot blob mồ côi** khi transaction tạo review thất bại, đều được dọn theo cùng cách. Mỗi lần xóa ghi audit `blob.gc` (chỉ hash, kích thước).
+     - **GC mark-and-sweep** *[Claude]* chạy hằng ngày (P0, cả local; xóa thật, không chỉ báo cáo): tập được tham chiếu = draft head hiện tại ∪ mọi snapshot ∪ mọi blob được **review** (mọi trạng thái) tham chiếu: preflight result, snapshot đầu vào (`keyLedgerSnapshot`, `sitePolicy`, policy snapshot) ∪ mọi Build Request được review hoặc **release record** tham chiếu ∪ mọi blob `CATSNAP` (C1b, N-02). Review và release record không bị xóa ở P0, nên đầu vào của mọi Build Request luôn lấy lại được (retry, `rebuild-verify`). Với mỗi blob **không** được tham chiếu và `BLOBTOUCH.touchedAt` **cũ hơn 24 giờ**: (a) `UpdateItem BLOBTOUCH SET gcState = deleting WHERE touchedAt = :seen AND attribute_not_exists(gcState)` — thất bại nghĩa là có writer vừa touch → bỏ qua; (b) kiểm lại tham chiếu (nhất quán mạnh) — **có** tham chiếu thì `REMOVE gcState` và dừng; (c) xóa blob; (d) xóa `BLOBTOUCH`. Writer gặp `gcState = deleting` thì chờ tới khi (d) xong. **Khôi phục sau crash:** mỗi lần chạy, GC xử lý trước các `BLOBTOUCH` đang `deleting` quá 10 phút: kiểm lại tham chiếu → có thì `REMOVE gcState`, không thì làm tiếp (c)(d). **Blob không có `BLOBTOUCH`** (ví dụ ghi trước khi có cơ chế, hoặc crash trước bước 0): GC tạo `BLOBTOUCH` với `touchedAt = now` (`attribute_not_exists`) và chỉ xét lại sau 24 giờ. **Giới hạn writer:** từ bước 0 tới commit bước 2 không quá 1 giờ *[Claude]*; quá thì writer touch lại trước khi commit (24 giờ ≫ 1 giờ nên GC không thể chen vào). **Local FS:** ghi file tạm rồi `link()` (thất bại nếu đã tồn tại) để không để lại file ghi dở; file đã tồn tại mà hash lệch → `E-PAYLOAD-INTEGRITY`, sự cố. Draft blob cũ bị thay bởi version mới hơn, và **snapshot blob mồ côi** khi transaction tạo review thất bại, đều được dọn theo cùng cách. Mỗi lần xóa ghi audit `blob.gc` (chỉ hash, kích thước).
      - Blob của **snapshot** không bao giờ bị GC khi snapshot item còn (P0: giữ vĩnh viễn).
 - **Đọc:** tải blob, tính lại SHA-256, so với `PayloadRef.sha256`; lệch → `E-PAYLOAD-INTEGRITY`, fail closed, audit. Truyền lên S3 kèm checksum SHA-256 của request để phát hiện lỗi đường truyền.
 - **Access control:** blob store private, mã hóa phía server, không URL công khai. Ghi: Admin API (draft, snapshot) và worker (Build Request, preflight). Đọc: Admin API, worker, Preview API (chỉ IR/snapshot của phiên). Xóa: chỉ job GC. Ở AWS là IAM theo role (sau G10).
@@ -260,7 +263,7 @@ PayloadRef = { inline?: <canonical JSON>, blobKey?: "sha256/<hex>", sha256: "<he
 | Tạo review | Put snapshot (`not exists`) · Put ReviewRequest · ConditionCheck draft head (`draftVersion = :requested`) · Update form (`reviewCounter`) · Put idempotency · Put audit | 6 | blob snapshot; preflight server cho đúng digest |
 | Approve / reject | Update ReviewRequest (`version = :v`, `state = OPEN`, người duyệt ≠ người gửi) · ConditionCheck pointer (`pointerVersion = :basePointerVersion`) · ConditionCheck `CAPSTATUS#{PRK}` mỗi plugin trong lock của snapshot (`attribute_not_exists(publishBlockers)`; có → `409 REVIEW_RECHECK_REQUIRED`) · Put audit | 3 + số plugin | — |
 | Tạo operation publish | Put operation (`not exists`) · Put idempotency · Update ReviewRequest (`APPROVED → PUBLISHING`) · ConditionCheck pointer (`pointerVersion = :basePointerVersion`, sai → `409 REVIEW_STALE`) · Update form (`revisionCounter`, chỉ khi review chưa có revision) · Put audit | 6 | — |
-| Đăng ký release | **Put release chỉ với `attribute_not_exists`** + Put `GATE#REL#{releaseId}` (`blockers = {rel#pending}`, `relVersion = 1`, `attribute_not_exists`) + Put `PRKUSE#{prk}/{releaseId}` mỗi plugin trong lock; nếu đã tồn tại (retry cùng review → cùng `releaseId`): **chỉ** ConditionCheck bộ identity (`lrmDigest`, `indexHtmlSha256`, `artifactSetDigest`, `formId`), **không bao giờ ghi đè** trạng thái (suspended/quarantined/retired giữ nguyên) · Update operation (fencing) · Put audit | 4 | ghi entry key ledger `KEY#{key}#{releaseId}` (Put `attribute_not_exists`, bất biến; §6.4 R4) |
+| Đăng ký release | **Put release chỉ với `attribute_not_exists`** + Put `GATE#REL#{releaseId}` (`blockers = {rel#pending}`, `attribute_not_exists`) + Put `PRKUSE#{prk}/{releaseId}` mỗi plugin trong lock; nếu đã tồn tại (retry cùng review → cùng `releaseId`): **chỉ** ConditionCheck bộ identity (`lrmDigest`, `indexHtmlSha256`, `artifactSetDigest`, `formId`), **không bao giờ ghi đè** trạng thái (suspended/quarantined/retired giữ nguyên) · Update operation (fencing) · Put audit | 4 | ghi entry key ledger `KEY#{key}#{releaseId}` (Put `attribute_not_exists`, bất biến; §6.4 R4) |
 | Đánh dấu `verified` | Update release (**`state IN (registered, verified)`**, `version = :v` → `verified`; idempotent, CSR-15) · Update operation (`generation = :g`, `VERIFYING → VERIFIED`, ghi `deploymentVersionChecked`) | 2 | integrity gate, deploy gate, policy |
 | **Activation** | §6.5 | 8 + số plugin (≤ 10) + số server FBK (≤ 10) ≤ 28 | — |
 | Kết thúc operation không thành công | Update operation (→ `FAILED`/`CANCELLED`/`SUPERSEDED`, fencing) · Update ReviewRequest (`PUBLISHING → APPROVED`, hoặc `STALE` khi SUPERSEDED) · Put audit | 3 | — |
@@ -318,10 +321,10 @@ stateDiagram-v2
 
 | Stage | Việc | Side effect ngoài DB | Idempotent nhờ |
 |---|---|---|---|
-| BUILDING | **lắp Build Request theo §6.8** (mọi trường từ nguồn authoritative đã ghi trong review, không từ trạng thái Admin hiện tại), lưu blob theo digest và ghi digest vào review (retry dùng lại → cùng `releaseId`); chạy build worker mode `release` (K0–K14, hai lần chạy sạch) | ghi `staging/{buildRequestDigest}/…` write-once | key theo digest; staging đã có cùng attestation → dùng lại |
+| BUILDING | **lắp Build Request theo §6.8** (mọi trường từ nguồn authoritative đã ghi trong review, không từ trạng thái Admin hiện tại), lưu blob theo digest và ghi digest vào review (retry dùng lại → cùng `releaseId`; `recheck` xóa `buildRequestDigest` để lần build sau lắp lại theo platform release mới — m-1); chạy build worker mode `release` (K0–K14, hai lần chạy sạch) | ghi `staging/{buildRequestDigest}/…` write-once | key theo digest; staging đã có cùng attestation → dùng lại |
 | BUILT | đọc attestation trong staging | — | — |
 | REGISTERED | đọc từng file staging, kiểm SHA-256, ghi `releases/{releaseId}/…` bằng `PutObject` có `If-None-Match: *` (không dùng CopyObject có điều kiện — chưa xác minh, VG-11); đã tồn tại → so hash; ghi entry key ledger; đăng ký release (§5.4) | ghi release store | content-addressed; `E-RELEASE-ID-COLLISION` nếu khác identity (spec #3 §11.6) |
-| VERIFYING | integrity gate **đọc lại từ storage** (mọi file trong inventory, `index.html` theo attestation, không file thừa, tính lại `releaseId`); deploy gate / adapter precheck của release với `DEPLOYMENT#CURRENT` (spec #2 §10.4); evaluator hiện tại hỗ trợ `irFormat` của release (CSR-11); `LRM.toolchain.engine` = engine của `review.platformReleaseId` (CSR-10); `CAPSTATUS` của mọi plugin trong lock (M2) và gate FBK tồn tại; support/security/retention của release; kiểm key ledger (§6.4 R4); release → `verified` cùng transaction với operation (§5.4) | đọc | thuần đọc |
+| VERIFYING | integrity gate **đọc lại từ storage** (mọi file trong inventory, `index.html` theo attestation, không file thừa, tính lại `releaseId`); deploy gate / adapter precheck của release với `DEPLOYMENT#CURRENT` (spec #2 §10.4); evaluator hiện tại hỗ trợ `irFormat` của release **và chạy semantic conformance fixtures của chính release trên evaluator hiện tại — lệch → FAILED** (C1b, N-04; kết quả gắn với `deploymentVersion` được ConditionCheck ở activation action 6); bootstrap được chọn theo §6.6 có tương thích; `LRM.toolchain.engine` = engine của `review.platformReleaseId` (CSR-10); `CAPSTATUS` của mọi plugin trong lock (M2) và gate FBK tồn tại; support/security/retention của release; kiểm key ledger (§6.4 R4); release → `verified` cùng transaction với operation (§5.4) | đọc | thuần đọc |
 | ACTIVATED | §6.5 | — | điều kiện trong transaction |
 | COMPLETED | sinh `entry.html` từ pointer + availability + khối `load` của release; ghi entry có điều kiện theo `entryVersion` (§6.6) | ghi entry | theo `entryVersion` |
 | (sau COMPLETED) | invalidation CDN + probe (§6.6), theo dõi trong `delivery.cdn` | CDN | `CallerReference = {formId}:{entryVersion}:{attempt}` |
@@ -375,11 +378,11 @@ DynamoDB `TransactWriteItems` (`ClientRequestToken = {operationId}:activate:{gen
 
 | # | Action | Item | Điều kiện / cập nhật |
 |---|---|---|---|
-| 1 | Update | `FORM#frm_pc_demo` / `POINTER` | **điều kiện** `pointerVersion = :expected (41)` (form chưa publish: `pointerVersion = 0`, MINOR-07) → `activeReleaseId = rel_r8…`, `pointerVersion = 42`, `entryVersion + 1`, **`bootstrapDigest = :b`** với `:b` = bootstrap **mới hơn** giữa bootstrap hiện tại của pointer và bootstrap của release đích (không bao giờ hạ version khi rollback, CSR-14), `lastOperationId`, `updatedAt` |
+| 1 | Update | `FORM#frm_pc_demo` / `POINTER` | **điều kiện** `pointerVersion = :expected (41)` (form chưa publish: `pointerVersion = 0`, MINOR-07) → `activeReleaseId = rel_r8…`, `pointerVersion = 42`, `entryVersion + 1`, `supportedReleases.#target = { draftFormat, loadFormat }` (thêm release đích), **`bootstrap = :b`** chọn theo §6.6 (C1b, N-03), `lastOperationId`, `updatedAt` |
 | 2 | Update | `REL#rel_r8…` / `META` (release đích) | **điều kiện** `formId = :form AND state = verified AND security = normal AND support = supported AND retention = served AND version = :v` → `activation = active`, `activatedAt = if_not_exists(activatedAt, :at)`, `lastActivatedAt = :at`, **REMOVE** `deactivatedAt`, `supportEndsAt`, `version + 1` |
 | 3 | Update | `OP#op_…` / `META` | **điều kiện** `state = VERIFIED AND generation = :g AND lease.owner = :me` → `state = ACTIVATED`, `activation = { pointerVersion: 42, at }` |
 | 4 | Update | `FORM#frm_pc_demo` / `REVIEW#rvw_…` (chỉ publish) | **điều kiện** `state = PUBLISHING AND snapshotDigest = :digest` → `state = PUBLISHED`, `publishedReleaseId` |
-| 5 | Update | `GATE#REL#rel_r8…` | **điều kiện** `attribute_exists(PK) AND relVersion = :rv` → `SET blockers = derive(REL sau action 2)` hoặc `REMOVE blockers` (gỡ `rel#pending`), `relVersion = :rv+1` — phép chiếu của `REL#` (§9.3.1) |
+| 5 | Update | `GATE#REL#rel_r8…` | **điều kiện** `attribute_exists(PK)` (CAS đã nằm ở action 2 trên `REL#`, C1b N2) → `SET blockers = derive(REL sau action 2)` hoặc `REMOVE blockers` (gỡ `rel#pending`) |
 | 5a | ConditionCheck | `CAPSTATUS#{PRK}` mỗi plugin trong lock (≤ 10 plugin mỗi form *[Claude]*) | `attribute_exists(PK) AND attribute_not_exists(publishBlockers)` (M2: không activate release chứa version `vulnerable`/`revoked`) |
 | 5b | ConditionCheck | `GATE#FBK#{fbk}` mỗi server FBK trong đường submit | `attribute_exists(PK) AND attribute_not_exists(blockers)` (gate tồn tại và mở; tránh activate một release mà mọi submit sẽ bị 423) |
 | 6 | ConditionCheck | `DEPLOYMENT#CURRENT` / `META` | `deploymentVersion = :checked` (backend không đổi kể từ deploy gate/adapter precheck) |
@@ -412,7 +415,12 @@ Không còn ConditionCheck `POLICY#STATE` toàn cục: activation chỉ kiểm �
   5. `412`/`409 ConditionalRequestConflict` → quay lại bước 1.
   - Kịch bản của review: publish R8 (`entryVersion` 42) → reconciler A bắt đầu ghi R8 → rollback R7 commit (43) → writer B ghi R7 (43) → A ghi tiếp: ETag A đọc đã cũ → `412` → A đọc lại `POINTER` (43) → thấy object đã 43 → dừng. Nếu A ghi **trước** B: B nhận `412` khi `If-Match` hoặc đọc thấy 42 < 43 → ghi 43. Kết quả ổn định luôn là `entryVersion` lớn nhất = pointer authoritative (TM-5G09).
   - Reconciler định kỳ so object với `POINTER.entryVersion` và sửa lệch; đây là bảo đảm hội tụ cuối cùng. CDN có thể còn phục vụ bản cũ tới `T_edge_max` — DB CAS **không** làm S3 hay CloudFront đổi nguyên tử. Nội dung entry: availability `suspended` (M5) → trang bảo trì tĩnh 「現在メンテナンス中です」, không bootstrap; ngược lại → shell + khối `active` + `bootstrap.js` của active release (spec #3 §14.1).
-- **`bootstrap.js`** và các platform asset (`/_platform/bootstrap.<hash>.js`) được trusted pipeline phát hành vào release store (spec #3 §14.1), phục vụ bất biến từ cùng origin phân phối; giữ ít nhất bằng release còn tham chiếu. *(C1, CSR-14)* `entry.html` dùng **`POINTER.bootstrapDigest`** (bootstrap mới nhất từng được active, không giảm khi rollback), **không** phải bootstrap của active release. Luật của spec #3 §14.1 (bootstrap mới đọc được mọi `draftFormat` của release còn trong `S`) vì vậy luôn áp dụng: rollback R8 → R6 trong khi draft R7 còn supported → entry vẫn dùng bootstrap của R8 → draft R7 resume được (TM-5P07).
+- **`bootstrap.js`** và các platform asset (`/_platform/bootstrap.<hash>.js`) được trusted pipeline phát hành vào release store (spec #3 §14.1), phục vụ bất biến từ cùng origin phân phối; giữ ít nhất bằng release còn tham chiếu. *(C1b, CSR-14 + N-03)* **Chọn bootstrap cho entry** (không còn quy tắc "không giảm"):
+  - `POINTER.supportedReleases` = map `releaseId → { draftFormat, loadFormat }` của các release **của form này** còn trong `S` (thêm ở activation, gỡ ở retire — cùng transaction CAS `pointerVersion`).
+  - Bootstrap được chọn = bootstrap có **version semver cao nhất** trong `PLATFORMREL#CURRENT.bootstraps` thỏa: trạng thái không `revoked`, `supportedDraftFormats` và `supportedLoadFormats` **bao trùm** mọi phần tử của `supportedReleases`. Không có bootstrap nào thỏa → activation FAILED (`E-BOOTSTRAP-INCOMPATIBLE`), không đổi pointer.
+  - Lần publish đầu: `supportedReleases` chỉ có release đích.
+  - Rollback R8 → R6 khi draft R7 còn supported: R7 vẫn trong `supportedReleases` → bootstrap được chọn đọc được draft R7 (TM-5P07).
+  - **Phục hồi bootstrap lỗi:** platform-admin đánh dấu bootstrap đó `revoked` trong platform release mới (§9.7) → reconciler tính lại cho từng form → transaction CAS `POINTER` (`bootstrap`, `entryVersion + 1`) → entry ghi lại. Không có bootstrap thay thế → M5 cho form (§9.3.4 f).
 - **CDN (sau G10):** HTML entry `no-cache` + ETag ở browser, TTL ngắn ở edge + invalidation đường dẫn `/f/{site}/{form}/*` (master API-08). Probe: `GET` stable entry qua CDN, đọc `active.releaseId`, thử lại đến `T_confirm` *[Claude: 10 phút]*; quá hạn → `delivery.cdn = timeout`, cảnh báo, reconciler thử invalidation lại với `CallerReference` có `attempt` mới. Local và mọi môi trường trước G10: không có CDN → `cdn = n/a`; probe chỉ được xây ở P0 cho môi trường AWS (sau G10). `T_edge_max` phụ thuộc cấu hình CDN thật → **OPEN, chốt ở G10** (VG-10).
 - **Operation COMPLETED** khi T2 xong. T3 được theo dõi riêng; `cdn = timeout` không làm operation thất bại (pointer đã đổi), nhưng hiện rõ là chưa xác nhận.
 - **Không bao giờ** hiện "完了" cho T4.
@@ -442,13 +450,16 @@ Nguyên tắc: Build Request chỉ được lắp từ những gì **đã ghi tr
 | `form.revision` | `review.revision` (gán khi tạo operation publish đầu tiên, §6.2) | tạo operation | retry cùng review dùng lại |
 | `definitionSnapshot` | `review.snapshotDigest` (`SNAP#`) | tạo review | bất biến |
 | `blockRevisions` | block revision đã pin trong snapshot | tạo review | digest từ block store |
-| `previousDataContract` | `REL#{release tại basePointerVersion}.dataContractDigest`; form chưa publish → `null` | tạo review | CSR-08 |
+| `previousDataContract` | `REL#{release tại basePointerVersion}.dataContractDigest`; form chưa publish → `null` (spec #3 §5.1 dùng cùng quy ước) | tạo review | CSR-08 |
 | `keyLedgerSnapshot` *(mới)* | digest tập entry key ledger thuộc release đã active, đọc khi preflight vN | preflight | cũng nằm trong `inputIds` của preflight (CSR-08) |
 | `registryCatalog`, `ledgerSnapshotId` | `CATSNAP#{id}` ghi trong `review.preflight.inputIds` | preflight | catalog + ledger status bất biến tại thời điểm đó |
 | `runtimeOverrideSnapshotId` | digest `{PRK → capVersion, publishBlockers}` của mọi PRK trong lock, đọc `CAPSTATUS` khi preflight | preflight | K3 thuần; VERIFYING + activation kiểm trạng thái **hiện tại** |
 | `sitePolicy` *(mới)* | digest `SITEPOLICY#{siteId}` khi preflight | preflight | K5 `E-EFFECT-NOT-ALLOWED` thuần; VERIFYING và outbox kiểm lại hiện tại |
 | `motionPresets` *(mới)* | digest platform asset `@platform/motion-presets@<version đã pin trong definition>` trong release store | preflight | CSR-12; version phải có trong `PLATFORMREL` |
-| `buildConfig`, `bootstrap`, `releaseHtmlTemplate`, `builderImage`, `platformSource` | `PLATFORMREL#{review.platformReleaseId}` | preflight (ghi `platformReleaseId` vào review) | CSR-10: engine của build = engine của preview/preflight mà Reviewer đã thấy |
+| `platformRelease` | `review.platformReleaseId` | preflight | id của `PLATFORMREL#{id}` bất biến (§9.7) |
+| `buildConfig`, `bootstrap`, `releaseHtmlTemplate`, `builderImage`, `platformSource` | `PLATFORMREL#{review.platformReleaseId}` | preflight (ghi `platformReleaseId` vào review) | CSR-10: engine của build = engine của preview/preflight mà Reviewer đã thấy; `bootstrap` ở đây là bootstrap mà `index.html` của release tham chiếu |
+
+**Lấy lại được theo digest (C1b, N-02):** ở preflight, server ghi **blob content-addressed** cho từng snapshot đầu vào — `CATSNAP` (catalog + ledger), policy snapshot (`{PRK → capVersion, publishBlockers}`), `sitePolicy` (JSON chuẩn của `SITEPOLICY` ở version đọc được), `keyLedgerSnapshot` (tập entry key ledger thuộc release đã active) — và lưu digest vào review. K0 tải đúng các blob này theo digest; GC không xóa chúng (§5.3). `ledgerSnapshotId` = id `CATSNAP`; `runtimeOverrideSnapshotId` = digest policy snapshot.
 
 **Ràng buộc platform release (CSR-10).**
 - Preflight trả `{ platformReleaseId, engineVersion, analyzerVersion, inputIds, … }`; ReviewRequest ghi lại.
@@ -476,14 +487,14 @@ CORS: mỗi API chỉ cho đúng origin của mình; không bao giờ `*` hay `n
 |---|---|---|---|
 | `GET /sites`, `GET /sites/{siteId}/forms` | thành viên site | danh sách | — |
 | `POST /sites/{siteId}/forms` | editor | tạo form (starter/clone/trống) | `Idempotency-Key` |
-| `GET /forms/{formId}/draft` | editor+ | envelope `{ draftVersion, document, keyLedger, pinnedBlocks, catalogSnapshotId, ledgerSnapshotId, runtimeOverrideSnapshotId, analyzerVersion }` (spec #4 §14.2) | `ETag: draftVersion` |
+| `GET /forms/{formId}/draft` | editor+ | envelope `{ draftVersion, document, pinnedBlocks, inputIds: { catalogSnapshotId, ledgerSnapshotId, runtimeOverrideSnapshotId, keyLedgerSnapshot, sitePolicy, platformReleaseId }, keyLedger, sitePolicy (nội dung), analyzerVersion }` (C1b, N-05: cùng tập `inputIds` với preflight, spec #3 §5.1, spec #4 §14.2–§14.3) (spec #4 §14.2) | `ETag: draftVersion` |
 | `PUT /forms/{formId}/draft` | editor | lưu `{ draftVersion(base), document, saveSeq }` | điều kiện `draftVersion`; `409 VERSION_CONFLICT { currentDraftVersion }`; `409 KEY_COLLISION { keys }` (spec #4 §8.2); `413 DEFINITION_TOO_LARGE` |
 | `POST /forms/{formId}/preflight` | editor+ | spec #3 mode `preflight` trên `draftVersion` | kết quả cache theo `inputIds` |
 | `POST /forms/{formId}/preview-sessions` | editor+ (`review`: reviewer+) | `{ mode: partial, catalogSnapshotId }` \| `{ mode: simulation, draftVersion }` \| `{ mode: review, snapshotId }` → `{ previewSessionId, platformReleaseId, blockedPrks }`: chỉ cấp khi Preview build hiện tại thuộc `PLATFORMREL#CURRENT`; `blockedPrks` = PRK trong draft/snapshot có `publishBlockers` hoặc gate runtime đóng (CSR-07) (spec #4 §14.7) | hết hạn *[Claude: 30 phút]*; thu hồi khi có phiên mới cho cùng người + form, logout, mất membership/vai trò |
 | `POST /forms/{formId}/reviews` | editor | tạo snapshot + ReviewRequest `{ draftVersion, dataContractAck, note }` | `Idempotency-Key`; đòi preflight pass cho đúng digest; `CAPSTATUS` của plugin trong lock không có `publishBlockers` (đọc nhất quán mạnh) |
 | `GET /forms/{formId}/reviews/{reviewId}` | reviewer+, người gửi | snapshot, diff nghiệp vụ, preflight, stale | — |
 | `POST /reviews/{reviewId}/recheck` | reviewer | chạy lại preflight trên **vN** (không đổi snapshot) với platform release + policy hiện tại; `STALE(dependency|platform)` → `OPEN` nếu pass; `STALE(pointer)` không recheck được (CSR-16) | điều kiện `version` |
-| `POST /reviews/{reviewId}/approve` · `/reject` | reviewer, **≠ người gửi** | `{ version, comment }` | điều kiện `version`; `409 REVIEW_STALE` nếu pointer đổi |
+| `POST /reviews/{reviewId}/approve` · `/reject` *(C1b: approve và tạo operation ConditionCheck thêm `PLATFORMREL#CURRENT.id = review.platformReleaseId`; khác → ghi `STALE(platform)`, CSR-10)* | reviewer, **≠ người gửi** | `{ version, comment }` | điều kiện `version`; `409 REVIEW_STALE` nếu pointer đổi |
 | `POST /forms/{formId}/operations` (publish) | publisher | `{ type: publish, reviewId }` | `Idempotency-Key`; `202 { operationId }`; `409 REVIEW_STALE` |
 | `POST /forms/{formId}/operations` (rollback) | publisher | `{ type: rollback, targetReleaseId, expectedPointerVersion, reasonCode, note? }` | `Idempotency-Key`; `409 POINTER_CHANGED { current }`; `409 NO_CHANGE` nếu đích đang active; `422 ROLLBACK_TARGET_INELIGIBLE { reasons }` |
 | `GET /forms/{formId}/operations/{operationId}` | thành viên site | status contract (§6.1, §6.6) | không cache |
@@ -491,13 +502,13 @@ CORS: mỗi API chỉ cho đúng origin của mình; không bao giờ `*` hay `n
 | `GET /forms/{formId}/releases` | thành viên site | lịch sử: revision, `releaseId`, 4 chiều trạng thái, ai publish/rollback, số submission theo kết quả | — |
 | `GET /forms/{formId}/rollback-candidates` | publisher | release **đã từng active** đủ điều kiện + lý do không đủ của release khác (retired, archived, suspended, adapter thiếu, plugin bị chặn) | — |
 | `POST /releases/{releaseId}/retire` | platform-admin | retire tường minh; điều kiện: `activation = inactive`, `now ≥ supportEndsAt`, không incident mở (§9.3) | điều kiện `version` + `activation = inactive`; `policyVersion + 1` |
-| `PUT /forms/{formId}/availability` | platform-security (M5, M4); site-admin (chỉ M4 vì lý do vận hành) *[Claude]* | `{ state: live \| degraded \| suspended, version, incidentId, reasonCode }` (M4/M5, spec #2 §16.2) | điều kiện `version`; `policyVersion + 1`, `entryVersion + 1` |
+| `POST /forms/{formId}/availability/holds` · `DELETE /forms/{formId}/availability/holds/{holdId}` | M5: platform-security; M4: platform-security hoặc site-admin (lý do vận hành) | `{ kind: M4 \| M5, incidentId?, reasonCode }` → `holdId` (C1b, N3, ADR-072). Gỡ hold chỉ gỡ **đúng hold đó**; site-admin không gỡ được hold do platform-security đặt | `Idempotency-Key`; CAS `AVAILABILITY.version`; audit |
 | `DELETE /preview-sessions/current` | editor+ | thu hồi phiên preview của mình cho form (Admin gọi khi iframe nạp lại, đóng preview) | — |
 | `POST /platform/capabilities/{prk}/ingest` · `/repair` | platform-admin | ingestion (§9.3.3); repair gate dưới CAS | idempotent theo `ingestedFrom`; `409 CAPABILITY_INGEST_CONFLICT` |
 | `POST /policy/overrides` · `POST /policy/overrides/{id}/close` | platform-security | `{ target: { prk, fbk? }, effect: vulnerable \| revoked \| block-operation, incidentId, reasonCode, expiresAt? }` (ADR-072) | `Idempotency-Key`; trả `capVersion`; `404 CAPABILITY_NOT_INGESTED`; `409 ADAPTER_NOT_DEPLOYED` khi mở gate thiếu adapter; fail closed khi store không khả dụng |
-| `POST /incidents/{id}/mitigations/m3` · `DELETE …/m3` | platform-security | `{ prk, fbks[] }` — M3 tối thiểu (ADR-072) | như trên |
+| *(C1b, m7)* M3 tối thiểu = override `block-operation` (route `/policy/overrides`); không có route M3 riêng | — | `target.fbk` phải ∈ `serverFbks` (khác → `422 FBK_NOT_IN_CAPABILITY`); target PRK = mọi FBK | — |
 | `POST /incidents/{id}/browser-revocation` | platform-security | `{ prk }` → operation suspend từng form (§9.3.8), `progress { done, total, failed[] }` | idempotent; reconcile |
-| `POST /releases/{releaseId}/suspend` · `/resume` | platform-security | security status của release | audit + incident id; `policyVersion + 1` |
+| `POST /releases/{releaseId}/security-holds` · `DELETE …/security-holds/{incidentId}` | platform-security | đặt / gỡ hold bảo mật theo incident (C1b, N3); release còn hold nào → `rel#security` | CAS `REL#.version`; audit; `policyVersion + 1` |
 | `GET /audit?formId=…` | site admin, platform | audit | — |
 | `GET /support-matrix` | editor+ | backend deployment hiện tại: `serverHostApi`, adapter có mặt (spec #4 §8.3) | — |
 
@@ -519,7 +530,9 @@ Mọi route đọc session từ header `X-Preview-Session`. Session hết hạn/
 **Phạm vi và cách giao preview session (ADR-071, SR-05).**
 - **Cấp:** Admin API (phiên Admin, RBAC) tạo `PREVIEW#` gắn `{ userId, formId, mode, draftVersion | snapshotId | catalogSnapshotId, platformReleaseId, blockedPrks }`, TTL 30 phút.
 - **Giao cho iframe:** iframe nạp trang tĩnh của Preview build **không** có capability (điều hướng iframe không mang custom header, nên không dùng header hay URL cho bước này); sau `preview.hello`, Admin gửi `previewSessionId` qua `session.start` (postMessage, `targetOrigin` chính xác, spec #4 §14.7); iframe giữ trong bộ nhớ và gửi tới Preview API bằng header `X-Preview-Session`.
-- **Kiểm ở Preview API mỗi request:** session tồn tại, chưa hết hạn, chưa bị thu hồi (logout, membership đổi, draft đổi khi người dùng tải lại, session bị thay); `Origin` = origin preview; tài nguyên yêu cầu thuộc đúng `draftVersion`/`snapshotId`/`formId` của session (khác → `403 PREVIEW_SESSION_SCOPE`); `platformReleaseId` = Preview build hiện tại.
+- **Kiểm ở Preview API mỗi request:** session tồn tại, chưa hết hạn, chưa bị thu hồi (logout, membership đổi, draft đổi khi người dùng tải lại, session bị thay); nếu có header `Origin` thì phải = origin preview, và `Sec-Fetch-Site` phải là `same-origin` (GET cùng origin có thể không gửi `Origin` — m8); tài nguyên yêu cầu thuộc đúng `draftVersion`/`snapshotId`/`formId` của session (khác → `403 PREVIEW_SESSION_SCOPE`); `platformReleaseId` = Preview build hiện tại.
+- **`blockedPrks` tới iframe (C1b, N4):** `GET /api/preview/session/ir` trả `{ ir, blockedPrks }` đọc **authoritative** từ `CAPSTATUS` ở mỗi lần gọi; iframe dùng giá trị này (giá trị Admin gửi trong `session.start` chỉ để hiện sớm) và không mount `Component` của PRK bị chặn. Lời gọi `queries`/`simulate-submit` tới capability ngoài snapshot của session → `403 PREVIEW_SESSION_SCOPE` (TM-5V06).
+- **Draft đổi:** session **không** tự thay; banner trong Admin; khi người dùng tải lại → session mới, session cũ bị thu hồi (thống nhất spec #4 §14.6–§14.7; ADR-071).
 - **Quyền:** chỉ đọc IR/fixture của phiên và chạy simulation không ghi trên dữ liệu tổng hợp; không có quyền Admin, không ghi nghiệp vụ. Admin API và Form API **không** chấp nhận `X-Preview-Session` (401).
 - **Replay / dùng chéo:** id hợp lệ chỉ trong TTL và tới khi bị thay/thu hồi → sau đó `410 PREVIEW_SESSION_EXPIRED`; id gắn với một form/snapshot nên không dùng được cho form/snapshot khác. Không có cơ chế chống replay trong TTL bởi chính iframe đó (bearer, chấp nhận theo ADR-071).
 - **Không rò rỉ:** không trong URL/query/fragment/storage/log (redact), `Referrer-Policy: no-referrer`.
@@ -564,19 +577,8 @@ Mã lỗi: spec #3 §16.4 (409/503/410/423/422/409 idempotency), chốt HTTP ở
 
 ## 8. Review (ADR-050) — phía server
 
-```mermaid
-stateDiagram-v2
-  [*] --> OPEN: snapshot vN + preflight pass
-  OPEN --> APPROVED: approve (pointer chưa đổi)
-  OPEN --> REJECTED: reject
-  OPEN --> STALE: pointer đổi / dependency bị chặn
-  APPROVED --> PUBLISHING: tạo operation publish
-  APPROVED --> STALE: pointer đổi
-  PUBLISHING --> PUBLISHED: activation commit
-  PUBLISHING --> APPROVED: operation FAILED / CANCELLED (retry được)
-  PUBLISHING --> STALE: operation SUPERSEDED
-  STALE --> OPEN: chỉ khi do dependency và preflight lại pass trên vN
-```
+*(C1b: sơ đồ cũ bị thay bằng bảng chính thức §8.1.)*
+
 
 - Snapshot tạo một lần, content-addressed, không sửa. `basePointerVersion` = pointer lúc tạo review.
 - `STALE` do pointer đổi là **cuối cùng** cho review đó (Editor gửi review mới từ draft); do dependency (plugin `vulnerable`/`revoked`, adapter mất khỏi support matrix) thì Reviewer chạy lại preflight trên vN.
@@ -620,7 +622,7 @@ Cộng với **trạng thái hiệu lực của plugin** (ledger + override, spe
 
 - `S` = mọi release **đã từng active** mà gate release **không** chứa `rel#retired` (gồm release đang active, trong grace, và đã quá `supportEndsAt` nhưng chưa retire). Như vậy `S` khớp với "thời điểm nhận submission muộn nhất = `retiredAt`" (§9.4). Release `suspended`/`quarantined` vẫn thuộc `S` (có thể resume) nhưng gate đóng. Thay định nghĩa "OD-09 giữ lại" của spec #2 §10.3.
 - Hệ quả vận hành: release chưa retire tiếp tục ràng buộc deploy gate (adapter phải còn) → có động lực retire đúng hạn; reconciler báo cáo release quá `supportEndsAt` chưa retire.
-- **Miễn trừ:** deploy gate **không** đòi adapter cho server FBK mà gate đang có `ledger#revoked` hoặc `override#…` loại `revoked` (mọi lời gọi đã bị chặn), để không buộc giữ adapter dễ tổn thương mãi khi incident còn mở. Gỡ chặn đó (mở lại gate) đòi adapter có mặt trong deployment hiện tại (kiểm trong transaction mở bằng ConditionCheck `DEPLOYMENT#CURRENT`).
+- **Miễn trừ:** deploy gate **không** đòi adapter cho server FBK mà gate đang có `ledger#revoked` hoặc `override#…` loại `revoked` (mọi lời gọi đã bị chặn), để không buộc giữ adapter dễ tổn thương mãi khi incident còn mở. Gỡ chặn đó (mở lại gate) đòi adapter có mặt trong deployment hiện tại (kiểm trong transaction mở bằng ConditionCheck `DEPLOYMENT#CURRENT`). *(C1b)* Chỉ miễn trừ khi blocker là `ledger#revoked` hoặc override `revoked`; M3 / `block-operation` **không** được miễn trừ (là biện pháp tạm thời). Mọi thao tác làm tập blocker của một FBK được miễn trừ trở thành rỗng (đóng override, đồng bộ ledger, repair) phải ConditionCheck `DEPLOYMENT#CURRENT` có adapter của FBK đó.
 - Deploy gate (spec #2 §10.4) chạy khi backend khởi động (P0) và trước khi nhận traffic sau deploy (AWS); đọc `S` từ `fb_control`; kết quả ghi `DEPLOYMENT#CURRENT`.
 - **Tương thích evaluator Python với release cũ (C1, CSR-11):** evaluator khai `supportedIrFormats` và semantic version trong `PLATFORMREL`; deploy gate kiểm **mọi** release trong `S`: (1) `irFormat` của release thuộc dải hỗ trợ; (2) chạy **semantic conformance fixtures** của release (spec #3: tạo ở K14 từ engine TS của chính release, lưu private) trên evaluator mới — lệch bất kỳ → deploy gate FAIL, không nhận traffic; không bao giờ ngầm bỏ hỗ trợ release cũ vì backend mới. Kết quả là **ma trận tương thích** `release × evaluator` lưu cùng `DEPLOYMENT#CURRENT` (TM-5C01).
 - Kiểm sớm "∈ `S`" trong Form API chỉ để báo lỗi rõ; quyết định cuối là gate trong transaction.
@@ -636,12 +638,12 @@ Cộng với **trạng thái hiệu lực của plugin** (ledger + override, spe
 |---|---|---|
 | `GATE#FBK#{fbk}` | `CAPSTATUS#{PRK}` — trạng thái policy hiệu lực của **một** plugin version | ingestion, override, đồng bộ ledger, M3 (§9.3.4) |
 | `GATE#REL#{releaseId}` | `REL#{releaseId}` (security, retention, support, `activatedAt`) | đăng ký, activation, suspend/resume, quarantine, retire |
-| `GATE#FORM#{formId}` | `FORM#{formId}/AVAILABILITY` (M4, M5) | platform-security (ADR-072) |
+| `GATE#FORM#{formId}` | `FORM#{formId}/AVAILABILITY` (hold M4, M5 theo nguồn) | M5: platform-security; M4: platform-security hoặc site-admin (ADR-072) |
 
-- Mỗi thay đổi là **một** `TransactWriteItems`: Update item authoritative có điều kiện version (CAS) **và** Update mọi gate chiếu từ nó với `SET blockers = :derived` (hoặc `REMOVE blockers` khi tập rỗng) + cùng version. Không dùng `ADD`/`DELETE` từng phần tử: tập `blockers` luôn được **tính lại** từ item authoritative bằng một hàm thuần `derive()` dùng chung.
+- Mỗi thay đổi là **một** `TransactWriteItems`: Update item authoritative có điều kiện version (CAS) **và** Update mọi gate chiếu từ nó với `SET blockers = :derived` (hoặc `REMOVE blockers` khi tập rỗng), điều kiện gate **chỉ** `attribute_exists(PK)` (C1b, N2: không có version riêng trên gate; CAS ở item authoritative đã tuần tự hóa). Với `CAPSTATUS`, **mọi** Update ghi lại **mọi** gate trong `serverFbks`. `publishBlockers` rỗng → `REMOVE publishBlockers` (m2). Không dùng `ADD`/`DELETE` từng phần tử: tập `blockers` luôn được **tính lại** từ item authoritative bằng một hàm thuần `derive()` dùng chung.
 - Mỗi transaction chạm mỗi item **đúng một lần** (DynamoDB không cho hai action trên cùng item, kể cả ConditionCheck + Update). CAS trên item authoritative là điều kiện của chính Update đó, không phải ConditionCheck riêng.
 - Mọi đọc dùng cho quyết định là `GetItem` nhất quán mạnh trên **một** item authoritative. **Không** dùng `Query` (chỉ read-committed) để quyết định.
-- Gate mở ⇔ `attribute_exists(PK) AND attribute_not_exists(blockers)`. Gate thiếu, item authoritative thiếu, hoặc version lệch → không mở (fail closed).
+- Gate mở ⇔ `attribute_exists(PK) AND attribute_not_exists(blockers)`. Submit **chỉ** kiểm gate (không đọc item authoritative); gate thiếu → fail closed. Gate không bao giờ lệch item authoritative vì chỉ được ghi trong cùng transaction CAS (m3).
 - Không xóa gate hay item authoritative: IAM chặn `DeleteItem` trên `CAPSTATUS#`, `GATE#`, `REL#` (sau G10); local: port không có thao tác xóa.
 
 #### 9.3.2. `CAPSTATUS#{PRK}` — trạng thái policy hiệu lực theo plugin (V5-01)
@@ -652,8 +654,7 @@ CAPSTATUS#{PRK} / META = {
   serverFbks: SS,                               // mọi server FBK của release (từ manifest), BẤT BIẾN sau ingestion
   sources: {
     ledger: "active" | "deprecated" | "vulnerable" | "revoked",
-    overrides:   { <overrideId>: { effect: "vulnerable" | "revoked" | "block-operation", target: "PRK" | <fbk>, incidentId } },
-    mitigations: { <incidentId>: { kind: "M3", fbks: [<fbk>…] } }
+    overrides:   { <overrideId>: { effect: "vulnerable" | "revoked" | "block-operation", target: "PRK" | <fbk>, incidentId } }   // khởi tạo {} ở ingestion (m2)
   },
   publishBlockers: SS,                          // = derivePublish(sources)
   fbkBlockers: { <fbk>: [ … ] },                // = deriveRuntime(sources, serverFbks)
@@ -669,23 +670,22 @@ CAPSTATUS#{PRK} / META = {
 | override `vulnerable` | `override#{id}` | — |
 | override `revoked` (target PRK hoặc FBK) | `override#{id}` | `override#{id}` cho mọi FBK (target PRK) hoặc đúng FBK đó |
 | override `block-operation` (M3 tối thiểu, ADR-072) | — | `override#{id}` cho FBK đích (P0 chặn **toàn bộ** operation của FBK) |
-| mitigation M3 của incident | — | `mitigation#M3#{incidentId}` cho các FBK liệt kê |
 
-- Override còn trong `sources.overrides` cho tới khi **đóng tường minh**; quá `expiresAt` không tự gỡ, chỉ báo cáo (spec #2 §16.5). Giới hạn: ≤ 20 override mở và ≤ 20 mitigation mở mỗi PRK *[Claude]* (item nhỏ, dưới 400 KB).
-- Mọi nguồn chặn nằm trong **một item** → tạo gate, đóng/mở, sửa chữa đều tính từ cùng một bản đọc ở cùng `capVersion`. M3 được bảo toàn vì nó là một nguồn trong `sources`.
+- Override còn trong `sources.overrides` cho tới khi **đóng tường minh**; quá `expiresAt` không tự gỡ, chỉ báo cáo (spec #2 §16.5). Giới hạn: ≤ 20 override mở mỗi PRK *[Claude]*. *(C1b, m7)* M3 tối thiểu (ADR-072) **chính là** override `block-operation` gắn `incidentId` — không còn nguồn `mitigations` riêng.
+- Mọi nguồn chặn nằm trong **một item** → tạo gate, đóng/mở, sửa chữa đều tính từ cùng một bản đọc ở cùng `capVersion`. M3 (override `block-operation`) được bảo toàn vì nó là một phần tử riêng trong `sources.overrides`.
 
 #### 9.3.3. Vòng đời và người sở hữu (CSR-01)
 
 | Bước | Actor / trigger | Tạo / đổi | Điều kiện trước |
 |---|---|---|---|
-| 1. **Ingestion plugin release** | platform-admin qua `POST /platform/capabilities/{prk}/ingest` hoặc bước tự động của pipeline phát hành plugin (spec #2 §8.1 bước 10) | **một** transaction: Put `CAPSTATUS#{PRK}` + Put **mọi** `GATE#FBK#{fbk}` của `serverFbks` (`attribute_not_exists`), blockers khởi tạo bằng `derive()` từ ledger status hiện tại + audit | release có trong release store, conformance PASS, có entry ledger. Idempotent: đã tồn tại với cùng `ingestedFrom` → no-op; khác → `409 CAPABILITY_INGEST_CONFLICT` + cảnh báo |
+| 1. **Ingestion plugin release** | platform-admin qua `POST /platform/capabilities/{prk}/ingest` hoặc bước 11 của pipeline phát hành plugin (spec #2 §8.1) — áp cho **mọi** plugin release, kể cả chỉ có facet browser (`serverFbks` rỗng, m1) | **một** transaction: Put `CAPSTATUS#{PRK}` (`sources.ledger` = `LEDGER#{prk}.status`, `overrides = {}`) + Put mọi `GATE#FBK` của `serverFbks` (`attribute_not_exists`), blockers = `derive()` + ConditionCheck `LEDGER#{prk}.ledgerVersion = :lv` (ledger không đổi giữa lúc đọc và commit — C1b, N1) + Put `CATSNAP#{new}` + Update `CATSNAP#CURRENT` (CAS) + audit | release trong release store, conformance PASS, `LEDGER#{prk}` đã có (đồng bộ ledger chạy trước, §9.7). Idempotent: đã tồn tại với cùng `ingestedFrom` → no-op; khác → `409 CAPABILITY_INGEST_CONFLICT` |
 | 2. Admin build / Preview build | trusted pipeline | chỉ đưa vào PRK **đã ingest** và không `revoked` (CSR-07) | bước 1 |
 | 3. Editor chèn plugin | Admin (spec #4 §8.3) | — | PRK có trong Admin capability set; `publishBlockers` rỗng |
 | 4. Preflight / approve | build worker / Admin API | đọc `CAPSTATUS` (K3: thiếu → `E-CAP-NOT-INGESTED`; approve ConditionCheck §5.4) | bước 1 |
 | 5. Đăng ký release | operation runner | Put `REL#` + Put `GATE#REL` (blockers `{rel#pending}`) + Put `PRKUSE#{prk}/{releaseId}` mỗi plugin trong lock (§9.3.8) | lock chỉ chứa PRK đã ingest |
 | 6. Activation | operation runner (§6.5) | `GATE#REL` chiếu lại từ `REL#` (gỡ `rel#pending`); ConditionCheck `CAPSTATUS` (publish) và gate FBK tồn tại | 1–5 |
 | Tạo form | Admin API | Put `AVAILABILITY` (`live`) + Put `GATE#FORM` (mở) | — |
-| **Repair** (gate thiếu/lệch — không xảy ra nếu protocol đúng) | platform-admin, `POST /platform/capabilities/{prk}/repair` | Update `CAPSTATUS` (CAS `v → v+1`) + Put gate với `attribute_not_exists(PK) OR capVersion < :v1`, blockers từ `derive()` | audit + incident |
+| **Repair** (gate thiếu/lệch — không xảy ra nếu protocol đúng) | platform-admin **hoặc platform-security** (để không chặn revoke khẩn cấp, m4), `POST /platform/capabilities/{prk}/repair` | Update `CAPSTATUS` (CAS `v → v+1`) + Put gate với `attribute_not_exists(PK) OR capVersion < :v1`, blockers từ `derive()` | audit + incident |
 
 `serverFbks` bất biến sau ingestion (một plugin release có tập facet cố định), nên **không bao giờ có "tạo gate muộn"** chen với override — nguồn của race V5-01 cũ bị loại bỏ.
 
@@ -704,13 +704,13 @@ CAPSTATUS#{PRK} / META = {
 
 **(b) Đóng override đó:** cùng cấu trúc; `REMOVE sources.overrides.#o`; tính lại; gate nào có tập rỗng → `REMOVE blockers`. Nếu FBK đó đang được **miễn trừ deploy gate** (không có adapter trong deployment, §9.2) và tập sắp rỗng → thêm ConditionCheck `DEPLOYMENT#CURRENT` (`deploymentVersion = :d AND contains(adapters, :fbkHash)`); không có adapter → từ chối mở (`409 ADAPTER_NOT_DEPLOYED`).
 
-**(c) M3 cho incident:** như (a) với `SET sources.mitigations.#inc = :m`; gỡ: `REMOVE sources.mitigations.#inc`.
+**(c) M3 cho incident:** là override `block-operation` (a/b) với `incidentId`; không có đường riêng (C1b, m7).
 
 **(d) Đồng bộ status ledger:** như (a) với `SET sources.ledger = :status`; `publishBlockers` và `fbkBlockers` **tính lại toàn bộ** (không `ADD`/`DELETE` từng phần tử — tránh lỗi overlapping path, MINOR-01).
 
-**(e) Suspend release:** Update `REL#` (`version = :v`; `security = suspended`) · Update `GATE#REL` (`attribute_exists AND relVersion = :v`; `SET blockers = derive(REL sau cập nhật), relVersion = :v+1`) · `POLICY#STATE` · audit. Resume / quarantine / retire cùng mẫu; retire có thêm điều kiện `activation = inactive AND supportEndsAt ≤ :now`.
+**(e) Hold bảo mật của release (C1b, N2, N3):** Update `REL#` (CAS `version = :v`; `SET securityHolds.#inc = :h` hoặc `REMOVE securityHolds.#inc`; `security = suspended` nếu còn hold) · Update `GATE#REL` (`attribute_exists`; `SET blockers = derive(REL)` / `REMOVE`) · `POLICY#STATE` · audit. Hai incident độc lập: gỡ một hold không mở gate khi hold kia còn. Quarantine và retire cùng mẫu; retire thêm điều kiện `activation = inactive AND supportEndsAt ≤ :now` và gỡ release khỏi `POINTER.supportedReleases` (transaction riêng CAS `pointerVersion`, §6.6).
 
-**(f) M4/M5:** Update `AVAILABILITY` (`version = :v`) · Update `GATE#FORM` (`SET`/`REMOVE blockers`) · Update `POINTER` (`availabilityState`, `entryVersion + 1`) · `POLICY#STATE` · audit.
+**(f) Hold M4/M5 của form (C1b, N3):** Update `AVAILABILITY` (CAS `version`; `SET holds.#h = :hold` / `REMOVE holds.#h`) · Update `GATE#FORM` (`attribute_exists`; `SET blockers = derive(holds)` / `REMOVE`) · Update `POINTER` (`availabilityState`, `entryVersion + 1`) · `POLICY#STATE` · audit. Gỡ một hold không xóa hold khác (kể cả M5 của browser revocation).
 
 Mọi bảng trên: mỗi item một action; ≤ 2 + 10 gate + 3 ≤ 15 action.
 
@@ -720,14 +720,17 @@ Mọi bảng trên: mỗi item một action; ≤ 2 + 10 gate + 3 ≤ 15 action.
 |---|---|---|---|
 | 1 | Ingestion ‖ override cùng PRK | override đòi `attribute_exists(CAPSTATUS)`; ingestion tạo `CAPSTATUS` + mọi gate trong một transaction | override trước ingestion → `404 CAPABILITY_NOT_INGESTED`; sau → CAS thường. Không thời điểm nào có gate mà không có `CAPSTATUS` |
 | 2 | Override `revoked` A ‖ đóng override B | CAS `capVersion` | một bên thắng, bên kia hủy → đọc lại → tính lại; cuối cùng gate = `derive(sources cuối)` (có A, không có B) |
-| 3 | Override ‖ M3 thêm/gỡ | CAS `capVersion` | như #2; M3 không bao giờ bị mất |
+| 3 | Override ‖ M3 (override `block-operation`) thêm/gỡ | CAS `capVersion` | như #2; M3 không bao giờ bị mất |
 | 4 | Đồng bộ ledger ‖ override | CAS `capVersion` | như #2 |
 | 5 | Revoke ‖ submit | item gate FBK (cả hai cùng chạm) | revoke commit trước → submit hủy (423); submit trước → hợp lệ (G-ADM) |
 | 6 | Repair ‖ override | CAS `capVersion` | repair chỉ ghi gate với version mới hơn; không ghi lùi |
-| 7 | Gate bị thiếu | — | submit: ConditionCheck `attribute_exists` hỏng → `503 E-ADMISSION-UNAVAILABLE`; mọi transaction đổi policy hỏng (Update gate `attribute_exists`) → cảnh báo → repair; **không** sinh gate mở |
-| 8 | `CAPSTATUS` thiếu / không đọc được | — | approve/activation/preflight fail closed; override `404`; submit chỉ dựa vào gate → nếu gate còn thì theo gate, không thì 503 |
+| 7 | Gate bị thiếu | — | submit: ConditionCheck `attribute_exists` hỏng → `503 E-ADMISSION-UNAVAILABLE`; mọi transaction đổi policy của PRK hỏng (Update gate `attribute_exists`) → cảnh báo → repair (platform-admin **hoặc platform-security**, m4) rồi áp lại; **không** sinh gate mở |
+| 8 | `CAPSTATUS` thiếu / không đọc được | — | approve/activation/preflight fail closed; override `404`; submit chỉ kiểm gate (đúng theo §9.3.1: gate chỉ bị ghi cùng transaction với `CAPSTATUS`) |
 | 9 | Resume override A ‖ revoke override A (cùng id) | CAS | tuần tự; trạng thái cuối theo thứ tự commit |
 | 10 | Deploy gate ghi `DEPLOYMENT#CURRENT` ‖ mở lại gate được miễn trừ | deploy gate: Put `DEPLOYMENT#CURRENT` (CAS `deploymentVersion`) + ConditionCheck mỗi gate miễn trừ `attribute_exists(blockers)`; mở gate: ConditionCheck `DEPLOYMENT#CURRENT` (#b) | một bên thắng; không có gate mở mà thiếu adapter (MINOR-02) |
+| 11 | Đồng bộ ledger ‖ ingestion cùng PRK (C1b, N1) | `LEDGER#{prk}.ledgerVersion` | đồng bộ ledger: nếu `CAPSTATUS` chưa có → transaction Update `LEDGER` (CAS) + ConditionCheck `attribute_not_exists(CAPSTATUS)`; nếu có → Update `LEDGER` + Update `CAPSTATUS` (CAS) + gate. Ingestion ConditionCheck `ledgerVersion`. Mọi thứ tự → `CAPSTATUS.sources.ledger` = trạng thái ledger mới nhất; không bao giờ có gate mở khi ledger đã `revoked` |
+| 12 | Hold M4/M5 ‖ gỡ hold khác cùng form (C1b, N3) | CAS `AVAILABILITY.version` | tuần tự; gate form = `derive(holds cuối)` |
+| 13 | Hai hold bảo mật của release (C1b, N2/N3) | CAS `REL#.version` | tuần tự; gate release còn `rel#security` khi còn hold; activation/verified không làm hỏng CAS của hold vì gate không còn version riêng |
 
 Kiểm chứng: **CT-26** với hook điều khiển thứ tự commit cho từng dòng, trên SQLite và DynamoDB Local (post-G1 implementation verification gate); DynamoDB thật sau G10. Không tuyên bố VERIFIED trước đó.
 
@@ -840,13 +843,24 @@ Release record, IR và Data Contract **không bao giờ xóa** ở P0, vì submi
 
 | Điều kiện (ADR-063) | Điểm enforce | Kiểm chứng | Khi phải PASS |
 |---|---|---|---|
-| Chỉ dữ liệu synthetic, không PII thật | seed data hư cấu có marker; Form API từ chối submit có cờ môi trường `synthetic-only` sai | TM-5X05: quét seed/fixture không có mẫu PII thật; mọi submission demo mang marker | trước mọi demo/đánh giá dựa vào ADR-063 |
+| Chỉ dữ liệu synthetic, không PII thật | cấu hình `environment.dataMode = synthetic` bắt buộc; mọi process kiểm lúc khởi động và từ chối chạy nếu khác; seed data hư cấu có marker | TM-5X05: kiểm cờ ở mọi process; quét seed/fixture (heuristic, kèm review thủ công — không phải bằng chứng tuyệt đối) | trước mọi demo/đánh giá dựa vào ADR-063 |
 | Không connector ngoài thật, mock không chạm hệ thống thật | cấu hình connector của host chỉ cho id trong allowlist mock (`mock-store-directory`, `effect-mock-log`); adapter chỉ nhận connector đã khai (spec #2 §13.4) | TM-5X02: kiểm cấu hình mọi process — chỉ connector mock | như trên |
+| Không effect đặc quyền thật; mock effect không gửi email/SMS, không sửa dữ liệu thật | site policy `allowedEffects` chỉ chứa `@platform/effect-mock-log#recordSubmission`; host không cấu hình connector email/SMS | TM-5X06: kiểm site policy + cấu hình host; chạy effect và xác nhận chỉ có dòng log local | như trên |
 | Không secret thật | không biến môi trường/secret nào ngoài khóa demo; khóa mã hóa demo là giá trị cục bộ | TM-5X03: scan cấu hình host, env, image (secret scanner + allowlist tên biến) | như trên |
 | Network theo allowlist **đã kiểm chứng** | egress của Form API, Preview API, outbox worker, adapter runtime, build worker chỉ tới store, blob, IdP local (local: firewall/container network; AWS: security group, sau G10) | TM-5X01: từ trong từng process thử kết nối một host ngoài allowlist → bị chặn; thử host trong allowlist → được | như trên |
 | Store không khả dụng → fail closed cho mọi quyết định bảo mật | §9.3.10 | TM-5G05, TM-5G17 + TM-5X04: tắt store khi đang chạy, mọi đường bảo mật trả 503/không chạy | như trên |
 
-**Owner:** vai trò platform-security (theo dõi) và người chạy demo (xác nhận trước mỗi demo). **Điều kiện đổi** (dữ liệu thật, connector thật, secret thật) → approval ADR-063 hết hiệu lực; cần security gate riêng trước tích hợp thật.
+**Owner:** vai trò platform-security (theo dõi) và người chạy demo (xác nhận trước mỗi demo). **Evidence:** lưu ở `docs/evidence/<phase>/adr-063-conditions/` (kết quả TM-5X01..06, ngày, môi trường). **Điều kiện đổi** (dữ liệu thật, connector thật, secret thật) → approval ADR-063 hết hiệu lực; cần security gate riêng trước tích hợp thật.
+
+### 9.7. Vòng đời platform release, đồng bộ ledger, catalog snapshot (C1b, N-01, N1)
+
+| Thao tác | Actor / trigger | Ghi | Điều kiện |
+|---|---|---|---|
+| **Tạo platform release** | trusted pipeline khi build platform (engine, analyzer, compiler, Admin build, Preview build, evaluator, bootstrap, `motion-presets`) | Put `PLATFORMREL#{id}` (`attribute_not_exists`; bất biến) | mọi digest có trong release store |
+| **Deploy platform release** | platform-admin chạy deploy (local: script; AWS: sau G10) | (1) backend mới qua deploy gate (spec #2 §10.4 + semantic fixtures của mọi release trong `S`, §9.2); (2) Admin build / Preview build của `id` được phục vụ; (3) **một** transaction: Update `PLATFORMREL#CURRENT` (CAS `id = :old`) · Put `DEPLOYMENT#CURRENT` (CAS `deploymentVersion`) · ConditionCheck gate được miễn trừ (§9.3.5 #10) · audit | (1) fail → không đổi gì. `PLATFORMREL#{id}` cũ và builder image cũ **được giữ** (P0 không xóa) để operation `PUBLISHING` dùng platform cũ vẫn build/rebuild-verify được; activation của chúng vẫn phải qua kiểm semantic trên evaluator hiện tại (§6.2 VERIFYING) |
+| **Đồng bộ status ledger** | bước 12 của pipeline plugin (spec #2 §8.1), chạy cho **mỗi** commit đổi `registry/status-ledger.jsonl` | mỗi PRK đổi: Update `LEDGER#{prk}` (CAS `ledgerVersion`, `ledgerCommit`); nếu `CAPSTATUS` có → cùng transaction Update `CAPSTATUS` (CAS) + mọi gate (§9.3.4 d); nếu chưa → ConditionCheck `attribute_not_exists(CAPSTATUS)`; sau đó Put `CATSNAP#{new}` + Update `CATSNAP#CURRENT` (CAS) | §9.3.5 #11 |
+| **Reconcile ledger** | reconciler (mỗi 30 s *[Claude]*) | so `ledgerCommit` đã đồng bộ với HEAD của ledger trong release store, và `LEDGER#{prk}.status` với `CAPSTATUS.sources.ledger`; lệch → chạy lại đồng bộ + cảnh báo | — |
+| **Preflight đọc catalog** | build worker | `CATSNAP#CURRENT` → `CATSNAP#{id}` (blob) | — |
 
 ---
 
@@ -983,7 +997,7 @@ Hai implementation: `sqlite` và `dynamodb`. Logic state machine, validation, qu
 | CT-23 | Release chưa từng active (`rel#pending`) không nhận submission dù đoán được `releaseId`; activation đầu tiên gỡ `rel#pending` nguyên tử | tuần tự |
 | CT-24 | GC và writer cùng một hash: writer touch trong lúc GC đánh dấu → GC bỏ qua; GC đang xóa → writer chờ rồi tạo lại blob; không item nào trỏ tới blob đã xóa | song song + hook |
 | CT-25 | `CAPSTATUS`: override `vulnerable` chỉ chặn publish (không chặn submit); `revoked` chặn cả hai; hai nguồn chồng nhau, gỡ một nguồn vẫn chặn; `CAPSTATUS` thiếu → approve/activation fail closed | tuần tự |
-| CT-26 | Tạo gate FBK song song với override `revoked` (và với đồng bộ ledger): mọi thứ tự commit → gate cuối cùng có `override#…`/`ledger#revoked`; bên thua CAS `CAPSTATUS` làm lại | song song + hook thứ tự |
+| CT-26 | *(C1b)* Ma trận §9.3.5 #1–#13 với hook điều khiển thứ tự commit: ingestion ‖ override; override ‖ override; M3 ‖ override; ledger ‖ override; ledger ‖ ingestion; repair ‖ override; gate thiếu; hold ‖ hold (form, release) → trạng thái cuối = `derive(nguồn cuối)`, không gate mở khi còn blocker authoritative | song song + hook thứ tự |
 
 - SQLite không tái hiện xung đột theo item của DynamoDB (chỉ có khóa cả database); CT-17 trên SQLite chỉ kiểm đường ánh xạ lỗi, không chứng minh hành vi throughput.
 - Chạy trên: `sqlite` (CI); `dynamodb` với **DynamoDB Local** (emulator, CI) — evidence ghi rõ "emulator"; **DynamoDB thật** trong account PoC cô lập **sau G10** — chỉ khi đó mới được nói "đã kiểm trên AWS".
@@ -1075,7 +1089,7 @@ Ký hiệu: P = pointer, R7/R8 = release (synthetic PC).
 | TM-5I01 | Ingestion PRK mới; ingestion lặp cùng `ingestedFrom`; khác `ingestedFrom` | tạo `CAPSTATUS` + mọi gate trong một transaction; lặp → no-op; khác → 409 + cảnh báo | `CAPSTATUS#`, `GATE#FBK#` |
 | TM-5I02 | Override trước ingestion; preflight/approve với PRK chưa ingest | `404 CAPABILITY_NOT_INGESTED`; `E-CAP-NOT-INGESTED`; approve fail closed | response |
 | TM-5I03 | Repair gate bị thiếu/lệch dưới CAS song song với override | gate cuối = `derive(sources cuối)`; không ghi lùi | `CAPSTATUS`, gate |
-| TM-5I04 | M3 + override + ledger `revoked` chồng nhau; gỡ từng nguồn | gate chỉ mở khi mọi nguồn đã gỡ; M3 không bao giờ mất | `CAPSTATUS.sources`, gate |
+| TM-5I04 | override `block-operation` (M3) + override `revoked` + ledger `revoked` chồng nhau; gỡ từng nguồn | gate chỉ mở khi mọi nguồn đã gỡ; M3 không bao giờ mất | `CAPSTATUS.sources`, gate |
 | TM-5I05 | Server facet của `jpPhone` bị revoke | submit Sports bị 423 (gate `jpPhone/server` trong tập kiểm, CSR-03) | gate, response |
 | TM-5I06 | Browser revocation `storeSelector` trên nhiều form PC (synthetic) | `PRKUSE` liệt kê đủ; M5 từng form idempotent; tiến độ N/M; ngắt giữa chừng → reconciler tiếp; không form nào bị bỏ sót | operation record, `AVAILABILITY` |
 | TM-5P07 | R8 active → rollback R6 khi draft R7 còn supported | `POINTER.bootstrapDigest` giữ bootstrap của R8; draft R7 resume được | entry, bootstrap |
@@ -1087,6 +1101,12 @@ Ký hiệu: P = pointer, R7/R8 = release (synthetic PC).
 | TM-5V03 | Session của snapshot v5 yêu cầu IR v6 / form khác | `403 PREVIEW_SESSION_SCOPE` | Preview API |
 | TM-5V04 | Gửi `X-Preview-Session` tới Admin API / Form API | `401`, không có hiệu lực | API |
 | TM-5V05 | Preview build khác `platformReleaseId` của session | không start; banner; không dùng làm bằng chứng | iframe, Preview API |
+| TM-5V06 | Preview session gọi `queries`/`simulate-submit` tới capability ngoài snapshot; PRK bị chặn sau khi session tạo | `403 PREVIEW_SESSION_SCOPE`; `GET session/ir` trả `blockedPrks` mới, iframe không mount `Component` | Preview API, iframe |
+| TM-5F02 | Hai hold M4 (site-admin) + M5 (platform-security) trên một form; site-admin gỡ hold của mình; thử gỡ hold M5 | form vẫn `suspended`; gỡ hold M5 bởi site-admin → 403 | `AVAILABILITY`, gate form |
+| TM-5P10 | Bootstrap bị đánh dấu `revoked` trong platform release mới | reconciler chọn lại bootstrap tương thích cho từng form; không có → M5 | `POINTER`, entry |
+| TM-5P11 | Activation release build ở platform cũ sau khi evaluator mới deploy, fixture lệch | VERIFYING FAILED; pointer không đổi | operation, `REL#` |
+| TM-5L01 | Commit đổi ledger sang `revoked` cho PRK đã ingest / chưa ingest | gate FBK đóng trong transaction đồng bộ; PRK chưa ingest: ingestion sau đó tạo gate đã đóng | `LEDGER#`, `CAPSTATUS`, gate |
+| TM-5X06 | Effect chỉ là mock (§9.6) | như §9.6 | site policy, log |
 | TM-5X01..05 | Điều kiện synthetic-only (§9.6) | như §9.6 | như §9.6 |
 | TM-5G15 | Freshness trong Admin khi store chậm/không khả dụng | trạng thái hiện `cached`/`unknown` đúng nhãn; nút hành động bảo mật không dựa vào `cached` | response Admin |
 | TM-5G16 | Revocation dưới tải submit liên tục cùng FBK | transaction đóng gate commit được (retry không giới hạn có backoff); Admin hiện 「停止処理中」 tới khi commit; sau commit không submission nào lọt; đo độ trễ commit (VG-12 cho số thật) | thứ tự commit + gate |
@@ -1280,7 +1300,7 @@ Không phát sinh BLOCKER. Các điểm còn lại chỉ đo được sau G10 (V
 
 **V5-01 — `CAPSTATUS.version` và tạo gate FBK. Trạng thái: VERIFICATION_PENDING / UNVERIFIED** (ADR-063). Cần: (1) independent design review của thay đổi `CAPSTATUS.version` — thực hiện trong Cross-Subsystem Review; (2) CT-26 với interleaving commit có kiểm soát trên SQLite và DynamoDB Local — chỉ chạy được khi có code, nên là **post-G1 implementation verification gate**; không tuyên bố PASS trong P01; emulator PASS không đủ cho AWS production. *(C1)* Bảng 8 tình huống bên dưới được **thay** bằng ma trận §9.3.5 theo mô hình `CAPSTATUS` làm trạng thái policy hiệu lực (gate tạo đủ ngay ở ingestion; không còn `Query` trong đường quyết định; M3 là một nguồn trong `sources`). Bảng cũ giữ làm lịch sử.
 
-Điều kiện chung: mọi transaction dưới đây đều có `Update CAPSTATUS#{PRK}` với `attribute_exists(PK) AND version = :v` → `version + 1` (CAS). Danh sách override mở được đọc nhất quán mạnh **trên bảng gốc** (không GSI) sau khi đọc `CAPSTATUS` ở version `v`; vì mọi thay đổi override đều CAS cùng `version`, danh sách đó không thể đổi giữa lần đọc và commit mà transaction vẫn thành công.
+*(Lịch sử — đã thay bằng §9.3.5 ở C1/C1b; mô tả dưới đây dùng `Query` và version cũ, không còn hiệu lực.)* Điều kiện chung: mọi transaction dưới đây đều có `Update CAPSTATUS#{PRK}` với `attribute_exists(PK) AND version = :v` → `version + 1` (CAS). Danh sách override mở được đọc nhất quán mạnh **trên bảng gốc** (không GSI) sau khi đọc `CAPSTATUS` ở version `v`; vì mọi thay đổi override đều CAS cùng `version`, danh sách đó không thể đổi giữa lần đọc và commit mà transaction vẫn thành công.
 
 | # | Tình huống | Transaction và điều kiện | Linearization / kết quả mong đợi |
 |---|---|---|---|
