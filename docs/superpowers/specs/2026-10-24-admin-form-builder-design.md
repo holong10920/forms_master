@@ -1,6 +1,7 @@
 # Spec #4: Admin Form Builder — UX & Architecture (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.2** (2026-10-24) — **READY_FOR_CROSS_SPEC_REVIEW** (điều kiện của ADR-055 đã thực hiện: targeted review §27a); OD4-07 cần quyết trước plan (§23).
+> **Trạng thái: PROPOSAL, revision 2.3** (2026-10-24) — **READY_FOR_CROSS_SPEC_REVIEW** (điều kiện của ADR-055 đã thực hiện: targeted review §27a); OD4-07 đã quyết (ADR-061).
+> - Rev 2.3: ADR-061 (P0 chỉ inspector tự sinh + control typed, không design binding trong origin Admin): §2, §9 D2, §10, §10.2, §14.7, §23; ADR-057: Admin hiển thị freshness `authoritative/cached/unknown` (§13.5, I4-18); spec #5 rev 2 đồng bộ (I4-17).
 > - Rev 2.2: sửa theo targeted independent review của Preview isolation (§27a): §14.7 viết lại (site khác nhau kể cả local, header, handshake `preview.hello`, `targetOrigin` chính xác, vòng đời và cách truyền preview session); §9 D5/D7 trung thực hơn; OD4-07 mới (design binding trong origin Admin); test 4Z10–4Z15. Spec #2 rev 2.8.
 > - Review rev 2: **CONDITIONALLY ACCEPTED — targeted corrections only**. Refinement của ADR-047 được duyệt; OD4-06 → ADR-053 (Preview cô lập trên origin riêng). Rev 2.1 chỉ sửa có trọng tâm: §14.1 (mức sẵn sàng), §14.7 (mới, cô lập Preview), §8.2 (khôi phục trùng key), §14.3, §19, §21, §23. Thay đổi: §30.
 > - Review #1 (rev 1): **SPEC4_REV1_CHANGES_REQUIRED**; OD4-01..05 → ADR-048..052. Rev 2 sửa BLOCKER A (Design Canvas), BLOCKER B (Preview), cùng các điểm còn lại. Thay đổi so với rev 1: §30.
@@ -37,6 +38,7 @@
 | ADR-051 | Shared block P0: chèn/xem/pin/nâng có impact; sửa block P1 | APPROVED |
 | ADR-052 | Optimistic concurrency, không merge tự động | APPROVED |
 | ADR-053 | Interactive Preview/Simulation cô lập trong iframe sandbox trên origin riêng | APPROVED |
+| ADR-061 | P0 chỉ inspector tự sinh + control typed; custom Inspector sandbox ở P1 | APPROVED |
 | §4–§22 | Cơ chế | **PROPOSED** |
 
 ---
@@ -65,7 +67,7 @@ Hiện nay mọi thay đổi field hay flow đều cần developer. Spec #4 đ�
 - JSON/DSL/regex/expression lộ ra cho Business Editor.
 - Nhiều panel tự sửa document.
 - Canvas mount component hành vi của plugin; coi `inert`, `pointer-events` hay CSS là ranh giới an toàn.
-- Chạy component hành vi của plugin cho khách (`Component`, engine, connector) trong cùng document hoặc cùng execution context với Admin đã xác thực (ADR-053), kể cả như phương án dự phòng. Code plugin còn lại trong origin Admin (`presentation`, design binding) là rủi ro được nêu rõ và quyết ở OD4-07, không bị coi là đã cô lập.
+- Chạy component hành vi của plugin cho khách (`Component`, engine, connector) trong cùng document hoặc cùng execution context với Admin đã xác thực (ADR-053), kể cả như phương án dự phòng. Code plugin duy nhất còn trong origin Admin là `presentation` (thuần, có spy, INV-A1); không có design binding ở P0 (ADR-061).
 - Preview "đi tới" màn hoàn tất không có thật; Partial Preview được coi là bằng chứng form hợp lệ.
 - Báo 保存済み / 公開しました khi server chưa xác nhận.
 - Ngầm đổi version plugin, ngầm bỏ hay sửa tính năng chỉ đọc.
@@ -296,10 +298,10 @@ flowchart LR
 | # | Lớp | Bắt được |
 |---|---|---|
 | D1 | Contract: canvas chỉ mount `Presentation`/component hiển thị core | component hành vi chạy effect lúc mount |
-| D2 | Conformance của registry: `Presentation` (và design binding) import + mount dưới spy (danh sách mở rộng, spec #2 rev 2.8 §17.2) → **0 lời gọi**; negative fixture phải làm test fail đúng lý do | `Presentation` vi phạm trong harness (phát hiện, không chứng minh) |
+| D2 | Conformance của registry: `Presentation` import + mount dưới spy (danh sách mở rộng, spec #2 rev 2.8 §17.2) → **0 lời gọi**; negative fixture phải làm test fail đúng lý do | `Presentation` vi phạm trong harness (phát hiện, không chứng minh) |
 | D3 | Static boundary của spec #2 (L3): browser facet không dùng API mạng trực tiếp | gọi mạng trong code plugin |
 | D4 | Không có context runtime trong cây canvas: hook cần engine/connector sẽ ném lỗi → khung hiện thẻ lỗi hiển thị, không crash Builder | code cố dùng runtime |
-| D5 | Header của Admin (§14.7): CSP đầy đủ (`script-src 'self'`, `connect-src` chỉ Admin API, `frame-src` chỉ preview, `object-src`/`base-uri` `'none'`, `frame-ancestors 'none'`), CORP, `Referrer-Policy` | lời gọi tới đích **ngoài** Admin API; chèn script ngoài. **Không** chặn được code trong origin Admin gọi Admin API (cùng origin, đọc được CSRF token) — xem OD4-07 |
+| D5 | Header của Admin (§14.7): CSP đầy đủ (`script-src 'self'`, `connect-src` chỉ Admin API, `frame-src` chỉ preview, `object-src`/`base-uri` `'none'`, `frame-ancestors 'none'`), CORP, `Referrer-Policy` | lời gọi tới đích **ngoài** Admin API; chèn script ngoài. **Không** chặn được code trong origin Admin gọi Admin API (cùng origin, đọc được CSRF token) — vì vậy P0 không nạp design binding (ADR-061); phần còn lại là `presentation` thuần |
 | D6 | Test E2E âm (TM-4C01..C04, §19) chạy Builder thật, không click gì, quan sát request và storage | hồi quy của cả hệ |
 | D7 | Admin build tuân INV-A1 (spec #2 rev 2.8 §11.1): không `Component`, không code runtime; L1b + L5 với canary trong module `Component` (4Z10) | code hành vi bị import/evaluate trong Admin |
 
@@ -308,7 +310,7 @@ flowchart LR
 | Đối tượng | 基本 | 条件 | 検証 | 詳細 |
 |---|---|---|---|---|
 | Field core | ラベル, 補足, プレースホルダー, 選択肢 (nhãn), 他と同時に選べない選択肢 (`exclusive`), 幅 | 表示条件, 必須条件 | 必須, 検証ルール (chip), メッセージ | 分類 (chỉ tăng), 送信対象 (field tính toán) |
-| Field plugin | design binding (chỉ ở Inspector, không ở canvas) hoặc inspector tự sinh (§10.2) | như trên | validator capability cho phép | version đã pin (chỉ đọc) + 更新を確認; trạng thái |
+| Field plugin | inspector tự sinh (§10.2) + control typed của Admin (nối input port, mapping) — ADR-061; design binding là P1 (sandbox) | như trên | validator capability cho phép | version đã pin (chỉ đọc) + 更新を確認; trạng thái |
 | Step | タイトル, 種類 (通常/確認/完了) | 次のステップ (§11.2) | — | — |
 | Section | タイトル | 表示条件 | — | — |
 | Block instance | tên, revision đã pin, field (chỉ đọc), input hằng | — (spec #1 không có điều kiện cho block instance) | — | exports (chỉ đọc), 更新 (impact, ADR-051) |
@@ -324,7 +326,8 @@ flowchart LR
 ### 10.2. Inspector tự sinh
 
 - Mọi thuộc tính của `configSchema`/`paramsSchema` có `title` tiếng Nhật; enum có nhãn (spec #2 §6.3).
-- Tự sinh chỉ cho tập con: boolean, enum có nhãn, string, integer, mảng chuỗi ngắn; ngoài tập con → bắt buộc design binding. Không bao giờ hiện tên thuộc tính thô.
+- Tự sinh chỉ cho tập con: boolean, enum có nhãn, string, integer, mảng chuỗi ngắn; ngoài tập con → registry từ chối ở P0 (`E-SCHEMA-PROFILE`, spec #2 rev 2.9 §6.3); khả năng thiết yếu bị thiếu → đề xuất control typed built-in, không mở code tùy ý (ADR-061). Không bao giờ hiện tên thuộc tính thô.
+- Đã kiểm cho P0: `storeSelector` (config boolean + string; input port `prefecture` qua control typed), `jpPhone` (không params), effect mock (mapping qua control typed) đều cấu hình được không cần design binding.
 
 ### 10.3. Quy tắc chung
 
@@ -507,6 +510,19 @@ Nhóm theo step; lọc theo mức; mỗi dòng có 修正する; đếm theo gat
 ```
 Mặc định là キャンセル; mọi lựa chọn sinh một (composite) command.
 
+
+### 13.5. Freshness của trạng thái (ADR-057; spec #5 §7.2, §9.3)
+
+Trạng thái bảo mật/hỗ trợ (plugin, release, availability, support matrix) luôn hiện kèm nhãn nguồn:
+
+| `freshness` | Nhãn | Dùng được cho |
+|---|---|---|
+| `authoritative` | 「確認済み（hh:mm:ss）」 | hiển thị và hành động (approve, publish, rollback) |
+| `cached` | 「参考情報（hh:mm 時点）」 | chỉ hiển thị; không bật nút hành động bảo mật dựa trên nó |
+| `unknown` | 「現在確認できません」 | không hành động; 再確認 |
+
+Không bao giờ trình bày `cached` như kết quả bảo mật thời gian thực.
+
 ---
 
 ## 14. Phân tích, Preview và Simulation
@@ -603,7 +619,7 @@ Ví dụ: draft có thể đồng thời 「保存済み」, 「一部プレビ�
 ```mermaid
 flowchart LR
   subgraph AO["Site/origin Admin (đã xác thực)"]
-    ADM["Admin app<br/>Canvas = Presentation thuần<br/>(+ design binding: OD4-07)"]
+    ADM["Admin app<br/>Canvas = Presentation thuần<br/>(không design binding, ADR-061)"]
     API["Admin API<br/>cookie __Host-, CSRF synchronizer,<br/>Origin + Sec-Fetch-Site"]
   end
   subgraph PO["Site/origin preview riêng (không có credential Admin)"]
@@ -669,7 +685,7 @@ Phong bì: `{ protocol: "fb-preview", v: 1, previewSessionId?, seq, type, payloa
 - Iframe dùng **đúng package engine và version** của Published Runtime (4Z08).
 - Preview API không có cấu hình, credential hay đường mạng tới hệ thống production (kiểm cấu hình, 4Z14).
 
-**Giới hạn:** iframe, CSP và header giảm rủi ro nhưng **không** làm Preview "an toàn tuyệt đối". Admin API và Preview API vẫn kiểm authorization ở server cho mọi request. Code plugin vẫn còn trong origin Admin dưới dạng `presentation` và design binding — xem OD4-07.
+**Giới hạn:** iframe, CSP và header giảm rủi ro nhưng **không** làm Preview "an toàn tuyệt đối". Admin API và Preview API vẫn kiểm authorization ở server cho mọi request. Code plugin duy nhất trong origin Admin là `presentation` thuần (ADR-061); spy chỉ phát hiện, không chứng minh (spec #2 §17.2).
 
 ---
 
@@ -821,7 +837,8 @@ Loại: **A** automated · **M** manual · **U** usability (người không ph�
 | I4-11 | Preview ≠ release; engine giống runtime | spec #3 §5.1; spec #1 §15; BUILD-08 | §14 | Đồng bộ |
 | I4-15 | Mã diagnostic mới (§13.2) | spec #3 rev 2.3 §18.1a | §13.2 | Đồng bộ |
 | I4-16 | Preview cô lập: Admin build / Preview build (INV-A1/A2), entry `presentation`, binding `presentation` | spec #2 rev 2.8 §6.2.1, §6.5, §7.4, §10.1, §11.1, L1b, L3, §17.2; spec #3 rev 2.3 §5.1 | §9 (D7), §14.4, §14.7 | Đồng bộ |
-| I4-17 | Preview session API (`partial`/`simulation`/`review`), Preview API, header `X-Preview-Session`, origin/site preview, CSP/CORS/CORP/cookie/CSRF/`Sec-Fetch-Site` của hai origin, build và deploy Admin build / Preview build | spec #5 rev 1 §7 | §14.7 | Đồng bộ một phần (spec #5 §7.1–§7.3) |
+| I4-17 | Preview session API (`partial`/`simulation`/`review`), Preview API, header `X-Preview-Session`, origin/site preview, CSP/CORS/CORP/cookie/CSRF/`Sec-Fetch-Site` của hai origin, build và deploy Admin build / Preview build, xác thực OIDC + BFF | spec #5 rev 2 §7, §7.6 | §14.7 | Đồng bộ |
+| I4-18 | Freshness của trạng thái bảo mật/hỗ trợ | spec #5 rev 2 §7.2, §9.3 (ADR-057) | §13.5 | Đồng bộ |
 | I4-12 | Ngôn ngữ Admin | spec #1 OD-11 (đóng cho P0, ADR-048) | §3 | Đồng bộ |
 | I4-13 | Draft API, envelope, tải kèm block/catalog/ledger/key ledger; preflight; simulation; ReviewRequest + stale; approve/reject/publish; rollback; support matrix; quyền (Editor, Reviewer, Publisher, quyền 詳細設定); CSRF/CSP; Admin build manifest | spec #5 | §14–§17, §10.1 | **Chuyển spec #5** |
 | I4-14 | Theme đã duyệt theo site; Motion preset; reduced motion; token editor P1 | spec #6 | §16 | **Chuyển spec #6** |
@@ -852,13 +869,13 @@ Loại: **A** automated · **M** manual · **U** usability (người không ph�
 
 **Đã quyết (review rev 2):** OD4-06 → ADR-053 (bác (a); P0 dùng iframe sandbox trên origin riêng). Refinement ADR-047 được duyệt.
 
-**OPEN:**
+**Đã quyết (review spec #5 rev 1):**
 
-| ID | Vấn đề | Phương án | Khuyến nghị | Hạn |
+| ID | Vấn đề | Phương án | Quyết định | Hạn |
 |---|---|---|---|---|
-| **OD4-07** | Code plugin còn chạy trong origin Admin đã xác thực: design binding (custom Inspector, React có state) và `presentation` (thuần, có spy). Code cùng origin gọi được Admin API và đọc được CSRF token; spy và L3 chỉ phát hiện, không chống mã độc cố ý (spec #2 rev 2.8 §7.2). | (a) Giữ cả hai trong origin Admin, dựa trên trust model ADR-023 + trusted pipeline + conformance + CSP; sandbox ở P1. (b) **P0 không nạp design binding**: chỉ inspector tự sinh từ schema (§10.2); capability có cấu hình ngoài tập con tự sinh thì chỉ đọc ở P0; `presentation` giữ trong origin Admin (thuần, spy, L3, INV-A1). Custom Inspector chạy trong iframe sandbox ở P1. (c) Đưa cả Canvas (`presentation`) và custom Inspector vào iframe sandbox trên origin riêng ngay P0: không còn code plugin nào trong origin Admin, nhưng Selection Layer, focus và a11y phải đi qua postMessage — phức tạp hơn nhiều. | **(b)**: hai plugin P0 (`storeSelector`, `jpPhone`) có cấu hình nằm trong tập con tự sinh (cần xác nhận khi viết plan); loại bỏ phần code có state/handler, chỉ còn code thuần hiển thị. Rủi ro còn lại của `presentation` được ghi rõ. | Trước plan |
+| **OD4-07** ✅ | Code plugin trong origin Admin | — | **Đã quyết (ADR-061):** P0 chỉ inspector tự sinh + control typed; không chạy code custom Inspector trong origin Admin; sandbox P1 | — |
 
-**Chuyển sang spec #5:** I4-13, I4-17 (API, persistence, ReviewRequest, stale data, preflight/simulation endpoint, support matrix, quyền, CSRF/CSP, Admin build manifest). **Chuyển sang spec #6:** I4-14. **Còn mở từ spec khác:** spec #1 OD-06, OD-13; OD2-08/09; VG-01..10.
+**Chuyển sang spec #5:** I4-13, I4-17 (API, persistence, ReviewRequest, stale data, preflight/simulation endpoint, support matrix, quyền, CSRF/CSP, Admin build manifest). **Chuyển sang spec #6:** I4-14. **Còn mở từ spec khác:** spec #1 OD-06, OD-13; VG-01..12. (OD2-08/09 đã đóng: ADR-057/058.)
 
 ## 24. Rủi ro
 
@@ -947,6 +964,11 @@ Không có mâu thuẫn chặn sau khi đồng bộ spec #1 rev 3.4, spec #2 rev
 
 ## 30. Thay đổi
 
+### Revision 2.3 (so với rev 2.2; review spec #5 rev 1)
+
+- ADR-061: bỏ design binding khỏi P0 (§2, §9 D2/D5, §10, §10.2, §14.7, §23); đã kiểm plugin P0 cấu hình được bằng inspector tự sinh.
+- ADR-057: §13.5 freshness; I4-17, I4-18.
+
 ### Revision 2.2 (so với rev 2.1; targeted review Preview isolation)
 
 - §14.7 viết lại: site khác nhau (cả local), header hai origin, handshake `preview.hello`, quy tắc gửi/nhận postMessage, vòng đời và cách truyền preview session (`partial`/`simulation`/`review`).
@@ -983,7 +1005,7 @@ Không có mâu thuẫn chặn sau khi đồng bộ spec #1 rev 3.4, spec #2 rev
 
 ## 31. Mức độ sẵn sàng (revision 2.2)
 
-**READY_FOR_CROSS_SPEC_REVIEW** (theo ADR-055: targeted review đã chạy, 0 BLOCKER, mọi phát hiện đã xử lý). OD4-07 phải quyết trước plan. Phụ thuộc khác nằm ở spec #1 (OD-06, OD-13) và spec #5.
+**READY_FOR_CROSS_SPEC_REVIEW** (theo ADR-055: targeted review đã chạy, 0 BLOCKER, mọi phát hiện đã xử lý). OD4-07 đã quyết (ADR-061). Phụ thuộc khác nằm ở spec #1 (OD-06, OD-13) và spec #5.
 
 
 | Phần | Trạng thái | Còn mở |
@@ -994,6 +1016,6 @@ Không có mâu thuẫn chặn sau khi đồng bộ spec #1 rev 3.4, spec #2 rev
 | Inspector (§10) | Chờ final review | — |
 | Rule Editor, Flow (§11, §12) | Điều kiện ADR-049 đáp ứng | OD-06, OD-13 |
 | Diagnostics (§13) | Chờ final review | — |
-| Preview/Simulation (§14) | Viết lại theo BLOCKER B; cô lập theo ADR-053; targeted review §27a | OD4-07 |
+| Preview/Simulation (§14) | Viết lại theo BLOCKER B; cô lập theo ADR-053; targeted review §27a | — |
 | Autosave (§15), theme (§16), review (§17) | Theo ADR-050/052 | transport: spec #5 |
 | Test matrix (§19), usability (§20) | Chờ final review | ngưỡng PASS |

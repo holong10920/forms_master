@@ -72,6 +72,12 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-053 | OD4-06: Interactive Preview/Simulation P0 chạy trong iframe sandbox trên **origin riêng**, không bao giờ cùng document/execution context với Admin đã xác thực; postMessage protocol tối thiểu có kiểu | **APPROVED** (bác phương án (a) của Claude) | User (spec #4 rev 2 review) | 2026-10-24 |
 | ADR-054 | Spec #5 Answer #1: publication state machine có gate, CAS, idempotent, reconcile; rollback thủ công không rebuild; phân biệt pointer / CDN / session; audit tối thiểu; P0 manual rollback, canary/auto-rollback P1. Kịch bản PC Rev 7→8 là **SYNTHETIC** | **APPROVED AS DESIGN REQUIREMENTS** | User (spec #4 rev 2 review & spec #5 Answer #1) | 2026-10-24 |
 | ADR-055 | Spec #5: Phương án A — Operation Record + Reconciler + Transactional Store; SQLite (local) / DynamoDB (AWS), S3 cho artifact bất biến, CloudFront phân phối, Python API authoritative, build worker tách request, không Step Functions ở P0 | **APPROVED AS DESIGN DIRECTION** (chưa duyệt toàn bộ spec #5) | User (spec #5 architecture decision) | 2026-10-24 |
+| ADR-056 | OD5-01: Admin xác thực bằng OIDC + BFF; local IdP giả lập với tài khoản tổng hợp, AWS Cognito; Authorization Code; token giữ phía server; cookie HttpOnly/Secure/SameSite; CSRF; RBAC server-side theo operation/site/form; người duyệt ≠ người gửi review | **APPROVED** | User (spec #5 rev 1 review) | 2026-10-24 |
+| ADR-057 | OD5-02 / OD2-08: `T_stale = 60 s` chỉ cho query read-only/informational được chỉ định; không dùng cache stale cho submit, revocation, activation, đăng ký release, approval/preflight, effect đặc quyền; UI phân biệt authoritative / cached / unknown | **APPROVED WITH RESTRICTIONS** | User (spec #5 rev 1 review) | 2026-10-24 |
+| ADR-058 | OD5-03 / OD2-09 / OD-08 / OD-09: TTL metadata draft của khách 72 giờ; `G` = 7 ngày tính từ lúc release rời active; retire thủ công sau eligibility check; không tự xóa asset khi hết `G` | **APPROVED AS P0 DEFAULTS** (chưa phải production policy) | User (spec #5 rev 1 review) | 2026-10-24 |
+| ADR-059 | OD5-04: retention submission tổng hợp 30 ngày ở PoC; logical expiration khi đọc/xử lý; TTL vật lý có thể trễ; không PII thật | **APPROVED** | User (spec #5 rev 1 review) | 2026-10-24 |
+| ADR-060 | OD-05 (spec #1): payload có field inactive → 422 với mã ổn định; backend tự tính field active; không lưu, không echo giá trị | **APPROVED** | User (spec #5 rev 1 review) | 2026-10-24 |
+| ADR-061 | OD4-07: P0 chỉ inspector tự sinh từ schema + control typed đã duyệt; không chạy code custom Inspector trong origin Admin; sandbox custom Inspector P1 | **APPROVED** | User (spec #5 rev 1 review) | 2026-10-24 |
 
 ---
 
@@ -1071,3 +1077,40 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
   - **Spec #4 rev 2.1:** chấp nhận READY_FOR_CROSS_SPEC_REVIEW có điều kiện: targeted independent review cho Preview isolation; xác minh ranh giới import design/presentation/browser facet; xác minh origin iframe, sandbox, postMessage, preview session. Không mở lại toàn bộ spec #4 nếu không có blocker mới.
   - **Thứ tự spec #5:** persistence aggregates → state machine publication/rollback → API boundaries → security/compatibility/support policy → submission/outbox → failure/recovery matrix; trình các lựa chọn thật sự cần quyết (đặc biệt OD2-08, OD2-09); đủ dữ kiện thì chuẩn bị Architecture Proposal thay vì hỏi nhiều câu nhỏ.
 - **Người duyệt:** User (spec #5 architecture decision). **Ngày:** 2026-10-24.
+
+## ADR-056 — Xác thực Admin (OD5-01)
+
+- **Quyết định (user): APPROVED.** OIDC + Backend-for-Frontend. Local: IdP giả lập với tài khoản tổng hợp. AWS baseline: Amazon Cognito. Authorization Code flow theo hướng dẫn bảo mật hiện hành; token quản lý phía server, không lưu `localStorage`; cookie phiên HttpOnly, Secure, SameSite phù hợp; chống CSRF; RBAC kiểm phía server trên từng operation/site/form; người duyệt và người gửi review phải là hai identity khác nhau (P0).
+- Mock IdP local **không** phải bằng chứng tích hợp Cognito PASS. Không cần enterprise SSO ở P0.
+- **Người duyệt:** User (review spec #5 rev 1). **Ngày:** 2026-10-24.
+
+## ADR-057 — `T_stale` và giới hạn dùng cache policy (OD5-02, OD2-08)
+
+- **Quyết định (user): APPROVED WITH RESTRICTIONS.** `T_stale = 60 s` ở P0, **chỉ** cho các query read-only/informational được chỉ định.
+- Cache stale **không** được quyết định: authorization của submission khách; security revocation; activation publish/rollback; security eligibility khi đăng ký release; approval/preflight authoritative; effect đặc quyền. Các thao tác này phải kiểm trạng thái authoritative hoặc fail closed khi không xác minh được.
+- Admin UI phân biệt: trạng thái authoritative mới; trạng thái cached chỉ để thông tin; trạng thái unknown/không khả dụng. Không trình bày trạng thái cached như kết quả bảo mật thời gian thực.
+- **Người duyệt:** User (review spec #5 rev 1). **Ngày:** 2026-10-24.
+
+## ADR-058 — Draft TTL, grace window, retire (OD5-03, OD2-09, OD-08, OD-09)
+
+- **Quyết định (user): APPROVED AS P0 DEFAULTS** (chưa phải production business policy): TTL metadata draft khách 72 giờ; `G` = 7 ngày; retire thủ công sau eligibility check.
+- **Draft:** không persist PII khách trong browser; không có draft khách phía server; metadata phục hồi chỉ chứa release identity đã pin và dữ liệu không nhạy cảm trong allowlist; browser có thể xóa storage bất kỳ lúc nào; không cam kết khôi phục PII sau reload.
+- **Grace:** `G` tính từ lúc release không còn active (trừ khi policy quy định khác). Phân biệt active / supported / security-suspended / retired / asset-retained. Không tự xóa asset khi hết `G`. Phải xác định: thời điểm nhận submission muộn nhất; bắt đầu/kết thúc grace; retention sau grace; giả định cache browser/CDN có giới hạn; resume khi release không còn supported; khác biệt retire thường và revocation khẩn cấp. Không bảo đảm vô hạn tab cũ vẫn submit được. `T_edge_max` chưa xác định thì ghi là mục kiểm chứng khi deploy, không tự suy ra cận trên.
+- Đóng spec #1 OD-08 (giá trị P0), OD-09 (retire thủ công); spec #2 OD2-09.
+- **Người duyệt:** User (review spec #5 rev 1). **Ngày:** 2026-10-24.
+
+## ADR-059 — Retention submission ở PoC (OD5-04)
+
+- **Quyết định (user): APPROVED.** 30 ngày cho submission tổng hợp. Chỉ dữ liệu giả; không PII thật khi chưa có approval bổ sung. Logical expiration enforce khi đọc/xử lý; TTL DynamoDB xóa vật lý có thể trễ. Audit metadata và payload submission tổng hợp có thể có retention khác nhau nếu thiết kế rõ. Không log raw payload.
+- **Người duyệt:** User (review spec #5 rev 1). **Ngày:** 2026-10-24.
+
+## ADR-060 — Field inactive trong payload (spec #1 OD-05)
+
+- **Quyết định (user): APPROVED.** Từ chối bằng validation error HTTP 422. Backend tự tính field active theo revision/workflow tin cậy; không tin cờ visibility do client gửi; không lưu giá trị field inactive; không echo PII trong error hay log; runtime nên xóa/vô hiệu giá trị phụ thuộc khi đổi nhánh; có test đổi nhánh, field ẩn, payload cũ, gửi lại. Error có mã máy đọc ổn định và UX mapping.
+- **Người duyệt:** User (review spec #5 rev 1). **Ngày:** 2026-10-24.
+
+## ADR-061 — Inspector P0 (OD4-07)
+
+- **Quyết định (user): APPROVED.** P0 chỉ dùng Inspector sinh từ schema và control typed đã duyệt. Không chạy code custom Inspector trong origin Admin. Sandbox cho custom Inspector chuyển P1.
+- Trước khi coi P0 đủ: xác minh các plugin cần cho Sports và PC đều cấu hình được qua Inspector tự sinh; nếu thiếu khả năng thiết yếu thì đề xuất một control typed built-in nhỏ, không mở thực thi code tùy ý.
+- **Người duyệt:** User (review spec #5 rev 1). **Ngày:** 2026-10-24.

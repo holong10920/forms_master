@@ -1,6 +1,7 @@
 # Spec #1: Form Definition Schema & Workflow DSL (Architecture Proposal)
 
-> **Trạng thái: PROPOSAL, revision 3.4** (2026-10-24).
+> **Trạng thái: PROPOSAL, revision 3.5** (2026-10-24).
+> - Rev 3.5: mã 422 field inactive là `E-INACTIVE-DATA-PRESENT` (dạng mã lỗi runtime công khai, spec #3 §16.4); body submit có `releaseId` (§8.6, spec #5 §10.2); đóng OD-05 (ADR-060), OD-08 và OD-09 (ADR-058, P0 defaults); TTL draft kiểm logic (§9).
 > - Rev 3.4: theo spec #4 review #1 (ADR-048, ADR-049): named condition tham chiếu bằng `conditionId` ổn định (§7.1, §7.3, §7.4); đóng OD-03 và OD-11 (§21); node `PREVIEW_ONLY_UNCONFIGURED_PATH` chỉ có trong IR preview (§8.1); `draftVersion` là metadata do server quản lý (§7.1). Chưa có review mới của user cho spec #1.
 > - Rev 3.3: thêm trạng thái chờ capability lazy (`awaitingCapability`, C11, INV-N9) theo spec #3 §15.1 (ADR-040); sửa C7 cho khớp ADR-037 (không xóa draft ngầm, đề xuất Resume đúng release). Chưa có review mới của user cho spec #1.
 > - Rev 3.2: chỉ **đồng bộ draft recovery với ADR-037** (spec #3 Answer #2): draft và session pin `releaseId`; §9 `session`, §13. Chưa có review mới của user cho spec #1.
@@ -563,7 +564,7 @@ Engine chỉ có **một** khái niệm "không có giá trị".
 
 - BE tính `project(IR, values)` = tập node active, qua `derivedPath` và hàm activity.
 - **Key được chấp nhận ⊆ active ∩ (`submit` ≠ `displayOnly`).**
-  - Key inactive → `422 INACTIVE_DATA_PRESENT`.
+  - Key inactive → `422 E-INACTIVE-DATA-PRESENT`.
   - Key lạ → `422 UNKNOWN_FIELD`.
 - Bản ghi được lưu gồm:
   - giá trị đã project và chuẩn hóa
@@ -796,7 +797,7 @@ Các kiểm tra graph khác (đều chặn publish):
 4. **Backend:**
    - Tải IR của đúng revision từ registry chính thức. Revision không tồn tại hoặc không còn được hỗ trợ thì từ chối.
    - Dựng lại đường đi active bằng cùng hàm activity.
-   - Có field inactive trong payload thì trả **`422 INACTIVE_DATA_PRESENT`**.
+   - Có field inactive trong payload thì trả **`422 E-INACTIVE-DATA-PRESENT`**.
    - Validate, tính lại `calculated`, chạy validator authoritative.
 5. Nếu lỗi: ở lại 確認, giữ state và draft, cho phép retry. Lỗi được map về field theo V-08.
 6. Nếu thành công: chuyển sang `complete` của đúng nhánh, xóa draft và `clear` state.
@@ -945,7 +946,7 @@ Các dòng C1–C10 được thêm vào T3 dưới dạng sự kiện và guard,
 - **Selector theo node:** adapter React chỉ subscribe phần mình cần, để tránh re-render toàn form (PERF-04, đo bằng profiler).
 - **`DraftPersistenceAdapter`:** là một effect handler.
   - Chỉ ghi giá trị **active**, có `persist: allowed` và không bị taint PII.
-  - TTL thuộc OD-08. Lưu kiểu debounce hoặc checkpoint.
+  - TTL 72 giờ (P0 default, ADR-058; OD-08 đóng); hết hạn được kiểm **logic** theo `savedAt` khi khôi phục, dù storage chưa bị dọn. Lưu kiểu debounce hoặc checkpoint.
   - Lỗi storage không ảnh hưởng việc nhập liệu.
   - Không bao giờ là nguồn sự thật: khi khôi phục, engine chạy lại activity, dựng lại đường đi và validate.
 
@@ -1334,18 +1335,18 @@ Cột "Thiết kế ở spec #1" là phần contract được chốt ngay bây g
 
 **OD-02, OD-04, OD-07, OD-12: APPROVED AS DESIGN DIRECTION kèm điều kiện** (review #2): ADR-019, ADR-020, ADR-021, ADR-022, áp dụng ở §7.7, §7.8, §16 và §11.
 
-**OD-05, OD-06, OD-08..OD-10, OD-13: vẫn OPEN, user chưa duyệt.** OD-03 đóng theo ADR-049 sau khi spec #4 rev 2 §11 hoàn tất mapping nhất quán; OD-11 đóng cho P0 theo ADR-048. Cột "Khuyến nghị" chỉ là đề xuất của Claude.
+**OD-06, OD-10, OD-13: vẫn OPEN, user chưa duyệt.** OD-05 đóng (ADR-060); OD-08, OD-09 đóng với P0 defaults (ADR-058). OD-03 đóng theo ADR-049 sau khi spec #4 rev 2 §11 hoàn tất mapping nhất quán; OD-11 đóng cho P0 theo ADR-048. Cột "Khuyến nghị" chỉ là đề xuất của Claude.
 
 | ID | Vấn đề | Phương án | Khuyến nghị | Lý do | Trade-off | Ảnh hưởng P0 | Phụ thuộc spec | Hạn quyết |
 |---|---|---|---|---|---|---|---|---|
 | OD-02 ✅ *(APPROVED AS DESIGN DIRECTION)* | Nguồn sự thật của schema | (a) JSON Schema 2020-12 là chuẩn, sinh type TS từ đó. (b) Zod là gốc, export JSON Schema. | (a) | Trung lập ngôn ngữ, Python validate trực tiếp được, khớp ADR-017 | Phải chọn công cụ sinh type. Lỗi schema kém thân thiện hơn Zod. | Cấu trúc của `form-schema` | #2 (`configSchema` dùng cùng định dạng), #3 | **Trước spec #2** |
 | OD-03 ✅ *(đóng — ADR-049, rev 3.4)* | Cách biểu diễn rule | (a) Gắn điều kiện vào đích, cộng named conditions. (b) Rule ECA. | (a) | Không xung đột, không phụ thuộc thứ tự, phân tích được | UI phải ánh xạ câu "khi X thì A, B, C" thành nhiều điều kiện | Engine, analyzer, IR | #3 (IR), #4 (rule editor) | Trước spec #3 |
 | OD-04 ✅ *(APPROVED AS DESIGN DIRECTION)* | Đóng gói block | (a) Chỉ field trong `exports` mới tham chiếu được từ ngoài. (b) Tham chiếu được mọi field. | (a) | Nâng block chỉ phải kiểm phần export, giảm coupling | Tác giả block phải khai `exports` | Analyzer, định nghĩa block | #2 (template), #4 | Trước spec #2 |
-| OD-05 | Field inactive có trong payload | (a) 422 nghiêm ngặt. (b) Lặng lẽ loại bỏ. | (a) | Khớp điểm 7 của Answer #6, phát hiện tamper và bug client | Bug client lộ ra thành lỗi submit | Evaluator BE | #5 | Trước spec #5 |
+| OD-05 ✅ *(đóng — ADR-060: 422 `E-INACTIVE-DATA-PRESENT`, spec #5 §10.2)* | Field inactive có trong payload | (a) 422 nghiêm ngặt. (b) Lặng lẽ loại bỏ. | (a) | Khớp điểm 7 của Answer #6, phát hiện tamper và bug client | Bug client lộ ra thành lỗi submit | Evaluator BE | #5 | Trước spec #5 |
 | OD-06 | Step graph ở P0 | (a) Chỉ DAG. (b) Cho vòng có giới hạn. | (a) | Kiểm tra graph đơn giản và chắc chắn kết thúc (NR-10). Nhóm lặp đáp ứng nhu cầu "thêm sản phẩm". | Không hỗ trợ flow dạng lặp | Engine, analyzer | #3, #4 (flow editor) | Trước spec #3 |
 | OD-07 ✅ *(APPROVED AS DESIGN DIRECTION)* | Ai đặt classification | (a) Developer đặt mặc định, Platform Admin quản lý ngoại lệ, Editor chỉ được tăng. (b) Editor tự chọn. | (a) | ADR-012: Editor không được nới hạn chế PII | Editor phụ thuộc mặc định do developer đặt | Taint, persistence, permission plugin | **#2** (`acceptsClassifications`), #4, #5 | **Trước spec #2** |
-| OD-08 | TTL của draft khách | con số do nghiệp vụ quyết | Chưa đề xuất con số | Là quyết định nghiệp vụ và quyền riêng tư | — | Adapter draft | #5 | Tại G1 |
-| OD-09 | Thời gian revision cũ còn nhận submit | (a) Đến khi bị retire thủ công. (b) Theo TTL. | (a), với điều kiện ≥ TTL draft | Không từ chối khách đang điền dở | Phải có thao tác retire | Evaluator BE, store | #5 | Trước spec #5 |
+| OD-08 ✅ *(P0 default 72 giờ — ADR-058)* | TTL của draft khách | con số do nghiệp vụ quyết | Chưa đề xuất con số | Là quyết định nghiệp vụ và quyền riêng tư | — | Adapter draft | #5 | Tại G1 |
+| OD-09 ✅ *(retire thủ công, `G` = 7 ngày — ADR-058)* | Thời gian revision cũ còn nhận submit | (a) Đến khi bị retire thủ công. (b) Theo TTL. | (a), với điều kiện ≥ TTL draft | Không từ chối khách đang điền dở | Phải có thao tác retire | Evaluator BE, store | #5 | Trước spec #5 |
 | OD-10 | Phép chia và toán ngày tháng trong `calculated` | (a) Hoãn sang P1 (§7.6.3). (b) Có ngay ở P0. | (a) | Cần chốt rounding và xử lý chia cho 0 trước | Một số phép tính phải đi qua plugin | Catalog toán tử | #2 (derivedFn) | Tại G1 |
 | OD-11 ✅ *(đóng cho P0 — ADR-048: tiếng Nhật qua message catalog)* | Ngôn ngữ của Admin (message, diagnostic) | ja / vi / en / nhiều ngôn ngữ | Chưa khuyến nghị | Phụ thuộc người dùng Admin thực tế | — | Catalog message của Admin | #4 | Trước spec #4 |
 | OD-12 ✅ *(APPROVED AS DESIGN DIRECTION)* | Ngoại lệ `deferToSubmit` cho validator authoritative | (a) Cho phép, có khai báo, BE bắt buộc kiểm. (b) Không ở P0. | (a) | Tránh phải sửa contract về sau. Demo không dùng tới. | Thêm một nhánh hành vi cần test | Validator contract | **#2** | **Trước spec #2** |
@@ -1443,5 +1444,5 @@ Kết quả của review là một tài liệu riêng gồm danh sách conflict,
 **Đề xuất:** nếu user không thấy vấn đề ở các phần mới trong rev 3 (§7.6.4/§7.6.5, §7.6.9/§7.6.10, §7.7, §7.8, §8.7.6, §11, §16), spec #1 có thể chuyển sang **READY_FOR_CROSS_REVIEW**. Trạng thái này chỉ được ghi khi user xác nhận. Claude không tự đánh dấu.
 
 **Blocking issue của spec #1:** không có mục nào chặn việc brainstorm spec #2.
-- Các OD còn mở (OD-05, OD-06, OD-08..10, OD-13; OD-03 và OD-11 đã đóng ở rev 3.4) có hạn ở spec #3–#5 hoặc G1.
+- Các OD còn mở (OD-06, OD-10, OD-13; OD-03, OD-11 đóng ở rev 3.4; OD-05, OD-08, OD-09 đóng ở rev 3.5) có hạn ở spec #3–#5 hoặc G1.
 - Việc user review rev 3 là điều kiện để chuyển sang READY_FOR_CROSS_REVIEW.

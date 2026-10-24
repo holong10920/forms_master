@@ -1,6 +1,7 @@
 # Spec #2: Plugin Contracts & Capability Registry (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.8** (2026-10-24).
+> **Trạng thái: PROPOSAL, revision 2.9** (2026-10-24).
+> - Rev 2.9: ADR-061 — **P0 không nạp design binding**: chỉ inspector tự sinh + control typed của Admin; design binding là P1 (sandbox) (§6.3, §6.4, §7.2, §11.1 INV-A1, §18.1). ADR-057/058 — đóng OD2-08 (`T_stale` 60 s chỉ cho query thông tin) và OD2-09 (`G` = 7 ngày); enforce runtime qua admission gate của spec #5 §9.3 (§15.3, §16.5).
 > - Rev 2.8: theo targeted review của Preview isolation: binding `presentation` + export `./presentation` + entry SDK `@platform/sdk-browser/presentation` (§6.2.1, §6.4, §6.5); L3 viết lại (bỏ `design` → browser); invariant INV-A1/INV-A2 và L1b/L5 cho Admin build và Preview build (§11.1, §11.2); conformance với spy mở rộng cho `presentation` **và design facet** (§17.2); ghi trung thực rằng design facet và `presentation` vẫn là code plugin chạy trong origin Admin (§7.2, §10.1; spec #4 OD4-07).
 > - Rev 2.7: theo ADR-053 (Preview cô lập): `Presentation` nằm ở **sub-entry `presentation`** riêng của browser facet, có đồ thị import thuần (§7.4, L3 §11.2); Admin build chỉ chứa design facet + entry `presentation`; browser facet hành vi chỉ vào **Preview build** trên origin preview riêng (§10.1); conformance kiểm cả lúc import module (§17.2).
 > - Rev 2.6: theo spec #4 review #1 BLOCKER A — `fieldType` có export **`Presentation`** thuần hiển thị, không side effect (§7.4) + conformance (§17.2); Admin chỉ dùng `Presentation` trên Design Canvas. Registry kiểm `designHostApi` của Admin build (§10.1).
@@ -274,7 +275,7 @@ PRK = pluginId "@" version ;  CK = PRK "#" capabilityId ;  FBK = CK "/" facet
 
 *(Rev 2.5, spec #4 §10.2.)* **Schema mà Business Editor cấu hình** (`configSchema`, `paramsSchema`):
 - Mọi thuộc tính phải có `title` là chuỗi tiếng Nhật (nhãn hiển thị); `description` tiếng Nhật nếu cần giải thích. Enum phải có nhãn hiển thị cho từng giá trị (ví dụ dùng `oneOf` gồm `{ const, title }`). Thiếu → `E-SCHEMA-PROFILE`.
-- Inspector tự sinh chỉ vẽ được tập con: `boolean`, enum có nhãn, `string`, `integer`, mảng chuỗi ngắn. Schema ngoài tập này (object lồng, mảng object, `$defs`…) chỉ được phép khi capability có **design binding** (§7.2); nếu không → `E-SCHEMA-PROFILE`.
+- Inspector tự sinh chỉ vẽ được tập con: `boolean`, enum có nhãn, `string`, `integer`, mảng chuỗi ngắn. Schema ngoài tập này (object lồng, mảng object, `$defs`…) → `E-SCHEMA-PROFILE` ở P0 (ADR-061: P0 không có design binding). Cần khả năng thiết yếu ngoài tập con → đề xuất một **control typed built-in** của Admin qua review platform, không mở code tùy ý. Từ P1: cho phép khi có design binding chạy trong sandbox (§7.2).
 - Tên thuộc tính (ví dụ `filterByPrefecture`) không bao giờ hiện cho Business Editor.
 
 ### 6.4. Ví dụ chuẩn: `@platform/store-selector@1.0.0`
@@ -305,7 +306,7 @@ Dữ liệu cửa hàng hư cấu. Mọi schema bên trong hợp lệ theo 2020-
       "id": "storeSelector",
       "kind": "fieldType",
       "title": { "ja": "店舗を選ぶ" },
-      "bindings": { "browser": "StoreSelectorField", "presentation": "StoreSelectorPresentation", "design": "StoreSelectorInspector" },
+      "bindings": { "browser": "StoreSelectorField", "presentation": "StoreSelectorPresentation" },
       "configSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -386,7 +387,7 @@ Dữ liệu cửa hàng hư cấu. Mọi schema bên trong hợp lệ theo 2020-
 ```
 
 - `fieldType` không có server binding. Xác minh server là capability riêng `storeIdValid`, liên kết qua `verification.check`. Mỗi capability có đúng một family nên facet không mơ hồ.
-- Inspector là **design binding** của `storeSelector` (`bindings.design`), không phải capability riêng (§7.2).
+- *(rev 2.9, ADR-061)* P0: Inspector của `storeSelector` là **inspector tự sinh** từ `configSchema` (boolean + string, nằm trong tập con §6.3); input port `prefecture` nối bằng control typed của Admin (`SetCapabilityInputs`, spec #4 §8). Không có design binding ở P0.
 - `mock-store-directory` là connector id do platform đăng ký phía server, trỏ tới dữ liệu hư cấu.
 
 ### 6.5. Đóng gói (minh họa; tên thư mục chốt ở spec #3/P02)
@@ -475,6 +476,8 @@ plugins/store-selector/
 - Kind bị bỏ so với rev 1: `inspector` (thành design binding, §7.2), `previewMock` (thành `previewFixtures`, §9.5).
 
 ### 7.2. Design binding (thay cho kind `inspector`)
+
+*(Rev 2.9, ADR-061: toàn bộ mục này là **P1**. P0 không nạp design binding vào Admin; capability chỉ dùng inspector tự sinh và control typed. Khi bật ở P1, design binding chạy trong sandbox, không trong origin Admin.)*
 
 Chỉ có **một** cơ chế đăng ký: `bindings.design` của chính capability.
 - Áp dụng cho mọi capability có `configSchema` (P0: `fieldType`; tương lai: validator có params phức tạp, effect).
@@ -647,7 +650,7 @@ Giới hạn một version chỉ trong **một Form Release**. Form khác nhau d
 
 ADR-026 nói một `engineApi` range; spec tách theo host vì các host có version độc lập. Đây là làm rõ, không đổi nguyên tắc.
 
-*(Rev 2.7, ADR-053, spec #4 §14.4, §14.7.)* Phía Admin có **hai build tách origin**: **Admin build** (origin Admin) chỉ chứa design facet và entry `presentation`; **Preview build** (origin preview riêng) chứa engine + browser facet đầy đủ. Admin build không chứa `Component` hay code runtime của plugin (INV-A1). Code plugin còn lại trong origin Admin là `presentation` (thuần, có spy) và design binding (§7.2; spec #4 OD4-07). *(Rev 2.6, spec #4 §8.3, §14.4.)* Hai build chỉ đưa vào những release có facet design hoặc browser mà, với **từng facet có mặt**, `compat.designHostApi` / `compat.browserHostApi` chứa version của Admin/engine trong bản build đó (không kiểm host mà release không có facet, §6.2; release chỉ có facet server chỉ cần metadata trong catalog snapshot); release không đạt thì không có trong **Admin capability set** và Admin hiện nó là 「この管理画面では編集できない版」, không bao giờ đổi version thay người dùng.
+*(Rev 2.7, ADR-053, spec #4 §14.4, §14.7.)* Phía Admin có **hai build tách origin**: **Admin build** (origin Admin) chỉ chứa design facet và entry `presentation`; **Preview build** (origin preview riêng) chứa engine + browser facet đầy đủ. Admin build không chứa `Component` hay code runtime của plugin (INV-A1). Code plugin còn lại trong origin Admin là `presentation` (thuần, có spy) (design binding là P1, ADR-061). *(Rev 2.6, spec #4 §8.3, §14.4.)* Hai build chỉ đưa vào những release có facet design hoặc browser mà, với **từng facet có mặt**, `compat.designHostApi` / `compat.browserHostApi` chứa version của Admin/engine trong bản build đó (không kiểm host mà release không có facet, §6.2; release chỉ có facet server chỉ cần metadata trong catalog snapshot); release không đạt thì không có trong **Admin capability set** và Admin hiện nó là 「この管理画面では編集できない版」, không bao giờ đổi version thay người dùng.
 
 ### 10.2. Release Manifest ghi gì (nội dung spec #2 yêu cầu, định dạng spec #3)
 
@@ -659,10 +662,7 @@ Version chính xác của engine, `browserHostApi`, compiler, bundler, Node, sha
 
 *(Rev 2.1, ADR-037.)* Đơn vị hỗ trợ là **release** (`releaseId`, một artifact cụ thể của một revision), không chỉ revision. Active ≠ supported: release `inactive` vẫn có thể `supported`. Rollback chỉ đổi active, không làm release publish sau đó thành `retired`. Bốn chiều trạng thái (activation, support, security, asset retention) và các mốc thời gian: spec #3 (notes S3-P06).
 
-Backend phải hỗ trợ mọi release trong tập `S` (dưới đây "revision" hiểu là release của revision đó):
-- revision đang active của mọi form;
-- revision vừa bị thay (publish mới hoặc rollback) trong **grace window** `G` kể từ lúc bị thay, vì khách có thể đang mở form cũ trong browser (OD2-09);
-- revision mà policy OD-09 của spec #1 vẫn giữ nhận submit.
+*(Rev 2.9, thay định nghĩa cũ theo spec #5 §9.2 và ADR-058.)* Backend phải hỗ trợ mọi release trong tập `S` = mọi release **đã từng active** mà chưa bị retire (gate release không có `rel#retired`). Tập này gồm release đang active, release trong grace window `G` (7 ngày từ lúc rời active, để khách đang mở form cũ gửi được), và release đã quá `supportEndsAt` nhưng chưa retire. Submission được nhận tới `retiredAt`. Miễn trừ của deploy gate cho server FBK đã bị revoke: spec #5 §9.2.
 
 Revision chỉ rời `S` bằng **retire tường minh** sau `G`. Khách gửi tới release đã retire nhận `410 E-RELEASE-RETIRED`, UI hướng dẫn bắt đầu lại trên active release (spec #1 §13, ADR-037).
 
@@ -722,7 +722,7 @@ Không có nhánh nào thay bằng version khác.
 | INV-F5 | Không có secret trong browser/design facet, manifest, catalog, artifact, sourcemap hay metadata build. |
 | INV-F6 | Hai form chỉ khác nhau về module plugin đúng bằng hiệu của hai lock (BUILD-06). |
 | INV-F7 | Artifact chứa đúng **một** bản React và React DOM. |
-| INV-A1 *(rev 2.8)* | **Admin build** (origin Admin): module ⊆ app Admin ∪ shared externals ∪ `contract` ∪ `presentation` ∪ `design` (của release trong Admin capability set; tùy OD4-07 của spec #4) ∪ thư viện allowlist. Không có module của `browser` facet, server facet, `fixtures/`, engine runtime client connector. |
+| INV-A1 *(rev 2.8)* | **Admin build** (origin Admin): module ⊆ app Admin ∪ shared externals ∪ `contract` ∪ `presentation` ∪ *(P1, ADR-061)* `design` ∪ thư viện allowlist. Không có module của `browser` facet, server facet, `fixtures/`, engine runtime client connector. |
 | INV-A2 *(rev 2.8)* | **Preview build** (origin preview): module ⊆ engine ∪ shared externals ∪ `contract` ∪ `presentation` ∪ `browser` facet (của Admin capability set) ∪ thư viện allowlist. Không có `design`, server facet, `fixtures/`, test, mock ngoài `previewFixtures` dạng dữ liệu. |
 
 ### 11.2. Sáu lớp
@@ -910,7 +910,7 @@ sequenceDiagram
   else key đã dùng, khác payload hash
     API-->>B: 409 E-IDEMPOTENCY-KEY-REUSED (không ghi)
   else key mới
-    API->>API: (2) revision ∈ S, adapter + hash + policy (§10.6)
+    API->>API: (2) revision ∈ S, adapter + hash; đọc nhất quán mạnh gate trước khi gọi adapter (spec #5 §9.3)
     API->>A: (3) validateAsInput · recompute · authoritativeCheck (storeIdValid) · deferToSubmit
     A-->>API: pass / reject / timeout
     alt reject
@@ -918,7 +918,7 @@ sequenceDiagram
     else timeout / không khả dụng
       API-->>B: 503 retryable (không ghi)
     else pass
-      API->>DB: (5)(6) một transaction: submission + idempotency + outbox event mỗi effect
+      API->>DB: (5)(6) một transaction: ConditionCheck gate form/release/FBK + submission + idempotency + outbox event mỗi effect (spec #5 §10.3)
       API-->>B: (7) 200 receipt {submissionId, status: received}
       W->>A: (8) postCommitEffect.handle(event) theo lease
       W->>DB: trạng thái xử lý
@@ -928,7 +928,7 @@ sequenceDiagram
 
 ### 15.1. Bước 4 và idempotency
 
-- Key lạ → từ chối; field inactive → theo OD-05 spec #1 (khuyến nghị 422); giá trị `displayOnly` không được gửi.
+- Key lạ → từ chối; field inactive → `422 E-INACTIVE-DATA-PRESENT` (ADR-060); giá trị `displayOnly` không được gửi.
 - Payload hash = SHA-256 của JCS `{formId, releaseId, values}` *(rev 2.8, đồng bộ spec #5 §10.2)*.
 - Engine dùng **cùng** `idempotencyKey` khi retry sau 503/lỗi mạng (payload không đổi). Sau phản hồi **dứt khoát** (422) và khách sửa dữ liệu, engine tạo **key mới** cho lần submit tiếp theo, vì payload đã khác *[Claude]*. Lưu và xử lý key của lần thử bị từ chối: spec #5.
 
@@ -944,7 +944,7 @@ sequenceDiagram
 
 - Definition khai `effects: [{ id, use, on: "submission.committed", inputs }]` (§6.6). Không có trigger nào khác ở P0.
 - Analyzer và publish pipeline kiểm: alias trỏ tới `postCommitEffect` trong registry, trạng thái cho phép, `inputs` hợp lệ theo `accepts`, effect có trong **site policy** (`E-EFFECT-NOT-ALLOWED`).
-- Backend kiểm lại khi tạo outbox event (cùng transaction) và khi worker xử lý. Nếu lúc xử lý effect đã bị chặn bởi policy, event chuyển `blocked` (không retry ngầm), ghi audit; recovery path quyết replay hay hủy.
+- Backend kiểm lại khi tạo outbox event (ConditionCheck gate FBK trong transaction submit, spec #5 §9.3, §10.3) và khi worker xử lý (đọc nhất quán mạnh gate). Nếu lúc xử lý effect đã bị chặn bởi policy, event chuyển `blocked` (không retry ngầm), ghi audit; recovery path quyết replay hay hủy.
 - Business Editor chỉ chọn trong danh sách effect được phép của site; không tạo command mới.
 - Retry không nhân đôi: handler idempotent theo `eventId`; mock ghi một dòng log với ràng buộc unique trên `eventId`.
 - **P0:** chỉ `@platform/effect-mock-log#recordSubmission`, ghi `submissionId`, `formRef`, thời điểm và field `public` đã map vào bảng log local. Không mạng, không email, không API công ty.
@@ -997,11 +997,11 @@ sequenceDiagram
 - **Runtime policy store** (P0: bảng trong DB local của backend; mô phỏng ở local): entry `{ target: PRK | FBK, effect: "vulnerable" | "revoked" | "block-operation", incidentId, reason, actor, createdAt, expiresAt? }`.
 - **Thay đổi**: chỉ qua API admin đã xác thực, role `platform-security` (RBAC ở spec #5, F-P0-13). Business Editor, Reviewer và người dùng form không có quyền. P0 có thể có một tài khoản local giữ role này.
 - **Audit**: mọi thay đổi ghi audit log append-only (F-P0-16).
-- **Enforce ngay**: backend đọc policy cho mỗi request. *(Rev 2.8: P0 có nhiều process API, nên cơ chế là so `policyVersion` mỗi request và đọc nhất quán mạnh ở submit — spec #5 §9.3; câu "một process, cache bị vô hiệu ngay khi ghi" trước đây bị thay.)*
+- **Enforce ngay**: backend đọc policy cho mỗi request. *(Rev 2.9: enforce bằng **admission gate** của spec #5 §9.3 — đọc nhất quán mạnh gate trước mọi lời gọi adapter và ConditionCheck gate trong transaction submit; `policyVersion` chỉ để versioning cache thông tin.)*
 - **Trạng thái hiệu lực** = mức **chặt nhất** của ledger và override (`active` < `deprecated` < `vulnerable` < `revoked`). Override không bao giờ nới lỏng ledger.
 - **Release manifest không bị đụng tới.**
 - **Reconciliation** (chạy ở generator và khi backend khởi động): báo cáo override chưa có entry ledger tương ứng sau hạn ghi trong incident; ledger đã chặt hơn override → override có thể đóng; override hết `expiresAt` → không tự gỡ nếu ledger chưa được cập nhật, mà báo cáo để người quyết.
-- **Runtime status store không khả dụng:** OD2-08.
+- **Runtime status store không khả dụng:** ADR-057 — submit fail closed (503); chỉ query thông tin dùng cache ≤ 60 s (spec #5 §9.3). Override có hiệu lực tại commit nhờ admission gate (spec #5 §9.3).
 
 ---
 
@@ -1047,8 +1047,8 @@ Kết quả lưu làm evidence. Fixture và kết quả conformance là một ph
 
 | Bước | Kết quả |
 |---|---|
-| Registry | 3 capability: `storeSelector` (browser-ui, có design binding), `storeList` (server-io), `storeIdValid` (server-io). Facet: browser, design, server. |
-| Editor chèn field | Admin hiện 「店舗を選ぶ」; inspector từ design binding; alias `{ …, capability: "storeSelector", kind: "fieldType" }` |
+| Registry | 3 capability: `storeSelector` (browser-ui; P0 không design binding), `storeList` (server-io), `storeIdValid` (server-io). Facet: browser (+ entry `presentation`), server. |
+| Editor chèn field | Admin hiện 「店舗を選ぶ」; inspector tự sinh từ `configSchema` (ADR-061); alias `{ …, capability: "storeSelector", kind: "fieldType" }` |
 | Compile PC | Lock: `storeSelector` (FBK browser), `storeList` (FBK server), `storeIdValid` (FBK server). Design binding không vào lock. Entry import đúng `browser` của release `1.0.0`. |
 | Compile Sports | Lock không có `@platform/store-selector`; L5 kiểm INV-F6 |
 | Runtime PC | engine gọi `storeList` qua client connector (CK); backend chạy adapter đúng hash; trả cửa hàng hư cấu |
@@ -1183,7 +1183,7 @@ Trạng thái: **Đồng bộ** = spec #1 rev 3.1 đã được sửa để kh�
 |---|---|---|---|
 | Key grammar, manifest meta-schema, profile | ✔ | ✔ | — |
 | Trusted pipeline + generator + provenance | ✔ | ✔ (local, chế độ CI) | CI thật: sau G9; ký artifact: phase sau |
-| Kind | ✔ | 5 kind P0 + design binding + `previewFixtures` (§7.1) | theo ma trận §7.1 |
+| Kind | ✔ | 5 kind P0 + `previewFixtures` (§7.1); design binding là P1 (ADR-061) | theo ma trận §7.1 |
 | Resolve + Capability Lock | ✔ | ✔ | — |
 | Adapter, deploy gate, supported set | ✔ | ✔ (một deployment, một group, kiểm lúc khởi động) | nhiều group/runtime: đề xuất production |
 | L1–L6 | ✔ | ✔ (L5 cùng spec #3) | — |
@@ -1206,8 +1206,8 @@ OD2-01 → ADR-029 · OD2-02 → ADR-030 · OD2-03 → ADR-031 · OD2-04 → ADR
 
 | ID | Vấn đề | Phương án | Khuyến nghị | Lý do | Trade-off | Hạn quyết |
 |---|---|---|---|---|---|---|
-| **OD2-08** | Backend làm gì khi runtime policy store không khả dụng | (a) Dùng snapshot tốt gần nhất (lưu cục bộ, kèm thời điểm) trong thời hạn `T_stale`; quá hạn thì fail closed cho thao tác của plugin (query, serverValidator, effect) và cho submit cần chúng; không có snapshot lúc khởi động thì không nhận traffic. (b) Fail closed ngay. (c) Fail open theo ledger Git. | **(a)**, `T_stale` do user/Platform Security chốt | Override là kênh khẩn cấp: fail open (c) có thể bỏ qua một lệnh `revoked` vừa ban hành; (b) biến sự cố nhỏ của store thành sự cố toàn hệ thống | (a) có cửa sổ `T_stale` mà override mới chưa thấy được | Trước spec #5 |
-| **OD2-09** | Grace window `G` cho revision vừa bị thay | (a) `G` cố định do platform đặt, ≥ thời gian sống tối đa của phiên form trong browser và gắn với TTL draft (OD-08). (b) `G` theo từng site. | **(a)**; con số chốt cùng OD-08/OD-09 | Tránh backend update làm hỏng form đang mở (ADR-029) | Giữ adapter cũ lâu hơn | Trước spec #5 |
+| **OD2-08** ✅ *(ADR-057: (a), `T_stale` = 60 s chỉ cho query thông tin; submit/revocation/activation không dùng cache — spec #5 §9.3)* | Backend làm gì khi runtime policy store không khả dụng | (a) Dùng snapshot tốt gần nhất (lưu cục bộ, kèm thời điểm) trong thời hạn `T_stale`; quá hạn thì fail closed cho thao tác của plugin (query, serverValidator, effect) và cho submit cần chúng; không có snapshot lúc khởi động thì không nhận traffic. (b) Fail closed ngay. (c) Fail open theo ledger Git. | **(a)**, `T_stale` do user/Platform Security chốt | Override là kênh khẩn cấp: fail open (c) có thể bỏ qua một lệnh `revoked` vừa ban hành; (b) biến sự cố nhỏ của store thành sự cố toàn hệ thống | (a) có cửa sổ `T_stale` mà override mới chưa thấy được | Trước spec #5 |
+| **OD2-09** ✅ *(ADR-058: `G` = 7 ngày, P0 default)* | Grace window `G` cho revision vừa bị thay | (a) `G` cố định do platform đặt, ≥ thời gian sống tối đa của phiên form trong browser và gắn với TTL draft (OD-08). (b) `G` theo từng site. | **(a)**; con số chốt cùng OD-08/OD-09 | Tránh backend update làm hỏng form đang mở (ADR-029) | Giữ adapter cũ lâu hơn | Trước spec #5 |
 
 ### 22.3. OPEN còn lại từ spec #1 (không đổi)
 
@@ -1273,7 +1273,7 @@ OD-03, OD-05, OD-06, OD-08, OD-09, OD-10, OD-11, OD-13 (spec #1 §21). Liên qua
 | Final submission, effect binding (§15) | Theo ADR-034; chờ review | OD-05 (spec #1) |
 | Governance, override (§16) | Theo ADR-032/035; chờ review | OD2-08 |
 | Conformance (§17) | Chờ review | — |
-| Interface matrix #1 ↔ #2 (§19) | 20/21 đồng bộ hoặc tham chiếu | I-19 chờ OD-09/OD2-09 |
+| Interface matrix #1 ↔ #2 (§19) | 20/21 đồng bộ hoặc tham chiếu | I-19 đồng bộ theo ADR-058 (spec #5 §9.2, §9.4) |
 
 **Ảnh hưởng tới spec #3 (compiler & bundle):** các input mà spec #3 cần từ spec #2 đã có: Capability Lock (§9.2), release store và cách tiêu thụ (§9.4), shared externals và React singleton (§11.4), invariant INV-F1..F7 và L5 (§11), nội dung Release Manifest (§10.2). OD2-08/OD2-09 thuộc spec #5, **không chặn** spec #3.
 

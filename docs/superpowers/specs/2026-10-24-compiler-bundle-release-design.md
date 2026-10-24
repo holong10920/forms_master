@@ -1,6 +1,7 @@
 # Spec #3: Compiler, Bundle & Release Architecture (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.3** (2026-10-24).
+> **Trạng thái: PROPOSAL, revision 2.4** (2026-10-24).
+> - Rev 2.4: error contract thêm 423 cho form availability (§16.4, spec #5 §9.1); §16.1 dùng P0 defaults của ADR-058 (`TTL_draft` 72 giờ, `G` 7 ngày, `T_edge_max` là mục kiểm chứng khi deploy); bootstrap kiểm TTL draft theo logic (`savedAt`).
 > - Rev 2.3: đồng bộ catalog diagnostic với spec #4 rev 2.1 (§18.1a); IR preview chỉ được thực thi trong runtime preview cô lập trên origin riêng (ADR-053, §5.1).
 > - Rev 2.1: thêm mode `preview` (§5.1) theo spec #4.
 > - Rev 2.2: theo spec #4 review #1: `preview` là **tập con phân tích an toàn cho browser**, không có node hoàn tất tổng hợp (dùng `PREVIEW_ONLY_UNCONFIGURED_PATH`); thêm mode **`preflight`** phía server, authoritative (§5.1).
@@ -664,7 +665,7 @@ Mở `/r/{R}/` trực tiếp: bootstrap đọc khối `release` của `index.htm
 | INV-R4 | Không lỗi nào (tải chunk, status, mạng) dẫn tới việc tải active release thay cho release đã pin. |
 
 - Session: `sessionStorage` `{ releaseId, sessionId }`; reload trong cùng tab đi qua bootstrap và resume đúng release nếu còn supported.
-- Draft: metadata `{ releaseId, revision, sessionId, savedAt, draftFormat }`, không PII (ADR-012). Khôi phục theo spec #1 NR-08/NR-09.
+- Draft: metadata `{ releaseId, revision, sessionId, savedAt, draftFormat }`, không PII (ADR-012). Khôi phục theo spec #1 NR-08/NR-09. *(Rev 2.4)* `savedAt + 72 giờ < now` → coi là hết hạn dù storage chưa dọn: không đề xuất Resume, xóa metadata (ADR-058).
 - **Hai tab:** draft theo `formId + sessionId`; `BroadcastChannel` báo tab khác đang mở và báo submit thành công. Giới hạn: best-effort; hai `idempotencyKey` khác nhau vẫn có thể tạo hai submission nếu khách cố ý gửi ở cả hai tab.
 
 ### 14.5. Loading Shell
@@ -756,10 +757,10 @@ Prefetch group `g` khi **tất cả** điều kiện sau đúng:
 | Security | `normal` / `suspended` | Platform Security (ADR-032, ADR-035) |
 | Asset retention | `served` / `withdrawn` / `archived` / `quarantined` | retention policy, security |
 
-Ràng buộc (chưa có con số; chờ OD-08, OD2-09):
-- `supportEndsAt ≥ deactivatedAt + max(G, T_edge_max)`.
-- `assetsWithdrawnAt ≥ supportEndsAt` (còn nhận submit thì asset, kể cả lazy chunk, còn phục vụ).
-- Rollback tới `R`: `R` không `suspended`/`quarantined`; asset `served` hoặc khôi phục được từ `archived` **và qua lại integrity gate**; precheck adapter (spec #2 §10.4); nếu `R` đã `retired` thì đặt lại `supported` bằng thao tác tường minh có audit. Không rebuild.
+Ràng buộc (P0 defaults theo ADR-058: `TTL_draft` 72 giờ, `G` 7 ngày; `T_edge_max` là mục kiểm chứng khi deploy — spec #5 §9.4):
+- `supportEndsAt = deactivatedAt + G` (spec #5 §6.5); điều kiện an toàn `T_edge_max ≤ G` là mục kiểm chứng khi deploy (VG-10), không tự suy ra.
+- `assetsWithdrawnAt ≥ retiredAt` (còn nhận submit — tới `retiredAt` — thì asset, kể cả lazy chunk, còn phục vụ; spec #5 §9.4: withdrawn sau retire + 7 ngày).
+- Rollback tới `R`: `R` không `suspended`/`quarantined`; asset `served`; precheck adapter (spec #2 §10.4); `R` đã từng active. P0 **không** rollback tới release `retired` hay `archived` (reinstate/khôi phục là P1, cần platform-admin; spec #5 §6.2). Không rebuild.
 - `quarantined`: asset có thể gỡ ngay; backend chặn ngay mọi query/submit của release.
 
 ### 16.2. Consistency model
@@ -788,6 +789,7 @@ Ràng buộc (chưa có con số; chờ OD-08, OD2-09):
 | Retired | `E-RELEASE-RETIRED` | 410 | không |
 | Security suspended | `E-RELEASE-SUSPENDED`, `E-CAPABILITY-BLOCKED` | 423 | không |
 | Form tạm ngừng (spec #5 §9.1, M4/M5) | `E-FORM-SUBMISSION-PAUSED`, `E-FORM-SUSPENDED` | 423 | không |
+| Field inactive trong payload (ADR-060) | `E-INACTIVE-DATA-PRESENT` (chỉ path, không giá trị) | 422 | không |
 | Validation | (spec #1 V-08) | 422 | không |
 | Idempotency key dùng lại với payload khác | `E-IDEMPOTENCY-KEY-REUSED` | 409 | không |
 

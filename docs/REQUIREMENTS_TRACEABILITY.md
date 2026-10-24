@@ -36,8 +36,8 @@
 | Schema & workflow | ARCH-01..10 | `docs/superpowers/specs/2026-10-23-form-schema-workflow-design.md` rev 3.1 §6–§16, §19 (PROPOSED; design direction ADR-017..022; chưa duyệt hoàn toàn). ARCH-09/ARCH-10 chi tiết → `docs/superpowers/specs/2026-10-24-plugin-contracts-capability-registry-design.md` rev 2 §5–§13 (PROPOSED; ADR-023..035). | TODO (design đang review) |
 | Compiler & isolation | BUILD-01..10 | Contract isolation (BUILD-02/04/05/06/08): spec #2 rev 2 §9–§11 (PROPOSED). Bundling, release, reproducible build: `docs/superpowers/specs/2026-10-24-compiler-bundle-release-design.md` rev 2 (PROPOSED; ADR-036..042). Bằng chứng mức spike (không phải implementation): `docs/evidence/P01/spike-gate-01/`. Bundling, Release Manifest: spec #3 (P01-04). | TODO |
 | Motion | MOTION-01..07 | — (P01-06) | TODO |
-| Backend & publishing | API-01..10 | `docs/superpowers/specs/2026-10-24-api-persistence-publishing-design.md` rev 1 (PROPOSED; ADR-054, ADR-055) | TODO (design đang review) |
-| Admin UX | UX-01..05, UX-07 | `docs/superpowers/specs/2026-10-24-admin-form-builder-design.md` rev 2.2 (PROPOSED; ADR-046..053; test matrix §19 gồm 4Z01–4Z15; READY_FOR_CROSS_SPEC_REVIEW) | TODO (design đang review) |
+| Backend & publishing | API-01..10 | `docs/superpowers/specs/2026-10-24-api-persistence-publishing-design.md` rev 2 (PROPOSED; ADR-054..060; READY_FOR_CROSS_SPEC_REVIEW) | TODO (design xong, chờ cross-spec review) |
+| Admin UX | UX-01..05, UX-07 | `docs/superpowers/specs/2026-10-24-admin-form-builder-design.md` rev 2.3 (PROPOSED; ADR-046..053, ADR-061; test matrix §19 gồm 4Z01–4Z15; READY_FOR_CROSS_SPEC_REVIEW) | TODO (design đang review) |
 | Undo/redo | UX-06 | ADR-004: P1; design phải chừa chỗ cho nó | DEFERRED P1 (G0) |
 
 ## Chất lượng
@@ -67,4 +67,5 @@ Các mục spike chưa chứng minh hoặc chưa kiểm. **OPEN** cho tới khi 
 | VG-09 | Isolation của preset Motion theo từng form (preset chỉ có trong form dùng nó) | spike limitation EXP-05, spec #3 §7.3–§7.4, spec #6 | sau spec #6 | OPEN |
 | VG-10 | Hành vi cache CDN và trình duyệt thật (stable entry, immutable asset, activation) | spec #3 §16, spec #5 | sau G10 | OPEN |
 | VG-11 | S3 conditional write (`If-None-Match`/`If-Match`) cho release store và entry; CopyObject có điều kiện chưa dùng; DynamoDB transaction conflict/throughput thật | spec #5 §6.2, §6.4, §10.3, §11.2 | sau G10 | OPEN |
+| VG-12 | Throughput và tỉ lệ `TransactionConflict` của submission admission gate (gate FBK dùng chung, shard `S`) trên DynamoDB thật | spec #5 §9.3 | sau G10 | OPEN |
 | — | OD2-08, OD2-09 và các decision còn mở của spec #1/#2 | spec #2 §22, spec #1 §21 | theo hạn từng mục | OPEN |
