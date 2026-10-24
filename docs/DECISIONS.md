@@ -56,6 +56,7 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-037 | Session-pinned revision + Stable Entry URL + Immutable Release URL; active ≠ supported; resolver trước khi khởi tạo runtime (spec #3 Q3-2) | **APPROVED AS DESIGN DIRECTION** (spec #3 Answer #2); resolver, consistency model, error contract PROPOSED; activation chi tiết → spec #5 | User (spec #3 Answer #2) | 2026-10-24 |
 | ADR-038 | P0 render phía client (CSR) với Loading Shell nhẹ, trung tính với revision; measurement contract; prerender chỉ là tối ưu tương lai (spec #3 Q3-3) | **APPROVED AS DESIGN DIRECTION** (spec #3 Answer #3); release identity, bootstrap/CSP, scenario matrix PROPOSED (S3-P12..P16) | User (spec #3 Answer #3) | 2026-10-24 |
 | ADR-039 | Byte-for-byte reproducible build cho trusted release; canonical build environment; verification hai build sạch; LRM contract; attestation `index.html`; provenance; failure semantics; bootstrap external (spec #3 Q3-4) | **APPROVED AS DESIGN DIRECTION** (spec #3 Answer #4); chi tiết PROPOSED (S3-P12 rev 2, S3-P13 rev 2, S3-P17..P21) | User (spec #3 Answer #4) | 2026-10-24 |
+| ADR-040 | Hybrid code splitting với prefetch có điều kiện; chunk load failure không mất dữ liệu, không tải nhầm release; Motion-none bắt buộc (spec #3 Q3-5) | **APPROVED AS DESIGN DIRECTION** (spec #3 Answer #5); chunk plan, prefetch rule, retry PROPOSED (spec #3) | User (spec #3 Answer #5) | 2026-10-24 |
 
 ---
 
@@ -883,3 +884,18 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 - **Đề xuất của Claude (PROPOSED, notes):** S3-P12 rev 2 (LRM contract: `lrmFormat`, JCS, SHA-256, path rules, scope), S3-P13 rev 2, S3-P17 (builder image, env), S3-P18 (protocol 10 bước), S3-P19 (Final Release Attestation write-once, integrity gate), S3-P20 (provenance), S3-P21 (TM-B01..B11).
 - **Trạng thái:** APPROVED AS DESIGN DIRECTION. Chi tiết PROPOSED. G1 NOT APPROVED.
 - **Người duyệt:** User (spec #3 Answer #4). **Ngày:** 2026-10-24.
+
+## ADR-040 — Hybrid code splitting với prefetch có điều kiện (spec #3 Q3-5)
+
+- **Bối cảnh:** capability chỉ dùng ở một nhánh (ví dụ `store-selector` ở 店頭買取) nên nằm trong bundle ban đầu hay lazy.
+- **Quyết định (user): APPROVED AS DESIGN DIRECTION — Hybrid Code Splitting with Conditional Prefetch.**
+  - Eager cho capability thiết yếu của step đầu; lazy cho capability của step/nhánh khác; shared internal chunk trong một release khi có lợi; không mutable shared runtime giữa release; bootstrap resolve release trước khi tải React/engine/plugin; có grouping, tránh over-splitting.
+  - `store-selector`: lazy; nhánh 宅配 không chủ động tải; prefetch khi đã chọn 店頭 và có khả năng tới bước chọn cửa hàng; prefetch không chặn tương tác; backend validation luôn authoritative. Demo phân biệt "có trong artifact" với "browser thật sự tải".
+  - Prefetch theo luật tất định (step reachable, branch đã chọn, ý định ổn định, dependency graph, network, data-saving); không prefetch mọi branch; prefetch không phải validation/transition/workflow state.
+  - Motion: Sports Motion-none không có Motion trong bất kỳ chunk/dynamic import/registry import nào; reduced motion; animation không chặn business state hay submit. Chi tiết ở spec #6.
+  - Chunk load failure: giữ step; không commit transition; không xóa giá trị; lỗi tiếng Nhật có recovery; phân biệt network / missing asset / incompatible / security suspended; không giả định `import()` lần hai sẽ request lại; reload chỉ khi cần, có cảnh báo PII, đúng pinned release, theo Draft Recovery; không tải active release mới thay thế.
+  - Chunk graph từ Capability Lock tin cậy, specifier literal do compiler sinh, không registry toàn bộ, không design/server facet, không capability không dùng, React singleton, kiểm cycle/import trái phép, tên chunk ổn định, có chunk manifest. Không chỉ dựa vào tree-shaking.
+  - 12 bundle verification test, mỗi test tách build graph / artifact inventory / network request / runtime behavior evidence.
+  - Sửa: không deploy public sourcemap ở P0 (sourcemap debug là private artifact có hash/provenance riêng); không tuyên bố path independence nếu test không đổi path mà toolchain thấy.
+- **Trạng thái:** APPROVED AS DESIGN DIRECTION. Cơ chế PROPOSED ở spec #3. G1 NOT APPROVED.
+- **Người duyệt:** User (spec #3 Answer #5). **Ngày:** 2026-10-24.

@@ -1,0 +1,46 @@
+# Spec #3 rev 1 — kiểm tra ví dụ JSON (2026-10-24, sau consistency review)
+# Công cụ: python3 3.11.11, json + kiểm định dạng digest, thứ tự và ký tự path của inventory
+# Command: python3 -I <scratchpad>/check_spec3_json.py docs/superpowers/specs/2026-10-24-compiler-bundle-release-design.md
+# Lịch sử: lần chạy đầu phát hiện 3 digest giả sai độ dài (đã sửa). Lần này chạy lại sau khi sửa theo consistency review.
+# Script (throwaway, ngoài repo):
+#   import json, re, sys
+#   path = sys.argv[1]
+#   text = open(path, encoding="utf-8").read()
+#   blocks = re.findall(r"```json\n(.*?)```", text, re.S)
+#   print(f"file: {path}\njson blocks found: {len(blocks)}")
+#   bad = 0
+#   for i, b in enumerate(blocks, 1):
+#       try:
+#           d = json.loads(b); print(f"block {i}: JSON parse OK ({next(iter(d))})")
+#           def walk(x, w):
+#               global bad
+#               if isinstance(x, dict):
+#                   for k, v in x.items(): walk(v, f"{w}.{k}")
+#               elif isinstance(x, list):
+#                   for j, v in enumerate(x): walk(v, f"{w}[{j}]")
+#               elif isinstance(x, str) and x.startswith("sha256:") and not re.fullmatch(r"sha256:[0-9a-f]{64}", x):
+#                   print(f"  bad digest at {w}: {x}"); bad += 1
+#               elif isinstance(x, str) and w.endswith(".sha256") and not re.fullmatch(r"[0-9a-f]{64}", x):
+#                   print(f"  bad sha256 at {w}"); bad += 1
+#           walk(d, f"block{i}")
+#           if "inventory" in d:
+#               paths = [e["path"] for e in d["inventory"]]
+#               print("  inventory sorted by UTF-8 bytes:", paths == sorted(paths, key=lambda p: p.encode()))
+#               print("  paths match [a-z0-9._/-]:", all(re.fullmatch(r"[a-z0-9._/-]+", p) for p in paths))
+#               print("  filename hash = sha256 prefix:", all(p.split(".")[-2] == e["sha256"][:12] for p, e in zip(paths, d["inventory"])))
+#       except Exception as e:
+#           print(f"block {i}: JSON PARSE ERROR {e}"); bad += 1
+#   print("RESULT:", "PASS" if bad == 0 else f"FAIL ({bad})")
+
+file: docs/superpowers/specs/2026-10-24-compiler-bundle-release-design.md
+json blocks found: 3
+block 1: JSON parse OK (buildRequestFormat)
+block 2: JSON parse OK (lrmFormat)
+  inventory sorted by UTF-8 bytes: True
+  paths match [a-z0-9._/-]: True
+  filename hash = sha256 prefix: True
+block 3: JSON parse OK (attestationFormat)
+RESULT: PASS
+
+# Kiểm thêm: inputs.ir == sha256 của file IR trong inventory
+inputs.ir == sha256(form-ir file): True

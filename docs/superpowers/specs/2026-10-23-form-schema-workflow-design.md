@@ -1,6 +1,7 @@
 # Spec #1: Form Definition Schema & Workflow DSL (Architecture Proposal)
 
-> **Trạng thái: PROPOSAL, revision 3.2** (2026-10-24).
+> **Trạng thái: PROPOSAL, revision 3.3** (2026-10-24).
+> - Rev 3.3: thêm trạng thái chờ capability lazy (`awaitingCapability`, C11, INV-N9) theo spec #3 §15.1 (ADR-040); sửa C7 cho khớp ADR-037 (không xóa draft ngầm, đề xuất Resume đúng release). Chưa có review mới của user cho spec #1.
 > - Rev 3.2: chỉ **đồng bộ draft recovery với ADR-037** (spec #3 Answer #2): draft và session pin `releaseId`; §9 `session`, §13. Chưa có review mới của user cho spec #1.
 > - Rev 3.1: chỉ **đồng bộ contract plugin với spec #2 rev 2** (theo yêu cầu của spec #2 review #1). Không đổi ngữ nghĩa DSL ngoài các mục liệt kê ở spec #2 §19 (Cross-Spec Interface Matrix). Chưa có review mới của user cho spec #1.
 > - Review #1: CHANGES / VERIFICATION REQUIRED.
@@ -895,6 +896,7 @@ Các bảng T1–T3 và ví dụ E1–E10 sẽ thành **test dạng bảng** ch�
 | INV-N6 | Sau mọi sự kiện, `current ∈ derivedPath(values)`. Nếu không thỏa, NR-06 được áp dụng **trong cùng sự kiện đó**. |
 | INV-N7 | Chỉ vào được `complete` sau khi BE xác nhận thành công. |
 | INV-N8 | Khi có một "ý định 次へ" đang chờ validation, **mọi thay đổi input, 戻る hoặc popstate đều hủy ý định đó**. Engine không bao giờ tự chuyển step sau khi khách đã sửa dữ liệu. |
+| INV-N9 | *(Rev 3.3, spec #3 §15.1.)* Engine chỉ đặt `current = s` khi mọi capability lazy **cần để hiển thị `s` với state hiện tại** đã tải xong. Áp dụng cho **mọi** cách vào step: 次へ, 戻る, `jumpTo`, popstate/deep link (T2), `restoreDraft`/reload (NR-08/NR-09). Với `review`, "cần để hiển thị" gồm capability của mọi field plugin **active** trên đường đi (để hiện tóm tắt). Trong lúc chờ (`awaitingCapability`), INV-N2 và INV-N8 áp dụng như với `awaitingValidation`. Tải lỗi thì không đổi `current` (khi khôi phục: đứng ở step đầu tiên hiển thị được trên đường đi) và không đổi giá trị nào. |
 
 **Kịch bản và hành vi mong đợi:**
 
@@ -906,10 +908,11 @@ Các bảng T1–T3 và ví dụ E1–E10 sẽ thành **test dạng bảng** ch�
 | C4 | Branch đổi trong lúc đang điều hướng, ví dụ kết quả lookup đổi field phía trước khi đang `awaitingValidation` | Sự kiện async được xử lý trước. Nếu `current` ∉ path thì áp NR-06 và ý định 次へ bị hủy. Nếu `current` vẫn trên path thì kết quả validation chỉ được dùng khi fingerprint của step còn khớp, và transition được tính từ state mới. |
 | C5 | Browser Back/Forward và reload | popstate trở thành sự kiện `navigateTo(r)` và được resolve theo T2. Nếu đang chờ thì hủy ý định 次へ (INV-N8). Reload theo NR-08/NR-09. |
 | C6 | Step hiện tại không còn reachable | NR-06 trong cùng sự kiện (INV-N6) |
-| C7 | Khôi phục draft khi revision đã khác | Artifact đang chạy có revision R. Draft có revision ≠ R thì **không được áp dụng**: không migrate, không đoán (ADR-012). Khách thấy thông báo và bắt đầu lại, draft cũ bị xóa. Riêng tab đang mở từ trước khi publish vẫn submit theo revision cũ, và BE chấp nhận nếu revision đó còn được nhận (OD-09). |
+| C7 | Khôi phục draft khi release đã khác | *(Sửa ở rev 3.3 theo ADR-037.)* Runtime của release R **không bao giờ** áp dụng draft của release khác (INV-R1 của spec #3): không migrate, không đoán (ADR-012). Bootstrap (spec #3 §14.2) chọn release **trước** khi khởi tạo runtime: release của draft còn supported → đề xuất Resume trên đúng release đó; retired/suspended/incompatible → thông báo và đề xuất Start Over trên active release. Draft cũ **không bị xóa ngầm** (giữ tới TTL hoặc tới khi khách xóa). Tab đang mở từ trước khi publish vẫn submit theo release cũ; BE chấp nhận nếu release đó còn supported. |
 | C8 | Double-click 次へ | Click thứ hai mang `fromStep` = step cũ, khác `current` mới, nên bị bỏ qua (INV-N3). Không có chuyện **nhảy qua hai step**. |
 | C9 | Double-click Submit | Click đầu khóa runtime (`disabled`) và tạo một submit duy nhất (INV-N5). Click sau bị bỏ qua. Mạng lỗi rồi thử lại thì dùng cùng `idempotencyKey`, và BE trả về kết quả đã lưu. |
 | C10 | Validation thành công nhưng transition không còn hợp lệ vì state đã đổi | Không thể dùng transition cũ (INV-N2). Kết quả validation chỉ được dùng nếu fingerprint của step còn khớp. Nếu không khớp thì validate lại. |
+| C11 | *(Rev 3.3)* Bấm 次へ tới step có capability lazy chưa tải (ví dụ `store-selector` ở `stp_store`) | Vào `awaitingCapability { group, fromStep, stateVersion }`, nút 次へ hiện đang xử lý. Tải xong: transition **được tính lại** từ state hiện tại (INV-N2) rồi commit. Tải lỗi: ở lại step hiện tại, hiện lỗi theo spec #3 §15.3, không đổi giá trị (INV-N9). Input, 戻る hoặc popstate trong lúc chờ: hủy ý định (INV-N8). |
 
 Các dòng C1–C10 được thêm vào T3 dưới dạng sự kiện và guard, và thành test dạng bảng (AC-34).
 

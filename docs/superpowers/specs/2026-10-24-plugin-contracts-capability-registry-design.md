@@ -1,7 +1,8 @@
 # Spec #2: Plugin Contracts & Capability Registry (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.2** (2026-10-24).
+> **Trạng thái: PROPOSAL, revision 2.3** (2026-10-24).
 > - Rev 2.2: §10.2 tách Logical Release Manifest (input của `releaseId`) và Final Release Metadata theo ADR-038 / spec #3 notes S3-P12.
+> - Rev 2.3: đồng bộ với spec #3 rev 1 sau consistency review: Capability Lock tách identity / resolution context (§9.2); rebuild dùng Build Request đã lưu (§9.3); §10.2 (vị trí `browserHostApi`, `serverHostApi`); INV-F1 có Motion của core (§11.1); L3 cấm engine import Motion; `fieldType` có `Summary` tùy chọn cho 確認 (§7.4).
 > - Rev 2.1: chỉ **đồng bộ với ADR-037** (spec #3 Answer #2): §10.3 (active ≠ supported, theo release), §10.6 (phân loại lỗi, không gom thành 503), §19 (I-19, I-22). Chưa có review mới của user cho rev 2.
 > - Review #1 (rev 1): **CHANGES REQUIRED — DESIGN DIRECTION ACCEPTED.** OD2-01..07 đã được user quyết (ADR-029..035). Rev 2 áp các quyết định đó và sửa các mâu thuẫn được nêu. Thay đổi so với rev 1: §27.
 > - Spec #2 **chưa được duyệt hoàn toàn**. **G1 NOT APPROVED.** G9 và G10 BLOCKED.
@@ -479,7 +480,11 @@ Chỉ có **một** cơ chế đăng ký: `bindings.design` của chính capabil
 
 **`fieldType` (browser):**
 ```ts
-type FieldTypeBrowser<V, C, I> = { Component: (p: FieldProps<V, C, I>) => ReactNode };
+type FieldTypeBrowser<V, C, I> = {
+  Component: (p: FieldProps<V, C, I>) => ReactNode;
+  Summary?: (p: { value: V | undefined; config: Readonly<C>; options?: QueryState<unknown> }) => ReactNode;
+  // rev 2.3: hiển thị giá trị ở step 確認; không có thì engine hiện giá trị thô. Cùng facet, cùng chunk.
+};
 type FieldProps<V, C, I> = {
   value: V | undefined;
   onChange(next: V | undefined): void;   // engine kiểm valueSchema rồi phát typed command
@@ -567,13 +572,15 @@ Input: snapshot draft, block revision đã pin, catalog (hash), ledger + runtime
 7. Compatibility với host hiện tại → `E-CAP-ENGINE-INCOMPAT`.
 8. Trạng thái hiệu lực (§16.5) → `E-CAP-VULNERABLE`, `E-CAP-REVOKED`, `W-CAP-DEPRECATED` (hoặc `E-CAP-DEPRECATED-NEW-USE` nếu policy chặn dùng mới).
 9. Config/mapping/classification/effect policy → `E-CAP-CONFIG-INVALID`, `E-TYPE-MAPPING`, `E-PERM-CLASSIFICATION`, `E-EFFECT-NOT-ALLOWED`.
-10. Emit **Capability Lock**: CK sắp xếp; mỗi CK: kind, family, FBK cần dùng, hash; hash catalog; id ledger snapshot.
+10. Emit **Capability Lock** gồm hai phần *(rev 2.3)*:
+    - **identity:** CK sắp xếp; mỗi CK: kind, family, FBK cần dùng, hash từng facet. Chỉ phần này vào LRM (spec #3 §11.1), nên một plugin không liên quan được phát hành (catalog đổi) hay ledger đổi trạng thái không làm đổi `releaseId`.
+    - **resolution context:** hash catalog, id ledger snapshot, id runtime override snapshot. Lưu kèm lock và trong provenance, ngoài identity.
 
 Giới hạn một version chỉ trong **một Form Release**. Form khác nhau dùng version khác nhau bình thường.
 
 ### 9.3. Rebuild và không tự nâng
 
-- Rebuild revision cũ là **kiểm chứng tái lập**, không phải publish: dùng Release Manifest và lock đã lưu, không chạy lại bước 1–9, không đọc catalog hiện tại. Facet theo hash không còn → `E-LOCK-UNRESOLVABLE`; bản published không bị ảnh hưởng (BUILD-10).
+- Rebuild revision cũ là **kiểm chứng tái lập**, không phải publish: dùng **Build Request**, Release Manifest và lock đã lưu (spec #3 §5.1, rev 2.3), không chạy lại bước 1–9, không đọc catalog hiện tại. Facet theo hash không còn → `E-LOCK-UNRESOLVABLE`; bản published không bị ảnh hưởng (BUILD-10).
 - Rebuild không bị ledger chặn (để audit được cả revision `revoked`), nhưng **đưa artifact vào phục vụ** là publish/rollback và chịu §16.
 - Chỉ Admin đề xuất version mới: lúc chèn (version `active` tương thích mới nhất) hoặc thao tác nâng có chủ đích, tạo draft mới, kèm impact analysis (form/block bị ảnh hưởng, diff `valueSchema` theo spec #1 R-02, regression test).
 
@@ -621,7 +628,7 @@ ADR-026 nói một `engineApi` range; spec tách theo host vì các host có ver
 
 Version chính xác của engine, `browserHostApi`, compiler, bundler, Node, shared externals; `serverHostApi` và backend deployment version lúc publish; Python; hash lockfile; hash catalog; id ledger snapshot; Capability Lock đầy đủ.
 
-*(Rev 2.2.)* Các mục trên chia vào hai lớp (spec #3, notes S3-P12): **Logical Release Manifest** chứa những gì quyết định identity và hành vi của artifact (IR, Capability Lock, version engine/compiler/bundler/shared externals, build config, file inventory) và là input của `releaseId`; **Final Release Metadata/provenance** chứa những gì không được làm đổi identity (thời điểm, pipeline, backend deployment version lúc publish, ledger snapshot id, signature).
+*(Rev 2.2, 2.3.)* Các mục trên chia ba nơi (spec #3 §11): **Logical Release Manifest** chứa những gì quyết định identity và hành vi của artifact (IR, phần identity của Capability Lock, version engine/`browserHostApi`/compiler/bundler/shared externals, build config, file inventory) và là input của `releaseId`; **provenance/attestation** của build chứa thời điểm, pipeline, resolution context của lock (catalog, ledger, override snapshot), signature; **release record** (spec #5, lúc đăng ký) chứa `serverHostApi`, backend deployment version và Python của lúc publish.
 
 ### 10.3. Tập release được hỗ trợ (supported set)
 
@@ -683,7 +690,7 @@ Không có nhánh nào thay bằng version khác.
 
 | ID | Invariant |
 |---|---|
-| INV-F1 | Module trong artifact của khách ⊆ engine ∪ shared externals (một bản) ∪ `contract` ∪ browser facet của FBK trong lock ∪ thư viện đã gói trong các facet đó. |
+| INV-F1 | Module trong artifact của khách ⊆ engine ∪ shared externals (một bản) ∪ `contract` ∪ browser facet của FBK trong lock ∪ thư viện đã gói trong các facet đó ∪ *(rev 2.3)* Motion runtime và preset của core (chỉ trong group `motion`, chỉ khi form dùng Motion; spec #3 §7). |
 | INV-F2 | Không có module của design facet, server facet, `fixtures/`, test hay mock trong artifact của khách. |
 | INV-F3 | Mọi import specifier (tĩnh hoặc `import()`) trong code compiler sinh là literal lấy từ catalog, không từ chuỗi trong definition. |
 | INV-F4 | Server facet chạy được khi không có Node/JS runtime. |
@@ -697,7 +704,7 @@ Không có nhánh nào thay bằng version khác.
 |---|---|---|---|
 | **L1 Resolution** | `./design` chỉ có điều kiện `design`; build của khách không bật `design`. Server facet là Python, không có trong đồ thị module JS. | build | import design từ browser; mọi ý định bundle server code |
 | **L2 Generation** | Compiler sinh một entry/form, chỉ import literal tới `packageExport` browser của FBK trong lock. Code-split chỉ bằng `import()` literal do compiler sinh. Definition chỉ có key có cấu trúc, kiểm theo ngữ pháp §5.2. | compile | kéo plugin không dùng; Admin JSON điều khiển import |
-| **L3 Static boundary** | Đồ thị phụ thuộc bắc cầu từ mỗi facet entry. `contract` → chỉ contract; `browser` → contract, SDK browser, thư viện allowlist; `design` → browser, contract, SDK design; cấm `browser` → `design`; cấm `node:*`, `fs`, `child_process`, `server/`, `fixtures/`, `test/`; cấm trong browser/design: `fetch`, `XMLHttpRequest`, `WebSocket`, `sendBeacon`, `import()` không literal; shared externals không được gói vào facet. Python: cấm `requests`, `urllib`, `http.client`, `socket`, `subprocess`, `os.environ`, import tuyệt đối sang plugin khác. | registry | import sai hướng trực tiếp/bắc cầu; mạng trực tiếp; gói React riêng |
+| **L3 Static boundary** | Đồ thị phụ thuộc bắc cầu từ mỗi facet entry. `contract` → chỉ contract; `browser` → contract, SDK browser, thư viện allowlist; `design` → browser, contract, SDK design; cấm `browser` → `design`; cấm `node:*`, `fs`, `child_process`, `server/`, `fixtures/`, `test/`; cấm trong browser/design: `fetch`, `XMLHttpRequest`, `WebSocket`, `sendBeacon`, `import()` không literal; shared externals không được gói vào facet; *(rev 2.3)* package engine không được import Motion (Motion chỉ vào qua group `motion` do compiler sinh). Python: cấm `requests`, `urllib`, `http.client`, `socket`, `subprocess`, `os.environ`, import tuyệt đối sang plugin khác. | registry | import sai hướng trực tiếp/bắc cầu; mạng trực tiếp; gói React riêng |
 | **L4 Secret hygiene** | Không có trường secret trong manifest; secret ở cấu hình connector của host. Secret scanner trên source plugin, artifact, sourcemap, metadata. Sourcemap không phục vụ công khai (SEC-04; chi tiết spec #3). | registry + build | hardcode token |
 | **L5 Artifact verification** | Module stats của bundler phải thuộc tập INV-F1; canary marker của design facet và fixtures không xuất hiện; INV-F6 giữa Sports và PC; INV-F7. | sau build (spec #3) | lỗi của L1–L3, cấu hình bundler sai, thư viện kéo code lạ |
 | **L6 Negative fixtures** | Mỗi guard có fixture vi phạm cố ý (§17.3). | CI | guard bị vô hiệu hoặc hỏng mà không ai biết |

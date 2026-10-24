@@ -34,7 +34,7 @@
 | Nhóm req | IDs | Design | Status |
 |---|---|---|---|
 | Schema & workflow | ARCH-01..10 | `docs/superpowers/specs/2026-10-23-form-schema-workflow-design.md` rev 3.1 §6–§16, §19 (PROPOSED; design direction ADR-017..022; chưa duyệt hoàn toàn). ARCH-09/ARCH-10 chi tiết → `docs/superpowers/specs/2026-10-24-plugin-contracts-capability-registry-design.md` rev 2 §5–§13 (PROPOSED; ADR-023..035). | TODO (design đang review) |
-| Compiler & isolation | BUILD-01..10 | Contract isolation (BUILD-02/04/05/06/08): spec #2 rev 2 §9–§11 (PROPOSED). Bundling (spec #3): đang brainstorm. Bundling, Release Manifest: spec #3 (P01-04). | TODO |
+| Compiler & isolation | BUILD-01..10 | Contract isolation (BUILD-02/04/05/06/08): spec #2 rev 2 §9–§11 (PROPOSED). Bundling, release, reproducible build: `docs/superpowers/specs/2026-10-24-compiler-bundle-release-design.md` rev 1 (PROPOSED; ADR-036..040). Bundling, Release Manifest: spec #3 (P01-04). | TODO |
 | Motion | MOTION-01..07 | — (P01-06) | TODO |
 | Backend & publishing | API-01..10 | — (P01-05) | TODO |
 | Admin UX | UX-01..05, UX-07 | — (P01-03) | TODO |
