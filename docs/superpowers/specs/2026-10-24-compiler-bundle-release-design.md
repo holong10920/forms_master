@@ -1,6 +1,7 @@
 # Spec #3: Compiler, Bundle & Release Architecture (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.6** (2026-10-25).
+> **Trạng thái: PROPOSAL, revision 2.7** (2026-10-25).
+> - Rev 2.7 (ADR-074, SR-04): §10.1 mới — **Admin build và Preview build** do trusted pipeline build bằng cùng toolchain; module graph allowlist, canary trong mọi entry của plugin fixture, kiểm phụ thuộc bắc cầu và `import()` không literal; mã `E-ADMIN-BUILD-*`, `E-PREVIEW-BUILD-*`; test TM-C18..C22; X2-14.
 > - Rev 2.6 (vòng sửa C1, Cross-Subsystem Review): Build Request thêm `keyLedgerSnapshot`, `sitePolicy`, `motionPresets`, `platformRelease` (§5.1; nguồn: spec #5 §6.8); Data Contract mang `identity`, `renamedFrom` (§6, CSR-08); IR có `motion` và `regionId` (§6, CSR-12); LRM có trường `motion` (§11.1); K14 sinh **semantic conformance fixtures** (CSR-11); entry dùng bootstrap mới nhất từng active (§14.1, CSR-14); bootstrap xử lý thêm trạng thái của spec #5 (§14.2, MINOR-10); xác minh stable URL local vs CDN (§16.3); mã `E-ADMISSION-UNAVAILABLE` (§16.4, MINOR-05); catalog mã (§18.1a, MINOR-15).
 > - Rev 2.5: đồng bộ spec #6 (I6-04): preset ví dụ đổi thành `subtle`/`guided`; group `motion` chỉ chứa recipe dùng, canary từng recipe (`E-ARTIFACT-MOTION-UNUSED-RECIPE`); kiểm reduced motion **trước** `import()` và prefetch; mã `E-MOTION-*` vào catalog; version `motion-presets` và thư viện Motion là input của LRM.
 > - Rev 2.4: error contract thêm 423 cho form availability (§16.4, spec #5 §9.1); §16.1 dùng P0 defaults của ADR-058 (`TTL_draft` 72 giờ, `G` 7 ngày, `T_edge_max` là mục kiểm chứng khi deploy); bootstrap kiểm TTL draft theo logic (`savedAt`).
@@ -415,6 +416,25 @@ Chạy trên output thật của K9, không tin lớp nào trước đó (spec #
 Output: **Chunk Manifest** (private, digest trong LRM): `{ chunkManifestFormat: 1, chunks: [{ file, sha256, kind: core|entry|group|shared, groupId?, modules: [...], staticImports: [...], dynamicImports: [...] }] }`. Đây là build graph evidence cho TM-C.
 - **Module id được chuẩn hóa**, không bao giờ là đường dẫn tuyệt đối: `pkg:<name>@<version>/<path trong package>` (thư viện), `rel:<PRK>/<facet>/<path>` (facet plugin từ release store), `gen:<path tương đối>` (module do compiler sinh), `platform:<package>@<version>/<path>` (engine, core), `virtual:<tên>` (module ảo của bundler, bỏ ký tự điều khiển như `\0`). Id không chuẩn hóa được → `E-CHUNK-MANIFEST-MODULE-ID`.
 - Sắp xếp: `chunks` theo `file`; `modules`, `staticImports`, `dynamicImports` theo chuỗi.
+
+### 10.1. Admin build và Preview build (rev 2.7, ADR-074; spec #2 INV-A1/A2)
+
+Hai bundle này **không** phải release của khách, nhưng do trusted pipeline build từ cùng release store, bằng cùng canonical image và bundler (§9, §12.1), và được kiểm bằng cùng loại verification như K10 trước khi deploy (spec #5 §6.8 `PLATFORMREL`). Không có module graph đạt kiểm tra → không deploy, Admin/Preview đang chạy giữ nguyên.
+
+| Kiểm tra | Áp cho | Nguồn | Mã lỗi |
+|---|---|---|---|
+| Mọi module thuộc tập INV-A1: app Admin (`platform:admin@…`), shared externals, thư viện allowlist. **Không** module id dạng `rel:<PRK>/…` (bất kỳ facet nào) | Admin build | module graph | `E-ADMIN-BUILD-PLUGIN-MODULE` |
+| Canary marker đặt trong **mọi** entry của plugin fixture (`contract`, `browser`, `server`, `fixtures`, và `presentation`/`design` của fixture âm) không xuất hiện trong bất kỳ file phục vụ nào | Admin build | quét nội dung | `E-ADMIN-BUILD-PLUGIN-MODULE` |
+| Phụ thuộc **bắc cầu**: không thư viện allowlist nào resolve (trực tiếp hay bắc cầu) tới package plugin; L1b của Admin build chỉ cho phép module app Admin, shared externals, thư viện allowlist, module ảo trong danh sách đóng | Admin build | L1b + module graph | `E-ADMIN-BUILD-PLUGIN-MODULE` |
+| Không `import()` không literal; không `new Function`/`eval`; specifier động duy nhất là chunk nội bộ của app Admin do bundler sinh | Admin build | lint tĩnh + quét specifier | `E-ADMIN-BUILD-DYNAMIC-IMPORT` |
+| Catalog/manifest mà Admin build nhúng hoặc tải chỉ là JSON hợp lệ theo schema (spec #2 §6.2.2); không khóa nào mang URL module hay code | Admin build | schema | `E-PRESENTATION-EXECUTABLE-REF` |
+| Mọi module thuộc tập INV-A2; không `design`, server facet, `fixtures/`, test; không entry `presentation` (P0); không PRK có ledger `revoked` tại thời điểm build | Preview build | module graph + ledger snapshot | `E-PREVIEW-BUILD-ILLEGAL-MODULE` |
+| Một React, một React DOM (INV-F7) | cả hai | module graph | `E-ARTIFACT-DUPLICATE-SINGLETON` |
+| Không sourcemap phục vụ, không đường dẫn tuyệt đối, không secret | cả hai | như K10 | như K10 |
+
+- Output: **Admin build manifest** `{ platformReleaseId, adminBuildHash, presentationVocabulary (designHostApi), capabilitySet: [PRK…], previewBuildHash }` và Chunk Manifest của mỗi build (cùng định dạng §10, module id chuẩn hóa). `previewBuildHash` là giá trị iframe trả trong `preview.hello` (spec #4 §14.7).
+- Negative fixture: N-PRES-06, N-PRES-07 (spec #2 §6.2.2) và fixture canary trong từng facet; luật §17.3 của spec #2 (fail đúng lý do + control pass).
+- **Giới hạn:** kiểm này chứng minh **không có code plugin** trong Admin build đã kiểm; nó không chứng minh app Admin không có lỗi XSS của chính nó (phủ bởi CSP và test 4C02/N-PRES-08 của spec #4).
 
 ---
 
@@ -870,13 +890,14 @@ Ràng buộc (P0 defaults theo ADR-058: `TTL_draft` 72 giờ, `G` 7 ngày; `T_ed
 | `E-LABEL-MISSING` | error | ✔ | field/step thiếu nhãn `ja` | spec #4 §13.2 |
 | `E-READONLY-FEATURE-BROKEN` | error | ✔ | prefill/lookup/`skipWhen`/nhóm lặp tham chiếu thứ không còn hợp lệ | spec #4 §8.1 |
 | `E-ADMIN-CAP-NOT-BUNDLED` | error (chỉ Admin) | — (compiler **không** phát) | version đã pin không có trong Admin/Preview build | spec #4 §14.4 |
-
 | `E-CAP-NOT-INGESTED` *(rev 2.6)* | error | ✔ | plugin version chưa ingestion runtime (spec #5 §9.3.3) | spec #5 |
 | `E-ADMIN-MOTION-NOT-BUNDLED` *(rev 2.6, chỉ Admin)* | error | — (compiler không phát) | version preset pin không có trong Preview build | spec #6 §10 |
 | `E-MOTION-PRESET-UNKNOWN` | error | ✔ | preset/version không có trong catalog | spec #6 §7.3 |
 | `E-MOTION-CATEGORY-UNSUPPORTED` | error | ✔ | nhóm không được preset hỗ trợ | spec #6 §7.3 |
 | `E-MOTION-PRESET-INCOMPATIBLE` | error | ✔ | `compat.engine` của preset không chứa engine | spec #6 §7.2 |
 | `W-MOTION-PRESET-DEPRECATED` | warning | ✘ | preset deprecated | spec #6 §7.3 |
+
+*(Rev 2.7)* Mã của registry/pipeline cho presentation khai báo (`E-PRESENTATION-INVALID`, `E-PRESENTATION-PRIMITIVE`, `E-PRESENTATION-POINTER`, `E-PRESENTATION-EXECUTABLE-REF`) và của Admin/Preview build (`E-ADMIN-BUILD-PLUGIN-MODULE`, `E-ADMIN-BUILD-DYNAMIC-IMPORT`, `E-PREVIEW-BUILD-ILLEGAL-MODULE`) **không** phải diagnostic của K5: chúng thuộc spec #2 §6.2.2/§8.1 và §10.1.
 
 Phân biệt: `E-GRAPH-NO-DEFAULT` (spec #1) là thiếu `default`; `E-TRANSITION-TARGET-UNSET` là thiếu đích của dòng có điều kiện.
 
@@ -918,6 +939,11 @@ Bốn loại evidence: **G** = build graph (Chunk Plan, Chunk Manifest, module g
 | C15 | *(rev 2)* Browser facet import design hoặc file server bằng đường dẫn tương đối | ✔ | ✔ | | | L1b từ chối ở K9; L3 báo `browser->design`/`browser->server`; nếu lọt thì L5 thấy canary |
 | C16 | *(rev 2)* Prefetch được dùng lại cho lần tải module | | | ✔ | | Chromium/Firefox: không request lần hai; WebKit: theo OD3-03 |
 | C17 | *(rev 2)* Lỗi evaluate → bậc 1 với token duy nhất phục hồi; sau reload vẫn có bậc 1 | | | ✔ | ✔ | phục hồi trên cả ba engine |
+| C18 | *(rev 2.7)* Admin build không có module plugin | ✔ | ✔ | | | không module `rel:*`; không canary của bất kỳ facet nào (§10.1) |
+| C19 | *(rev 2.7)* Phụ thuộc bắc cầu từ thư viện allowlist tới plugin (N-PRES-06) | ✔ | | | | L1b từ chối, `E-ADMIN-BUILD-PLUGIN-MODULE`; control pass |
+| C20 | *(rev 2.7)* `import()` không literal / URL từ catalog trong Admin (N-PRES-07) | ✔ | ✔ | | | `E-ADMIN-BUILD-DYNAMIC-IMPORT`; control pass |
+| C21 | *(rev 2.7)* Preview build theo INV-A2 | ✔ | ✔ | | | không `design`/server/`fixtures`/entry `presentation`; không PRK `revoked` theo ledger snapshot |
+| C22 | *(rev 2.7)* Admin đang chạy không phát request tới origin ngoài Admin API khi mở Canvas có field plugin | | | ✔ | ✔ | log request: chỉ Admin API; không request do metadata (spec #4 4C01) |
 
 Evidence đầu tiên cho C01–C14 và C15–C17 (mức spike): `docs/evidence/P01/spike-gate-01/` (EXP-01, EXP-03, EXP-04).
 
@@ -1019,6 +1045,7 @@ Loại: **A** automated · **M** manual · **F** future (sau G10/hạ tầng th�
 | X2-11 | `Summary` tùy chọn của `fieldType` cho 確認 | §7.4 (rev 2.3) | §15.1 | Đồng bộ |
 | X2-12 | Rebuild dùng Build Request đã lưu | §9.3 (rev 2.3) | §5.1 | Đồng bộ |
 | X2-13 | L1b resolve allowlist (gồm `contract`, Motion của core, module ảo); giới hạn của conditional exports đã đo; L5 kiểm cả server/`.py` | §11.2, §11.3, §11.5, §17.3 (rev 2.4) | §9, §10 | Đồng bộ |
+| X2-14 | *(rev 2.7)* INV-A1/A2, presentation khai báo, N-PRES-06/07 | §6.2.2, §11.1 (rev 2.12) | §10.1, C18–C22 | Đồng bộ (ADR-074) |
 
 ### 20.3. Pending cho spec #5 và spec #6
 

@@ -1,6 +1,7 @@
 # Spec #2: Plugin Contracts & Capability Registry (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.11** (2026-10-25).
+> **Trạng thái: PROPOSAL, revision 2.12** (2026-10-25).
+> - Rev 2.12 (ADR-074, user duyệt SR-04): **Host-owned Declarative Presentation là hướng thiết kế P0 đã duyệt**. §6.2.2 mới: contract metadata (schema đóng, không có chuỗi tự do, primitive trong allowlist của Platform, không cấp quyền API), ba tầng Edit Canvas / Interactive Preview / Published Form và parity của từng tầng, negative fixture N-PRES-01..08; registry P0 từ chối `bindings.presentation`, `bindings.design`, export `./presentation`/`./design` (`E-PRESENTATION-EXECUTABLE-REF`); sửa chỗ còn ghi Admin build chứa `presentation`/`design` (§4, §6.5, INV-A2, L3, §17.2, §18.1, §21).
 > - Rev 2.11 (vòng sửa C1, Cross-Subsystem Review): **presentation khai báo do host sở hữu** thay cho export JS `Presentation` ở P0 (SR-04/ADR-070, đề xuất chờ user xác nhận; §6.2.1, §7.4); INV-A1: Admin build **không** chứa module nào của plugin; INV-A2: loại version `revoked`, cho phép adapter submit mock của preview (MINOR-14); §8.1 bước 11 ingestion runtime (CSR-01); §10.3/§10.4 theo `S` = release và miễn trừ (MINOR-18); §15 body có `schemaVersion` (MINOR-06); §16.3 `deprecated` chỉ thông tin (CSR-17); §16.5 G-ADM/G-EXEC (CSR-04); §21 phạm vi theo ADR-072; `motionPreset` không còn "Motion Animation Editor".
 > - Rev 2.10: đồng bộ spec #6 (I6-03, I6-06): INV-A2 có Motion runtime + mọi version `@platform/motion-presets` được hỗ trợ; luật L3 cho package Motion (không import dispatcher/store/selector của engine, không API mạng/storage).
 > - Rev 2.9: ADR-061 — **P0 không nạp design binding**: chỉ inspector tự sinh + control typed của Admin; design binding là P1 (sandbox) (§6.3, §6.4, §7.2, §11.1 INV-A1, §18.1). ADR-057/058 — đóng OD2-08 (`T_stale` 60 s chỉ cho query thông tin) và OD2-09 (`G` = 7 ngày); enforce runtime qua admission gate của spec #5 §9.3 (§15.3, §16.5).
@@ -154,11 +155,11 @@ flowchart LR
 | Compiler | resolve → Capability Lock, sinh import tường minh | lấy chuỗi từ definition làm import specifier; chọn version |
 | Engine (browser) | gọi capability qua scoped capability map, async manager, typed command | `registry.get()` toàn cục |
 | Backend deployment | chạy adapter theo Capability Lock, enforce permission và policy | nạp module theo chuỗi từ request; thay version |
-| Admin | catalog cho Editor, design binding, preview | cho nhập code, URL, import path; preview production bằng workspace build |
+| Admin | catalog cho Editor (dữ liệu); vẽ `presentation` khai báo bằng primitive của host (§6.2.2, ADR-074); mở Interactive Preview cô lập | nạp, import hay thực thi code plugin; cho nhập code, URL, import path; preview production bằng workspace build |
 
 ---
 
-*(Rev 2.8.)* Ngoài artifact của khách, trusted pipeline còn build hai bundle cho Admin từ cùng release store: **Admin build** trên origin Admin (`contract` + `presentation` + `design`, INV-A1) và **Preview build** trên origin preview riêng (engine + `presentation` + `browser`, INV-A2) (spec #4 §14.4, §14.7; ADR-053).
+*(Rev 2.8; sửa ở rev 2.12 theo ADR-074.)* Ngoài artifact của khách, trusted pipeline còn build hai bundle cho Admin từ cùng release store: **Admin build** trên origin Admin — **không** module nào của plugin, chỉ đọc manifest/catalog dạng dữ liệu (INV-A1) — và **Preview build** trên origin preview riêng (engine + `contract` + `browser` facet + Motion, INV-A2) (spec #4 §14.4, §14.7; spec #3 §10.1; ADR-053, ADR-074). *(Lịch sử rev 2.7–2.10: Admin build từng chứa `contract` + `presentation` + `design`.)*
 
 ## 5. Capability identity và các khái niệm version (ADR-026, ADR-029)
 
@@ -247,8 +248,8 @@ PRK = pluginId "@" version ;  CK = PRK "#" capabilityId ;  FBK = CK "/" facet
 |---|---|---|
 | `id`, `kind` | mọi kind | `capabilityId`; kind theo §7.1 |
 | `title` | mọi kind dùng được từ catalog của Editor | `{ "ja" }` |
-| `bindings` | kind có code | tên export theo facet. Facet thực thi do family quyết (§7.1); `design` là **authoring binding** tùy chọn (§7.2); *(rev 2.8)* `presentation` (chỉ `fieldType`, tùy chọn): tên export trong entry `./presentation` của browser facet (§7.4) |
-| `presentation` *(rev 2.11)* | `fieldType` (P0) | **dữ liệu khai báo**, không phải code: `{ primitive: "text" \| "textarea" \| "select" \| "radio" \| "checkbox" \| "number" \| "card", placeholderFrom?: <JSON Pointer vào config>, sampleOptionsFrom?: { capability: <id `dataSource` cùng release có `previewFixtures`>, label: <JSON Pointer vào phần tử fixture> } }`. Host (Admin) vẽ bằng component lõi của chính nó. Không biểu thức, không URL, không chuỗi CSS/HTML. Thiếu → thẻ giữ chỗ trung tính |
+| `bindings` | kind có code | tên export theo facet. Facet thực thi do family quyết (§7.1); `design` là **authoring binding** tùy chọn (§7.2); *(rev 2.8)* `presentation` (chỉ `fieldType`, tùy chọn): tên export trong entry `./presentation` của browser facet (§7.4). *(rev 2.12, ADR-074)* P0: registry **từ chối** `bindings.presentation` và `bindings.design` (`E-PRESENTATION-EXECUTABLE-REF`, §6.2.2); chỉ được mở lại ở P1 trong ranh giới cô lập thật, cần ADR mới |
+| `presentation` *(rev 2.11)* | `fieldType` (P0) | **dữ liệu khai báo**, không phải code: `{ primitive: "text" \| "textarea" \| "select" \| "radio" \| "checkbox" \| "number" \| "card", placeholderFrom?: <JSON Pointer vào config>, sampleOptionsFrom?: { capability: <id `dataSource` cùng release có `previewFixtures`>, label: <JSON Pointer vào phần tử fixture> } }`. Host (Admin) vẽ bằng component lõi của chính nó. Không biểu thức, không URL, không chuỗi CSS/HTML. Thiếu → thẻ giữ chỗ trung tính. Contract đầy đủ: §6.2.2 (ADR-074) |
 | `configSchema` | kind cấu hình được | những gì Editor cấu hình |
 | `valueSchema` | `fieldType`, `validator`, `serverValidator` | kiểu giá trị |
 | `paramsSchema` | `validator`, `serverValidator`, `derivedFn` | kiểu `params` do definition truyền (§6.6) |
@@ -265,6 +266,47 @@ PRK = pluginId "@" version ;  CK = PRK "#" capabilityId ;  FBK = CK "/" facet
 | `messages` | `validator`, `serverValidator` | `{ code: { "ja" } }` |
 | `fixtures` | `cross-runtime-pure`, kind có server facet | thư mục fixture trong plugin (§17) |
 | `previewFixtures` | `dataSource` | dữ liệu có version cho preview khi không gọi adapter (§9.5) |
+
+#### 6.2.2. Host-owned Declarative Presentation (ADR-074, P0)
+
+**Nguyên tắc.** Admin chỉ thực thi renderer và component do **Platform** sở hữu. Plugin chỉ cung cấp **dữ liệu** khai báo (manifest, schema, `previewFixtures`) đã được registry validate. Không JavaScript, JSX, HTML, CSS, URL module hay event handler nào của plugin được import hoặc thực thi trong origin Admin.
+
+**Schema của `presentation`** (do Platform sở hữu; phiên bản từ vựng gắn với `designHostApi` của Admin, §10.1):
+
+| Khóa | Kiểu | Ràng buộc |
+|---|---|---|
+| `primitive` | enum | thuộc **allowlist của Platform** cho `designHostApi` mà Admin build hỗ trợ. P0: `text`, `textarea`, `select`, `radio`, `checkbox`, `number`, `card` (thẻ trung tính: nhãn + loại). Mỗi primitive là một component lõi của Admin; thêm primitive = thay đổi platform có review, nâng `designHostApi` minor |
+| `placeholderFrom` | JSON Pointer | ngữ pháp `^(/[A-Za-z0-9_]+)+$`; phải trỏ tới thuộc tính kiểu `string` có trong `configSchema` của chính capability |
+| `sampleOptionsFrom.capability` | `capabilityId` | `dataSource` trong **cùng release**, có `previewFixtures` |
+| `sampleOptionsFrom.label` | JSON Pointer | cùng ngữ pháp; trỏ tới thuộc tính `string` trong `outputSchema` của phần tử fixture |
+
+- Schema **đóng** ở mọi cấp (`additionalProperties: false`). Không có **chuỗi tự do** nào trong `presentation`: mọi giá trị là enum, id đã khai, hoặc JSON Pointer đúng ngữ pháp và resolve được. Vì vậy không có chỗ cho URL, `javascript:`, markup, CSS, biểu thức hay tên handler.
+- Nội dung hiển thị chỉ đến từ: `title`/`messages` (`ja`) trong manifest, giá trị config trong draft, và `previewFixtures`. Tất cả là **dữ liệu không tin cậy**, chỉ được render thành text node (không `dangerouslySetInnerHTML`, không thuộc tính `href`/`src`/`style` lấy từ dữ liệu).
+- **Không cấp quyền.** `presentation` không đặt tên endpoint, không mang permission, không kích hoạt request. `sampleOptionsFrom.capability` chỉ chọn **bản fixture nào trong catalog** để đọc; Admin **không bao giờ** gọi adapter `dataSource` cho Canvas. Danh sách endpoint Admin API là hằng trong code của host; metadata không thêm, đổi hay mở rộng được (spec #5 §7.5 vẫn kiểm quyền ở server cho mọi request).
+- **Không có tham chiếu thực thi ở P0.** Registry từ chối `bindings.presentation`, `bindings.design`, export `./presentation` / `./design`, và mọi khóa trong manifest/catalog mang module specifier hay URL (`E-PRESENTATION-EXECUTABLE-REF`). Export JS `Presentation` (§7.4) và design binding (§7.2) là **P1**, chỉ trong ranh giới cô lập thật, cần ADR mới. Inspector P0 vẫn là inspector tự sinh + control typed (ADR-061); không mở lại custom executable Inspector.
+
+**Ba tầng, ba mức parity** (spec #4 §9, §14.1):
+
+| Tầng | Chạy gì | Parity phải có | Không được tuyên bố |
+|---|---|---|---|
+| **Edit Canvas** | renderer khai báo của host (Admin build, không code plugin) | **semantic/configuration parity** với definition: accessible name (nhãn), helper, bắt buộc, placeholder đã khai, thứ tự field/section/step, độ rộng; option của field core; option mẫu (gắn nhãn 「サンプル」) từ `previewFixtures` | pixel-identical; giao diện đặc thù của plugin; hành vi, trạng thái async, validation, Motion |
+| **Interactive Preview** | runtime khách trong iframe cô lập (Preview build, INV-A2): engine + browser `Component` của PRK đã approve | **presentation/behavior parity** theo contract có version: cùng `platformReleaseId` (engine, Motion, preset) và cùng PRK/hash facet như release sẽ build; chứng minh bằng conformance scenario (spec #4 4Z08) | parity cho release build bằng `platformReleaseId` hoặc lock khác |
+| **Published Form** | runtime khách thật theo release bất biến (spec #3, #5) | — (đây là chuẩn) | — |
+
+- Field plugin trên Canvas **luôn** mang nhãn 「編集用の簡易表示」 và nút 「プレビューで確認」 (mở Interactive Preview tại step chứa field, chọn sẵn field). Không có `presentation`, primitive là `card`, hoặc Admin không hỗ trợ phiên bản từ vựng → thẻ trung tính kèm 「この部品の実際の表示はプレビューで確認してください」. Builder **không** âm thầm vẽ một UI khác rồi coi là giống runtime.
+
+**Negative fixture bắt buộc** (theo luật §17.3: fail đúng lý do + control pass):
+
+| ID | Vi phạm (đúng một) | Lớp bắt | Kỳ vọng |
+|---|---|---|---|
+| N-PRES-01 | khóa lạ trong `presentation` (`onClick`, `html`, `style`, `className`, `component`) | C0 | `E-PRESENTATION-INVALID` |
+| N-PRES-02 | `primitive` ngoài allowlist (`iframe`, `custom`, `html`) | C0 | `E-PRESENTATION-PRIMITIVE` |
+| N-PRES-03 | JSON Pointer không resolve / trỏ thuộc tính không phải `string` / `sampleOptionsFrom.capability` không phải `dataSource` cùng release hoặc không có `previewFixtures` | C0 | `E-PRESENTATION-POINTER` |
+| N-PRES-04 | chuỗi URL, `javascript:` hay markup đặt vào ô JSON Pointer | C0 (ngữ pháp) | `E-PRESENTATION-POINTER` |
+| N-PRES-05 | tham chiếu thực thi: `bindings.presentation`, `bindings.design`, export `./presentation`/`./design`, khóa `moduleUrl`/`import` trong manifest | C0 | `E-PRESENTATION-EXECUTABLE-REF` |
+| N-PRES-06 | import bắc cầu: một module của app Admin hoặc thư viện allowlist import (trực tiếp hay bắc cầu) package plugin (`contract`, `browser`, `presentation`, `design`, `server`, `fixtures`) | L1b (Admin build) + L5 canary | `E-ADMIN-BUILD-PLUGIN-MODULE` (spec #3 §10.1) |
+| N-PRES-07 | `import()` không literal hoặc URL lấy từ catalog trong code Admin | lint tĩnh Admin + L5 | `E-ADMIN-BUILD-DYNAMIC-IMPORT` (spec #3 §10.1) |
+| N-PRES-08 | giá trị config trong draft chứa `<img src=x onerror=…>` / `<script>` | E2E Admin (spec #4 4C02) | hiện thành chữ; không phần tử DOM mới, không request, không vi phạm CSP |
 
 ### 6.3. Platform profile cho schema nhúng
 
@@ -398,10 +440,10 @@ Dữ liệu cửa hàng hư cấu. Mọi schema bên trong hợp lệ theo 2020-
 ```
 plugins/store-selector/
   plugin.manifest.json
-  package.json        # exports: "./contract", "./presentation", "./browser", "./design" (chỉ điều kiện "design"); không có "." gộp, không wildcard
+  package.json        # P0 (rev 2.12, ADR-074): exports chỉ "./contract", "./browser"; "./presentation", "./design" là P1 (bị registry từ chối ở P0); không có "." gộp, không wildcard
   contract/           # type sinh từ schema + hằng thuần
-  presentation/       # TSX thuần hiển thị (rev 2.8); không import browser/
-  browser/  design/   # TS/TSX
+  browser/            # TS/TSX
+  # presentation/, design/: P1, chỉ trong ranh giới cô lập thật (§6.2.2)
   server/             # Python package, chỉ import tương đối
   fixtures/           # fixture có version theo release; không nằm trong exports
 ```
@@ -410,15 +452,13 @@ plugins/store-selector/
 {
   "exports": {
     "./contract": { "import": "./dist/contract/index.js", "types": "./dist/contract/index.d.ts" },
-    "./presentation": { "import": "./dist/presentation/index.js", "types": "./dist/presentation/index.d.ts" },
-    "./browser": { "import": "./dist/browser/index.js", "types": "./dist/browser/index.d.ts" },
-    "./design": { "design": "./dist/design/index.js", "types": "./dist/design/index.d.ts" }
+    "./browser": { "import": "./dist/browser/index.js", "types": "./dist/browser/index.d.ts" }
   },
   "peerDependencies": { "react": "<pin theo engine>", "@platform/sdk-browser": "<pin theo browserHostApi>" }
 }
 ```
 
-`package.json` được chép nguyên vào release, nên điều kiện export vẫn có hiệu lực khi compiler resolve từ store. **Conditional exports chỉ là một lớp (L1), không phải security boundary duy nhất**; hiệu lực của nó phải được kiểm trong bundler thật (§11.5).
+*(Rev 2.12: ví dụ đã bỏ `./presentation`, `./design` theo ADR-074; điều kiện export `design` ở L1 giữ cho P1.)* `package.json` được chép nguyên vào release, nên điều kiện export vẫn có hiệu lực khi compiler resolve từ store. **Conditional exports chỉ là một lớp (L1), không phải security boundary duy nhất**; hiệu lực của nó phải được kiểm trong bundler thật (§11.5).
 
 ### 6.6. Definition dùng capability thế nào (đồng bộ vào spec #1 rev 3.1)
 
@@ -486,7 +526,7 @@ Chỉ có **một** cơ chế đăng ký: `bindings.design` của chính capabil
 - Áp dụng cho mọi capability có `configSchema` (P0: `fieldType`; tương lai: validator có params phức tạp, effect).
 - Không có binding → Admin dùng inspector tự sinh từ `configSchema`.
 - `design` là **authoring facet**: chỉ chạy trong Admin, không bao giờ vào artifact của khách (L1, L3, L5). Nó không phải execution facet nên không đổi family của capability.
-- *(rev 2.8, trung thực)* Design binding là React có state và handler, chạy **trong origin Admin đã xác thực**. L3 chỉ chặn được API mạng viết trực tiếp; code cố ý có thể lách (`globalThis[...]`, `new Image().src`, chèn `<script>`), và code cùng origin đọc được CSRF token của Admin. Bảo vệ hiện có chỉ phù hợp trust model ADR-023 (developer thiện chí, trusted pipeline, review, conformance §17.2, CSP của Admin), **không** chống mã độc cố ý. Có giữ design binding trong origin Admin ở P0 hay không: spec #4 OD4-07.
+- *(rev 2.8, trung thực; giữ làm lý do cho ADR-061/ADR-074 — rev 2.12: P0 registry từ chối `bindings.design`, §6.2.2)* Design binding là React có state và handler; nếu chạy **trong origin Admin đã xác thực**: L3 chỉ chặn được API mạng viết trực tiếp; code cố ý có thể lách (`globalThis[...]`, `new Image().src`, chèn `<script>`), và code cùng origin đọc được CSRF token của Admin. Bảo vệ hiện có chỉ phù hợp trust model ADR-023 (developer thiện chí, trusted pipeline, review, conformance §17.2, CSP của Admin), **không** chống mã độc cố ý. Có giữ design binding trong origin Admin ở P0 hay không: spec #4 OD4-07.
 - Contract: React component nhận `{ config, onChange(config), schema, catalogContext }`. Admin validate output theo `configSchema` trước khi ghi draft bằng typed command của Admin (spec #4). Inspector không ghi ra ngoài config của node.
 - Admin cũng là ứng dụng browser: design facet cũng **không** được chứa secret (L4).
 
@@ -506,7 +546,7 @@ type FieldTypeBrowser<V, C, I> = {
   Summary?: (p: { value: V | undefined; config: Readonly<C>; options?: QueryState<unknown> }) => ReactNode;
   // rev 2.3: hiển thị giá trị ở step 確認; không có thì engine hiện giá trị thô. Cùng facet, cùng chunk.
   Presentation?: (p: { value?: V; config: Readonly<C>; sampleOptions?: unknown; ids: A11yIds }) => ReactNode;
-  // rev 2.11 (C1, SR-04/ADR-070): export JS này là **P1** và chỉ được nạp trong một ranh giới cô lập thật
+  // rev 2.11 (C1, SR-04/ADR-070; rev 2.12: ADR-074 duyệt): export JS này là **P1** và chỉ được nạp trong một ranh giới cô lập thật
   // (iframe sandbox trên origin riêng). P0: Design Canvas dùng `presentation` khai báo trong manifest (§6.2.1),
   // do host vẽ — không có JavaScript nào của plugin chạy trong origin Admin.
   // rev 2.6: CHỈ hiển thị, dùng trên Design Canvas của Admin (spec #4 §9). Thuần: không hook có side effect
@@ -559,7 +599,7 @@ class ServerContext:
 | 0 | **Trusted mode**: chạy trên tree đã commit, sạch (`git status` rỗng), ghi commit SHA. P0 = generator chạy ở local theo chế độ CI; sau G9 là CI thật. Không có đầu vào nào khác (không upload, không URL). | `E-UNTRUSTED-SOURCE` |
 | 1 | Discover: glob cố định `plugins/*/plugin.manifest.json` | — |
 | 2 | Validate manifest và schema nhúng (2020-12 + profile) | `E-MANIFEST-INVALID`, `E-SCHEMA-INVALID`, `E-SCHEMA-PROFILE` |
-| 3 | Luật kind: facet theo family; kind chưa bật; `requires`/`verification.check` đúng kind trong cùng release; port khớp; `verification` bắt buộc cho `fieldType`; `capabilityId` duy nhất; *(rev 2.5)* `title` tiếng Nhật và tập con inspector cho `configSchema`/`paramsSchema` (§6.3) | `E-FACET-MISSING`, `E-FACET-FORBIDDEN`, `E-KIND-NOT-ENABLED`, `E-REQUIRES-INVALID`, `E-REQUIRES-PORT-MISMATCH`, `E-VERIFICATION-MISSING`, `E-VERIFICATION-INVALID` |
+| 3 | Luật kind: facet theo family; kind chưa bật; `requires`/`verification.check` đúng kind trong cùng release; port khớp; `verification` bắt buộc cho `fieldType`; `capabilityId` duy nhất; *(rev 2.5)* `title` tiếng Nhật và tập con inspector cho `configSchema`/`paramsSchema` (§6.3) | `E-FACET-MISSING`, `E-FACET-FORBIDDEN`, `E-KIND-NOT-ENABLED`, `E-REQUIRES-INVALID`, `E-REQUIRES-PORT-MISMATCH`, `E-VERIFICATION-MISSING`, `E-VERIFICATION-INVALID`; *(rev 2.12)* `presentation` theo §6.2.2: `E-PRESENTATION-INVALID`, `E-PRESENTATION-PRIMITIVE`, `E-PRESENTATION-POINTER`, `E-PRESENTATION-EXECUTABLE-REF` |
 | 4 | Exports khớp `packageExport`, điều kiện đúng; không `.` gộp; không wildcard; shared externals là `peerDependencies` | `E-EXPORT-MISMATCH`, `E-SHARED-EXTERNAL` |
 | 5 | Binding: TS stub `satisfies` interface rồi typecheck; Python kiểm AST tên và async/sync | `E-BINDING-MISSING`, `E-BINDING-SIGNATURE` |
 | 6 | Boundary graph (L3, §11.2) | `E-BOUNDARY-VIOLATION` |
@@ -657,7 +697,7 @@ Giới hạn một version chỉ trong **một Form Release**. Form khác nhau d
 
 ADR-026 nói một `engineApi` range; spec tách theo host vì các host có version độc lập. Đây là làm rõ, không đổi nguyên tắc.
 
-*(Rev 2.11, C1.)* **Admin build** (origin Admin) không chứa code plugin nào (INV-A1); Canvas vẽ `presentation` khai báo. **Preview build** (origin preview riêng) chứa engine + browser facet + Motion (INV-A2), không chứa version `revoked`; version bị revoke sau khi build vẫn còn trong bundle tới lần build sau, nhưng không được dùng: preview session mang `blockedPrks` (spec #5 §7.3) và iframe không mount `Component` của chúng; lời gọi server qua gate (spec #5 §9.3). *(Lịch sử rev 2.6–2.10: Admin build từng chứa entry `presentation` JS.)* *(Rev 2.6, spec #4 §8.3, §14.4.)* Hai build chỉ đưa vào những release có facet design hoặc browser mà, với **từng facet có mặt**, `compat.designHostApi` / `compat.browserHostApi` chứa version của Admin/engine trong bản build đó (không kiểm host mà release không có facet, §6.2; release chỉ có facet server chỉ cần metadata trong catalog snapshot); release không đạt thì không có trong **Admin capability set** và Admin hiện nó là 「この管理画面では編集できない版」, không bao giờ đổi version thay người dùng.
+*(Rev 2.11, C1; rev 2.12 ADR-074.)* **Admin build** (origin Admin) không chứa code plugin nào (INV-A1); Canvas vẽ `presentation` khai báo (§6.2.2). `designHostApi` từ rev 2.12 là **phiên bản từ vựng presentation khai báo** (allowlist primitive) mà Admin build hỗ trợ, không còn là API cho code design. **Preview build** (origin preview riêng) chứa engine + browser facet + Motion (INV-A2), không chứa version `revoked`; version bị revoke sau khi build vẫn còn trong bundle tới lần build sau, nhưng không được dùng: preview session mang `blockedPrks` (spec #5 §7.3) và iframe không mount `Component` của chúng; lời gọi server qua gate (spec #5 §9.3). *(Lịch sử rev 2.6–2.10: Admin build từng chứa entry `presentation` JS.)* *(Rev 2.6, spec #4 §8.3, §14.4.)* Hai build chỉ đưa vào những release có facet design hoặc browser mà, với **từng facet có mặt**, `compat.designHostApi` / `compat.browserHostApi` chứa version của Admin/engine trong bản build đó (không kiểm host mà release không có facet, §6.2; release chỉ có facet server chỉ cần metadata trong catalog snapshot); release không đạt thì không có trong **Admin capability set** và Admin hiện nó là 「この管理画面では編集できない版」, không bao giờ đổi version thay người dùng.
 
 ### 10.2. Release Manifest ghi gì (nội dung spec #2 yêu cầu, định dạng spec #3)
 
@@ -730,8 +770,8 @@ Không có nhánh nào thay bằng version khác.
 | INV-F5 | Không có secret trong browser/design facet, manifest, catalog, artifact, sourcemap hay metadata build. |
 | INV-F6 | Hai form chỉ khác nhau về module plugin đúng bằng hiệu của hai lock (BUILD-06). |
 | INV-F7 | Artifact chứa đúng **một** bản React và React DOM. |
-| INV-A1 *(rev 2.11)* | **Admin build** (origin Admin): module ⊆ app Admin ∪ shared externals ∪ thư viện allowlist. **Không** module nào từ package plugin (kể cả `contract`, `presentation`, `design`, `browser`); Admin chỉ đọc manifest/catalog dạng **dữ liệu** (JSON). Kiểm bằng L1b + L5 với canary trong mọi entry của plugin fixture |
-| INV-A2 *(rev 2.8)* | **Preview build** (origin preview; *rev 2.11*: không chứa version có ledger `revoked` — CSR-07; cho phép adapter submit mock **của platform** chỉ dùng trong preview cho `simulatePending`, spec #6 §10 — MINOR-14): module ⊆ engine ∪ shared externals ∪ `contract` ∪ `presentation` ∪ `browser` facet (của Admin capability set) ∪ *(rev 2.10)* Motion runtime (thư viện đã pin) + Motion Adapter + mọi version `@platform/motion-presets` được hỗ trợ (spec #6 §7.2) ∪ thư viện allowlist. Không có `design`, server facet, `fixtures/`, test, mock ngoài `previewFixtures` dạng dữ liệu. |
+| INV-A1 *(rev 2.11)* | **Admin build** (origin Admin): module ⊆ app Admin ∪ shared externals ∪ thư viện allowlist. **Không** module nào từ package plugin (kể cả `contract`, `presentation`, `design`, `browser`); Admin chỉ đọc manifest/catalog dạng **dữ liệu** (JSON). Kiểm bằng L1b + L5 với canary trong mọi entry của plugin fixture; *(rev 2.12)* kiểm cả phụ thuộc bắc cầu và `import()` không literal (spec #3 §10.1, N-PRES-06/07) |
+| INV-A2 *(rev 2.8)* | **Preview build** (origin preview; *rev 2.11*: không chứa version có ledger `revoked` — CSR-07; cho phép adapter submit mock **của platform** chỉ dùng trong preview cho `simulatePending`, spec #6 §10 — MINOR-14): module ⊆ engine ∪ shared externals ∪ `contract` ∪ `browser` facet (của Admin capability set; *rev 2.12*: không có entry `presentation` ở P0) ∪ *(rev 2.10)* Motion runtime (thư viện đã pin) + Motion Adapter + mọi version `@platform/motion-presets` được hỗ trợ (spec #6 §7.2) ∪ thư viện allowlist. Không có `design`, server facet, `fixtures/`, test, mock ngoài `previewFixtures` dạng dữ liệu. |
 
 ### 11.2. Sáu lớp
 
@@ -740,7 +780,7 @@ Không có nhánh nào thay bằng version khác.
 | **L1 Resolution** | `./design` chỉ có điều kiện `design`; build của khách không bật `design`. Server facet (Python) không có trong `exports`. | build | import design hoặc server **qua `exports`**. *(Rev 2.4: không chặn import tương đối bên trong package — xem L1b.)* |
 | **L1b Resolve allowlist** *(rev 2.4; rev 2.8: áp thêm cho Admin build theo INV-A1 và Preview build theo INV-A2, do trusted pipeline build bằng cùng toolchain spec #3, deploy theo spec #5)* | Plugin của compiler trong bundler (K9, spec #3 §9) từ chối mọi module resolve ra ngoài tập cho phép: facet được phép của FBK trong lock (browser + `contract`), engine/core, Motion của core (chỉ group `motion`), shared externals, module sinh ra, danh sách đóng các module ảo của bundler; module có file thật phải có đuôi JS/CSS/JSON. | build | import **tương đối** sang `design/`, `server/`, `fixtures/` hay file `.py` — những thứ `exports` không chặn được (spike EXP-03 n2, n4) |
 | **L2 Generation** | Compiler sinh một entry/form, chỉ import literal tới `packageExport` browser của FBK trong lock. Code-split chỉ bằng `import()` literal do compiler sinh. Definition chỉ có key có cấu trúc, kiểm theo ngữ pháp §5.2. | compile | kéo plugin không dùng; Admin JSON điều khiển import |
-| **L3 Static boundary** | Đồ thị phụ thuộc bắc cầu từ mỗi facet entry. `contract` → chỉ contract; `browser` → contract, SDK browser, thư viện allowlist; *(rev 2.8, thay luật cũ "`design` → browser")* `presentation` → chỉ file trong `presentation/`, `contract`, `@platform/sdk-browser/presentation` (entry SDK riêng, không API runtime), thư viện allowlist; `browser` → contract, SDK browser, `presentation`, thư viện allowlist; `design` → contract, SDK design, `presentation`, thư viện allowlist; cấm `presentation` → `browser`/`design`, cấm `design` → `browser`, cấm `browser` → `design`; module dùng chung giữa `presentation` và `browser` phải nằm trong `presentation/` (khi đó nó thuộc đồ thị `presentation` và chịu luật của nó); cấm `node:*`, `fs`, `child_process`, `server/`, `fixtures/`, `test/`; cấm trong browser/design: `fetch`, `XMLHttpRequest`, `WebSocket`, `sendBeacon`, `import()` không literal; shared externals không được gói vào facet; *(rev 2.10)* package `@platform/motion-presets` và Motion Adapter không được import dispatcher, store hay selector của engine, không dùng API mạng/storage; *(rev 2.3)* package engine không được import Motion (Motion chỉ vào qua group `motion` do compiler sinh). Python: cấm `requests`, `urllib`, `http.client`, `socket`, `subprocess`, `os.environ`, import tuyệt đối sang plugin khác. | registry | import sai hướng trực tiếp/bắc cầu; mạng trực tiếp; gói React riêng |
+| **L3 Static boundary** | Đồ thị phụ thuộc bắc cầu từ mỗi facet entry. `contract` → chỉ contract; `browser` → contract, SDK browser, thư viện allowlist; *(rev 2.8, thay luật cũ "`design` → browser"; rev 2.12: các luật `presentation`/`design` dưới đây chỉ áp ở **P1** — P0 registry từ chối hai entry này, §6.2.2)* `presentation` → chỉ file trong `presentation/`, `contract`, `@platform/sdk-browser/presentation` (entry SDK riêng, không API runtime), thư viện allowlist; `browser` → contract, SDK browser, `presentation`, thư viện allowlist; `design` → contract, SDK design, `presentation`, thư viện allowlist; cấm `presentation` → `browser`/`design`, cấm `design` → `browser`, cấm `browser` → `design`; module dùng chung giữa `presentation` và `browser` phải nằm trong `presentation/` (khi đó nó thuộc đồ thị `presentation` và chịu luật của nó); cấm `node:*`, `fs`, `child_process`, `server/`, `fixtures/`, `test/`; cấm trong browser/design: `fetch`, `XMLHttpRequest`, `WebSocket`, `sendBeacon`, `import()` không literal; shared externals không được gói vào facet; *(rev 2.10)* package `@platform/motion-presets` và Motion Adapter không được import dispatcher, store hay selector của engine, không dùng API mạng/storage; *(rev 2.3)* package engine không được import Motion (Motion chỉ vào qua group `motion` do compiler sinh). Python: cấm `requests`, `urllib`, `http.client`, `socket`, `subprocess`, `os.environ`, import tuyệt đối sang plugin khác. | registry | import sai hướng trực tiếp/bắc cầu; mạng trực tiếp; gói React riêng |
 | **L4 Secret hygiene** | Không có trường secret trong manifest; secret ở cấu hình connector của host. Secret scanner trên source plugin, artifact, sourcemap, metadata. Sourcemap không phục vụ công khai (SEC-04; chi tiết spec #3). | registry + build | hardcode token |
 | **L5 Artifact verification** | Module stats của bundler phải thuộc tập INV-F1; canary marker của design facet, server facet và fixtures không xuất hiện; không module có đuôi `.py` hay mã của server facet; INV-F6 giữa Sports và PC; INV-F7. | sau build (spec #3) | lỗi của L1–L3, cấu hình bundler sai, thư viện kéo code lạ |
 | **L6 Negative fixtures** | Mỗi guard có fixture vi phạm cố ý (§17.3). | CI | guard bị vô hiệu hoặc hỏng mà không ai biết |
@@ -1030,7 +1070,7 @@ sequenceDiagram
 
 | Kind | Kiểm |
 |---|---|
-| `fieldType` | controlled; `onChange` chỉ phát giá trị hợp lệ hoặc `undefined`; không throw với `undefined`; dùng `ids` a11y; không còn listener sau unmount; không `onCommit` trong IME composition (giới hạn harness ghi rõ, spec #1 AC-18); design binding chỉ phát config hợp lệ; *(rev 2.6)* `Presentation` mount trong harness có spy trên `fetch`/`XMLHttpRequest`/`WebSocket`/`sendBeacon`/`setTimeout`/`setInterval`/`localStorage`/`sessionStorage`/`indexedDB` → **không một lời gọi nào**, kể cả sau nhiều lần render; negative fixture có `useEffect` + fetch lúc mount phải làm test này fail đúng lý do; *(rev 2.7)* **import** entry `presentation` (module evaluation) dưới cùng spy → 0 lời gọi; negative fixture có side effect ở top-level module phải fail; *(rev 2.8)* danh sách spy mở rộng: thêm `document.cookie`, `Image`/thuộc tính `src`, `document.createElement('script'|'iframe'|'link')`, `EventSource`, `postMessage`, `window.open`, `location`, `BroadcastChannel`, `Worker`, `navigator.serviceWorker`, `requestAnimationFrame`; harness chạy dưới CSP của Admin; **design binding** (nếu có) chịu cùng spy lúc import và lúc mount, chỉ được gọi `onChange`. Giới hạn: spy chỉ phát hiện hành vi xảy ra trong harness, không chứng minh không có code chạy theo điều kiện. | *(rev 2.11)* `presentation` khai báo: validate theo schema; mọi JSON Pointer trỏ tới thuộc tính có trong `configSchema` / fixture có trong `previewFixtures`; harness vẽ được bằng component lõi.
+| `fieldType` | controlled; `onChange` chỉ phát giá trị hợp lệ hoặc `undefined`; không throw với `undefined`; dùng `ids` a11y; không còn listener sau unmount; không `onCommit` trong IME composition (giới hạn harness ghi rõ, spec #1 AC-18); design binding chỉ phát config hợp lệ (P1); *(rev 2.6; rev 2.12: phần spy cho `Presentation` JS và design binding dưới đây chỉ áp ở **P1**)* `Presentation` mount trong harness có spy trên `fetch`/`XMLHttpRequest`/`WebSocket`/`sendBeacon`/`setTimeout`/`setInterval`/`localStorage`/`sessionStorage`/`indexedDB` → **không một lời gọi nào**, kể cả sau nhiều lần render; negative fixture có `useEffect` + fetch lúc mount phải làm test này fail đúng lý do; *(rev 2.7)* **import** entry `presentation` (module evaluation) dưới cùng spy → 0 lời gọi; negative fixture có side effect ở top-level module phải fail; *(rev 2.8)* danh sách spy mở rộng: thêm `document.cookie`, `Image`/thuộc tính `src`, `document.createElement('script'|'iframe'|'link')`, `EventSource`, `postMessage`, `window.open`, `location`, `BroadcastChannel`, `Worker`, `navigator.serviceWorker`, `requestAnimationFrame`; harness chạy dưới CSP của Admin; **design binding** (nếu có) chịu cùng spy lúc import và lúc mount, chỉ được gọi `onChange`. Giới hạn: spy chỉ phát hiện hành vi xảy ra trong harness, không chứng minh không có code chạy theo điều kiện. | *(rev 2.11; rev 2.12 P0)* `presentation` khai báo: validate theo schema đóng của §6.2.2; mọi JSON Pointer resolve tới thuộc tính `string` có trong `configSchema` / `outputSchema` của fixture; harness vẽ được bằng component lõi; N-PRES-01..05 fail đúng mã, control pass.
 | `validator` | thuần (hai lần cùng kết quả; input deep-freeze); kết quả đúng dạng; mọi `code` có message `ja` |
 | `dataSource` | output đúng `outputSchema`; tôn trọng cancel/deadline; chỉ connector đã khai; log không có giá trị (PII marker giả); `previewFixtures` hợp lệ theo `outputSchema` |
 | `serverValidator` | không dùng connector ghi; lặp lại cùng kết quả; reject/timeout đúng spec #1 §11 |
@@ -1038,7 +1078,7 @@ sequenceDiagram
 
 ### 17.3. Negative fixture cho từng guard (Review #1 §9)
 
-Mỗi guard `G` (L1, L1b — kể cả cho Admin build và Preview build, L2, từng luật L3, L4, từng kiểm tra L5 — kể cả INV-A1/INV-A2 với canary marker đặt trong module của `Component` và của `design`, từng luật C0) có fixture `N_G` vi phạm **đúng một** luật. Test của `G` phải chứng minh ba điều:
+Mỗi guard `G` (*rev 2.12:* gồm N-PRES-01..08 ở §6.2.2; L1, L1b — kể cả cho Admin build và Preview build, L2, từng luật L3, L4, từng kiểm tra L5 — kể cả INV-A1/INV-A2 với canary marker đặt trong module của `Component` và của `design`, từng luật C0) có fixture `N_G` vi phạm **đúng một** luật. Test của `G` phải chứng minh ba điều:
 1. Chạy trên `N_G` → thất bại.
 2. Thất bại **đúng lý do**: diagnostic có mã lỗi của `G` và trỏ tới module/vị trí vi phạm trong `N_G`; không được là lỗi phụ (cú pháp, thiếu file, timeout).
 3. **Control**: `N_G` sau khi bỏ đúng vi phạm đó → pass. Nếu control fail, fixture hỏng chứ không phải guard tốt.
@@ -1055,7 +1095,7 @@ Kết quả lưu làm evidence. Fixture và kết quả conformance là một ph
 
 | Bước | Kết quả |
 |---|---|
-| Registry | 3 capability: `storeSelector` (browser-ui; P0 không design binding), `storeList` (server-io), `storeIdValid` (server-io). Facet: browser (+ entry `presentation`), server. |
+| Registry | 3 capability: `storeSelector` (browser-ui; P0 không design binding), `storeList` (server-io), `storeIdValid` (server-io). Facet: browser, server; *(rev 2.12)* `presentation` khai báo `select` + `sampleOptionsFrom: storeList` (dữ liệu, §6.2.2) — Canvas hiện 「編集用の簡易表示」, UI thật xem ở Interactive Preview. |
 | Editor chèn field | Admin hiện 「店舗を選ぶ」; inspector tự sinh từ `configSchema` (ADR-061); alias `{ …, capability: "storeSelector", kind: "fieldType" }` |
 | Compile PC | Lock: `storeSelector` (FBK browser), `storeList` (FBK server), `storeIdValid` (FBK server). Design binding không vào lock. Entry import đúng `browser` của release `1.0.0`. |
 | Compile Sports | Lock không có `@platform/store-selector`; L5 kiểm INV-F6 |
@@ -1199,6 +1239,7 @@ Trạng thái: **Đồng bộ** = spec #1 rev 3.1 đã được sửa để kh�
 | Runtime override | ✔ | ✔ *(rev 2.11, ADR-072)* API chạy ở local PoC (authz, audit, CAS, idempotency, fail closed; spec #5 §7.2) | incident service đầy đủ: không làm |
 | Effect binding + site policy | ✔ | ✔ (một mock effect) | effect thật: ngoài PoC |
 | Dev Preview | ✔ | ✔ tối thiểu | — |
+| *(rev 2.12, ADR-074)* Presentation khai báo do host sở hữu | ✔ (§6.2.2) | ✔ (allowlist primitive P0, N-PRES-01..08) | JS `Presentation`, design binding: P1 trong ranh giới cô lập thật (ADR mới) |
 | Provisional Command | ✔ contract | ✘ | P2 |
 | Postal-code | ✔ contract | ✘ | P1 |
 

@@ -1,6 +1,7 @@
 # Spec #6: Motion (Architecture Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.1** (2026-10-25).
+> **Trạng thái: PROPOSAL, revision 2.2** (2026-10-25).
+> - Rev 2.2 (ADR-074): §11 ghi rõ Motion chỉ được xem ở **Interactive Preview** (iframe cô lập); Edit Canvas (host khai báo) không có Motion và không tuyên bố parity Motion. Không đổi contract Motion.
 > - Rev 2.1 (vòng sửa C1): `ExitShell` do slot tự vẽ từ IR theo `regionId`, không giữ element con (CSR-13, §6.2–§6.3, TM-6R10); `motion-presets` là platform asset pin bằng digest trong Build Request (CSR-12, §7.3); adapter submit mock của preview là module platform được INV-A2 cho phép (MINOR-14); I6-06 cập nhật (MINOR-13); token editor ngoài phạm vi (P1).
 > - Review rev 1 (user): direction approved with targeted corrections; OD6-01..04 → ADR-064..067. Rev 2: §7.4 reduced motion & lazy import, §6.3 bóng exit không PII, §6.4 chuyển nhanh & hủy, §12 test bổ sung, §14 truy vết MOTION-01. Thay đổi: §20.
 > - Rev 1 đã qua builder check + consistency review độc lập (§19).
@@ -268,6 +269,7 @@ Package `@platform/motion-presets` (core, phát hành qua trusted pipeline, có 
 
 ## 11. Preview / Published parity
 
+- *(Rev 2.2, ADR-074)* Ba tầng của spec #4 §9.1: **Edit Canvas** không chạy Motion (không có Motion runtime trong Admin build, INV-A1) và không tuyên bố gì về chuyển động; **Interactive Preview** (tab モーション, Preview, Review) là nơi duy nhất trong Admin xem Motion, parity theo contract có version (`platformReleaseId` gồm engine, `motion-presets`, thư viện Motion); **Published Form** là chuẩn. Motion Preview vốn đã chạy trong iframe cô lập (§10), nên ADR-074 không đổi contract Motion.
 - Preview iframe dùng cùng package engine, `motion-presets`, thư viện `motion` và cùng IR `motion` như artifact (spec #4 §14.7: Preview build cùng version).
 - Test parity so **mô tả animation** (recipe id, thuộc tính, thời lượng, hướng) mà runtime chọn cho cùng chuỗi `TransitionNotice`, không so pixel.
 

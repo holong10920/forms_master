@@ -1,6 +1,7 @@
 # Spec #4: Admin Form Builder — UX & Architecture (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.5** (2026-10-25) — **READY_FOR_CROSS_SPEC_REVIEW** (điều kiện của ADR-055 đã thực hiện: targeted review §27a); OD4-07 đã quyết (ADR-061).
+> **Trạng thái: PROPOSAL, revision 2.6** (2026-10-25) — **READY_FOR_CROSS_SPEC_REVIEW** (điều kiện của ADR-055 đã thực hiện: targeted review §27a); OD4-07 đã quyết (ADR-061).
+> - Rev 2.6 (ADR-074, user duyệt SR-04): presentation khai báo do host sở hữu là **hướng P0 đã duyệt**; §9.1 mới: ba tầng Edit Canvas / Interactive Preview / Published Form, parity của từng tầng, UX khi primitive không đủ (「編集用の簡易表示」, 「プレビューで確認」); không custom executable Inspector ở P0 (§10); sửa chỗ còn ghi code plugin `presentation` trong origin Admin (§9 D5, §14.7); test 4C02, 4C07, 4C08, 4Z10.
 > - Rev 2.5 (vòng sửa C1, Cross-Subsystem Review): Canvas vẽ **presentation khai báo** do host sở hữu — không JavaScript plugin nào trong origin Admin (SR-04/ADR-070, đề xuất chờ user xác nhận; §2, §9); Admin build không chứa code plugin (CSR-06, §14.4); plugin đã revoke trong Admin/Preview (CSR-07, §9, §14.4); preview gắn `platformReleaseId` (CSR-10, §14.7); state machine review theo spec #5 §8.1 (CSR-16, §17); `dataContractAck`; sơ đồ preview session (MINOR-13).
 > - Rev 2.4: đồng bộ spec #6 (I6-05): §16 tab 設定 › モーション; command Motion; diagnostics `E-MOTION-*`, `E-ADMIN-MOTION-NOT-BUNDLED`; postMessage `preview.demo`, `preview.motionMode`; review diff Motion.
 > - Rev 2.3: ADR-061 (P0 chỉ inspector tự sinh + control typed, không design binding trong origin Admin): §2, §9 D2, §10, §10.2, §14.7, §23; ADR-057: Admin hiển thị freshness `authoritative/cached/unknown` (§13.5, I4-18); spec #5 rev 2 đồng bộ (I4-17).
@@ -41,6 +42,7 @@
 | ADR-052 | Optimistic concurrency, không merge tự động | APPROVED |
 | ADR-053 | Interactive Preview/Simulation cô lập trong iframe sandbox trên origin riêng | APPROVED |
 | ADR-061 | P0 chỉ inspector tự sinh + control typed; custom Inspector sandbox ở P1 | APPROVED |
+| ADR-070, ADR-074 | SR-04: Host-owned Declarative Presentation; không code plugin trong origin Admin; ba tầng parity (§9.1) | ADR-074 **APPROVED AS P0 DESIGN DIRECTION** (thay điều kiện tạm của ADR-070) |
 | §4–§22 | Cơ chế | **PROPOSED** |
 
 ---
@@ -56,7 +58,7 @@ Hiện nay mọi thay đổi field hay flow đều cần developer. Spec #4 đ�
 **Goals**
 - G4-1: Business Editor hoàn thành hành trình ngày đầu (§5) chỉ bằng UI.
 - G4-2: Mọi chỉnh sửa đi qua typed command; một nguồn sự thật cho document.
-- G4-3: Canvas tái dùng **phần hiển thị** của renderer runtime; Preview chạy **engine** của runtime; không có renderer hay engine thứ hai.
+- G4-3: Canvas tái dùng **phần hiển thị** của renderer runtime cho field core; field plugin được host vẽ từ `presentation` khai báo (ADR-074) và luôn được ghi rõ là bản hiển thị để chỉnh sửa; Preview chạy **engine** của runtime; không có engine thứ hai (§9.1).
 - G4-4: **Design Canvas không chạy hành vi runtime** (navigation, lookup, mạng, submit, command đặc quyền, effect) — được bảo đảm bằng kiến trúc và test, không bằng `inert`/CSS (§9).
 - G4-5: Preview không bao giờ hiện thành công giả; workflow chưa hoàn chỉnh được nói rõ (§14).
 - G4-6: Draft đang xây dở luôn sửa được; lỗi giải thích bằng tiếng Nhật và có đường sửa.
@@ -69,8 +71,9 @@ Hiện nay mọi thay đổi field hay flow đều cần developer. Spec #4 đ�
 - JSON/DSL/regex/expression lộ ra cho Business Editor.
 - Nhiều panel tự sửa document.
 - Canvas mount component hành vi của plugin; coi `inert`, `pointer-events` hay CSS là ranh giới an toàn.
-- Chạy **bất kỳ** JavaScript nào của plugin trong origin Admin đã xác thực ở P0 (ADR-053, ADR-070): Canvas chỉ vẽ `presentation` **khai báo** bằng component lõi của host; component hành vi chỉ chạy trong iframe preview cô lập.
+- Chạy **bất kỳ** JavaScript nào của plugin trong origin Admin đã xác thực ở P0 (ADR-053, ADR-070, ADR-074): Canvas chỉ vẽ `presentation` **khai báo** bằng component lõi của host; component hành vi chỉ chạy trong iframe preview cô lập.
 - Preview "đi tới" màn hoàn tất không có thật; Partial Preview được coi là bằng chứng form hợp lệ.
+- Vẽ field plugin trên Canvas bằng một UI khác rồi ngầm coi là giống runtime; tuyên bố parity pixel-perfect giữa Canvas và runtime (ADR-074).
 - Báo 保存済み / 公開しました khi server chưa xác nhận.
 - Ngầm đổi version plugin, ngầm bỏ hay sửa tính năng chỉ đọc.
 
@@ -291,7 +294,7 @@ flowchart LR
 
 | Lớp | Làm gì | Không làm |
 |---|---|---|
-| **Presentational Renderer** | Core field: component **thuần hiển thị** (cùng markup/CSS với runtime). Field plugin: host đọc `presentation` **khai báo** trong manifest (spec #2 rev 2.11 §6.2.1: `primitive`, `placeholderFrom`, `sampleOptionsFrom`) và vẽ bằng **component lõi của chính Admin**; dữ liệu mẫu lấy từ `previewFixtures` (dữ liệu hư cấu). Không có `presentation` → thẻ giữ chỗ trung tính (nhãn + loại + 「プレビューで確認できます」). Plugin có trạng thái hiệu lực `revoked` (đọc từ `CAPSTATUS` qua Admin API, có freshness) → thẻ 「この部品は利用停止中です」, không vẽ preview | Không nạp, không import, không thực thi **bất kỳ** code nào của plugin (không `Component`, không `Presentation` JS, không `design`) |
+| **Presentational Renderer** | Core field: component **thuần hiển thị** (cùng markup/CSS với runtime). Field plugin: host đọc `presentation` **khai báo** trong manifest (spec #2 rev 2.11 §6.2.1: `primitive`, `placeholderFrom`, `sampleOptionsFrom`) và vẽ bằng **component lõi của chính Admin**; dữ liệu mẫu lấy từ `previewFixtures` (dữ liệu hư cấu). Field plugin luôn có nhãn 「編集用の簡易表示」 và nút 「プレビューで確認」 (§9.1). Không có `presentation`, primitive `card`, hoặc Admin không hỗ trợ phiên bản từ vựng → thẻ trung tính (nhãn + loại + 「この部品の実際の表示はプレビューで確認してください」). Plugin có trạng thái hiệu lực `revoked` (đọc từ `CAPSTATUS` qua Admin API, có freshness) → thẻ 「この部品は利用停止中です」, không vẽ preview | Không nạp, không import, không thực thi **bất kỳ** code nào của plugin (không `Component`, không `Presentation` JS, không `design`) |
 | **Design-time Adapter** | Dựng props hiển thị từ document: nhãn, helper, required, layout, giá trị mẫu, `sampleOptions` từ `previewFixtures`; cung cấp **DesignContext** chỉ chứa dữ liệu hiển thị | Không cung cấp engine, client connector, command dispatcher của runtime, submit, effect; không gọi lookup hay mạng; không khởi tạo hành vi runtime |
 | **Selection Layer** | Mỗi field có một **khung chọn** (focus được, `role="option"` trong `listbox` của step, `aria-selected`, tên truy cập 「メーカー、テキスト、必須」); click/Enter để `select`; mũi tên di chuyển; ＋ là button | Không dùng `inert` để vô hiệu hóa; không làm mất direct selection hay accessibility tree. Phần hiển thị bên trong khung là `aria-hidden` (khung đã mang mô tả đầy đủ) |
 
@@ -303,9 +306,23 @@ flowchart LR
 | D2 | Registry validate `presentation` khai báo theo schema (spec #2 §17.2): JSON Pointer chỉ trỏ vào `configSchema` / `previewFixtures` đã khai; không biểu thức, URL, CSS/HTML | dữ liệu khai báo sai hoặc chứa nội dung thực thi |
 | D3 | Static boundary của spec #2 (L3) cho browser facet (chạy trong iframe preview, không phải Admin) | gọi mạng trong code plugin ở preview |
 | D4 | Không có context runtime trong cây canvas: hook cần engine/connector sẽ ném lỗi → khung hiện thẻ lỗi hiển thị, không crash Builder | code cố dùng runtime |
-| D5 | Header của Admin (§14.7): CSP đầy đủ (`script-src 'self'`, `connect-src` chỉ Admin API, `frame-src` chỉ preview, `object-src`/`base-uri` `'none'`, `frame-ancestors 'none'`), CORP, `Referrer-Policy` | lời gọi tới đích **ngoài** Admin API; chèn script ngoài. **Không** chặn được code trong origin Admin gọi Admin API (cùng origin, đọc được CSRF token) — vì vậy P0 không nạp design binding (ADR-061); phần còn lại là `presentation` thuần |
+| D5 | Header của Admin (§14.7): CSP đầy đủ (`script-src 'self'`, `connect-src` chỉ Admin API, `frame-src` chỉ preview, `object-src`/`base-uri` `'none'`, `frame-ancestors 'none'`), CORP, `Referrer-Policy` | lời gọi tới đích **ngoài** Admin API; chèn script ngoài. **Không** chặn được code trong origin Admin gọi Admin API (cùng origin, đọc được CSRF token) — vì vậy P0 không nạp **bất kỳ** code plugin nào (ADR-061, ADR-074; D1, D7) |
 | D6 | Test E2E âm (TM-4C01..C04, §19) chạy Builder thật, không click gì, quan sát request và storage | hồi quy của cả hệ |
-| D7 | Admin build tuân INV-A1 (spec #2 rev 2.11 §11.1): **không** module nào của package plugin; L1b + L5 với canary trong mọi entry của plugin fixture (4Z10) | code plugin bị import/evaluate trong Admin |
+| D7 | Admin build tuân INV-A1 (spec #2 rev 2.11 §11.1): **không** module nào của package plugin; L1b + L5 với canary trong mọi entry của plugin fixture, kiểm phụ thuộc bắc cầu và `import()` không literal (spec #3 §10.1; 4Z10) | code plugin bị import/evaluate trong Admin |
+
+### 9.1. Ba tầng hiển thị và parity (ADR-074)
+
+| Tầng | Ở đâu | Chạy gì | Parity phải có | Bằng chứng | Không được tuyên bố |
+|---|---|---|---|---|---|
+| **Edit Canvas** | chế độ 作成, origin Admin | renderer khai báo của host; field core dùng component hiển thị lõi; field plugin vẽ từ `presentation` khai báo (spec #2 §6.2.2) | **semantic/configuration parity** với definition: accessible name, helper, bắt buộc, placeholder đã khai, thứ tự field/section/step, độ rộng, option của field core, option mẫu (gắn 「サンプル」) | 4C03, 4C08 | pixel-identical; UI đặc thù của plugin; hành vi, trạng thái async, validation, Motion |
+| **Interactive Preview** | chế độ プレビュー, Review, tab モーション; iframe trên origin preview (§14.7) | runtime khách: engine + browser `Component` của PRK đã approve (Preview build, INV-A2) | **presentation/behavior parity** theo contract có version: cùng `platformReleaseId` (engine, Motion, preset) và cùng PRK/hash facet như release sẽ build | 4Z08 (conformance scenario), spec #6 TM-6P* | parity với release build bằng `platformReleaseId` hoặc lock khác |
+| **Published Form** | ngoài Admin | runtime khách thật theo release bất biến (spec #3, #5) | chuẩn tham chiếu | TM-C*, TM-L* | — |
+
+**Khi primitive của host không đủ** (ví dụ UI chọn cửa hàng thật có bản đồ hay danh sách nhóm, còn Canvas chỉ có `select`):
+- Khung field mang nhãn 「編集用の簡易表示」; tooltip/chú thích 「お客様に表示される画面とは見た目が異なる場合があります」.
+- Nút 「プレビューで確認」 mở Interactive Preview ở step chứa field, field được chọn sẵn; nếu draft chưa đủ để preview (`gate: preview`) thì nút hiện lý do và đường sửa (§13), không mở preview giả.
+- Builder **không** tự chọn primitive khác plugin đã khai, không ngầm thay giao diện, không ghi 「実際の表示」 cho Canvas.
+- Thêm primitive mới là thay đổi platform có review (spec #2 §6.2.2), không phải tùy chọn của plugin.
 
 ## 10. Properties Inspector
 
@@ -330,6 +347,7 @@ flowchart LR
 - Mọi thuộc tính của `configSchema`/`paramsSchema` có `title` tiếng Nhật; enum có nhãn (spec #2 §6.3).
 - Tự sinh chỉ cho tập con: boolean, enum có nhãn, string, integer, mảng chuỗi ngắn; ngoài tập con → registry từ chối ở P0 (`E-SCHEMA-PROFILE`, spec #2 rev 2.9 §6.3); khả năng thiết yếu bị thiếu → đề xuất control typed built-in, không mở code tùy ý (ADR-061). Không bao giờ hiện tên thuộc tính thô.
 - Đã kiểm cho P0: `storeSelector` (config boolean + string; input port `prefecture` qua control typed), `jpPhone` (không params), effect mock (mapping qua control typed) đều cấu hình được không cần design binding.
+- *(Rev 2.6, ADR-074)* **Không có custom executable Inspector ở P0.** Inspector chỉ dùng schema + control typed của host; manifest không thể chỉ định component, URL hay handler cho Inspector (registry từ chối `bindings.design`, spec #2 §6.2.2).
 
 ### 10.3. Quy tắc chung
 
@@ -548,7 +566,7 @@ flowchart LR
 
 | Tầng chạy | Điều kiện vào | Chạy gì | Không được coi là |
 |---|---|---|---|
-| **Edit Canvas** | luôn | Presentational Renderer (§9) | form chạy được |
+| **Edit Canvas** | luôn | Presentational Renderer (§9), presentation khai báo (§9.1) | form chạy được; giống pixel với runtime (chỉ semantic/configuration parity, §9.1) |
 | **Partial Preview** (一部プレビュー) | không có diagnostic `gate: preview` | engine runtime **trong iframe preview cô lập** (§14.7) trên **IR preview do client sinh** (§14.2); đường chưa cấu hình → node `PREVIEW_ONLY_UNCONFIGURED_PATH` | bằng chứng mọi nhánh hợp lệ |
 | **Full Interactive Simulation** (シミュレーション) | không có `gate: preview` **và** không có `gate: workflow` (theo **server preflight**) | engine **trong iframe preview cô lập** trên **IR do server sinh** + Submission Simulation: evaluator Python validate theo IR đó, **không ghi** submission, không outbox, không effect | publish |
 | **Review-ready Preflight** | không còn diagnostic `error` theo server; compatibility, ledger hiện tại, support matrix pass; `W-CONTRACT-CHANGE` (nếu có) đã được Editor xác nhận (`dataContractAck`) | spec #3 mode `preflight` + kiểm của spec #5 | đã duyệt |
@@ -625,7 +643,7 @@ Ví dụ: draft có thể đồng thời 「保存済み」, 「一部プレビ�
 ```mermaid
 flowchart LR
   subgraph AO["Site/origin Admin (đã xác thực)"]
-    ADM["Admin app<br/>Canvas = Presentation thuần<br/>(không design binding, ADR-061)"]
+    ADM["Admin app<br/>Canvas = presentation khai báo do host vẽ<br/>(không code plugin, ADR-061, ADR-074)"]
     API["Admin API<br/>cookie __Host-, CSRF synchronizer,<br/>Origin + Sec-Fetch-Site"]
   end
   subgraph PO["Site/origin preview riêng (không có credential Admin)"]
@@ -693,7 +711,7 @@ Phong bì: `{ protocol: "fb-preview", v: 1, previewSessionId?, seq, type, payloa
 - Iframe dùng **đúng** engine của `platformReleaseId` mà review/preflight đã ghi (spec #5 §6.8); parity với Published Runtime chỉ được tuyên bố cho release build bằng cùng `platformReleaseId` và kèm conformance (4Z08 theo engine của release).
 - Preview API không có cấu hình, credential hay đường mạng tới hệ thống production (kiểm cấu hình, 4Z14).
 
-**Giới hạn:** iframe, CSP và header giảm rủi ro nhưng **không** làm Preview "an toàn tuyệt đối". Admin API và Preview API vẫn kiểm authorization ở server cho mọi request. Code plugin duy nhất trong origin Admin là `presentation` thuần (ADR-061); spy chỉ phát hiện, không chứng minh (spec #2 §17.2).
+**Giới hạn:** iframe, CSP và header giảm rủi ro nhưng **không** làm Preview "an toàn tuyệt đối". Admin API và Preview API vẫn kiểm authorization ở server cho mọi request. Origin Admin **không** có code plugin nào (INV-A1, ADR-074); kiểm bằng module graph + canary của Admin build (spec #3 §10.1, 4Z10), không dựa vào spy. Code plugin duy nhất của Builder chạy trong iframe preview trên origin khác.
 
 ---
 
@@ -767,9 +785,11 @@ Loại: **A** automated · **M** manual · **U** usability (người không ph�
 | # | Nhóm | Tình huống | Kết quả mong đợi | Loại |
 |---|---|---|---|---|
 | 4C01 | Canvas side effect | Plugin fixture **chỉ có `Component`** với `useEffect` gọi `fetch` tới URL canary + ghi `localStorage` lúc mount; mở Builder ở step chứa field đó, **không click gì** | canvas hiện thẻ giữ chỗ; 0 request tới URL canary; không có ghi storage; `Component` không mount | A (Playwright, log request + spy storage) |
-| 4C02 | Canvas: dữ liệu khai báo sai | `presentation` có JSON Pointer ngoài `configSchema`/`previewFixtures`, có chuỗi URL/HTML/CSS | registry từ chối (spec #2 C0/C2); Admin không bao giờ nhận được | A |
+| 4C02 | Canvas: dữ liệu khai báo sai / không an toàn | (a) `presentation` vi phạm N-PRES-01..05 (spec #2 §6.2.2); (b) *(rev 2.6)* giá trị config trong draft chứa `<img src=x onerror=…>`, `<script>` (N-PRES-08) | (a) registry từ chối đúng mã, control pass; Admin không bao giờ nhận được; (b) hiện thành chữ, không phần tử DOM mới, 0 request, 0 vi phạm CSP | A |
 | 4C03 | Canvas: plugin hợp lệ (`storeSelector`) | host vẽ `select` khai báo với tên cửa hàng hư cấu từ `previewFixtures`; 0 module JS của plugin trong Admin (kiểm module graph + canary) | A |
 | 4C06 | Canvas: plugin bị revoke sau khi build | thẻ 「この部品は利用停止中です」; chèn mới bị chặn; preview session trả `blockedPrks`, iframe không mount `Component` | A |
+| 4C07 | *(rev 2.6)* Canvas: giới hạn primitive | `storeSelector` (primitive `select`); fixture plugin không có `presentation` | khung có 「編集用の簡易表示」; nút 「プレビューで確認」 mở iframe ở đúng step, field được chọn; fixture không `presentation` → thẻ trung tính; không có chữ 「実際の表示」 | A |
+| 4C08 | *(rev 2.6)* Canvas: semantic parity | Sports + PC fixture: với mỗi field, so mô tả ngữ nghĩa của Canvas (accessible name, bắt buộc, placeholder, danh sách option của field core, thứ tự) với giá trị suy ra từ definition và với cùng thuộc tính đọc từ DOM của Interactive Preview | khớp hoàn toàn cho các thuộc tính trong §9.1; không so pixel | A |
 | 4C04 | Canvas selection | Click / Enter / mũi tên trên khung field | Outline + Inspector theo cùng vùng chọn; accessibility tree có tên khung | A + M (screen reader) |
 | 4P01 | Preview chưa hoàn chỉnh | `それ以外` của 宅配情報 未設定; chạy Partial Preview nhánh 宅配 | dừng ở trạng thái blocked có thông báo + 修正する; không 次へ/送信; không màn hoàn tất | A |
 | 4P02 | Preview chưa hoàn chỉnh | Cùng draft; nhánh 店頭 hoàn chỉnh | chạy tới 確認 và hoàn tất của nhánh đó; thanh trên vẫn ghi 「一部プレビュー：未設定の経路 1件」 | A |
@@ -808,7 +828,7 @@ Loại: **A** automated · **M** manual · **U** usability (người không ph�
 | 4Z07 | Preview isolation | Sửa draft trong lúc preview | phiên mới, `session.replace`; phiên cũ bị Preview API thu hồi; message phiên cũ bị bỏ | A |
 | 4Z08 | Preview isolation | Cùng fixture chạy trong iframe preview và trong artifact đã publish | cùng step đi qua, cùng kết quả validation (cùng package/version engine) | A |
 | 4Z09 | Preview isolation | Cấu hình iframe và header | site iframe ≠ site Admin (kể cả local); sandbox không có cờ cấm; CSP/Permissions-Policy/Referrer-Policy/frame-ancestors của hai origin đúng §14.7 | A |
-| 4Z10 | Build boundary | Module stats của Admin build và Preview build; fixture đặt canary trong module `Component` và `design` | Admin build không có canary `Component`; Preview build không có canary `design`; negative fixture (import tương đối `../browser/…` từ `presentation/`) làm L1b/L3 fail đúng lý do (spec #2 §17.3) | A |
+| 4Z10 | Build boundary | *(rev 2.6)* Module graph của Admin build và Preview build; canary trong **mọi** entry của plugin fixture (`contract`, `browser`, `server`, `fixtures`, `presentation`/`design` của fixture âm) | Admin build: không module `rel:*`, không canary nào (spec #3 §10.1, C18); N-PRES-06 (bắc cầu) và N-PRES-07 (`import()` không literal) fail đúng mã, control pass; Preview build: không canary `design`/server/`fixtures` (C21) | A |
 | 4Z11 | Nạp code | IR hoặc message chứa URL / specifier lạ ở vị trí PRK hay chuỗi bất kỳ | không request tải code nào; thẻ lỗi | A |
 | 4Z12 | postMessage | Lint + test runtime: mọi lời gọi `postMessage` có `targetOrigin` chính xác; message có `ports`, kích thước vượt, `previewSessionId` lạ ngoài `session.*`, `hello` với `buildManifestHash` lệch | không có `"*"`; các message đều bị bỏ / không start | A |
 | 4Z13 | Preview session | Kiểm URL iframe, history, `Referer`, storage, log của Preview API | `previewSessionId` không xuất hiện ở đâu ngoài bộ nhớ và header; log đã redact; thu hồi khi logout / mất quyền / reload / phiên mới | A |
@@ -841,13 +861,13 @@ Loại: **A** automated · **M** manual · **U** usability (người không ph�
 | I4-04 | Step graph DAG | spec #1 OD-06 | §11.2 | Chờ OD-06 |
 | I4-05 | Block exports; block không trải nhiều step; block instance không có điều kiện | spec #1 ADR-020, OD-13, §7.1 | §6, §10 | Chờ OD-13 |
 | I4-06 | Catalog, design binding, inspector tự sinh, `title` tiếng Nhật, `paramsSchema` | spec #2 §6.3, §7.2 | §10 | Đồng bộ |
-| I4-07 | `presentation` **khai báo** của `fieldType` (dữ liệu, host vẽ); JS `Presentation` là P1 trong ranh giới cô lập (rev 2.11) | spec #2 rev 2.11 §6.2.1, §7.4, §17.2 | §9 | Đồng bộ (C1) |
+| I4-07 | `presentation` **khai báo** của `fieldType` (dữ liệu, host vẽ); JS `Presentation` là P1 trong ranh giới cô lập; ba tầng parity (ADR-074) | spec #2 rev 2.12 §6.2.1, §6.2.2, §7.4, §17.2 | §9, §9.1, §10 | Đồng bộ (ADR-074) |
 | I4-08 | Admin capability set; kiểm `compat` theo facet có mặt | spec #2 §6.2, §10.1 (rev 2.6–2.8) | §8.3, §14.4 | Đồng bộ |
 | I4-09 | Node `PREVIEW_ONLY_UNCONFIGURED_PATH` | spec #1 rev 3.4 §8.1; spec #3 rev 2.2 | §14.5 | Đồng bộ |
 | I4-10 | `draftVersion` là metadata envelope | spec #1 rev 3.4 §7.1 | §15 | Đồng bộ |
 | I4-11 | Preview ≠ release; engine giống runtime | spec #3 §5.1; spec #1 §15; BUILD-08 | §14 | Đồng bộ |
 | I4-15 | Mã diagnostic mới (§13.2) | spec #3 rev 2.3 §18.1a | §13.2 | Đồng bộ |
-| I4-16 | Preview cô lập: Admin build / Preview build (INV-A1/A2), entry `presentation`, binding `presentation` | spec #2 rev 2.8 §6.2.1, §6.5, §7.4, §10.1, §11.1, L1b, L3, §17.2; spec #3 rev 2.3 §5.1 | §9 (D7), §14.4, §14.7 | Đồng bộ |
+| I4-16 | Preview cô lập: Admin build / Preview build (INV-A1/A2); *(rev 2.6)* P0 không có entry/binding `presentation` | spec #2 rev 2.12 §6.2.2, §6.5, §10.1, §11.1, L1b; spec #3 rev 2.7 §10.1 | §9 (D7), §14.4, §14.7 | Đồng bộ (ADR-074) |
 | I4-17 | Preview session API (`partial`/`simulation`/`review`), Preview API, header `X-Preview-Session`, origin/site preview, CSP/CORS/CORP/cookie/CSRF/`Sec-Fetch-Site` của hai origin, build và deploy Admin build / Preview build, xác thực OIDC + BFF | spec #5 rev 2 §7, §7.6 | §14.7 | Đồng bộ |
 | I4-18 | Freshness của trạng thái bảo mật/hỗ trợ | spec #5 rev 2 §7.2, §9.3 (ADR-057) | §13.5 | Đồng bộ |
 | I4-12 | Ngôn ngữ Admin | spec #1 OD-11 (đóng cho P0, ADR-048) | §3 | Đồng bộ |
@@ -885,6 +905,8 @@ Loại: **A** automated · **M** manual · **U** usability (người không ph�
 | ID | Vấn đề | Phương án | Quyết định | Hạn |
 |---|---|---|---|---|
 | **OD4-07** ✅ | Code plugin trong origin Admin | — | **Đã quyết (ADR-061):** P0 chỉ inspector tự sinh + control typed; không chạy code custom Inspector trong origin Admin; sandbox P1 | — |
+
+**Đã quyết (phản hồi C1, 2026-10-25):** SR-04 → ADR-074 (presentation khai báo do host sở hữu; không mở lại custom executable Inspector ở P0).
 
 **Chuyển sang spec #5:** I4-13, I4-17 (API, persistence, ReviewRequest, stale data, preflight/simulation endpoint, support matrix, quyền, CSRF/CSP, Admin build manifest). **Chuyển sang spec #6:** I4-14. **Còn mở từ spec khác:** spec #1 OD-06, OD-13; VG-01..12. (OD2-08/09 đã đóng: ADR-057/058.)
 

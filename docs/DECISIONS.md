@@ -90,6 +90,8 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-071 | SR-05: preview session là bearer capability hẹp | **CONDITIONALLY ACCEPTED RISK** (chỉ synthetic P0) | User (C1 approval) | 2026-10-24 |
 | ADR-072 | Phạm vi P0: M4 (suspend submission) thật, runtime override API hoạt động ở local, M3 `block-operation` theo FBK với contract tối thiểu | **APPROVED** | User (C1 approval) | 2026-10-24 |
 | ADR-073 | VG-07 Safari thật: bắt buộc trước rollout cho khách thật, **không** phải điều kiện G1; P0 dùng Playwright WebKit | **APPROVED** | User (C1 approval) | 2026-10-24 |
+| ADR-074 | SR-04: **Host-owned Declarative Presentation** cho Admin P0 — không import/thực thi JavaScript plugin trong origin Admin; primitive trong allowlist của Platform; Edit Canvas / Interactive Preview / Published Form tách bạch; không custom executable Inspector ở P0 | **APPROVED AS P0 DESIGN DIRECTION** (thay điều kiện tạm của ADR-070) | User (C1 review response) | 2026-10-25 |
+| ADR-075 | Phản hồi review C1: V5-01 cần independent design review theo 12 điểm + linearization; independent C1 closure review (Batch A/B/C, cùng rubric); tiêu chí trình G1 Approval Package | **APPROVED** (governance; không approve G1) | User (C1 review response) | 2026-10-25 |
 
 ---
 
@@ -1197,6 +1199,8 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 
 ## ADR-070 — SR-04: presentation trong origin Admin
 
+> *(2026-10-25)* Điều kiện tạm của ADR này được thay bằng **ADR-074** (Host-owned Declarative Presentation). Nội dung dưới giữ làm lịch sử.
+
 - **Quyết định (user): NOT YET ACCEPTED; VERIFICATION REQUIRED.** Presentation là JavaScript thực thi trong origin Admin đã xác thực; contract "thuần" không tạo ranh giới bảo mật. Giữ tạm thiết kế P0 với điều kiện: chỉ code plugin first-party/trusted được Platform duyệt; không code tùy ý hay URL runtime từ cấu hình Admin; presentation không import Component hay code server/design ngoài allowlist; static import graph guard; negative fixture side effect lúc import và mount; kiểm dependency bắc cầu; CSP/network phù hợp; plugin không nhận credential hay capability đặc quyền qua props/context. Code chạy cùng origin → không được tuyên bố sandbox isolation. Không chứng minh được → giữ MAJOR và đề xuất **host-owned declarative presentation** hoặc ranh giới cô lập thật. Không chuyển thành accepted risk chỉ vì code được gọi là trusted.
 - **Người duyệt:** User. **Ngày:** 2026-10-24.
 
@@ -1218,3 +1222,30 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 
 - **Quyết định (user): APPROVED.** Test Safari thật **bắt buộc trước rollout cho khách thật**, **không** phải điều kiện G1. P0 kiểm chứng bằng Playwright WebKit. Không có môi trường test → giữ NOT VERIFIED và chặn rollout, hoặc cần exception approval riêng. Bỏ cách ghi "trước G1 hoặc khi có thiết bị".
 - **Người duyệt:** User. **Ngày:** 2026-10-24.
+
+## ADR-074 — SR-04: Host-owned Declarative Presentation (Admin P0)
+
+- **Bối cảnh:** ADR-070 không chấp nhận JavaScript plugin chạy trong origin Admin đã xác thực chỉ vì được gọi là "trusted"; C1 (`2f514a1`) đề xuất presentation khai báo do host sở hữu (Cross-Subsystem Review §10.2a).
+- **Quyết định (user): APPROVED AS P0 DESIGN DIRECTION.** G1 vẫn NOT APPROVED.
+  - Admin chỉ thực thi renderer/component do **Platform** sở hữu. Plugin chỉ cung cấp metadata/schema/data khai báo đã được validate.
+  - Không import hay thực thi JavaScript do plugin sở hữu trong origin Admin. Không JSX, JavaScript, HTML, CSS tùy ý, không URL module động, không event handler.
+  - Rendering primitive phải nằm trong **allowlist của Platform**. Design metadata không cấp quyền gọi Admin API đặc quyền nào.
+  - Bắt buộc có negative fixture cho: metadata không an toàn, import bắc cầu, tham chiếu presentation có thể thực thi.
+  - Inspector tự sinh của P0 tiếp tục dựa trên schema + control typed (ADR-061). **Không mở lại** tùy chọn custom executable Inspector ở P0.
+  - Plugin cần UI đặc thù mà primitive của host không hỗ trợ → Builder phải **nói rõ giới hạn** và đưa người dùng sang Interactive Preview cô lập để kiểm tra. Không được âm thầm vẽ một UI khác rồi tuyên bố parity pixel-perfect.
+  - Ba tầng tách bạch:
+    - **Edit Canvas:** host-owned declarative rendering; cần **semantic/configuration parity** phù hợp, không bắt buộc pixel-identical với runtime khách.
+    - **Interactive Preview:** runtime khách cô lập, dùng browser `Component` đã approve; phải chứng minh **presentation/behavior parity** theo contract có version.
+    - **Published Form:** runtime khách thật theo release bất biến.
+- **Đồng bộ có trọng tâm:** spec #2 (facet, contract metadata), spec #3 (cô lập Admin build, module graph, canary), spec #4 (Edit Canvas, Inspector, Preview, parity renderer), spec #6 nếu Motion Preview bị ảnh hưởng.
+- **Đánh đổi:** Canvas có thể nghèo hơn UI thật của plugin; đổi lại không có code plugin nào trong origin có credential Admin.
+- **Người duyệt:** User. **Ngày:** 2026-10-25.
+
+## ADR-075 — Phản hồi review C1: V5-01, independent closure review, tiêu chí trình G1
+
+- **Quyết định (user): APPROVED** (governance). Không approve G1.
+- **V5-01:** đồng ý hướng materialized `CAPSTATUS` nhưng **chưa chấp nhận** kết luận bảo đảm an ninh cho tới khi có independent review kiểm đúng 12 điểm: (1) ranh giới identity/version plugin và key FBK; (2) policy hiệu lực của `CAPSTATUS` cho từng loại operation; (3) khởi tạo gate lúc ingestion; (4) interleaving giữa tạo gate và revoke; (5) bảo toàn blocker M3; (6) thiếu gate → fail closed; (7) revoke/resume đồng thời; (8) admission trong transaction submit; (9) một plugin có nhiều server capability/form/release; (10) giới hạn 100 action của DynamoDB transaction; (11) không ConditionCheck + Update cùng item; (12) không có quyết định phụ thuộc `Query` trên đường admission. Cần ví dụ transaction và linearization point mong đợi. Nếu một revocation không cập nhật nguyên tử được mọi gate liên quan → phải chứng minh transaction submit vẫn kiểm policy authoritative để không có revocation gap. Không tự đánh dấu V5-01 VERIFIED; CT-26 vẫn là post-G1 implementation verification gate.
+- **Independent C1 closure review:** trạng thái **INDEPENDENT_REVIEW_PENDING** cho tới khi reviewer trả kết quả; không ghi PASS/READY_FOR_G1; không suy ra PASS khi reviewer chưa phản hồi. Có thể chia Batch A (CSR-01..06, Security/Gates), Batch B (CSR-07..12, Integration/Version/Build), Batch C (CSR-13..17, Lifecycle/Recovery), cùng một severity rubric và xét tương tác giữa các batch. Mỗi finding: original issue, section đổi, fix thực tế, verification của reviewer, rủi ro còn lại, verdict RESOLVED / UNRESOLVED / ACCEPTED_RISK / VERIFICATION_PENDING.
+- **Tiêu chí trình G1 Approval Package:** cả 17 MAJOR có disposition được independent reviewer xác nhận; không còn BLOCKER/MAJOR unresolved; SR-04 đồng bộ nhất quán; V5-01 có design review rõ ràng (CT-26 pending nếu chưa implement); accepted risk có điều kiện enforcement và verification gate; trace end-to-end Sports/PC không thiếu producer, consumer hay authority; test implementation còn pending ghi trung thực, không PASS. MAJOR mới → báo đúng severity, sửa có trọng tâm. Claude không tự approve G1.
+- **Governance:** cho phép sửa tài liệu có trọng tâm và local commit theo hook/approval hiện tại. Không production code, không push, không ghi AWS, không merge spike code. Không mở rộng brainstorming hay thêm feature.
+- **Người duyệt:** User. **Ngày:** 2026-10-25.
