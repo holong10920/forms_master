@@ -1,6 +1,7 @@
 # Spec #1: Form Definition Schema & Workflow DSL (Architecture Proposal)
 
-> **Trạng thái: PROPOSAL, revision 3** (2026-10-24).
+> **Trạng thái: PROPOSAL, revision 3.1** (2026-10-24).
+> - Rev 3.1: chỉ **đồng bộ contract plugin với spec #2 rev 2** (theo yêu cầu của spec #2 review #1). Không đổi ngữ nghĩa DSL ngoài các mục liệt kê ở spec #2 §19 (Cross-Spec Interface Matrix). Chưa có review mới của user cho spec #1.
 > - Review #1: CHANGES / VERIFICATION REQUIRED.
 > - Review #2: CONDITIONALLY ACCEPTED FOR DESIGN CONTINUATION. User cho phép brainstorm spec #2, nhưng spec #1 **chưa được duyệt hoàn toàn**.
 > - **G1 NOT APPROVED.** G9 và G10 đang BLOCKED.
@@ -107,7 +108,7 @@ Hiện nay, mỗi lần đổi field hoặc flow đều phải nhờ developer s
 ```mermaid
 flowchart LR
   subgraph DEV["Developer (code, source CI)"]
-    REG["Capability Registry<br/>fieldType · validator · lookup<br/>motionPreset · derivedFn · template<br/>(id@semver, manifest + FE/BE modules)"]
+    REG["Capability Registry (spec #2)<br/>P0: fieldType · validator · dataSource<br/>serverValidator · postCommitEffect<br/>(pluginId@version#capabilityId, release store)"]
     ENG["form-engine (TS, pure)<br/>activity · rules · derived<br/>validation · navigation"]
     ANA["form-analyzer (TS)<br/>static checks"]
     PYV["backend evaluator (Python)<br/>evaluates Normalized IR"]
@@ -254,10 +255,11 @@ stateDiagram-v2
 | `locale` | `{ default: "ja", supported: ["ja"] }` |
 | `themeRef` | tham chiếu theme đã pin. Theme thuộc spec #4/#6. |
 | `motion` | cấu hình preset. Thuộc spec #6, spec #1 chỉ giữ chỗ. |
-| `dependencies` | `blocks` và `capabilities`, pin chính xác (`name → id@version`). Không có `latest` hay wildcard. |
+| `dependencies` | `blocks` (`alias → id@revision`) và `capabilities` (`alias → { plugin, version, capability, kind }`, spec #2 §5.2, §6.6), pin chính xác. Không có `latest` hay wildcard. Một version mỗi `pluginId` trong một form release (ADR-031). |
+| `effects` | binding tới post-commit effect đã được platform approve: `{ id, use: alias, on: "submission.committed", inputs }` (spec #2 §15.3, ADR-034). Không có trigger khác ở P0. |
 | `blockInstances` | `{ id, alias, block: alias trong dependencies, inputs }`. *[Claude]* `inputs` ở P0 **chỉ là hằng số**. Compiler gập chúng lại khi expand, nên chúng không trở thành node trong dependency graph. Bind input vào field hoặc điều kiện là việc của P1, cần ADR. |
 | `exports` (chỉ có ở block) | public contract của block (§7.8, OD-04) |
-| `fields` | field local của form |
+| `fields` | field local của form. Field plugin: `type: "plugin:<alias>"`, `config` theo `configSchema`, `inputs` map port (spec #2 §6.6). Validator: `validators: [{ use: alias, params? }]`, `params` mặc định `{}`. |
 | `sections` | `{ id, title, visibleWhen?, content }`, là container hiển thị bên trong step. Xem §7.5. |
 | `conditions` | **named conditions**, dùng lại được trong rule editor |
 | `steps` | gồm `kind`: `form` / `review` / `complete`, `content`, và `transitions` có thứ tự |
@@ -287,13 +289,12 @@ stateDiagram-v2
     { "id": "fld_email", "key": "email", "type": "email", "label": { "ja": "メールアドレス" },
       "required": true, "classification": "personal" },
     { "id": "fld_prefecture", "key": "prefecture", "type": "choice.select",
-      "label": { "ja": "都道府県" }, "optionsFrom": "jpPrefectures", "classification": "public" }
+      "label": { "ja": "都道府県" }, "optionsFrom": "core:jpPrefectures", "classification": "public" }
   ],
   "dependencies": {
     "capabilities": {
-      "katakana": "@platform/validator-katakana@1.0.0",
-      "jpPhone": "@platform/validator-jp-phone@1.0.0",
-      "jpPrefectures": "@platform/options-jp-prefectures@1.0.0"
+      "katakana": { "plugin": "@platform/validator-katakana", "version": "1.0.0", "capability": "katakana", "kind": "validator" },
+      "jpPhone": { "plugin": "@platform/validator-jp-phone", "version": "1.0.0", "capability": "jpPhone", "kind": "validator" }
     }
   },
   "changelog": [
@@ -320,10 +321,14 @@ stateDiagram-v2
   "dependencies": {
     "blocks": { "customerInfo": "blk_customer_info@r2" },
     "capabilities": {
-      "storeSelector": "@platform/store-selector@1.0.0",
-      "scaleSpring": "@platform/motion-scale-spring@1.0.0"
+      "storeSel": { "plugin": "@platform/store-selector", "version": "1.0.0", "capability": "storeSelector", "kind": "fieldType" },
+      "logSubmission": { "plugin": "@platform/effect-mock-log", "version": "1.0.0", "capability": "recordSubmission", "kind": "postCommitEffect" }
     }
   },
+  "effects": [
+    { "id": "eff_log", "use": "logSubmission", "on": "submission.committed",
+      "inputs": { "formRef": { "system": "formRef" }, "purchaseMethod": { "ref": "$local:fld_method" } } }
+  ],
   "blockInstances": [
     { "id": "inst_customer", "alias": "customer", "block": "customerInfo",
       "inputs": { "requireKana": true } }
@@ -350,8 +355,8 @@ stateDiagram-v2
       "required": true, "classification": "public",
       "options": [{ "value": "store", "label": { "ja": "店頭買取" } },
                   { "value": "takuhai", "label": { "ja": "宅配買取" } }] },
-    { "id": "fld_store", "key": "store", "type": "plugin:storeSelector", "label": { "ja": "店舗選択" },
-      "required": true, "classification": "public", "config": { "dataset": "fictional-stores-v1" } },
+    { "id": "fld_store", "key": "store", "type": "plugin:storeSel", "label": { "ja": "店舗選択" },
+      "required": true, "classification": "public", "config": { "filterByPrefecture": false } },
     { "id": "fld_kit", "key": "packingKit", "type": "choice.radio", "label": { "ja": "梱包キット" },
       "required": true, "classification": "public",
       "options": [{ "value": "yes", "label": { "ja": "必要" } }, { "value": "no", "label": { "ja": "不要" } }] },
@@ -393,6 +398,7 @@ stateDiagram-v2
 Ý nghĩa của các thành phần trong ví dụ:
 - `review` là step 確認. Bấm 次へ ở đây chính là chạy **submit pipeline do engine sở hữu**.
 - Khi submit thành công, engine đi theo transition sang step `complete` của đúng nhánh, nên mỗi nhánh có màn hoàn tất riêng.
+- Rev 3.1: `storeSel` theo cú pháp của spec #2 §6.6; `config` theo `configSchema` của `@platform/store-selector@1.0.0` (spec #2 §6.4); dữ liệu cửa hàng hư cấu do `dataSource` `storeList` cung cấp, không còn `dataset` trong config. Motion preset ở P0 do core cung cấp (spec #6), nên không nằm trong `capabilities` (ADR-033). `jpPrefectures` (§7.2) là option set built-in của core (`core:jpPrefectures`), không phải capability.
 - Field `fld_defects` có option `exclusive: true` để biểu diễn ràng buộc 「なし」 loại trừ các lựa chọn khác. Đây là một thuộc tính khai báo, không phải biểu thức.
 
 ### 7.4. Rule AST (ARCH-03, PROPOSED)
@@ -674,7 +680,7 @@ Mỗi nhóm có **golden fixture** (đầu vào và kết quả kỳ vọng) cù
 | Loại | Nguồn | Tham chiếu được từ rule? | Kiểu do ai khai báo |
 |---|---|---|---|
 | Field export | field của shared block | được, dạng `inst:@exportId` | khai trong block |
-| Plugin output | capability instance, ví dụ `store-selector` sinh ra `region` | được, dạng `inst:fld_store/outputId`, nếu manifest khai `outputs` | manifest (spec #2) |
+| Plugin output | capability instance, ví dụ `store-selector` sinh ra `region` | **P1** (spec #2 §19 I-11): projection khai báo từ value của `fieldType`, dạng `inst:fld_store/outputId`. P0 không có. | manifest (spec #2) |
 | Integration/lookup output | phản hồi của connector | **không trực tiếp**. Chỉ được map vào field đích, rồi rule tham chiếu field đó. | `outputSchema` (spec #2) |
 
 - Rule không bao giờ đọc phản hồi API thô.
@@ -943,7 +949,7 @@ Các dòng C1–C10 được thêm vào T3 dưới dạng sự kiện và guard,
 |---|---|---|
 | `calculated` (D-01) | formula builder trực quan | Catalog hữu hạn (§7.4). **Không có phép chia ở P0** (OD-10). Output có kiểu, `readOnly`. |
 | `prefill/default` (D-02) | chọn nguồn + policy | Nguồn: giá trị tĩnh, field khác, hoặc query param trong allowlist (không bao giờ là PII). `editable`, `overwrite: ifEmpty \| untilEdited \| always` |
-| `external lookup` (D-03) | chọn capability + map input/output | Chỉ qua capability đã đăng ký, không có URL trong definition (ARCH-10). Async có fingerprint và latest-wins. Lỗi thì cho nhập tay. **Không ghi đè dữ liệu khách đã sửa.** |
+| `external lookup` (D-03) | chọn capability + map input/output | Chỉ qua `dataSource` đã đăng ký, không có URL trong definition (ARCH-10). Khai trên field đích: `derived: { kind: "lookup", source: alias, inputs, select: <JSON Pointer vào outputSchema>, overwrite: ifEmpty \| untilEdited }`. Async có fingerprint và latest-wins. Lỗi thì cho nhập tay. **Không ghi đè dữ liệu khách đã sửa.** Trạng thái field đích (`empty` / `autofilled(fp)` / `userEdited`) và cách xử lý khi input đổi: spec #2 §18.3. Engine áp kết quả bằng typed command `ApplyDerivedValue`; plugin không ghi state. |
 
 - **Submit (D-06):**
   - Mỗi giá trị dẫn xuất khai báo `submit: include | displayOnly`.
@@ -967,7 +973,8 @@ Các dòng C1–C10 được thêm vào T3 dưới dạng sự kiện và guard,
 | Business Editor | cấu hình qua UI, không code |
 
 - **Built-in validators** đi theo `schemaVersion` của engine: `required`, `minLength`, `maxLength`, `min`, `max`, `minItems`, `maxItems`, `exclusiveOption`.
-- **Named validators** đến từ registry, có pin version (T-01). Admin không bao giờ gõ regex.
+- **Named validators** đến từ registry, có pin version (T-01). Admin không bao giờ gõ regex. Cú pháp `{ use, params? }` và `paramsSchema`: spec #2 §6.6.
+- **Server verification của field plugin** (spec #2 §13.2): mọi giá trị client gửi lên đều untrusted. `fieldType` khai `verification` (`validateAsInput` / `recompute` / `authoritativeCheck`); `authoritativeCheck` chạy một `serverValidator` theo cơ chế `deferToSubmit` dưới đây. Ví dụ `storeIdValid` của `store-selector` (spec #2 §15.2).
 
 **Thời điểm hiển thị lỗi** (đã xác nhận, ADR-015):
 - Lỗi chỉ hiện khi field `active` ∧ `invalid` ∧ (`touched` ∨ `submitAttempted`). Sau khi đã hiện thì cập nhật live mỗi lần thay đổi.
@@ -1048,6 +1055,21 @@ Khái niệm `failOpen` ở đề xuất trước bị loại bỏ, thay bằng 
 - Khi spec #2, #3, #5 hoặc #6 được duyệt, mục tương ứng ở spec #1 chỉ còn là **tham chiếu**.
 - Nếu phát hiện mâu thuẫn, spec chuyên trách thắng. Spec #1 phải được sửa trong **cùng thay đổi**, và mâu thuẫn được ghi vào cross-subsystem review (§25).
 
+**Đồng bộ với spec #2 rev 2 (rev 3.1).** Spec #2 §19 là Cross-Spec Interface Matrix giữa hai spec. Khi spec #2 được duyệt, bảng PL-01..PL-10 dưới đây chỉ còn là lịch sử; nguồn sự thật:
+
+| PL | Thay bằng (spec #2 rev 2) |
+|---|---|
+| PL-01 registry, id, version, kind | §5 (identity, key), §7.1 (ma trận kind P0/P1/P2: `lookup` → `dataSource`; thêm `serverValidator`, `postCommitEffect`; `motionPreset`, `derivedFn`, `template`, `canonicalizer`, `layout` chỉ có contract ở P0), §8 (release pipeline) |
+| PL-02 schema | §6.2.1, §6.3 (platform profile) |
+| PL-03 quyền | §13.1 (classification theo port), §13.4 (permission) |
+| PL-04 hook | §7.3, §7.4 |
+| PL-05 lỗi, timeout, cancel | §12 |
+| PL-06 dependency tracking | §6.6 (`inputs`) |
+| PL-07 backend authoritative | §7.1 (facet theo family), §13.2 (verification policy) |
+| PL-08 pinning | §9 (một version mỗi plugin, Capability Lock) |
+| PL-09 thiếu/không tương thích | §9.2, §10, §16 |
+| PL-10 privacy, side effect | §13 |
+
 **Contract chuyển sang spec #2 làm nguồn sự thật** (revision 3):
 - **Danh sách loại capability.** Spec #1 dùng các tên tạm `fieldType`, `validator`, `lookup`, `motionPreset`, `derivedFn`, `template`. Review #2 nêu các loại field, validator, action, data source, layout, integration. **Spec #2 sẽ chốt danh sách cuối cùng.** Các loại mới (action, layout) vẫn phải nằm trong ranh giới ADR-016: không loại nào được override navigation hoặc submit.
 - Định dạng manifest, registry API, `configSchema` cho Inspector, interface renderer và interface validation phía server.
@@ -1093,7 +1115,7 @@ Khái niệm `failOpen` ở đề xuất trước bị loại bỏ, thay bằng 
 | `schemaVersion` (DSL) | semver | Minor bổ sung tùy chọn. Major đòi migration của developer. Engine khai báo dải schema mà nó đọc được. |
 | Form revision | `revN` tăng dần | Bất biến. Submit gắn với revision cụ thể. |
 | Block revision | `rN` | Bất biến. Đi kèm changelog theo `fieldDefId`. |
-| Capability | semver | Major ↔ contract, cộng với `engineApi` range |
+| Capability | semver | Major ↔ contract, cộng với range theo host (`browserHostApi`, `serverHostApi`, `designHostApi`, `formSchema`) và Capability Lock (spec #2 §9, §10) |
 | Engine | semver | Ghi vào manifest. Revision cũ được build lại bằng engine nào thuộc spec #3. |
 | Data Contract | sinh ra theo revision | Diff giữa các revision, phân loại theo R-02 |
 
@@ -1120,7 +1142,7 @@ flowchart TD
   S0["0 · Freeze snapshot<br/>(draftVersion at publish request)"] --> S1
   S1["1 · Structural validate<br/>JSON Schema for schemaVersion"] --> S2
   S2["2 · Version gate<br/>supported schemaVersion? if not → migrate in Admin first"] --> S3
-  S3["3 · Resolve<br/>exact pins: blocks + capabilities; status vulnerable/deprecated"] --> S4
+  S3["3 · Resolve<br/>exact pins: blocks + capabilities (spec #2 §9.2: một version/plugin, Capability Lock); trạng thái hiệu lực"] --> S4
   S4["4 · Expand + lower<br/>inline block instances → qualified identities;<br/>skipWhen → edges; named conditions"] --> S5
   S5["5 · Analyze<br/>identity/collision · references · types · permissions<br/>taint · dependency graph/cycles · step graph (DAG, default, terminal, provable unreachable)<br/>data-contract diff + key ledger"] --> S6
   S6{"blocking errors?"} -->|yes| E["Diagnostics → Admin<br/>(published version unaffected, BUILD-10)"]
@@ -1164,7 +1186,7 @@ flowchart TD
 | `tel`, `email`, `postal`, `katakana` (tên), địa chỉ | `personal` | PII |
 | file upload (P1) | `personal` | |
 | OTP, token | `secret` | |
-| Field của plugin | `minClassification` trong manifest | Khai bởi developer (spec #2) |
+| Field của plugin | `dataPolicy.valueFloor` trong manifest; input/output theo port (`accepts`, `outputFloor`) | Khai bởi developer (spec #2 §13.1) |
 | `calculated`, prefill, lookup | **taint** = mức cao nhất của các input, cộng với mức tối thiểu của field đích | D-07 |
 
 - **Field mới mặc định** nhận mức tối thiểu của type đó. Không có field "chưa phân loại".
@@ -1283,7 +1305,7 @@ Cột "Thiết kế ở spec #1" là phần contract được chốt ngay bây g
 | Rule AST, named conditions, catalog toán tử | ✔ | ✔ | Date ops và chia: P1 |
 | Hàm activity, history, deep link/reload | ✔ | ✔ | — |
 | `calculated` / prefill | ✔ | ✔ (tập con mà demo cần) | — |
-| External lookup | ✔ contract | mock nếu demo cần (theo spec #2) | API thật: ngoài PoC |
+| External lookup | ✔ contract | `storeList` (dataSource, dữ liệu hư cấu) cho `store-selector`; lookup → field (postal-code) chỉ contract | postal-code: P1; API thật: ngoài PoC |
 | Validation timing, IME, a11y | ✔ | ✔ | — |
 | Async validation | ✔ contract | không cần cho demo | — |
 | Shared block có pin, nhiều instance | ✔ | ✔ (ít nhất `customer-info` dùng chung giữa Sports và PC) | Bulk adoption: P1 |
@@ -1291,7 +1313,7 @@ Cột "Thiết kế ở spec #1" là phần contract được chốt ngay bây g
 | Template | ✔ metadata | clone từ revision | Template Management: P1 |
 | Nhóm lặp | ✔ data model + `$item` + aggregate | engine + fixture | UI: P1 (T-05) |
 | Draft của khách (không PII) | ✔ | ✔ | Draft phía server, nhiều thiết bị: P1 |
-| Plugin contract | ✔ PL-01..10 | `store-selector` + validator của demo | Marketplace: P2 |
+| Plugin contract | ✔ → spec #2 rev 2 | 5 kind P0 (spec #2 §7.1): `store-selector`, validator của demo, mock effect | kind còn lại theo spec #2 §7.1; Marketplace: P2 |
 | Evaluator BE + conformance fixtures | ✔ | ✔ | — |
 | Vòng lặp trong graph, block lồng, đa locale (UI), A/B | ✗ | ✗ | P1/P2 qua ADR |
 
@@ -1405,7 +1427,7 @@ Kết quả của review là một tài liệu riêng gồm danh sách conflict,
 | Derived state (§10) | Sẵn sàng để user duyệt (ADR-013 PROPOSED) | OD-10 |
 | Validation contract (§11) | Ba loại validation, `deferToSubmit` (ADR-022) | — |
 | Classification (§16) | Hướng đi đã duyệt (ADR-021). Bảng mức tối thiểu PROPOSED. | — |
-| Plugin contract (§12) | Mức cao. **Nguồn sự thật chuyển sang spec #2.** | spec #2 |
+| Plugin contract (§12) | Mức cao. **Nguồn sự thật chuyển sang spec #2.** Rev 3.1 đã đồng bộ theo spec #2 rev 2 §19 (bảng PL → spec #2, ví dụ §7.2/§7.3, §7.1, §7.8, §10 D-03, §11, §13, §16, §20). | spec #2 review |
 | Versioning và compiler (§13, §14) | Mức khái niệm. Chi tiết ở spec #3. | spec #3 |
 | Parity FE/BE (ADR-017) | Hướng đi đã duyệt. Ma trận kịch bản §7.6.10, AC-29..38. | Test matrix đầy đủ: viết trong P01, trước G1 |
 

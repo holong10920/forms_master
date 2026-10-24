@@ -1045,4 +1045,308 @@ Mọi thứ phụ thuộc vào câu trả lời lúc runtime **không** phải l
 
 ### OPEN
 
-- Q2-1: Ai sẽ thực sự viết plugin? Chỉ team platform trong cùng repo, hay cả các team phụ trách từng site cũng tự viết và phát hành plugin riêng? (hỏi ở phiên 3)
+- Q2-1: ai viết plugin. → đã trả lời ở Spec #2 Answer #1.
+
+## Session 3: Spec #2 Answer #1 (2026-10-24), ownership và governance của plugin → ADR-023
+
+### CONFIRMED (user)
+
+- **Mô hình: Centralized Governance + Distributed Contribution.**
+  - Platform Maintainers quản lý:
+    - Plugin SDK và typed contracts
+    - Capability Registry
+    - lifecycle và versioning
+    - security policies
+    - compatibility requirements
+    - conformance tests
+    - release governance
+  - Developer của từng site được viết plugin mới, cải tiến plugin có sẵn, hoặc đề xuất capability qua Pull Request.
+  - Không được bypass review. Không phát hành plugin chưa kiểm chứng.
+  - Platform Maintainer approve contract và release.
+- **P0:**
+  - Plugin nằm trong monorepo, viết bằng TypeScript hoặc ngôn ngữ phù hợp với execution target đã duyệt.
+  - Có public interface và dependency boundary.
+  - Mỗi plugin có manifest và configuration schema.
+  - Registry chỉ nhận trusted plugin đã đăng ký trong source/build.
+  - Không tải hay thực thi remote JavaScript. Business Editor không upload code.
+  - Release qua code review và CI.
+  - Plugin dùng chung không import code ứng dụng riêng của site.
+- **Tương lai (không implement ở P0):**
+  - code owner theo plugin
+  - site team tự phát triển capability
+  - tách thành package có version độc lập nếu cần
+  - SDK có compatibility contract ổn định
+  - CI chạy conformance trước khi registry chấp nhận
+  - breaking change cần migration plan
+  - chặn publish với version deprecated hoặc vulnerable
+  - Không có dynamic package registry hay marketplace ở P0.
+- **Versioning:**
+  - `pluginId` ổn định, release version bất biến, dùng semver để khai báo compatibility.
+  - Form đã publish pin chính xác version.
+  - Release manifest ghi version, source/build identity và artifact hash.
+  - Không `latest`, không wildcard, không floating dependency. Không tự nâng plugin của form đang chạy.
+  - Nâng plugin phải có impact analysis và regression test.
+  - Compiler chỉ đưa vào những gì form cần.
+  - **Semver không phải bằng chứng tương thích.** Tương thích phải được kiểm chứng.
+- **Trust model:**
+  - **Trusted Developer Code** qua review và CI, được làm đúng các tác vụ của execution target đã duyệt, có permission metadata và giới hạn side effect.
+  - **Untrusted Admin Configuration** chỉ là dữ liệu:
+    - không chứa JavaScript thực thi
+    - không tạo network destination tùy ý
+    - không ghi đè security policy
+    - không nạp code từ URL
+  - Plugin backend tuân thủ authorization, input validation và classification phía server. Config không được chọn endpoint nội bộ tùy ý (SSRF).
+- **Capability cần hỗ trợ:**
+  - field renderer
+  - validator
+  - data source / lookup
+  - workflow action
+  - layout
+  - backend integration
+  - derived function
+  - Motion preset (nếu thật sự cần ở registry chung)
+  - Không nhất thiết tất cả cùng một loại plugin. Cần phân tích chia thành **capability family** theo execution context.
+  - Frontend không cần backend secret. Backend integration không bị bundle vào browser. Compiler chỉ import code chạy được trên browser.
+  - Output có typed contract. Async có cancellation và stale policy.
+  - Registry không phải global service locator.
+- **Quality gates cho mỗi plugin:**
+  - manifest/schema validity
+  - typecheck
+  - unit test
+  - contract/conformance test
+  - compatibility test
+  - security/dependency scan
+  - kiểm tra ranh giới browser/server
+  - bundle isolation test
+  - regression test cho các form bị ảnh hưởng
+  - Plugin có side effect cần idempotency và failure semantics.
+- **Ranh giới:** Shared Block (Editor cấu hình, là Form Definition có version, không có code) ≠ Code Plugin (developer viết, release qua CI, có typed API và security contract). Không gộp thành cơ chế kế thừa.
+- **Thứ tự ưu tiên của spec #2:**
+  1. taxonomy
+  2. manifest
+  3. registry architecture
+  4. config schema
+  5. ranh giới browser/server
+  6. lifecycle và versioning
+  7. isolation trong compiler
+  8. conformance
+  - Trình bày phương án và trade-off trước khi chốt.
+
+### PROPOSAL (Claude): taxonomy và registry, phiên 3. Chờ review, NOT approved
+
+- **S2-P01 Capability family theo execution context:**
+  - `browser-ui`: field renderer, layout, motion preset
+  - `isomorphic-pure`: validator đồng bộ, derived function, canonicalizer; có bản TS và Python với fixture chung
+  - `server-io`: data source/lookup, validator authoritative async và submit-time, backend integration, workflow action
+  - `design-time`: inspector/config editor, template (dữ liệu), mock cho preview
+- **S2-P02 Đóng gói:** một plugin package có nhiều **facet** theo context, mỗi facet là một entrypoint riêng (`browser`, `server`, `design`). Compiler chỉ import facet `browser` của capability được dùng.
+- **S2-P03 Registry:**
+  - Là catalog tĩnh, sinh lúc build từ manifest trong monorepo. Admin và compiler đọc catalog này.
+  - Ở runtime, compiler sinh import tường minh, và engine nhận một capability map (dependency injection) chỉ gồm những gì form dùng.
+  - Không có `registry.get()` toàn cục.
+- **S2-P04 Workflow action:**
+  - Chỉ chạy phía server, ở các lifecycle point do engine khai báo (P0: chỉ sau khi bài nộp đã ghi).
+  - Idempotent, có outbox/retry.
+  - Không đụng navigation hay submit (ADR-016).
+
+### OPEN
+
+- Q2-2: việc sau khi submit. → đã trả lời ở Spec #2 Answer #2.
+
+## Session 3: Spec #2 Answer #2 (2026-10-24), taxonomy, đóng gói, registry, action → ADR-024, ADR-025
+
+### CONFIRMED (user)
+
+- **Taxonomy: APPROVED WITH ADJUSTMENTS.** Bốn family:
+  - `browser-ui`
+  - **`cross-runtime-pure`** (đổi tên từ `isomorphic-pure`, vì TS và Python có thể là hai implementation của cùng một semantic contract)
+  - `server-io`
+  - `design-time`
+  - Với `cross-runtime-pure`: shared semantic specification, conformance fixtures có version, differential tests, output tất định, không phụ thuộc timezone/locale/runtime default không kiểm soát.
+  - Lookup phía browser được gọi backend API đã duyệt qua connector/adapter có contract rõ. Browser không truy cập endpoint tùy ý, không có server secret.
+- **Đóng gói: chọn B**, một package có nhiều facet/entrypoint theo context (cấu trúc thư mục chỉ minh họa).
+  - entrypoint public tường minh
+  - facet browser không import facet server
+  - code design-time không có trong artifact của khách
+  - shared contract không import dependency có đặc quyền
+  - **Thực thi bằng static check, dependency graph và bundle test**, không dựa vào kiểm tra môi trường lúc runtime.
+  - Plugin không cần có đủ mọi facet.
+- **Registry: chọn R2**, catalog tĩnh sinh lúc build + import tường minh do compiler sinh.
+  - Admin dùng catalog để hiển thị capability được phép chọn. Compiler resolve đúng plugin, facet, version.
+  - Artifact chỉ chứa capability browser thật sự cần. Capability nặng được code-split. Capability server không có trong client bundle.
+  - Runtime nhận scoped capability map qua dependency injection.
+  - Không có global service locator hay marketplace remote JS ở P0.
+  - **Bằng chứng isolation thật phải có ở spec #3/P07.**
+- **Workflow action: ADJUSTED.** Không giới hạn mọi action chỉ chạy sau khi đã lưu bài nộp. Phân thành năm loại:
+  1. UI interaction: hành vi local trên browser
+  2. Query/lookup: chỉ đọc, qua integration đã duyệt
+  3. Authoritative validation: kiểm tra phía server
+  4. Business command: ghi có đặc quyền phía server
+  5. Post-commit effect: email, notification, đồng bộ ra ngoài
+  - Không trộn UI interaction và navigation với side effect nghiệp vụ có đặc quyền.
+  - Command có đặc quyền phải có permission tường minh, idempotency và error semantics.
+  - Post-commit effect bất đồng bộ cần durability, retry, failure tracking. Ưu tiên transactional outbox khi phù hợp.
+  - Không bắt UI action hay lookup đi qua outbox.
+- **Sau submit trong P0:** không tích hợp hệ thống công ty, không email thật, không dịch vụ bên thứ ba. PoC phải chứng minh:
+  - Sports và PC submit qua **cùng một submission contract**
+  - Python validate theo authoritative published revision
+  - bài nộp được lưu vào **durable local DB**
+  - idempotency được kiểm chứng
+  - có **submission ID/receipt** để hiển thị xác nhận
+  - có **ít nhất một mock post-submit event hoặc mock integration handler** để chứng minh extension point
+  - không gửi dữ liệu thật ra ngoài, không có side effect nghiệp vụ bên ngoài
+  - Nếu dùng outbox thì lưu bài nộp và outbox event **trong cùng một transaction**.
+  - Lỗi sau submit không làm mất bài nộp đã commit.
+  - UI phân biệt "bài nộp đã được nhận" với "xử lý phía sau đã xong".
+  - Không xây hạ tầng email hay hệ thống worker phân tán phức tạp.
+- **Bảo mật và versioning:**
+  - Plugin là code đã review, **không mặc nhiên an toàn**.
+  - Registry cần có: version chính xác, capability contract, execution boundary, permission metadata, config schema, thông tin compatibility, trạng thái deprecation/vulnerability, yêu cầu conformance.
+  - **Side effect phải được thực thi (enforce) ở backend**, không chỉ khai báo trong manifest.
+
+### PROPOSAL (Claude): manifest, phiên 3. Chờ review, NOT approved
+
+- S2-P05: release manifest **bất biến**. Trạng thái (`active` / `deprecated` / `vulnerable`) nằm trong một **registry status ledger** riêng, có thể thay đổi, do Platform Maintainer quản lý. Đổi trạng thái không làm thay đổi bản release.
+- S2-P06: một manifest liệt kê nhiều capability. Mỗi capability có `kind`, `family`, `facets`, schema theo kind, `permissions`, `minClassification`, `authority`, `dependsOn`. Kind thuộc family nào thì chỉ được có các facet hợp lệ cho family đó.
+- S2-P07: kind dự kiến:
+  - `browser-ui`: `fieldType`, `layout`, `motionPreset`, `uiInteraction`
+  - `cross-runtime-pure`: `validator`, `derivedFn`, `canonicalizer`
+  - `server-io`: `dataSource`, `serverValidator`, `command`, `postCommitEffect`
+  - `design-time`: `inspector`, `template`, `previewMock`
+
+### OPEN
+
+- Q2-3: Có trường hợp nào khách đang điền dở mà hệ thống đã phải ghi thật trước khi bấm gửi (ví dụ giữ chỗ một khung giờ đến cửa hàng) không? (hỏi ở phiên 3)
+  - → đã trả lời ở Spec #2 Answer #3.
+
+## Session 3: Spec #2 Answer #3 (2026-10-24), plugin manifest và thao tác trước submit → ADR-026, ADR-027, ADR-028
+
+### CONFIRMED (user)
+
+- **Plugin Manifest: APPROVED AS DESIGN DIRECTION WITH ADJUSTMENTS.** Chưa duyệt toàn bộ spec #2, chưa duyệt G1.
+  - Đồng ý: release manifest bất biến; status ledger độc lập; capability taxonomy theo execution boundary; đóng gói nhiều facet; registry tĩnh lúc build; resolve dependency tường minh; permission được enforce ở server.
+  - **Capability identity:** phải định danh duy nhất, không nhập nhằng giữa `pluginId`, `pluginVersion`, `capabilityId`, `capabilityKind`, `executionFacet`. Compiler và backend resolve **cùng một** capability identity.
+  - **Dependency resolution:**
+    - mọi dependency có stable identifier
+    - published release pin exact resolved versions
+    - phát hiện dependency thiếu hoặc không tương thích, phát hiện cycle
+    - không silent version fallback, không tự nâng dependency khi rebuild
+    - có dependency graph và lock/manifest phù hợp
+  - **Engine compatibility:**
+    - plugin manifest được phép khai `engineApi` range.
+    - Release Manifest phải ghi **chính xác** engine/runtime version đã dùng.
+    - Có compatibility check với implementation phía server.
+    - Form đã publish **không được** dùng server facet không tương thích chỉ vì backend mới được deploy.
+  - **JSON Schema:** sửa placeholder trong ví dụ manifest khi đưa vào contract chuẩn (ví dụ `{"type":"enum"}` không hợp lệ). Output phải có schema hợp lệ, type rõ ràng, có cơ chế validate.
+  - **Plugin data security:** `minClassification` chỉ là policy tối thiểu, không đại diện cho toàn bộ data flow. Phải phân tích:
+    - classification của input và output
+    - data propagation
+    - output trusted vs untrusted
+    - authorization theo tenant/site
+    - xác minh dữ liệu phía server (server-authoritative)
+    - **Output của plugin phía browser không tự động trở thành trusted data.**
+  - **Facet boundary:**
+    - browser facet không chứa server code/secret
+    - server facet không phụ thuộc browser runtime
+    - design facet không xuất hiện trong bundle của khách
+    - JSON của Admin không được chỉ định import path
+    - registry kiểm tra facet entrypoint và package exports
+    - Với server facet Python: phân tích packaging và deployment versioning, **không giả định** Node/TS và Python dùng chung package runtime.
+- **Business write trước submit (P0):** **không** yêu cầu business write trước khi khách bấm Submit trong demo Sports/PC.
+  - Trước submit chỉ có: UI interaction, cập nhật field có điều kiện, lookup chỉ đọc, validation, preview, khôi phục draft phía client theo privacy policy đã duyệt.
+  - Chọn cửa hàng chỉ là chọn, không giữ chỗ thật. Không tích hợp đặt lịch, email, thanh toán hay reservation thật.
+  - Đây là **giới hạn của PoC**, không phải khẳng định cho mọi form production. Flow cũ có pre-submit write phải được audit trước khi migration.
+- **Final submission (P0), sau khi khách bấm Submit:**
+  1. Backend nhận request kèm idempotency key.
+  2. Xác minh published form revision và compatibility.
+  3. Re-evaluate rule/validation authoritative.
+  4. Loại bỏ hoặc từ chối dữ liệu không hợp lệ theo submission contract.
+  5. Lưu submission vào durable local DB.
+  6. Nếu dùng outbox: submission và outbox event trong cùng transaction.
+  7. Trả receipt / submission ID.
+  8. Mock processing handler xử lý post-submit event.
+  - Yêu cầu: double-submit không tạo hai đơn; dùng lại idempotency key với payload khác phải bị phát hiện và xử lý theo contract rõ ràng; lỗi sau commit không làm mất submission; không email thật, không gọi hệ thống công ty, không dữ liệu khách thật.
+- **Tương lai: Provisional Command.** Architecture phải có extension point cho thao tác ghi trước final submit (upload file tạm, giữ slot hẹn, draft phía server, verification challenge, báo giá/giữ chỗ tạm). Những thao tác này **không** đồng nghĩa với final purchase submission.
+  - Phân biệt: **Query** (không đổi business state) · **Provisional Command** (tạo trạng thái tạm) · **Final Command** (business submission) · **Post-commit Effect** (sau khi transaction commit).
+  - Không implement Provisional Command Framework ở P0, nhưng **plugin contract không được giả định mọi server write chỉ xảy ra sau final submit**.
+- **Provisional Command contract (chỉ thiết kế, P1/P2):** resource ownership, idempotency, expiration/TTL, authorization, cancellation, retry, reconciliation, compensation khi đảo ngược được, dọn orphan resource, race condition, abuse/rate limiting.
+  - Không giả định mọi action đều compensate được (email/OTP đã gửi thì không thu hồi được; giữ chỗ tạm thì có thể hết hạn hoặc release).
+  - TTL cleanup không bảo đảm thời điểm hết hiệu lực chính xác. Business invariant quan trọng phải enforce tại nguồn authoritative.
+  - Không xây generic saga/compensation engine chỉ cho PoC.
+- **Plugin version governance:** manifest bất biến và status ledger tách riêng. Trạng thái: `active`, `deprecated`, `vulnerable`, `revoked`. Phân biệt:
+  - chặn version cho các lần publish sau
+  - chính sách cho các form đã publish đang dùng version đó
+  - emergency disable / rollback
+  - server compatibility và data migration
+  - Không silent-upgrade artifact đã publish.
+- **Yêu cầu tiếp theo:** ghi nguyên tắc vào ADR và notes; chi tiết chưa quyết giữ PROPOSED. Phân tích manifest schema, capability contract interface, registry generation, version/dependency resolution, server compatibility, async lifecycle và cancellation, security policy, conformance suite. **Chứng minh bằng thiết kế** rằng plugin có browser, server và design facet không khiến compiler bundle nhầm code giữa các môi trường. Không code, không tự duyệt G1, G9/G10 vẫn BLOCKED. Sau đó đưa **Spec #2 Design Proposal** để user review.
+
+### Đã thực hiện (Claude)
+
+- ADR-026 (manifest, identity, resolution, compatibility, data security, facet boundary), ADR-027 (Query / Provisional / Final / Post-commit; P0 không có business write trước submit), ADR-028 (status ledger và governance theo version). Cả ba ở mức nguyên tắc; chi tiết PROPOSED.
+- ADR-025 được làm rõ bởi ADR-027 (loại "business command" tách thành Provisional Command và Final Command). Không supersede.
+- Viết Spec #2 Design Proposal: `docs/superpowers/specs/2026-10-24-plugin-contracts-capability-registry-design.md`. Quyết định còn chờ user: OD2-01..OD2-07 (spec #2 §22).
+
+### OPEN
+
+- User review Spec #2 Design Proposal (rev 1) và các OD2-xx. → đã review ở Spec #2 Review #1.
+
+## Session 3: Spec #2 Review #1 (2026-10-24) → ADR-029..035
+
+### CONFIRMED (user)
+
+- **Verdict: CHANGES REQUIRED — DESIGN DIRECTION ACCEPTED.** Cho phép sửa spec #2 và chuẩn bị sang spec #3 sau khi đồng bộ contract quan trọng. Chưa duyệt toàn bộ spec #2. G1 NOT APPROVED.
+- **OD2-01 APPROVED WITH ADJUSTMENTS:** hỗ trợ đồng thời các server capability version mà published revision hợp lệ còn dùng, nhưng **không bắt buộc** nạp mọi version vào một Python process/environment.
+  - version-scoped server capability adapter; resolve chính xác từ Capability Lock tin cậy; không fallback sang latest/nearest-compatible
+  - deploy gate kiểm mọi revision còn được hỗ trợ; backend kiểm compatibility trước khi xử lý submission; fail closed với mã lỗi phù hợp
+  - backend update không được phá form đang mở trong browser
+  - phân biệt: source package version, server adapter version, backend deployment version, published form revision, Capability Lock
+  - P0: một backend deployment nhiều adapter nếu không xung đột dependency. Nếu cần nhiều runtime để cô lập dependency: đề xuất riêng cho production, không orchestration phức tạp trong PoC.
+- **OD2-02 APPROVED:** Immutable Plugin Release Store.
+  - artifact do trusted CI/build pipeline tạo; identity/version bất biến; hash chính xác; source commit; dependency lock + provenance; runtime compatibility metadata; facet inventory
+  - không nhận artifact do Admin upload; không nạp code từ URL trong form JSON
+  - phân biệt 4 lớp: workspace (dev) · trusted release store · runtime deployment · published form release
+  - Admin production preview dùng trusted release capability. Local dev dùng workspace build trong môi trường dev cô lập, đánh dấu development-only, không giả làm release.
+  - Hash verification và provenance là yêu cầu P0; artifact signing làm ở phase phù hợp.
+- **OD2-03 APPROVED FOR P0:** một resolved version mỗi `pluginId` trong một Form Release. Conflict: compiler phát hiện, diagnostic chỉ rõ dependency chain, không tự nâng/hạ, không bỏ qua dependency, không chọn theo load order. Form khác nhau vẫn dùng version khác nhau được.
+- **OD2-04 MODIFIED:** không chấp nhận "`vulnerable`: form owner quyết" khi không có security governance.
+  - `deprecated`: cảnh báo; chặn dùng mới theo policy nếu cần; form đã publish tiếp tục trong thời gian hỗ trợ.
+  - `vulnerable`: chặn phát hành bản mới chứa version đó theo security policy; impact analysis theo severity, exploitability, exposure; **Platform Security/Maintainer** quyết remediation deadline hoặc emergency mitigation; chủ form tham gia nhưng không tự miễn trừ.
+  - `revoked`: có khả năng suspend runtime operation bị ảnh hưởng; backend enforce tại authoritative boundary; không fallback; có audit, incident metadata, user-facing failure, recovery path.
+  - Tách vulnerability status của code khỏi availability status của form. Không mặc định suspend toàn bộ form là an toàn; cần impact analysis và cơ chế xử lý sự cố.
+- **OD2-05 APPROVED WITH P0 SCOPE:** chỉ implement kind thật sự cần: `fieldType`, `validator`, `dataSource`, `serverValidator`, `postCommitEffect`. Design facet/inspector để cấu hình field plugin trong Admin. Preview mock dùng versioned fixtures. Platform core cung cấp ở P0: layout chuẩn, navigation/UI interaction chuẩn, canonicalization built-in, conditional rules built-in, final submission command, Motion presets. Định nghĩa extension contract cho kind còn lại, không bắt buộc implement. **Motion vẫn P0** (không có plugin `motionPreset` ≠ bỏ Motion Animation Editor). Làm rõ `inspector` là design facet hay capability độc lập, tránh hai cơ chế đăng ký. Tạo ma trận P0/P1/P2.
+- **OD2-06 APPROVED WITH RESTRICTIONS:** definition được bind tới post-commit effect đã được platform approve; Admin không tự định nghĩa business command. P0: chỉ mock effect; trigger sau commit; kiểm theo registry, permission và **site policy**; outbox cùng transaction; retry không nhân đôi side effect; lỗi downstream không mất submission; không email/API công ty. Editor chọn effect được phép, không vượt policy.
+- **OD2-07 APPROVED WITH ADJUSTMENTS:** Git-managed ledger là nguồn quản trị và audit baseline P0, nhưng kiến trúc phải có **emergency runtime override** có kiểm soát: change được xác thực và phân quyền; audit log; backend enforce ngay; không sửa release manifest; reconciliation giữa ledger và runtime policy; người dùng form/Business Editor không đổi được; có failure policy khi runtime status store không khả dụng. P0 mô phỏng ở local. Không xây incident-management service.
+- **Xem lại bốn lựa chọn kỹ thuật:**
+  - 8.1 Đồng ý server verification lúc submit cho demo. Kiểm tra `storeExists` (manifest ví dụ trước, `allowsDeferToSubmit: false`) vs `storeIdValid` (rev 1, qua `deferToSubmit`): cùng hay khác capability? Khi fail ở submit: không tạo submission, chỉ rõ field/store sai, cho chọn lại, không mất giá trị hợp lệ khác.
+  - 8.2 Đồng ý production/published preview chỉ dùng release artifact; local dev được thử plugin chưa phát hành trong isolated dev preview; không giả mạo release identity.
+  - 8.3 **Không** dùng `valueOrigin` làm cơ chế quyết định trust. Tách value provenance, authority policy, verification policy. `storeId` chọn từ option server vẫn untrusted khi client gửi lại. Derived output từ client không tự nhận là server-trusted.
+  - 8.4 Postal-code: mô tả cách map lookup result vào field, quyền sửa giá trị autofill, loại bỏ response cũ, xử lý địa chỉ cũ khi đổi mã bưu điện, plugin không mutate state ngoài typed command. Postal-code là P1, chỉ thiết kế.
+- **Kiểm tra thêm trước spec #3:** dependency isolation (dynamic import specifier tĩnh do compiler sinh; custom export condition phải kiểm trong bundler thật; conditional exports không là security boundary duy nhất); React singleton, platform SDK compatibility, duplicate React; trùng thư viện tạm chấp nhận nếu đo được; bundle budget ở spec #3; artifact integrity (commit, lock, hash, reproducible input, compatibility, không secret trong bundle/sourcemap/metadata); server release compatibility (retention/grace period cho form đang mở; frontend rollback ≠ backend rollback); conformance (mỗi guard có negative fixture, chứng minh fail đúng lý do; chưa kết luận isolation PASS khi chưa có artifact thật).
+- **Việc cần làm:** áp OD2-01..07 vào ADR; sửa mâu thuẫn; spec #2 rev 2; đồng bộ spec #1; Cross-Spec Interface Matrix #1 ↔ #2; danh sách OPEN và blocker; nếu xong phần ảnh hưởng spec #3 thì brainstorm spec #3. Cho phép **local documentation commit** sau staged-diff/security check. Không code, không push, không AWS write, không tự duyệt G1.
+
+### Đã thực hiện (Claude)
+
+- ADR-029..035 (OD2-01..07). ADR-028 ghi chú: policy chi tiết theo ADR-032 và ADR-035.
+- Spec #2 rev 2 (§26 tóm tắt thay đổi). Spec #1 rev 3.1: đồng bộ contract plugin theo spec #2 §19.
+- `storeExists` chỉ xuất hiện trong đề xuất ở chat phiên trước, không có trong file nào của repo; spec #2 rev 2 ghi `storeIdValid` thay thế nó (§18.1).
+
+### OPEN
+
+- User review spec #2 rev 2 và OD2-08..OD2-10 (spec #2 §22).
+- Spec #3 brainstorming: câu hỏi đầu tiên ghi ở Session 3: Spec #3.
+
+## Session 3: Spec #3, Compiler & Bundle Architecture (bắt đầu 2026-10-24)
+
+> Bối cảnh ràng buộc:
+> - ADR-002 (Hybrid), ADR-004 (vertical slice), ADR-005 (performance chỉ dựa trên đo), ADR-018 (spike cần gate riêng)
+> - Spec #1 §12, §14 (compiler front-end, Normalized IR, Release Manifest, Dependency Lock thuộc spec #3)
+> - Spec #2 rev 2: §9.2 Capability Lock, §9.4 tiêu thụ release + shared externals, §10.2 nội dung Release Manifest, §11 INV-F1..F7 và L1–L6, §11.5 (custom export condition phải kiểm trong bundler thật)
+> - Master BUILD-01..10, PERF-01..07
+> - Chưa có quyết định nào của spec #3.
+
+### OPEN
+
+- **Q3-1:** Khi một form được publish, artifact phục vụ khách nên **tự chứa hoàn toàn** (mỗi form có engine, React và plugin riêng trong thư mục của nó; rollback chỉ là đổi con trỏ) hay các form **dùng chung một lớp runtime** (engine/React) được cache chung giữa nhiều form/site?
+  - Ảnh hưởng: cache của trình duyệt giữa các form, cách chứng minh isolation (INV-F1, INV-F6), rollback có kéo theo runtime chung không, React singleton, PERF-02.
+  - Phỏng đoán của Claude (chưa phải đề xuất chính thức): P0 tự chứa hoàn toàn để bằng chứng BUILD-04/06 và rollback đơn giản; runtime dùng chung chỉ xem xét sau khi có số đo.

@@ -1,16 +1,16 @@
 # Current Status
 
-> Cập nhật lần cuối: 2026-10-24 (phiên 3, spec #1 revision 3 sau review #2; bắt đầu brainstorm spec #2)
+> Cập nhật lần cuối: 2026-10-24 (phiên 3: spec #2 rev 2 sau review #1; spec #1 rev 3.1 đồng bộ; bắt đầu brainstorm spec #3)
 
 | Mục | Giá trị |
 |---|---|
-| Phase đang chạy | **P01 Discovery/Design IN_PROGRESS**. Spec #1 rev 3: CONDITIONALLY ACCEPTED FOR DESIGN CONTINUATION (review #2), **chưa duyệt hoàn toàn**. Đang brainstorm spec #2 (Plugin Contracts & Capability Registry). |
+| Phase đang chạy | **P01 Discovery/Design IN_PROGRESS**. Spec #1 rev 3.1 (rev 3 + đồng bộ contract plugin): CONDITIONALLY ACCEPTED FOR DESIGN CONTINUATION (review #2), **chưa duyệt hoàn toàn**. Spec #2 rev 2: review #1 = CHANGES REQUIRED — DESIGN DIRECTION ACCEPTED; rev 2 chờ user review. Spec #3 (Compiler & Bundle): **bắt đầu brainstorm**. |
 | Plan đang active | Không có. `writing-plans` chỉ chạy sau G1. |
 | Git | local branch `p00-discovery`. Các commit WIP của P01 xem bằng `git log` (`21baa8c` = spec #1 rev 2; commit không có nghĩa là đã duyệt). Checkpoint P00 = `0d4fe7b`. Chưa push. Push bị gate bởi G9 (ADR-007). |
 | Remote | repo GitHub cá nhân, **PUBLIC**. G9 BLOCKED; user đang xử lý. |
 | AWS | **KHÔNG GHI**, và chưa gọi AWS API nào. Chưa chọn profile (ADR-006). |
 | Môi trường | macOS local; Node 20.20.2; Python 3.9.6; Docker 29.1.3 |
-| Scope đã duyệt | G0: ADR-001..007. Nguyên tắc của spec #1: ADR-008..012, ADR-015, ADR-016. Design direction: ADR-017 (OD-01), ADR-018 (OD-14), ADR-019 (OD-02), ADR-020 (OD-04), ADR-021 (OD-07), ADR-022 (OD-12). ADR-013/014 + addenda vẫn PROPOSED. (không phải là duyệt architecture). **G1 NOT APPROVED. G9 BLOCKED. G10 BLOCKED.** |
+| Scope đã duyệt | G0: ADR-001..007. Nguyên tắc của spec #1: ADR-008..012, ADR-015, ADR-016. Design direction: ADR-017 (OD-01), ADR-018 (OD-14), ADR-019 (OD-02), ADR-020 (OD-04), ADR-021 (OD-07), ADR-022 (OD-12). Spec #2: ADR-023..025, ADR-027, ADR-028 (nguyên tắc), ADR-026 (APPROVED AS DESIGN DIRECTION WITH ADJUSTMENTS), ADR-029..035 (OD2-01..07, review #1). ADR-013/014 + addenda vẫn PROPOSED. (không phải là duyệt architecture). **G1 NOT APPROVED. G9 BLOCKED. G10 BLOCKED.** |
 | URLs | không có |
 
 ## Đã xong (có evidence)
@@ -49,17 +49,24 @@
       - §8.7.6 race condition (INV-N1..N8, C1–C10)
       - §11, §16, AC-34..38
     - Chờ user review rev 3 trước khi chuyển sang READY_FOR_CROSS_REVIEW.
-  - **Spec #2:** đã mở brainstorming. Các câu trả lời được ghi vào `docs/discovery/P01_BRAINSTORM_NOTES.md`.
+  - **Spec #2:** đang brainstorm.
+    - Answer #1 (governance) → ADR-023. Answer #2 (taxonomy, facet, registry R2, action) → ADR-024, ADR-025. Cả ba là nguyên tắc ACCEPTED; chi tiết PROPOSED.
+    - Answer #3 (manifest, pre-submit, final submission, provisional, governance) → ADR-026 (APPROVED AS DESIGN DIRECTION WITH ADJUSTMENTS), ADR-027, ADR-028 (nguyên tắc ACCEPTED). ADR-025 được làm rõ bởi ADR-027.
+    - **Spec #2 Design Proposal rev 1:** `docs/superpowers/specs/2026-10-24-plugin-contracts-capability-registry-design.md`. Builder check đã chạy (§25.1).
+    - **Review #1 (CHANGES REQUIRED — DESIGN DIRECTION ACCEPTED):** OD2-01..07 → ADR-029..035. **Rev 2** áp quyết định, sửa `valueOrigin` (→ provenance/authority/verification), `storeExists` = `storeIdValid`, postal-code lookup, React singleton, negative fixture; thêm Cross-Spec Interface Matrix #1 ↔ #2 (§19, I-01..I-21). Ví dụ JSON kiểm lại: PASS (`docs/evidence/P01/spec2-manifest-example-check.txt`). OPEN mới: OD2-08, OD2-09.
+    - **Spec #1 rev 3.1:** chỉ đồng bộ contract plugin theo spec #2 §19 (ví dụ §7.2/§7.3, §7.1, §7.8, §10 D-03, §11, §12, §13, §16, §20, §26).
+  - **Spec #3 (Compiler & Bundle Architecture):** bắt đầu brainstorm; Q3-1 ở cuối `docs/discovery/P01_BRAINSTORM_NOTES.md`.
 
 ## Bị chặn
 - G9 (GitHub) và G10 (AWS): đang chờ user.
 
 ## Tiếp theo
-1. Brainstorm spec #2 (Plugin Contracts & Capability Registry) với `superpowers:brainstorming`, mỗi lần một câu hỏi.
-2. User review spec #1 rev 3. Nếu đồng ý thì spec #1 chuyển sang READY_FOR_CROSS_REVIEW (chỉ khi user xác nhận).
-3. Tiếp theo là spec #3..#6 (compiler + bundle, Admin, API/persistence/publish, Motion). Spike phải qua gate riêng (ADR-018).
-4. Cross-Subsystem Integration Review (spec #1 §25), rồi mới trình G1.
-5. Trong P01 được phép: design review, kiểm chứng lý thuyết, viết test matrix. Không scaffold, không viết code.
+1. User trả lời Q3-1 (spec #3), tiếp tục brainstorm spec #3, mỗi lần một câu hỏi.
+2. User review spec #2 rev 2 và quyết OD2-08/OD2-09 (cần trước spec #5, không chặn spec #3).
+3. User review spec #1 rev 3.1. Nếu đồng ý thì spec #1 chuyển sang READY_FOR_CROSS_REVIEW (chỉ khi user xác nhận).
+4. Sau spec #3: spec #4..#6 (Admin, API/persistence/publish, Motion). Spike đo isolation phải qua gate riêng (ADR-018).
+5. Cross-Subsystem Integration Review (spec #1 §25), rồi mới trình G1.
+6. Trong P01 được phép: design review, kiểm chứng lý thuyết, viết test matrix. Không scaffold, không viết code.
 
 ## Câu hỏi mở cho G1 (đã ghi lại, không cần hỏi lại trước khi brainstorming)
 - F-P0-13/16/18/19 giữ P0, xếp lịch sau vertical slice (ADR-004). Cần xác nhận.

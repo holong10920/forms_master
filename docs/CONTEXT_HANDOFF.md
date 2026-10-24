@@ -1,6 +1,6 @@
 # Context Handoff
 
-> Dành cho một phiên Claude mới. Đọc file này trước, sau đó đến `CURRENT_STATUS.md`. Cập nhật 2026-10-24, phiên 3. Commit cuối xem `git log` trên branch `p00-discovery` (local, chưa push).
+> Dành cho một phiên Claude mới. Đọc file này trước, sau đó đến `CURRENT_STATUS.md`. Cập nhật 2026-10-24, phiên 3 (sau spec #2 review #1; bắt đầu spec #3). Commit cuối xem `git log` trên branch `p00-discovery` (local, chưa push).
 
 **Dự án:** PoC multi-site form builder.
 - Form được định nghĩa bằng JSON có versioning.
@@ -21,15 +21,18 @@
   - Design direction đã duyệt: ADR-017..022 (OD-01, OD-14, OD-02, OD-04, OD-07, OD-12).
   - OD-03, OD-05, OD-06, OD-08..11, OD-13 vẫn OPEN.
   - Mức độ sẵn sàng ở §26.
-- **Spec #2 (Plugin Contracts & Capability Registry):** đang brainstorm. Câu hỏi đang mở được ghi ở cuối `docs/discovery/P01_BRAINSTORM_NOTES.md`.
+- **Spec #2 (Plugin Contracts & Capability Registry):** rev 2 ở `docs/superpowers/specs/2026-10-24-plugin-contracts-capability-registry-design.md`. Review #1: CHANGES REQUIRED — DESIGN DIRECTION ACCEPTED; OD2-01..07 đã quyết (ADR-029..035). Rev 2 chờ user review. OPEN: OD2-08, OD2-09 (§22). §19 là Cross-Spec Interface Matrix #1 ↔ #2.
+- **Spec #1** đã thành rev 3.1: chỉ đồng bộ contract plugin với spec #2 (không có review mới).
+- **Spec #3 (Compiler & Bundle Architecture):** bắt đầu brainstorm. Câu hỏi đang mở (Q3-1) ở cuối `docs/discovery/P01_BRAINSTORM_NOTES.md`. Input từ spec #2: §9.2 (Capability Lock), §9.4 (tiêu thụ release), §10.2 (nội dung Release Manifest), §11 (INV-F1..F7, L1–L6), §11.4 (React singleton).
 - Các ADR từ P01:
   - ADR-008..012, 015, 016: nguyên tắc spec #1.
   - ADR-017..022: design direction.
-  - ADR-013, ADR-014, các addendum và contract chi tiết: **PROPOSED**.
+  - ADR-023..025, ADR-027, ADR-028: nguyên tắc spec #2 (ACCEPTED). ADR-026: APPROVED AS DESIGN DIRECTION WITH ADJUSTMENTS. ADR-029..035: quyết định OD2-01..07 (review #1).
+  - ADR-013, ADR-014, các addendum và mọi cơ chế chi tiết của spec #1/#2: **PROPOSED**.
 
 **Bước đầu tiên ở phiên tiếp theo:**
-1. Invoke `superpowers:brainstorming` và tiếp tục spec #2 từ câu hỏi OPEN cuối cùng trong notes. Mỗi lần một câu hỏi. Không hỏi lại những gì notes đã có.
-2. Nguồn sự thật cho contract plugin chi tiết sẽ là spec #2 (spec #1 §12). Không tạo mâu thuẫn với ADR-016, ADR-020, ADR-021, ADR-022.
+1. Invoke `superpowers:brainstorming` và tiếp tục spec #3 từ Q3-1. Mỗi lần một câu hỏi. Spec #3 phải khớp spec #2 §9–§11 và chịu trách nhiệm bằng chứng isolation thật (C5/L5).
+2. Nếu user review spec #2 rev 2: ghi vào notes + ADR, ra rev 3. Mọi thay đổi chạm interface #1 ↔ #2 phải cập nhật spec #2 §19 và spec #1 trong cùng thay đổi. Không tự đổi OD2-08/09 thành APPROVED.
 3. Không nâng bất kỳ mục PROPOSED/OPEN nào nếu chưa có approval rõ ràng. Spec #1 chỉ chuyển sang READY_FOR_CROSS_REVIEW khi user xác nhận.
 4. Giữ G1 NOT APPROVED, G9 BLOCKED, G10 BLOCKED. Không code. Spike phải qua gate riêng (ADR-018).
 
