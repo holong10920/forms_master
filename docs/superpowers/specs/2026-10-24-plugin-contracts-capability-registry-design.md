@@ -1,6 +1,7 @@
 # Spec #2: Plugin Contracts & Capability Registry (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.4** (2026-10-24).
+> **Trạng thái: PROPOSAL, revision 2.5** (2026-10-24).
+> - Rev 2.5: §6.3 bắt buộc `title` tiếng Nhật cho mọi thuộc tính của `configSchema`/`paramsSchema` và quy định tập con mà inspector tự sinh vẽ được (theo builder check của spec #4); cập nhật ví dụ §6.4.
 > - Rev 2.4: thêm lớp **L1b (resolve allowlist trong bundler)** và cập nhật §11.5 theo evidence SPIKE-GATE-01 EXP-03 (spec #3 rev 2 §25.2).
 > - Rev 2.2: §10.2 tách Logical Release Manifest (input của `releaseId`) và Final Release Metadata theo ADR-038 / spec #3 notes S3-P12.
 > - Rev 2.3: đồng bộ với spec #3 rev 1 sau consistency review: Capability Lock tách identity / resolution context (§9.2); rebuild dùng Build Request đã lưu (§9.3); §10.2 (vị trí `browserHostApi`, `serverHostApi`); INV-F1 có Motion của core (§11.1); L3 cấm engine import Motion; `fieldType` có `Summary` tùy chọn cho 確認 (§7.4).
@@ -266,6 +267,11 @@ PRK = pluginId "@" version ;  CK = PRK "#" capabilityId ;  FBK = CK "/" facet
 
 `minLength`/`maxLength` luôn đếm theo code point (luật cố định, spec #1 §7.6.4; cũng là ngữ nghĩa của JSON Schema). C3 có fixture surrogate pair.
 
+*(Rev 2.5, spec #4 §10.2.)* **Schema mà Business Editor cấu hình** (`configSchema`, `paramsSchema`):
+- Mọi thuộc tính phải có `title` là chuỗi tiếng Nhật (nhãn hiển thị); `description` tiếng Nhật nếu cần giải thích. Enum phải có nhãn hiển thị cho từng giá trị (ví dụ dùng `oneOf` gồm `{ const, title }`). Thiếu → `E-SCHEMA-PROFILE`.
+- Inspector tự sinh chỉ vẽ được tập con: `boolean`, enum có nhãn, `string`, `integer`, mảng chuỗi ngắn. Schema ngoài tập này (object lồng, mảng object, `$defs`…) chỉ được phép khi capability có **design binding** (§7.2); nếu không → `E-SCHEMA-PROFILE`.
+- Tên thuộc tính (ví dụ `filterByPrefecture`) không bao giờ hiện cho Business Editor.
+
 ### 6.4. Ví dụ chuẩn: `@platform/store-selector@1.0.0`
 
 Dữ liệu cửa hàng hư cấu. Mọi schema bên trong hợp lệ theo 2020-12 (§25).
@@ -299,8 +305,8 @@ Dữ liệu cửa hàng hư cấu. Mọi schema bên trong hợp lệ theo 2020-
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "filterByPrefecture": { "type": "boolean", "default": true },
-          "placeholder": { "type": "string", "maxLength": 40 }
+          "filterByPrefecture": { "type": "boolean", "default": true, "title": "都道府県で絞り込む" },
+          "placeholder": { "type": "string", "maxLength": 40, "title": "未選択時の表示", "description": "店舗が選ばれていないときに表示する文章です。" }
         }
       },
       "valueSchema": { "type": "string", "pattern": "^ST-[0-9]{4}$" },
@@ -528,7 +534,7 @@ class ServerContext:
 | 0 | **Trusted mode**: chạy trên tree đã commit, sạch (`git status` rỗng), ghi commit SHA. P0 = generator chạy ở local theo chế độ CI; sau G9 là CI thật. Không có đầu vào nào khác (không upload, không URL). | `E-UNTRUSTED-SOURCE` |
 | 1 | Discover: glob cố định `plugins/*/plugin.manifest.json` | — |
 | 2 | Validate manifest và schema nhúng (2020-12 + profile) | `E-MANIFEST-INVALID`, `E-SCHEMA-INVALID`, `E-SCHEMA-PROFILE` |
-| 3 | Luật kind: facet theo family; kind chưa bật; `requires`/`verification.check` đúng kind trong cùng release; port khớp; `verification` bắt buộc cho `fieldType`; `capabilityId` duy nhất | `E-FACET-MISSING`, `E-FACET-FORBIDDEN`, `E-KIND-NOT-ENABLED`, `E-REQUIRES-INVALID`, `E-REQUIRES-PORT-MISMATCH`, `E-VERIFICATION-MISSING`, `E-VERIFICATION-INVALID` |
+| 3 | Luật kind: facet theo family; kind chưa bật; `requires`/`verification.check` đúng kind trong cùng release; port khớp; `verification` bắt buộc cho `fieldType`; `capabilityId` duy nhất; *(rev 2.5)* `title` tiếng Nhật và tập con inspector cho `configSchema`/`paramsSchema` (§6.3) | `E-FACET-MISSING`, `E-FACET-FORBIDDEN`, `E-KIND-NOT-ENABLED`, `E-REQUIRES-INVALID`, `E-REQUIRES-PORT-MISMATCH`, `E-VERIFICATION-MISSING`, `E-VERIFICATION-INVALID` |
 | 4 | Exports khớp `packageExport`, điều kiện đúng; không `.` gộp; không wildcard; shared externals là `peerDependencies` | `E-EXPORT-MISMATCH`, `E-SHARED-EXTERNAL` |
 | 5 | Binding: TS stub `satisfies` interface rồi typecheck; Python kiểm AST tên và async/sync | `E-BINDING-MISSING`, `E-BINDING-SIGNATURE` |
 | 6 | Boundary graph (L3, §11.2) | `E-BOUNDARY-VIOLATION` |

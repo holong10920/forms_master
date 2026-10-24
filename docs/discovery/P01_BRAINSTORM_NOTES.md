@@ -1936,3 +1936,34 @@ Từ ngữ hiển thị (ngôn ngữ Admin: OD-11): Form, 下書き (Draft), 公
 ### OPEN
 
 - **Q4-2:** chọn mô hình UI cho Builder (A / B / C) và phạm vi P0 của mô hình đó.
+  - → đã trả lời ở Spec #4 Answer #2.
+
+## Session 3: Spec #4 Answer #2 (2026-10-24), Builder interaction model → ADR-047
+
+### CONFIRMED (user)
+
+- **Chọn C — Hybrid Workspace, P0 giới hạn. APPROVED AS PRODUCT/UX DESIGN DIRECTION** (chưa duyệt spec #4, chưa G1).
+  - Ba vùng: Outline (trái) · Visual Form Canvas (giữa) · Properties Inspector (phải). Chế độ 作成 / フロー / プレビュー / 設定; navigation rõ, không nhiều nguồn state mâu thuẫn.
+  - A là fallback nếu implementation thấy C vượt khả năng PoC — **không tự chuyển sang A khi chưa có approval đổi scope**. B không chọn cho P0.
+- **P0 bắt buộc:**
+  - Outline: xem step/section/field; thêm/xóa/đổi tên; reorder bằng drag-and-drop **và** bàn phím/menu; chọn để sửa; thấy vấn đề liên quan; không hierarchy lồng phức tạp.
+  - Canvas: tái dùng renderer field của khách; click chọn, thấy item đang chọn, ＋ thêm, đổi thứ tự, thấy label/helper/required/layout, phản ánh thay đổi từ Inspector. Không absolute positioning, pixel-perfect, resize handle, CSS editor. **Có design-time interaction adapter**: thao tác chỉnh sửa không được kích hoạt transition, privileged command hay submission.
+  - Inspector: tab 基本 / 条件 / 検証 / 詳細; chỉ hiện tùy chọn hợp với loại field/capability; không JSON/code/regex/DSL; không hiện cấu hình platform không cho sửa.
+  - Rule Editor dạng câu `WHEN [買取方法] [is] [店頭買取] THEN [Go to] [店舗選択]`; nhánh `それ以外` khi contract yêu cầu; thấy điều kiện, step đích, field được tham chiếu, reference không còn hợp lệ, cảnh báo khi xóa field/step liên quan; serialize thành typed DSL của spec #1; không executable expression.
+  - Flow Overview **chỉ đọc**: xem step và nhánh; click để tới chỗ cấu hình; highlight nhánh không tới được/có lỗi; điều hướng tới rule để sửa; không kéo tạo edge; **có biểu diễn dạng danh sách tương đương** cho accessibility.
+  - Preview: cùng semantic engine và capability đã approve như runtime; desktop/mobile; chạy nhánh 店頭/宅配; required/validation; Back/Next/確認/hoàn tất giả lập; không side effect. **Tách Edit Canvas với Interactive Preview**; không dùng canvas đang có draft lỗi để giả là runtime hợp lệ.
+- **Editor state:** tách Builder Document State, UI Selection State, Validation/Diagnostics State, Preview Runtime State, Persistence/Save State; đồng bộ qua contract tường minh (không nhất thiết 5 store). **Single selection authority** (chọn ở Outline/Canvas thì các vùng khác theo; đổi mode không mất thay đổi chưa lưu). **Typed command** (ví dụ AddField, RemoveField, MoveField, UpdateFieldProperty, AddStep, MoveStep, SetTransitionRule — chưa phải danh sách cuối) có stable ID, validation, impact analysis; không để các panel tự mutate JSON theo nhiều cách.
+- **Vòng đời validation:** Editable Draft (thiếu, có diagnostic, vẫn lưu/sửa) · Previewable Draft (đủ điều kiện tối thiểu để engine chạy an toàn; chưa đạt thì giải thích + 修正する) · Review-ready Draft (qua semantic validation, dependency check, preflight). Schema/workflow analysis không được làm Editor không thao tác được form đang xây dở. Diagnostic: mã ổn định, thông báo nghiệp vụ **tiếng Nhật**, severity, location/target, hành động sửa, nhảy tới đối tượng; không raw compiler error.
+- **Autosave & concurrency:** optimistic locking theo draft version; autosave debounce/checkpoint; trạng thái saving/saved/error; response đến trễ không ghi đè thay đổi mới hơn; 409 không ghi đè ngầm; **giữ thay đổi local chưa lưu để Editor quyết định**; không CRDT/collaboration. `pending` không khóa mọi field, chỉ hạn chế thao tác thật sự không an toàn. Save Draft ≠ Review-ready.
+- **Responsive & a11y:** desktop-first; viewport nhỏ: collapse Outline, Inspector dạng drawer; không bắt buộc mobile full editing nhưng không lỗi nghiêm trọng; keyboard, focus thấy được, reorder thay thế drag, nhãn screen reader, không chỉ dùng màu cho selection/error.
+- **P0:** hybrid workspace, field/step editing, Rule Editor, Flow Overview chỉ đọc, Inspector, Interactive Preview, theme + Motion preset đã duyệt, draft persistence, diagnostics, review request UX. **P1/P2:** free-form layout, direct edge editing, undo/redo đầy đủ, real-time collaboration, rule debugger nâng cao, bulk cross-site, template marketplace, AI sinh form. Không cắt capability thiết yếu cho demo Sports/PC.
+- **UX acceptance:** task-based test với persona không biết code, 9 task (mở PC site → tạo/clone → thêm メーカー → nhánh 店頭/宅配 → validation → preview từng nhánh → sửa lỗi rule hệ thống chỉ ra → lưu và mở lại → gửi review); ghi completion, thời gian, số lần cần developer, lỗi UX, mức hiểu thông báo, parity preview/runtime. KPI đề xuất chưa phải acceptance chính thức. **Không tuyên bố usability PASS nếu chỉ developer tự test.**
+- **Tiếp theo:** ghi ADR + notes; viết Spec #4 Design Proposal (IA, journey, layout, interaction state, typed command, Rule Editor, diagnostics UX, autosave/conflict, ranh giới Edit Canvas vs Preview, P0/P1/P2, usability test plan, cross-spec interface với spec #1/#2/#3/#5/#6). Chỉ hỏi nếu còn câu thật sự blocking. Commit docs theo chính sách hook, không bypass.
+
+### Đã thực hiện (Claude)
+
+- ADR-047. Spec #4 Design Proposal rev 1: `docs/superpowers/specs/2026-10-24-admin-form-builder-design.md`. Không có câu hỏi blocking; quyết định còn mở ghi thành OD4-01..OD4-05 trong spec.
+
+### OPEN
+
+- User review Spec #4 Design Proposal rev 1 và OD4-xx.

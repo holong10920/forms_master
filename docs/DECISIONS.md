@@ -63,6 +63,7 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-044 | OD3-04: pnpm là package manager ưu tiên để đánh giá ở P02 (chưa khóa version) | **APPROVED AS EVALUATION DIRECTION** (spike review) | User (spike review) | 2026-10-24 |
 | ADR-045 | Toolchain Node.js: Node 20 đã EOL; chỉ giữ để tái hiện spike; P02 đánh giá Node 24 LTS | **ACCEPTED** (spike review); version cụ thể chốt ở P02 | User (spike review) | 2026-10-24 |
 | ADR-046 | Spec #4: Business-first Visual Form Builder, Developer-extensible Architecture; persona và hành trình ngày đầu; tiêu chí thành công A/B; nguyên tắc UX | **APPROVED AS PRODUCT DIRECTION** (spec #4 Answer #1); IA, mô hình UI, chỉ số PROPOSED | User (spec #4 Answer #1) | 2026-10-24 |
+| ADR-047 | Spec #4: Hybrid Workspace (Outline · Canvas · Inspector; 作成/フロー/プレビュー/設定), P0 giới hạn; tách 5 loại state; single selection; typed command; ba mức draft; autosave + optimistic locking | **APPROVED AS PRODUCT/UX DESIGN DIRECTION** (spec #4 Answer #2); cơ chế PROPOSED (spec #4) | User (spec #4 Answer #2) | 2026-10-24 |
 
 ---
 
@@ -972,3 +973,18 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 - **Đề xuất của Claude (PROPOSED, notes S4-P01..P04):** IA; ba mô hình UI (A outline, B flow canvas, C hybrid workspace — khuyến nghị C); interaction model; bảng chỉ số kèm target đề xuất.
 - **Trạng thái:** APPROVED AS PRODUCT DIRECTION. G1 NOT APPROVED.
 - **Người duyệt:** User (spec #4 Answer #1). **Ngày:** 2026-10-24.
+
+## ADR-047 — Builder: Hybrid Workspace và editor state (spec #4 Answer #2)
+
+- **Bối cảnh:** chọn mô hình UI cho Builder trong ba phương án A (outline), B (flow canvas), C (hybrid workspace).
+- **Quyết định (user): C — Hybrid Workspace, P0 giới hạn. APPROVED AS PRODUCT/UX DESIGN DIRECTION.**
+  - Outline · Visual Form Canvas · Properties Inspector; chế độ 作成 / フロー / プレビュー / 設定. A là fallback, chỉ chuyển khi có approval đổi scope; B không dùng ở P0.
+  - P0: Outline (drag **và** bàn phím/menu), Canvas dùng renderer của khách qua **design-time interaction adapter** (không kích hoạt transition, privileged command hay submission), Inspector 基本/条件/検証/詳細, Rule Editor dạng câu serialize thành typed DSL, Flow Overview chỉ đọc có bản danh sách tương đương, Interactive Preview tách khỏi Edit Canvas, theme + Motion preset, draft persistence, diagnostics, review request UX.
+  - **Editor state:** Document / Selection / Diagnostics / Preview Runtime / Persistence tách bạch, đồng bộ qua contract; single selection authority; typed command có stable ID, validation, impact analysis; không panel nào tự mutate JSON.
+  - **Ba mức draft:** Editable / Previewable / Review-ready; diagnostic có mã ổn định, thông báo nghiệp vụ tiếng Nhật, severity, target, hành động sửa.
+  - **Autosave:** optimistic locking theo draft version; response trễ không ghi đè; 409 không ghi đè ngầm và giữ thay đổi local; không CRDT; `pending` chỉ hạn chế thao tác không an toàn.
+  - **A11y/responsive:** desktop-first; collapse Outline, Inspector drawer ở màn nhỏ; keyboard, focus, reorder không cần drag, nhãn screen reader, không chỉ dùng màu.
+  - P1/P2: free-form layout, edge editing, undo/redo đầy đủ, collaboration, rule debugger nâng cao, bulk cross-site, marketplace, AI sinh form.
+  - **UX acceptance:** task-based test 9 task với persona không biết code; KPI đề xuất chưa phải acceptance; không tuyên bố usability PASS chỉ từ developer tự test.
+- **Trạng thái:** APPROVED AS PRODUCT/UX DESIGN DIRECTION. Cơ chế PROPOSED ở spec #4. G1 NOT APPROVED.
+- **Người duyệt:** User (spec #4 Answer #2). **Ngày:** 2026-10-24.

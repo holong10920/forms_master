@@ -37,7 +37,7 @@
 | Compiler & isolation | BUILD-01..10 | Contract isolation (BUILD-02/04/05/06/08): spec #2 rev 2 §9–§11 (PROPOSED). Bundling, release, reproducible build: `docs/superpowers/specs/2026-10-24-compiler-bundle-release-design.md` rev 2 (PROPOSED; ADR-036..042). Bằng chứng mức spike (không phải implementation): `docs/evidence/P01/spike-gate-01/`. Bundling, Release Manifest: spec #3 (P01-04). | TODO |
 | Motion | MOTION-01..07 | — (P01-06) | TODO |
 | Backend & publishing | API-01..10 | — (P01-05) | TODO |
-| Admin UX | UX-01..05, UX-07 | — (P01-03) | TODO |
+| Admin UX | UX-01..05, UX-07 | `docs/superpowers/specs/2026-10-24-admin-form-builder-design.md` rev 1 (PROPOSED; ADR-046, ADR-047) | TODO (design đang review) |
 | Undo/redo | UX-06 | ADR-004: P1; design phải chừa chỗ cho nó | DEFERRED P1 (G0) |
 
 ## Chất lượng

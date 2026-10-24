@@ -1,4 +1,4 @@
-# Spec #2 rev 2 — kiểm tra ví dụ JSON (2026-10-24)
+# Spec #2 rev 2.5 — kiểm tra ví dụ JSON (2026-10-24)
 # Công cụ: python3 3.11.11, jsonschema 4.26.0, Draft202012Validator.check_schema + kiểm tra profile cơ bản
 # Command: python3 -I <scratchpad>/check_spec2_json.py docs/superpowers/specs/2026-10-24-plugin-contracts-capability-registry-design.md
 # Script (throwaway, ngoài repo):
@@ -72,9 +72,3 @@ block 3: JSON parse OK
 block 4: JSON parse OK
 negative control {"type":"enum"}: rejected as expected ('enum' is not valid under any of the given schemas)
 RESULT: PASS
-
-# --- Spec #1 rev 3.1: parse các khối JSON (2026-10-24) ---
-# Command: python3 -I - (json.loads từng khối ```json trong docs/superpowers/specs/2026-10-23-form-schema-workflow-design.md)
-block 1: JSON parse OK
-block 2: JSON parse OK
-block 3: fragment minh họa, không phải JSON độc lập (Extra data: line 1 column 10 (char 9)) — có từ rev 3, không đổi

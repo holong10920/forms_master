@@ -1,6 +1,7 @@
 # Spec #3: Compiler, Bundle & Release Architecture (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2** (2026-10-24).
+> **Trạng thái: PROPOSAL, revision 2.1** (2026-10-24).
+> - Rev 2.1: thêm mode `preview` của front-end compiler (§5.1) theo spec #4 §14.1. Không đổi gì khác.
 > - Review #1 (rev 1): **CONDITIONALLY ACCEPTED FOR TECHNICAL VERIFICATION**; OD3-01 → ADR-041, OD3-02 → ADR-042 (SPIKE-GATE-01).
 > - Rev 2 cập nhật theo **evidence của SPIKE-GATE-01** ([báo cáo](../../discovery/P01_SPIKE_GATE_01_REPORT.md), `docs/evidence/P01/spike-gate-01/`) và thêm pipeline consistency review (§5.4, §5.5). Thay đổi so với rev 1: §27.
 > - Hướng đi đã duyệt: ADR-036..040 (spec #3 Answer #1..#5). Cơ chế trong tài liệu này **PROPOSED**.
@@ -145,7 +146,8 @@ Spec #5 tạo Build Request khi một revision được duyệt publish. Mọi t
 }
 ```
 
-- `mode`: `release` (trusted) · `rebuild-verify` · `dev` (không trusted, cho phát triển).
+- `mode`: `release` (trusted) · `rebuild-verify` · `dev` (không trusted, cho phát triển) · *(rev 2.1)* `preview`.
+- **`preview`** (spec #4 §14.1): chỉ chạy **K1–K6** trong Admin (trình duyệt) bằng cùng package TS; input là draft + block revision đã pin + catalog/ledger snapshot do Admin tải (spec #5). Khác `release`: (1) chỉ dừng ở diagnostic có `gate: preview`; lỗi chỉ chặn review không chặn sinh IR; (2) transition `default` còn trống được lower thành cạnh tới step hoàn tất tổng hợp `__preview_end__`, **chỉ** có trong IR preview. Không K7–K14, không artifact, không trusted. Server tự sinh lại IR preview từ snapshot khi chạy Submission Simulation, không tin IR của Admin.
 - `previousDataContract` vắng khi là revision đầu.
 - `bootstrap` và `releaseHtmlTemplate` (template `index.html` + CSS shell) là **platform asset** do trusted pipeline phát hành vào release store, được pin bằng digest như plugin (§14.1).
 - `ledgerSnapshotId` và `runtimeOverrideSnapshotId` cho K3 một snapshot cố định của trạng thái plugin, nên K3 là hàm thuần. Spec #5 kiểm lại trạng thái **hiện tại** trước activation.
