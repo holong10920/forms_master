@@ -1503,3 +1503,109 @@ Mọi lỗi kèm `{ code, retryable, releaseId, userAction }`; không chứa PII
 - **Q3-3:** Khi khách mở form trên điện thoại với mạng chậm, bạn muốn step đầu tiên hiện ra ngay từ HTML tĩnh trước khi JavaScript tải xong (prerender lúc build), hay chấp nhận một khung chờ nhẹ cho tới khi runtime khởi động (render hoàn toàn phía client)?
   - Ảnh hưởng: LCP/INP (PERF-03), độ phức tạp của compiler (render React lúc build, hydration), tương tác với bootstrap/resolver (HTML prerender của active release không được hiện cho khách có draft của release khác), A11y/IME khi trang hiện trước lúc tương tác được, kích thước `entry.html`.
   - Phỏng đoán của Claude: P0 render phía client với bootstrap nhỏ và khung chờ; chỉ thêm prerender nếu số đo trên artifact thật cho thấy cần (ADR-005).
+  - → đã trả lời ở Spec #3 Answer #3.
+
+## Session 3: Spec #3 Answer #3 (2026-10-24), chiến lược render ban đầu → ADR-038
+
+> Câu trả lời đến trong hai tin nhắn (tin đầu bị cắt giữa mục 4). Đã nhận đủ mục 1–9.
+
+### CONFIRMED (user)
+
+- **Decision: APPROVED AS DESIGN DIRECTION — P0 dùng CSR với Loading Shell nhẹ, trung tính với revision.** Chưa duyệt toàn spec #3 hay G1.
+- **Rendering P0:** Client-Side Rendering cho customer form. Không bắt buộc React SSR/SSG/prerender/hydration ở P0.
+  - Luồng: Stable Entry URL → Lightweight Bootstrap → resolve release active/đã pin → tải đúng Immutable Release → khởi tạo React runtime → render form.
+  - Loading Shell không phụ thuộc React hay plugin runtime.
+  - Không tải engine, plugin catalog hay Motion trước khi resolver xác định release.
+- **Loading Shell UX:** hiện nhanh bằng HTML/CSS tối giản; responsive mobile; trạng thái loading rõ bằng tiếng Nhật; không animation phức tạp; hỗ trợ reduced motion; không có field tương tác giả; không gây layout shift lớn khi form render; không hiện thông tin nhạy cảm; không hiện nội dung đặc thù của revision trước khi xác định revision. Được dùng skeleton trung tính về bố cục nhưng không giả vờ form đã tương tác được. Chuyển Shell → Form mượt, không mất keyboard focus hay accessibility semantics. Có error/retry UI khi runtime hoặc resolver không tải được; không loading vô hạn.
+- **Revision safety (theo ADR-037):** bootstrap xác định release trước khi tải React runtime; draft hợp lệ của release cũ → Resume đúng release; không render rev 8 rồi mới đổi sang rev 7; runtime chỉ hydrate draft cùng `releaseId`; không tự migrate draft; backend xác thực support status; không tin metadata client làm bằng chứng authorization. Network/status API lỗi → failure tất định. Không giả định release còn supported chỉ vì có draft local. Không bypass security policy để tránh màn hình lỗi.
+- **Performance:** chưa yêu cầu con số tuyệt đối khi chưa có baseline, nhưng spec #3 phải có **measurement contract** cho: TTFB, FCP, LCP, CLS, INP, bootstrap JS bytes, initial CSS bytes, initial runtime JS bytes, Time to Form Visible, Time to Form Interactive/Ready, số request ban đầu, hành vi mạng chậm, cold vs warm cache.
+  - Phân biệt ba thời điểm: (1) Loading Shell xuất hiện; (2) customer form có nội dung thật; (3) khách nhập liệu và tương tác ổn định. Không dùng FCP đẹp của shell để tuyên bố cả form có performance tốt. Không tuyên bố LCP/INP đạt mục tiêu khi chưa đo.
+- **Prerender là tối ưu tương lai:** không loại bỏ về kiến trúc. Khi benchmark chứng minh CSR gây vấn đề lớn, có thể đánh giá: prerender lúc build theo từng immutable release, HTML tĩnh chứa step đầu, hydration React, khớp HTML/client tất định, plugin contract tương thích SSR, progressive loading. Prerender chỉ sau khi release identity đã được resolve đúng. **Stable Entry URL không được chứa prerender đặc thù form của active revision** để rồi hiện nhầm cho người đang resume revision khác. Không implement prerender ở P0 chỉ vì công nghệ hỗ trợ.
+- **Sửa release identity hashing:** câu "hai lần build cùng revision sẽ có hai releaseId" chưa luôn đúng. Contract chính xác: cùng canonical hash input và cùng artifact content có thể cho cùng `releaseId`; khác content hoặc hash input có ý nghĩa phải tạo identity khác; không đưa `releaseId` vào chính nội dung được hash (circular); phân biệt logical manifest, final release metadata, signature, timestamp; định nghĩa trường nào thuộc canonical hash input; có xử lý collision/duplicate và publish release idempotent. Mục tiêu: identity tất định và artifact integrity. Không dùng timestamp hay randomness chỉ để tạo `releaseId` khác nhau nếu không có lý do kiến trúc.
+- **Bootstrap và CSP:** so sánh A (inline + CSP hash) với B (`bootstrap.js` external có version) theo CSP, cache, số request, độc lập update/rollback, bảo mật, maintainability, active release resolution. Không dùng `unsafe-inline` mặc định. Không nhúng mutable active pointer vào immutable bootstrap script. Stable entry có cache policy hợp với activation protocol; resolver có nguồn sự thật rõ ràng.
+- **Scenario matrix bổ sung:** cold mobile/slow network; warm cache/repeat visit; resume rev 7 khi active rev 8; rollback trong lúc bootstrap resolve; status API chậm/không khả dụng; bootstrap OK nhưng runtime chunk lỗi; offline; CSP chặn script; JavaScript tắt; Back/Forward; thông báo loading cho bàn phím/screen reader; reduced motion; entry cũ bị cache; reload khi runtime chưa khởi tạo xong. Phân loại automated / manual / future verification theo risk.
+- **Governance:** ghi Q3-3 vào ADR và notes; đồng bộ spec #1 (draft recovery), spec #2 (release compatibility) nếu cần; cho phép local documentation commit sau staged-diff/security check; không code, không push, không AWS write; G1 NOT APPROVED, G9/G10 BLOCKED. Câu hỏi tiếp theo nên về compiler pipeline, chunk splitting hoặc reproducible build.
+
+### PROPOSAL (Claude): bổ sung sau Answer #3. Chờ review, NOT approved. Sẽ chuyển vào spec #3.
+
+**S3-P12 Release identity tất định (thay đoạn `releaseId` ở S3-P01).**
+
+Ba lớp, chỉ lớp đầu quyết định identity:
+
+| Lớp | Nội dung | Thuộc canonical hash input? |
+|---|---|---|
+| **Logical Release Manifest (LRM)** | `lrmFormat`; `formId`, `siteId`, `revision`; hash Normalized IR; hash Capability Lock (FBK + hash facet); version chính xác của engine, compiler, bundler, shared externals; hash build config (base path policy, target browsers, chế độ build); **file inventory**: mọi file phục vụ của release trừ `index.html`, sắp xếp theo path, mỗi file `{ path, size, sha256, contentType }` | ✔ toàn bộ, canonical JSON (RFC 8785) |
+| **Release HTML** | `index.html` sinh **sau** khi có `releaseId`, bằng template tất định từ LRM + `releaseId` | ✘ (để tránh vòng lặp); hash của nó ghi ở lớp dưới |
+| **Final Release Metadata (FRM)** | `releaseId`, digest đầy đủ của LRM, `indexHtmlSha256`, thời điểm tạo, pipeline id, con trỏ tới provenance, signature (phase sau) | ✘ |
+
+- `releaseId = "rel_" + base32(sha256(JCS(LRM)))` cắt còn 26 ký tự (130 bit) cho URL; digest đầy đủ lưu trong FRM.
+- **Không file nào trong inventory chứa `releaseId`.** Runtime biết identity của mình qua `index.html` (khối dữ liệu `<script type="application/json" id="release">`, không thực thi). Asset JS/CSS chỉ chứa hash nội dung, nên không có vòng lặp.
+- **Ngoài hash input:** timestamp, hostname/đường dẫn tuyệt đối của máy build, thời gian build, số ngẫu nhiên, signature, provenance pointer, backend deployment version lúc publish. Những thứ này nằm ở FRM hoặc provenance.
+- **Hệ quả:**
+  - Cùng LRM (cùng input có ý nghĩa và cùng byte artifact) → cùng `releaseId`. Đăng ký lại là **idempotent** (trả về release đã có; activation là bước riêng).
+  - Build không tái lập (cùng input nhưng byte khác) → inventory khác → `releaseId` khác. Đây là tín hiệu để điều tra tính tái lập (Q3-4), không phải cách cố ý tạo identity mới.
+  - Hai form có nội dung giống nhau vẫn có `releaseId` khác vì `formId` nằm trong LRM.
+- **Collision/duplicate:** khi đăng ký, nếu `releaseId` đã có: digest đầy đủ và LRM giống → no-op; khác → `E-RELEASE-ID-COLLISION`, dừng, không ghi đè (thực tế gần như không xảy ra, nhưng phải tất định).
+- **Integrity:** khi phục vụ hoặc rollback, kiểm từng file theo inventory và `index.html` theo `indexHtmlSha256`.
+
+**S3-P13 Bootstrap: A (inline + CSP hash) vs B (external có version).**
+
+| Tiêu chí | A. Inline + CSP hash | B. `bootstrap.<hash>.js` external, bất biến |
+|---|---|---|
+| CSP | `script-src 'sha256-…'`; hash đổi mỗi khi code bootstrap đổi → header CSP và `entry.html` phải đổi đồng thời; dùng `<meta>` CSP thì mất một số directive (`frame-ancestors`, report) | `script-src 'self'`, không có hash phải đồng bộ |
+| Cache trình duyệt | code tải lại cùng `entry.html` mỗi lần (vì entry `no-cache`) | cache dài hạn, dùng chung giữa các form cùng origin; lần sau 0 byte |
+| Số request ban đầu | 0 thêm | +1 khi cold (cùng origin, HTTP/2) |
+| Độc lập update/rollback | version bootstrap gắn với lần sinh `entry.html`; mỗi activation có thể vô tình đổi bootstrap | bootstrap có version riêng của platform; rollback form không đổi bootstrap; entry cũ trong cache vẫn trỏ file bootstrap cũ còn tồn tại |
+| Bảo mật | không `unsafe-inline`, nhưng dễ trượt sang nới CSP khi hash lệch | SRI được; code platform đã review |
+| Maintainability | khó test, khó đo riêng | module thường, test/lint/budget riêng |
+| Active pointer | trong HTML mutable (hợp lệ) | trong HTML mutable dưới dạng dữ liệu JSON, **không** trong script bất biến |
+
+**Khuyến nghị: B**, kèm:
+- `entry.html` (mutable): HTML shell + CSS shell tối thiểu inline với `style-src 'sha256-…'` (CSS shell do platform version hóa, ít đổi; inline để shell hiện ngay khi cold) + khối dữ liệu `<script type="application/json" id="active">{ formId, activeReleaseId, pointerVersion }</script>` + `<script src="/_platform/bootstrap.<hash>.js" defer integrity="…">` + `<noscript>`.
+- Nguồn sự thật: active pointer record ở backend; `entry.html` là bản chiếu; bootstrap chỉ đọc dữ liệu, không giữ pointer.
+- Cache: `entry.html` `no-cache` + ETag (trình duyệt luôn revalidate), CDN TTL ngắn/invalidation khi activation (spec #5); `bootstrap.<hash>.js`, asset release: `immutable`.
+- Trade-off chấp nhận: thêm 1 request khi cold; đo ở benchmark. Nếu số đo cho thấy đáng kể, cân nhắc A cho riêng phần resolver nhưng vẫn không dùng `unsafe-inline`.
+
+**S3-P14 Measurement contract.**
+
+| Mốc | Định nghĩa | Cách đo |
+|---|---|---|
+| T1 Shell visible | FCP của `entry.html` | Performance API / Lighthouse lab |
+| T2 Form visible | step đầu tiên có nội dung thật được render | `performance.mark("form:visible")` do runtime đặt + element timing |
+| T3 Form ready | handler đã gắn, field đầu tiên focus/nhập được, không còn chunk bắt buộc đang chờ | `performance.mark("form:ready")` |
+| Khác | TTFB, LCP, CLS, INP, bootstrap JS bytes, initial CSS bytes, initial runtime JS bytes, số request ban đầu | web-vitals + bundle stats |
+
+- Mọi số đo ghi rõ **lab-only** (thiết bị, throttling, cold/warm) cho tới khi có dữ liệu thật (PERF-03). Báo cáo luôn tách T1, T2, T3; không dùng T1 để kết luận về form.
+- Budget chưa có con số; đặt sau baseline và duyệt ở G1 (ADR-005).
+
+**S3-P15 Prerender (tương lai).** Nếu có, chỉ ở **Immutable Release URL** (sau khi release đã được resolve), không bao giờ ở Stable Entry. Điều kiện trước khi đánh giá: benchmark CSR chứng minh vấn đề; plugin contract tương thích SSR (spec #2 sẽ cần mở rộng); HTML/client khớp tất định.
+
+**S3-P16 Scenario matrix loading/bootstrap (TM-L01..L14).** Loại: **A** = automated (unit/integration/Playwright), **M** = manual, **F** = future verification (sau G10 hoặc khi có hạ tầng thật).
+
+| # | Tình huống | Kết quả mong đợi | Nguồn sự thật | Loại |
+|---|---|---|---|---|
+| L01 | Cold mobile, mạng chậm | shell hiện từ HTML + CSS inline; resolver chạy sau khi bootstrap tải; báo cáo T1/T2/T3 riêng | số đo lab | A (Playwright throttle, lab) + M (thiết bị thật) |
+| L02 | Warm cache, quay lại | bootstrap và asset từ cache; `entry.html` revalidate (304) | cache header | A |
+| L03 | Resume draft rev 7 khi active rev 8 | như TM-R05: đề xuất Resume, rev 8 không khởi tạo | status API + INV-R1 | A |
+| L04 | Rollback xảy ra trong lúc bootstrap resolve | bootstrap dùng `activeReleaseId` đã đọc; session pin release đó; release này vẫn supported | ràng buộc S3-P06 | A (integration, đổi pointer giữa chừng) |
+| L05 | Status API chậm hoặc không khả dụng | sau timeout: 「確認できませんでした」 + 再試行 + Start Over; không tải runtime kèm draft | bootstrap (tất định) | A (mock) |
+| L06 | Bootstrap OK, runtime chunk lỗi | shell chuyển sang lỗi + 再試行 (tải lại đúng release); không loading vô hạn | bootstrap bắt lỗi tải script + timeout | A (chặn route) |
+| L07 | Offline | trước khi tải: trang lỗi mặc định của trình duyệt (P0 không có service worker); giữa chừng: engine xử lý lỗi mạng ở query/submit (spec #1 §11) | trình duyệt / engine | A (giữa chừng) + M |
+| L08 | CSP chặn script | shell không treo: thông báo dự phòng thuần CSS hiện sau N giây (không cần JS, không phải chuyển động) mời tải lại; CSP report cho vận hành | CSS shell | A (phục vụ sai hash) |
+| L09 | JavaScript tắt | `<noscript>`: 「このフォームをご利用いただくには、JavaScriptを有効にしてください。」 | HTML | A (`javaScriptEnabled: false`) |
+| L10 | Back/Forward | về stable entry: bootstrap resolve lại (có thể đề xuất Resume); trong form: spec #1 C5; trang khôi phục từ bfcache không khởi tạo runtime lần hai | bootstrap + engine | A |
+| L11 | Bàn phím/screen reader | shell có `role="status"` `aria-live="polite"` 「読み込み中…」; khi form sẵn sàng: thông báo 「フォームを読み込みました」, đưa focus tới tiêu đề step (tabindex=-1) chỉ khi người dùng chưa tự di chuyển focus | runtime a11y | A (axe, kiểm focus) + M (VoiceOver/NVDA) |
+| L12 | Reduced motion | shell không có chuyển động, chỉ chữ/trạng thái tĩnh | CSS `prefers-reduced-motion` | A (emulate) |
+| L13 | `entry.html` cũ bị cache | nhận release active trước đó (vẫn supported) và chạy bình thường; nếu đã retired → thông báo, Start Over tải `entry.html` mới với revalidate bắt buộc | S3-P06, status API | A (integration) + F (CDN thật) |
+| L14 | Reload khi runtime chưa khởi tạo xong | bootstrap chạy lại; marker trong `sessionStorage` (nếu có) → cùng release; không tạo draft trùng | bootstrap + session marker | A |
+
+### Đã thực hiện (Claude)
+
+- ADR-038 hoàn chỉnh (đủ mục 1–9). ADR-037 ghi chú: định nghĩa `releaseId` thay bằng S3-P12.
+- Đồng bộ: spec #2 rev 2.2 (§10.2: tách LRM và FRM). Spec #1 không cần sửa (draft recovery đã dùng `releaseId`, INV-R1).
+
+### OPEN
+
+- **Q3-4 (reproducible build):** Khi build lại cùng một release từ cùng input, bạn cần byte-for-byte giống hệt (để `releaseId` trùng và rebuild là bằng chứng integrity), hay chấp nhận "tương đương chức năng" với hash khác?
+  - Ảnh hưởng: môi trường build (pin toolchain, container cố định hay máy local), ý nghĩa của rebuild-verification (spec #2 AC2-06), S3-P12, cách xử lý khi bundler không tất định.
+  - Phỏng đoán của Claude: byte-for-byte cho mọi file trong inventory, build trong môi trường đã pin; nếu spike cho thấy bundler không tất định thì ghi thành defect cần xử lý, không nới contract.

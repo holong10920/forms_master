@@ -1,6 +1,7 @@
 # Spec #2: Plugin Contracts & Capability Registry (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.1** (2026-10-24).
+> **Trạng thái: PROPOSAL, revision 2.2** (2026-10-24).
+> - Rev 2.2: §10.2 tách Logical Release Manifest (input của `releaseId`) và Final Release Metadata theo ADR-038 / spec #3 notes S3-P12.
 > - Rev 2.1: chỉ **đồng bộ với ADR-037** (spec #3 Answer #2): §10.3 (active ≠ supported, theo release), §10.6 (phân loại lỗi, không gom thành 503), §19 (I-19, I-22). Chưa có review mới của user cho rev 2.
 > - Review #1 (rev 1): **CHANGES REQUIRED — DESIGN DIRECTION ACCEPTED.** OD2-01..07 đã được user quyết (ADR-029..035). Rev 2 áp các quyết định đó và sửa các mâu thuẫn được nêu. Thay đổi so với rev 1: §27.
 > - Spec #2 **chưa được duyệt hoàn toàn**. **G1 NOT APPROVED.** G9 và G10 BLOCKED.
@@ -619,6 +620,8 @@ ADR-026 nói một `engineApi` range; spec tách theo host vì các host có ver
 ### 10.2. Release Manifest ghi gì (nội dung spec #2 yêu cầu, định dạng spec #3)
 
 Version chính xác của engine, `browserHostApi`, compiler, bundler, Node, shared externals; `serverHostApi` và backend deployment version lúc publish; Python; hash lockfile; hash catalog; id ledger snapshot; Capability Lock đầy đủ.
+
+*(Rev 2.2.)* Các mục trên chia vào hai lớp (spec #3, notes S3-P12): **Logical Release Manifest** chứa những gì quyết định identity và hành vi của artifact (IR, Capability Lock, version engine/compiler/bundler/shared externals, build config, file inventory) và là input của `releaseId`; **Final Release Metadata/provenance** chứa những gì không được làm đổi identity (thời điểm, pipeline, backend deployment version lúc publish, ledger snapshot id, signature).
 
 ### 10.3. Tập release được hỗ trợ (supported set)
 

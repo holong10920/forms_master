@@ -54,6 +54,7 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-035 | Git-managed status ledger + emergency runtime override có kiểm soát (OD2-07) | **APPROVED WITH ADJUSTMENTS** (spec #2 review #1); failure policy chi tiết OPEN (OD2-08) | User (spec #2 review #1) | 2026-10-24 |
 | ADR-036 | Self-contained Form Release ở P0: không có mutable shared runtime giữa các form (spec #3 Q3-1) | **APPROVED AS DESIGN DIRECTION** (spec #3 Q3-1); cơ chế PROPOSED (spec #3) | User (spec #3 Q3-1) | 2026-10-24 |
 | ADR-037 | Session-pinned revision + Stable Entry URL + Immutable Release URL; active ≠ supported; resolver trước khi khởi tạo runtime (spec #3 Q3-2) | **APPROVED AS DESIGN DIRECTION** (spec #3 Answer #2); resolver, consistency model, error contract PROPOSED; activation chi tiết → spec #5 | User (spec #3 Answer #2) | 2026-10-24 |
+| ADR-038 | P0 render phía client (CSR) với Loading Shell nhẹ, trung tính với revision; measurement contract; prerender chỉ là tối ưu tương lai (spec #3 Q3-3) | **APPROVED AS DESIGN DIRECTION** (spec #3 Answer #3); release identity, bootstrap/CSP, scenario matrix PROPOSED (S3-P12..P16) | User (spec #3 Answer #3) | 2026-10-24 |
 
 ---
 
@@ -842,6 +843,23 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
   - **Retention:** không xóa asset chỉ vì không còn active; tách "không còn nhận submit", "asset không còn phục vụ", "giữ để rollback", "security quarantine". Không tự chọn con số (OD2-09 OPEN).
   - **Backend enforcement:** frontend không quyết support; không tin `revision`/`releaseId` của client như bằng chứng; phân biệt incompatible / temporarily unavailable / permanently retired / security suspended, không gom thành 503.
   - Test matrix tối thiểu 14 case có expected behavior và nguồn sự thật.
-- **Đề xuất của Claude (PROPOSED, notes S3-P01..P11):** `releaseId` theo hash của Release Manifest; bootstrap inline trong `entry.html` + status API; INV-R1 (runtime chỉ hydrate draft cùng `releaseId`), INV-R2 (immutable URL không mở session mới cho release không active); bốn chiều trạng thái release và ràng buộc mốc thời gian; consistency model eventual cho stable entry; activation protocol với CAS và reconciler; error contract 409/503/410/423; TM-R01..R14.
+- **Đề xuất của Claude (PROPOSED, notes S3-P01..P11):** `releaseId` theo hash của Release Manifest (**được thay bằng S3-P12** theo yêu cầu ở spec #3 Answer #3: identity tất định từ Logical Release Manifest, không vòng lặp, idempotent); bootstrap inline trong `entry.html` + status API; INV-R1 (runtime chỉ hydrate draft cùng `releaseId`), INV-R2 (immutable URL không mở session mới cho release không active); bốn chiều trạng thái release và ràng buộc mốc thời gian; consistency model eventual cho stable entry; activation protocol với CAS và reconciler; error contract 409/503/410/423; TM-R01..R14.
 - **Trạng thái:** APPROVED AS DESIGN DIRECTION. Cơ chế PROPOSED. Activation, lưu trữ, cache thật: pending spec #5. G1 NOT APPROVED.
 - **Người duyệt:** User (spec #3 Answer #2). **Ngày:** 2026-10-24.
+
+## ADR-038 — CSR + Loading Shell trung tính với revision (spec #3 Q3-3)
+
+- **Bối cảnh:** step đầu tiên nên hiện từ HTML prerender lúc build, hay khung chờ tới khi runtime khởi động.
+- **Quyết định (user): APPROVED AS DESIGN DIRECTION — P0 dùng CSR với Loading Shell nhẹ, trung tính với revision.**
+  - Không bắt buộc SSR/SSG/prerender/hydration ở P0.
+  - Luồng: Stable Entry URL → bootstrap nhẹ → resolve release → tải đúng Immutable Release → khởi tạo React runtime → render form. Không tải engine, plugin catalog hay Motion trước khi resolver xác định release.
+  - Loading Shell: HTML/CSS tối giản, không phụ thuộc React/plugin; responsive; trạng thái loading tiếng Nhật; reduced motion; không field giả; không layout shift lớn; không thông tin nhạy cảm; không nội dung đặc thù revision trước khi xác định revision; skeleton trung tính được phép nhưng không giả vờ tương tác được; chuyển sang form không mất focus/a11y semantics; có error/retry, không loading vô hạn.
+  - Revision safety theo ADR-037; failure tất định khi network/status API lỗi; không coi release là supported chỉ vì có draft local; không bypass security policy.
+  - Measurement contract (chưa có con số tuyệt đối): TTFB, FCP, LCP, CLS, INP, bootstrap JS bytes, initial CSS bytes, initial runtime JS bytes, Time to Form Visible, Time to Form Interactive/Ready, số request ban đầu, hành vi mạng chậm, cold vs warm cache. Tách ba thời điểm: shell xuất hiện · form có nội dung thật · khách nhập/tương tác ổn định. Không dùng FCP của shell để tuyên bố performance của form; không tuyên bố LCP/INP đạt khi chưa đo.
+  - **Prerender** không bị loại về kiến trúc nhưng không implement ở P0; chỉ đánh giá khi benchmark chứng minh CSR gây vấn đề lớn; chỉ sau khi release identity đã resolve; Stable Entry không chứa prerender đặc thù của active revision.
+  - **Release identity:** cùng canonical hash input và cùng artifact content → có thể cùng `releaseId`; khác content/input có ý nghĩa → identity khác; không vòng lặp; tách logical manifest, final metadata, signature, timestamp; định nghĩa trường thuộc hash input; xử lý collision/duplicate; publish idempotent; không dùng timestamp/randomness để tạo identity khác nhau.
+  - **Bootstrap/CSP:** so sánh inline + CSP hash với external có version; không `unsafe-inline` mặc định; không nhúng mutable active pointer vào immutable bootstrap; stable entry có cache policy hợp activation protocol; resolver có nguồn sự thật rõ.
+  - **Scenario matrix** 14 tình huống loading/bootstrap, phân loại automated / manual / future verification.
+- **Đề xuất của Claude (PROPOSED, notes S3-P12..P16):** LRM / release HTML / FRM, `releaseId = rel_ + base32(sha256(JCS(LRM)))[:26]`, idempotent + `E-RELEASE-ID-COLLISION`; khuyến nghị bootstrap B (external bất biến, SRI) + CSS shell inline có CSP hash + active pointer dạng dữ liệu JSON trong `entry.html`; mốc T1/T2/T3; prerender chỉ ở Immutable Release URL; TM-L01..L14.
+- **Trạng thái:** APPROVED AS DESIGN DIRECTION. Cơ chế PROPOSED ở spec #3. G1 NOT APPROVED.
+- **Người duyệt:** User (spec #3 Answer #3). **Ngày:** 2026-10-24.
