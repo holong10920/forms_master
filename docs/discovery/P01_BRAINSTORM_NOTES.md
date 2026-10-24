@@ -1809,3 +1809,130 @@ Ghi tại commit này để có mốc thời gian trước khi spike chạy. Chi
 ### OPEN
 
 - **Q4-1:** Hãy kể (hoặc hình dung) buổi làm việc đầu tiên của một Business Editor khi được giao tạo form thu mua PC mới trên Admin: họ là ai, họ mở Admin ra và làm những gì theo thứ tự, và tới lúc nào thì bạn coi là họ đã thành công?
+  - → đã trả lời ở Spec #4 Answer #1.
+
+## Session 3: Spec #4 Answer #1 (2026-10-24), Business Editor journey → ADR-046
+
+### CONFIRMED (user)
+
+- **Decision: Business-first Visual Form Builder, Developer-extensible Architecture.** Định hướng sản phẩm; chưa duyệt spec #4 hay G1.
+- **Persona (giả định thiết kế, chưa xác minh nhân sự thật): Business Editor — PC Site.** PO, PM hoặc Business Operator; hiểu nghiệp vụ và dữ liệu cần thu; quyết field, điều kiện, thứ tự step; không cần biết React/TS/Python/JSON Schema/DSL; không sửa source, không đăng ký plugin; chỉ dùng capability đã approve; không nhất thiết có quyền publish.
+- **Hành trình ngày đầu (9 bước):**
+  1. Login & chọn site: thấy site/form được phép; UI phân biệt Site, Form, Form Draft, Published Form Revision, Active Release; không đưa khái niệm kỹ thuật vào luồng chính.
+  2. Tạo form: từ template/starter được phép, clone form/revision (nếu có quyền), hoặc form trống (nếu scope cho phép). Không live inheritance; không cần Template Marketplace ở P0. Đặt tên và thông tin cơ bản.
+  3. Step: Visual Step Editor (ví dụ: 商品情報 → 買取方法 → 連絡先・住所 → 確認; nhánh có thể đổi danh sách step thực tế). Thêm/xóa/sắp xếp, đổi tên, cấu hình nội dung, thấy quan hệ giữa các step. Không sửa JSON.
+  4. Field: chọn từ Capability Library (メーカー, 型番, CPU, バッテリー状態, SIM関連情報, お名前, 電話番号, メールアドレス…). Thêm/xóa/sắp xếp, label tiếng Nhật, required/optional, option list, registered validator, helper/error text, layout được phép. Identity ổn định do platform quản lý; đổi label không phá reference; classification không hạ dưới mức tối thiểu.
+  5. Điều kiện: Visual Rule Editor, dạng `WHEN [買取方法] [is] [店頭買取] THEN [Go to] [店舗選択]`. Không JavaScript, JSON expression, regex tùy ý, DSL text, technical field path. Admin chuyển thao tác thành typed Workflow DSL; backend/compiler dùng contract của spec #1.
+  6. Theme & Motion: theme/token được duyệt, màu, typography/spacing trong phạm vi, Motion preset được duyệt; không CSS/Motion code; animation không điều khiển business state; chi tiết ở spec #6.
+  7. **Preview & Test (một trong những bước quan trọng nhất):** desktop, mobile, các step, các nhánh, validation error, Back/Next, 確認, màn hoàn tất. Cùng semantic contract với runtime khách. P0 dữ liệu giả và mock. Phân biệt Visual Preview / Interactive Preview / Submission Simulation / Published Customer Form. Không side effect ra business system.
+  8. Save & sửa lỗi: lỗi dễ hiểu, dẫn thẳng tới chỗ cần sửa (step không tới completion, field bị rule tham chiếu đã xóa, thiếu cấu hình bắt buộc, plugin không tương thích, validation sai, rẽ nhánh không đủ). Không chỉ raw JSON Schema error. Phân biệt: draft có lỗi (vẫn lưu được) · draft hợp lệ để preview · draft hợp lệ để request publish. Không publish khi chưa qua validation gate.
+  9. Gửi review: Reviewer/Publisher kiểm thay đổi form, thay đổi dependency, shared block bị ảnh hưởng, compatibility, kết quả preview/simulation, publish readiness; approve/reject/publish theo quyền; Editor không bypass. Workflow approval đầy đủ phối hợp spec #5; spec #4 có UX contract tương ứng.
+- **Thành công:**
+  - A (spec #4): tạo/clone PC form; thêm/sửa/sắp xếp field và step; điều kiện 店頭/宅配; registered validation; theme/Motion preset; preview các nhánh chính; thấy và sửa lỗi cấu hình; lưu, mở lại, tiếp tục; gửi publish — toàn bộ bằng UI, không source/JSON, không cần capability code mới cho nghiệp vụ registry đã hỗ trợ.
+  - B (vertical slice end-to-end, không chỉ spec #4): publish sau approve; compiler build artifact cô lập; Sports và PC khác flow; backend nhận submit theo authoritative revision; mock post-submit effect; rollback; bundle isolation có bằng chứng.
+- **Nguyên tắc UX:** business-first terminology (Form, Step, Field, Condition, Preview, Publish; không capability lock/IR/dependency graph/release manifest); progressive disclosure (không Inspector khổng lồ); direct manipulation (click/select/reorder trên canvas + properties inspector; flow và preview phản ánh thay đổi); safe editing (cảnh báo impact, không phá shared block, không silent migration, identifier ổn định, dependency tự phân tích); accessible (bàn phím, screen reader, **không bắt buộc drag-and-drop**, Admin responsive trong phạm vi P0); deterministic feedback (trạng thái lưu, validation, loading/lỗi rõ; không giả vờ publish thành công khi backend chưa xác nhận).
+- **Scope:** P0 ưu tiên first-day journey chạy được end-to-end; không enterprise designer đầy đủ. P1/P2 có thể: bulk update nhiều site, multiplayer real-time, rule debugger nâng cao, plugin marketplace, template/version inheritance nâng cao, undo/redo đầy đủ, AI sinh form, mass migration. P0 vẫn phải có branching, cấu hình trực quan, validation, preview, persistence và review/publish journey ở mức đã duyệt.
+- **UX đo được:** đề xuất chỉ số (time to first valid form, time to first interactive preview, số thao tác thêm field, số thao tác tạo nhánh, tỷ lệ hoàn thành không cần developer, số lỗi cấu hình phát hiện trước publish, khả năng tự sửa lỗi từ thông báo, nhất quán preview/runtime) kèm phương pháp đo; **không** đặt KPI cố định như đã được business xác nhận.
+- **Tiếp theo:** đi từ journey sang Information Architecture và interaction model (dashboard, tạo form, builder canvas, step/flow editor, property inspector, preview/simulation, version/publish state); đề xuất 2–3 mô hình UI kèm ưu/nhược và khuyến nghị. **Không** thiết kế JSON editor bọc drag-and-drop rồi gọi là no-code. Không kéo dài bằng câu hỏi nhỏ nếu đủ căn cứ cho UX Architecture Proposal. Cho phép local documentation commit sau staged-diff/security check và theo chính sách hook.
+
+### PROPOSAL (Claude): IA, mô hình UI, interaction model, chỉ số UX. Chờ review, NOT approved
+
+**S4-P01 Information Architecture.**
+
+```
+Admin
+├─ Site switcher (chỉ site được phép)
+│  └─ Site dashboard: danh sách form + trạng thái
+│     (下書きあり · レビュー中 · 公開中 rN · 要確認の問題 N件)
+├─ Form overview (một form)
+│  ├─ 公開中のバージョン (active) · lịch sử bản đã publish
+│  ├─ 下書き (draft hiện tại) → mở Builder
+│  ├─ Yêu cầu review (trạng thái)
+│  └─ Thành phần dùng chung (shared block, plugin) + cảnh báo
+├─ Builder (một draft)  — chế độ: 作成 | フロー | プレビュー | 設定
+├─ Review (Reviewer/Publisher): thay đổi theo ngôn ngữ nghiệp vụ, impact, preview của snapshot, kết quả simulation, approve/reject/publish
+└─ Thư viện: shared block, starter (P0: chọn và pin; không marketplace)
+```
+
+Từ ngữ hiển thị (ngôn ngữ Admin: OD-11): Form, 下書き (Draft), 公開バージョン rN (Published Revision), 公開中 (Active). "Release" và mọi khái niệm kỹ thuật (lock, IR, manifest) chỉ xuất hiện ở màn Advanced/Reviewer.
+
+**S4-P02 Ba mô hình UI cho Builder.**
+
+*Mô hình A — Outline-first (danh sách dọc kiểu biểu mẫu):*
+```
+┌ Steps & Fields (dọc) ─────────────┬ Inspector ┐
+│ ▸ 1 商品情報                       │ (field    │
+│     メーカー / 型番 / CPU          │  đang     │
+│ ▸ 2 買取方法  ⑂ 2 nhánh            │  chọn)    │
+│ ▸ 3a 店舗選択 (khi 店頭)           │           │
+│ ▸ 3b 宅配情報 (khi 宅配)           │           │
+│ ▸ 4 連絡先 · 5 確認                │           │
+└────────────────────────────────────┴───────────┘
+```
+- Ưu: quen thuộc, gần thứ tự khách thấy; dễ làm accessible (danh sách, bàn phím); phạm vi P0 nhỏ nhất.
+- Nhược: nhánh chỉ thấy dạng nhãn; flow phức tạp khó hình dung; không thấy form "trông thế nào" khi đang sửa.
+
+*Mô hình B — Flow-canvas-first (đồ thị node/edge):*
+```
+[商品情報] → [買取方法] ─店頭→ [店舗選択] ─┐
+                       └─宅配→ [宅配情報] ─┴→ [連絡先] → [確認]
+(click node → drawer chỉnh field)
+```
+- Ưu: nhánh rõ nhất; khớp mô hình step graph của DSL.
+- Nhược: đồ thị node gây áp lực với người nghiệp vụ, dễ thành "lập trình trực quan"; zoom/kéo khó accessible; chỉnh field bị đẩy vào drawer; dễ vẽ edge sai (vòng, nhánh thiếu).
+
+*Mô hình C — Hybrid workspace (khuyến nghị):*
+```
+┌ 構成 (outline) ──┬ キャンバス (step đang chọn, renderer thật) ┬ インスペクター ─────┐
+│ 1 商品情報       │  商品情報                                  │ [基本][条件][検証]  │
+│ 2 買取方法 ⑂     │  メーカー [_____]   ← click để chọn        │ [詳細 ▸]            │
+│ 3a 店舗選択      │  ＋ ここに追加                             │ ラベル  必須 ☑      │
+│ 3b 宅配情報      │  型番     [_____]                          │ 選択肢 …            │
+│ 4 連絡先  5 確認 │                                            │                     │
+├──────────────────┴────────────────────────────────────────────┴─────────────────────┤
+│ 保存済み ✓ · 問題 2件 ▸ · 下書き (レビュー依頼可能: いいえ)      [作成|フロー|プレビュー|設定] │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+- **Outline** (trái): cây step → field; chọn, thêm, sắp xếp bằng drag **và** bàn phím/menu "移動先…".
+- **Canvas** (giữa): step đang chọn được vẽ bằng **chính renderer của runtime** ở chế độ chỉnh sửa (direct manipulation: click chọn, điểm chèn ＋). Không phải JSON được vẽ lại.
+- **Inspector** (phải): theo đối tượng đang chọn, chia tab 基本 / 条件 / 検証 / 詳細 (progressive disclosure).
+- **フロー**: bản đồ step và nhánh **sinh tự động** từ rule; click node để tới step/rule; P0 không cho vẽ edge — nhánh được sửa bằng câu điều kiện.
+- **プレビュー**: engine thật, khung desktop/mobile, chọn kịch bản (店頭/宅配), simulation có nhãn.
+- **Thanh trạng thái**: trạng thái lưu, số vấn đề (click để mở danh sách và nhảy tới chỗ sửa), mức sẵn sàng của draft.
+- Ưu: vừa thao tác trực tiếp vừa thấy tổng thể; nhánh nhìn được mà vẫn sửa bằng ngôn ngữ nghiệp vụ; canvas và preview cùng renderer với runtime (BUILD-08, spec #3); outline đảm bảo đường không cần drag.
+- Nhược: nhiều phần phải đồng bộ (outline, canvas, flow, inspector); phạm vi P0 lớn hơn A. Giảm bằng cách: フロー chỉ đọc + điều hướng ở P0; một vùng chọn duy nhất cho toàn workspace.
+
+**Khuyến nghị: C**, với P0 cắt gọn (フロー chỉ đọc, chưa có canvas tự do kéo thả layout). A là phương án dự phòng nếu phạm vi P0 cần nhỏ hơn. B không khuyến nghị cho Business Editor.
+
+**S4-P03 Interaction model (áp cho C).**
+- **Một vùng chọn duy nhất** (step / field / block instance / rule); outline, canvas, flow và inspector đều theo vùng chọn này; breadcrumb ở inspector.
+- **Mọi chỉnh sửa là typed command** (ADR-004) → autosave theo debounce, optimistic concurrency theo `draftVersion`, chừa đường undo/redo (P1).
+- **Thêm field:** điểm ＋ giữa các field → Capability Library (tìm kiếm + nhóm: 基本 / 選択 / 連絡先(個人情報) / 店舗・プラグイン / 共通ブロック) → chèn với giá trị mặc định an toàn. Mục tiêu ≤ 3 thao tác.
+- **Sắp xếp:** drag handle; Alt+↑/↓; menu "移動先…" để chuyển sang step khác. Không bắt buộc drag.
+- **Điều kiện (rule):** tab 条件 có câu `[field] [toán tử theo kiểu field] [giá trị từ option list] → [hiển thị / ẩn / bắt buộc]`; với step: mục "次のステップ" gồm danh sách `この場合 → [step]` theo thứ tự và "それ以外 → [step]" bắt buộc. Điều kiện đặt tên được ("店頭買取の場合") để dùng lại. Admin chuyển thành Rule AST và transition của spec #1; không bao giờ hiện AST.
+- **Validation:** tab 検証: 必須; validator đã đăng ký dạng chip lấy từ catalog; tham số qua inspector sinh từ `paramsSchema`; ghi đè message.
+- **Plugin Inspector:** field plugin dùng design binding của capability (spec #2 §7.2) hoặc inspector tự sinh từ `configSchema`; badge trạng thái (`deprecated`…) ; version chỉ hiện ở 詳細.
+- **Vấn đề (Issues):** diagnostic của analyzer (spec #1 §14) được dịch sang ngôn ngữ nghiệp vụ, mỗi vấn đề có nút "修正する" nhảy tới đúng đối tượng. Ba mức của draft: 編集中 (có lỗi, vẫn lưu) · プレビュー可能 · レビュー依頼可能.
+- **Cảnh báo impact trước thay đổi nguy hiểm:** xóa field đang được rule tham chiếu; đổi/xóa option đang dùng trong rule; đổi key ảnh hưởng Data Contract; nâng version block/plugin. Dialog liệt kê chỗ bị ảnh hưởng và lựa chọn (hủy / sửa luôn tham chiếu / tiếp tục và để lại lỗi). Key ledger (spec #1 R-04) ngăn dùng lại key.
+- **Preview:** engine thật + browser facet từ release store (spec #2 §9.5, spec #3); chọn step bắt đầu, kịch bản nhánh, desktop/mobile; Submission Simulation gọi mock backend, có nhãn 「シミュレーション」, không side effect.
+- **Trạng thái lưu:** 保存済み / 保存中 / 未保存の変更 / 保存できませんでした (再試行); xung đột phiên bản (người khác vừa sửa) → thông báo và lựa chọn, không ghi đè ngầm.
+
+**S4-P04 Chỉ số UX (đề xuất, chưa phải KPI đã xác nhận).**
+
+| Chỉ số | Cách đo | Target đề xuất |
+|---|---|---|
+| Time to first valid PC form (người dùng lần đầu, từ starter) | usability test có kịch bản với dữ liệu giả; bấm giờ từ "Create" tới khi draft đạt mức レビュー依頼可能 | ≤ 30 phút |
+| Time to first interactive preview | cùng buổi test; tới lúc lần đầu mở プレビュー và đi được 1 step | ≤ 5 phút |
+| Số thao tác thêm một field | đếm thao tác (click/phím) từ ＋ tới field xuất hiện với mặc định | ≤ 3 |
+| Số thao tác tạo nhánh 店頭/宅配 | đếm thao tác cho rule "次のステップ" 2 nhánh + "それ以外" | ≤ 8 |
+| Tỷ lệ hoàn thành task không cần developer | số người hoàn thành / số người test (≥ 5 người nội bộ, không phải developer) | ≥ 4/5 |
+| Lỗi cấu hình phát hiện trước publish | bộ lỗi gieo sẵn (fixture); tỷ lệ bị analyzer bắt trước khi request publish | 100% với lỗi trong catalog đã định nghĩa |
+| Tự sửa lỗi từ thông báo UI | trong test, tỷ lệ lỗi gieo sẵn người dùng tự sửa không hỏi ai | ≥ 80% |
+| Nhất quán preview/runtime | conformance scenario chạy cả preview và artifact; so kết quả | 100% scenario giống nhau (tự động) |
+
+- Instrument trong Admin chỉ ghi sự kiện thao tác và thời điểm, không PII, không nội dung field.
+- Số target là để user review; không dùng làm cam kết.
+
+### OPEN
+
+- **Q4-2:** chọn mô hình UI cho Builder (A / B / C) và phạm vi P0 của mô hình đó.

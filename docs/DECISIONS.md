@@ -62,6 +62,7 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-043 | OD3-03: chấp nhận ở P0 việc WebKit có thể tải lại chunk đã prefetch; xử lý evaluation failure không tự reload | **ACCEPTED FOR P0** (spike review) | User (spike review) | 2026-10-24 |
 | ADR-044 | OD3-04: pnpm là package manager ưu tiên để đánh giá ở P02 (chưa khóa version) | **APPROVED AS EVALUATION DIRECTION** (spike review) | User (spike review) | 2026-10-24 |
 | ADR-045 | Toolchain Node.js: Node 20 đã EOL; chỉ giữ để tái hiện spike; P02 đánh giá Node 24 LTS | **ACCEPTED** (spike review); version cụ thể chốt ở P02 | User (spike review) | 2026-10-24 |
+| ADR-046 | Spec #4: Business-first Visual Form Builder, Developer-extensible Architecture; persona và hành trình ngày đầu; tiêu chí thành công A/B; nguyên tắc UX | **APPROVED AS PRODUCT DIRECTION** (spec #4 Answer #1); IA, mô hình UI, chỉ số PROPOSED | User (spec #4 Answer #1) | 2026-10-24 |
 
 ---
 
@@ -955,3 +956,19 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 - **Quyết định (user): ACCEPTED.** Giữ image Node 20 để tái hiện spike, **không** mặc định dùng cho canonical production build. Ở P02: ưu tiên đánh giá Node.js 24 LTS; pin image theo digest bất biến; kiểm tương thích Vite/Rolldown và plugin; chạy lại verification reproducibility và isolation; ghi rõ nếu kết quả khác spike. Không sửa evidence gốc của spike.
 - **Trạng thái:** ACCEPTED; version cụ thể chốt ở P02. Verification: VG-05.
 - **Người duyệt:** User (spike review). **Ngày:** 2026-10-24.
+
+## ADR-046 — Business-first Visual Form Builder (spec #4 Answer #1)
+
+- **Bối cảnh:** spec #4 (Admin Form Builder) phải được thiết kế từ góc nhìn người nghiệp vụ.
+- **Quyết định (user): Business-first Visual Form Builder, Developer-extensible Architecture.** Định hướng sản phẩm, chưa duyệt spec #4 hay G1.
+  - **Persona (giả định thiết kế):** Business Editor — PC Site (PO/PM/Business Operator); hiểu nghiệp vụ; không cần biết React/TS/Python/JSON Schema/DSL; không sửa source, không đăng ký plugin; chỉ dùng capability đã approve; không nhất thiết có quyền publish.
+  - **Hành trình ngày đầu 9 bước:** login & chọn site → tạo form (starter/clone/trống; không live inheritance) → step → field → điều kiện (`WHEN … THEN …`, không code/JSON/regex/DSL/path) → theme & Motion (preset; spec #6) → **preview & test** (desktop/mobile, nhánh, validation, 確認, hoàn tất; cùng semantic contract; phân biệt Visual/Interactive Preview, Submission Simulation, Published Form; không side effect) → lưu & sửa lỗi (lỗi dễ hiểu, dẫn tới chỗ sửa; draft có lỗi / hợp lệ để preview / hợp lệ để request publish) → gửi review (Editor không bypass reviewer; phối hợp spec #5).
+  - Identity ổn định do platform quản lý; đổi label không phá reference; classification không hạ dưới mức tối thiểu.
+  - **Thành công A (spec #4)** và **B (vertical slice)** như notes; A toàn bộ bằng UI, không source/JSON.
+  - **Nguyên tắc UX:** business-first terminology; progressive disclosure; direct manipulation; safe editing; accessible (không bắt buộc drag-and-drop); deterministic feedback (không giả vờ publish thành công).
+  - **Scope:** P0 ưu tiên first-day journey end-to-end; danh sách P1/P2 như notes; P0 vẫn có branching, cấu hình trực quan, validation, preview, persistence, review/publish journey.
+  - **Chỉ số UX:** đề xuất kèm phương pháp đo; không đặt KPI cố định như đã xác nhận.
+  - **Anti-goal:** không thiết kế JSON editor bọc drag-and-drop rồi gọi là no-code.
+- **Đề xuất của Claude (PROPOSED, notes S4-P01..P04):** IA; ba mô hình UI (A outline, B flow canvas, C hybrid workspace — khuyến nghị C); interaction model; bảng chỉ số kèm target đề xuất.
+- **Trạng thái:** APPROVED AS PRODUCT DIRECTION. G1 NOT APPROVED.
+- **Người duyệt:** User (spec #4 Answer #1). **Ngày:** 2026-10-24.
