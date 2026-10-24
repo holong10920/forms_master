@@ -1609,3 +1609,99 @@ Ba lớp, chỉ lớp đầu quyết định identity:
 - **Q3-4 (reproducible build):** Khi build lại cùng một release từ cùng input, bạn cần byte-for-byte giống hệt (để `releaseId` trùng và rebuild là bằng chứng integrity), hay chấp nhận "tương đương chức năng" với hash khác?
   - Ảnh hưởng: môi trường build (pin toolchain, container cố định hay máy local), ý nghĩa của rebuild-verification (spec #2 AC2-06), S3-P12, cách xử lý khi bundler không tất định.
   - Phỏng đoán của Claude: byte-for-byte cho mọi file trong inventory, build trong môi trường đã pin; nếu spike cho thấy bundler không tất định thì ghi thành defect cần xử lý, không nới contract.
+  - → đã trả lời ở Spec #3 Answer #4.
+
+## Session 3: Spec #3 Answer #4 (2026-10-24), reproducible build → ADR-039
+
+### CONFIRMED (user)
+
+- **DECISION: APPROVED AS DESIGN DIRECTION — Byte-for-byte Reproducible Build cho trusted release artifact.** Chưa duyệt toàn spec #3 hay G1.
+- **Yêu cầu:** cùng canonical build input, cùng toolchain, cùng dependency lock và artifact digest, cùng build instruction, cùng môi trường chuẩn → artifact giống hệt từng byte, so bằng SHA-256 (hoặc hash mật mã phù hợp). Tương đương chức năng mà khác byte **không** phải reproducible build thành công. Phạm vi: các release artifact đã định nghĩa; không yêu cầu CI log, timestamp, báo cáo vận hành giống hệt.
+- **Build environment chuẩn cho CI release:** container image pin theo digest; Node chính xác; Python chính xác nếu tham gia compilation; package manager chính xác; lockfile; version compiler/bundler/minifier; hash plugin release artifact; version engine/runtime; build config chuẩn; locale, timezone và input môi trường có ảnh hưởng được cố định; thứ tự file và serialization tất định; không phụ thuộc đường dẫn tuyệt đối; không timestamp/random trong artifact thuộc phạm vi identity. Không floating dependency resolution. Local build linh hoạt hơn nhưng không thay bằng chứng trusted release.
+- **Verification protocol:** (1) resolve input bất biến → (2) build A trong môi trường sạch → (3) build B độc lập từ cùng input → (4) so toàn bộ artifact inventory → (5) so hash → (6) giống hệt: tiếp tục integrity/release check → (7) khác: fail kèm báo cáo diff. Không hợp thức hóa output khác nhau thành release mới khi tuyên bố cùng input. Build cache không được che non-determinism; cần clean-build verification.
+- **S3-P12 bổ sung:** LRM có canonical serialization contract; inventory có relative path + content hash từng file trong phạm vi; sort và path normalization tất định; định nghĩa hash algorithm và schema version của manifest; `releaseId` không tự tham chiếu; xử lý duplicate/collision; cùng LRM → cùng `releaseId`; khác input có ý nghĩa → identity khác hoặc bị kiểm incompatibility. **Cùng input khai báo mà byte khác là reproducibility failure, không phải cơ chế tạo release mới.**
+- **index.html integrity:** LRM → `releaseId` → `index.html` tất định → Final Release Metadata/Attestation ghi hash `index.html` → integrity gate kiểm toàn bộ artifact set kể cả `index.html` → record integrity cuối không được sửa sau approval. Phân biệt: immutable release `index.html` · mutable Stable Entry HTML · build artifact · build provenance · operational status record. Stable Entry HTML không thuộc identity của release.
+- **Provenance (theo tinh thần SLSA Build Provenance, mức PoC):** source commit, builder identity, build instruction, dependency đã resolve, toolchain, artifact hash, build config identity. Reproducibility và provenance là hai thuộc tính khác nhau; artifact tái lập được không tự chứng minh nguồn hay pipeline đáng tin. Không cần SLSA certification ở P0.
+- **Failure semantics:** non-deterministic output, thiếu dependency, hash mismatch, manifest không nhất quán, file output ngoài dự kiến, trùng path artifact, lệch version compiler, dependency không tin cậy, trùng `releaseId` → pipeline fail với diagnostic rõ. Không fallback, không ghi đè artifact bất biến, không activate release lỗi. Mọi check security/integrity xong trước activation.
+- **S3-P13:** đồng ý `bootstrap.js` external có version cho P0. CSP hợp topology production; SRI/hash khi cấu hình phù hợp; không `unsafe-inline` mặc định; CSS shell inline tuân CSP; active-pointer metadata của Stable Entry **không** phải bằng chứng authoritative; backend vẫn enforce release status và security policy; bootstrap không tải runtime của revision sai. **Fallback thuần CSS không biết chắc CSP chặn JS hay runtime đang chậm** → mô tả là generic fallback notice, không phải CSP failure detector. JS tắt → `<noscript>`. Không tạo UX hứa phát hiện mọi lỗi bootstrap khi chưa có JS chạy.
+- **Scope:** không overengineer. Ưu tiên một môi trường tham chiếu, output tất định, lock chính xác, diff verification, release bất biến, evidence. Không cần build farm, nhiều cloud builder, tất định giữa các OS, artifact registry phức tạp, build-cache orchestration.
+- **Test matrix** (11 case, có expected, pass/fail, vị trí evidence) — ở S3-P21.
+- **Governance:** ghi Answer #4 và điều chỉnh S3-P12/P13 vào ADR + notes; chi tiết chưa review giữ PROPOSED; cho phép local documentation commit sau staged-diff/security check; không code, không push, không AWS write; G1 NOT APPROVED, G9/G10 BLOCKED. Câu hỏi tiếp theo ưu tiên: compiler pipeline stages, static vs dynamic plugin import, chunk splitting, release artifact verification. Khi đủ thông tin thì tạo Spec #3 Architecture Proposal.
+
+### PROPOSAL (Claude): sau Answer #4. Chờ review, NOT approved. Sẽ chuyển vào spec #3.
+
+**S3-P12 rev 2 — LRM contract.**
+- `lrmFormat: 1` (schema version của LRM, có JSON Schema 2020-12 riêng). Đổi cấu trúc LRM = tăng `lrmFormat`.
+- **Serialization:** RFC 8785 (JCS) trên UTF-8; mọi số trong LRM là integer; không trường tùy chọn mang giá trị `null` (bỏ hẳn trường).
+- **Hash:** SHA-256 cho từng file và cho LRM. `releaseId = "rel_" + base32-lowercase-không-padding(sha256(JCS(LRM)))[:26]`; digest đầy đủ (hex 64) lưu ở Final Release Attestation.
+- **Phạm vi inventory:** mọi file phục vụ dưới `/r/{releaseId}/` **trừ** `index.html`. Sourcemap không phục vụ công khai ở P0 (SEC-04); nếu sinh ra để debug thì là private artifact, liệt kê kèm hash trong provenance, không thuộc LRM.
+- **Path:** tương đối với gốc release, phân tách `/`, ký tự cho phép `[a-z0-9._/-]` (compiler sinh tên, không lấy từ dữ liệu Editor), cấm `..`, `./`, `/` đầu, `//`, path rỗng. Hai path chỉ khác hoa/thường → `E-ARTIFACT-PATH-COLLISION`. Sắp xếp theo thứ tự byte UTF-8.
+- **Mỗi entry:** `{ path, size, sha256, contentType }`; `contentType` lấy từ bảng cố định theo đuôi file (không đoán theo nội dung).
+- **Verification:** tính lại `sha256(JCS(LRM))` → phải ra đúng `releaseId` và digest trong attestation.
+- **Cùng `releaseId` đã có:** digest đầy đủ + LRM giống → no-op (idempotent); khác → `E-RELEASE-ID-COLLISION`.
+- **Input khai báo giống nhau mà byte khác** (phát hiện ở verification hai build, S3-P18) → `E-BUILD-NON-REPRODUCIBLE` (NON_REPRODUCIBLE_BUILD); không đăng ký release nào.
+
+**S3-P17 Canonical build environment (P0).**
+- **Builder image:** một image Docker (Docker 29.1.3 có sẵn trên máy) pin theo **digest**, chứa Node (version chính xác), package manager (version chính xác, qua corepack hoặc cài cố định), không có gì khác cần cho build. Python **không** tham gia compilation theo thiết kế hiện tại (analyzer chạy trong Node build worker); nếu sau này tham gia thì pin version tương tự.
+- **Môi trường cố định:** `TZ=UTC`, `LANG=C.UTF-8`, `LC_ALL=C.UTF-8`, umask cố định, đường dẫn build cố định trong container (ví dụ `/build`), `NODE_ENV=production`, `SOURCE_DATE_EPOCH` = thời điểm commit (chỉ để công cụ nào cần timestamp có giá trị cố định; mục tiêu là không có timestamp trong artifact).
+- **Dependency:** cài từ lockfile ở chế độ frozen (không resolve lại); không mạng trong bước build sau khi cài (giảm phụ thuộc ngoài); plugin release lấy từ release store theo hash (spec #2 §9.4).
+- **Build config chuẩn:** một file config có hash (target browser, base path policy, minifier option, chunk naming theo content hash), nằm trong LRM.
+- **Toolchain manifest:** version chính xác của Node, package manager, bundler, minifier, compiler, engine → ghi vào LRM (phần ảnh hưởng output) và provenance.
+- **Local build:** được dùng để phát triển và Dev Preview (spec #2 §9.5), không bao giờ là bằng chứng trusted release.
+
+**S3-P18 Verification protocol.**
+
+| Bước | Việc | Thất bại |
+|---|---|---|
+| 1 | Resolve input bất biến: commit sạch, lockfile, hash plugin release, digest builder image, build config | `E-BUILD-UNPINNED-DEP`, `E-BUILD-DEP-MISSING`, `E-BUILD-UNTRUSTED-DEP` |
+| 2 | Build A: container mới, không cache | build error |
+| 3 | Build B: container mới khác, không cache, **khác thư mục mount trên host** (để lộ phụ thuộc đường dẫn) | build error |
+| 4 | So inventory A/B (tập path, size) | `E-BUILD-NON-REPRODUCIBLE` + diff |
+| 5 | So SHA-256 từng file và digest LRM | `E-BUILD-NON-REPRODUCIBLE` + diff |
+| 6 | Kiểm toolchain thực tế khớp toolchain manifest | `E-TOOLCHAIN-MISMATCH` |
+| 7 | Tính `releaseId`, kiểm trùng (S3-P12) | `E-RELEASE-ID-COLLISION` |
+| 8 | Sinh `index.html`, ghi Final Release Attestation | — |
+| 9 | Integrity gate (S3-P19) | `E-ARTIFACT-HASH-MISMATCH`, `E-ARTIFACT-UNEXPECTED-FILE`, `E-LRM-INCONSISTENT` |
+| 10 | Chỉ khi tất cả pass: đăng ký release (inactive) → activation theo S3-P08 | — |
+
+- P0 dùng **cả hai build sạch** (quy mô PoC chịu được chi phí). Cache chỉ dùng cho build dev.
+- Báo cáo diff: danh sách path khác, hash A/B, diff nội dung dạng text cho file text; công cụ diff do builder chọn.
+
+**S3-P19 Final Release Attestation và integrity gate.**
+- **Final Release Attestation (FRA):** `{ attestationFormat, releaseId, lrmDigest, indexHtmlSha256, artifactSetDigest (sha256 của JCS danh sách mọi file đã phục vụ, kể cả index.html), provenanceDigest, createdAt }`. Ghi **một lần** vào release store; sau approval không sửa (write-once). Cần sửa → đó là release khác, không phải sửa record.
+- **Integrity gate** (trước activation và khi rollback): mọi file trong inventory tồn tại và đúng hash; `index.html` đúng `indexHtmlSha256`; **không có file nào ngoài** inventory + `index.html`; `releaseId` tính lại khớp; FRA khớp LRM.
+- **Năm loại dữ liệu tách biệt:** immutable release `index.html` (thuộc artifact set, có hash trong FRA) · mutable Stable Entry HTML (bản chiếu active pointer, không thuộc identity) · build artifact (thuộc LRM) · build provenance (S3-P20) · operational status record (activation, support, security, retention; spec #5).
+
+**S3-P20 Provenance (mức PoC, theo tinh thần SLSA Build Provenance).** `{ subject: [{ releaseId, artifactSetDigest }], source: { commit, treeClean: true }, builder: { imageDigest, pipelineId, operator (P0: local) }, buildInstructions: { command, buildConfigDigest }, resolvedDependencies: [{ name, version, integrity }], pluginReleases: [{ PRK, facetHashes }], toolchain: {...}, reproducibility: { buildA, buildB, identical: true } }`. Lưu cạnh FRA, digest ghi trong FRA. Không ký ở P0 (ADR-030). Ghi rõ: provenance nói release **được build thế nào và từ đâu**; reproducibility nói **build có tất định không**; cả hai không chứng minh pipeline đáng tin.
+
+**S3-P13 rev 2 — Bootstrap.**
+- Thông báo dự phòng thuần CSS là **generic fallback notice**: hiện sau N giây nếu form chưa thay shell, nội dung không đoán nguyên nhân, ví dụ 「読み込みに時間がかかっています。通信環境をご確認のうえ、ページを再読み込みしてください。」. Không tuyên bố đó là lỗi CSP.
+- TM-L08 sửa thành: "CSP chặn script → shell hiện generic fallback notice sau N giây; CSP report (nếu cấu hình) cho vận hành biết nguyên nhân".
+- Active pointer trong `entry.html` chỉ dùng để chọn release cho khách mới; backend vẫn kiểm support/security ở mọi query/submit.
+
+**S3-P21 Test matrix reproducible build (TM-B01..B11).** Evidence (sau G1): `docs/evidence/<phase>/release-verification/<case>/` gồm command, output, hash list, diff report.
+
+| # | Case | Expected | Pass | Fail |
+|---|---|---|---|---|
+| B01 | Hai build sạch cùng input | inventory và hash giống hệt | mọi SHA-256 trùng, `releaseId` trùng | bất kỳ file nào khác |
+| B02 | Đảo thứ tự liệt kê file (filesystem trả thứ tự khác) | output không đổi | hash giống B01 | khác hash |
+| B03 | Đổi source hoặc plugin dependency có ý nghĩa | `releaseId` khác; inventory phản ánh thay đổi | `releaseId` ≠ bản gốc | `releaseId` trùng |
+| B04 | Đổi timestamp/log/metadata vận hành | `releaseId` không đổi | trùng | khác |
+| B05 | Dependency không pin (range, thiếu trong lock) | build bị từ chối trước khi chạy | `E-BUILD-UNPINNED-DEP` | build chạy tiếp |
+| B06 | Artifact của dependency/plugin bị thay đổi (hash khác lock) | integrity fail | `E-ARTIFACT-HASH-MISMATCH` / `E-LOCK-UNRESOLVABLE` | build dùng artifact lạ |
+| B07 | Sửa `index.html` sau khi sinh | integrity gate fail | lỗi với `indexHtmlSha256` | qua gate |
+| B08 | Sửa LRM | verification `releaseId` fail | `E-LRM-INCONSISTENT` | qua gate |
+| B09 | Cùng input khai báo, output khác (ví dụ chèn non-determinism cố ý) | `E-BUILD-NON-REPRODUCIBLE`, không đăng ký release | lỗi + diff report | release được tạo |
+| B10 | Build revision khác của cùng form | `releaseId` khác; resolver/status không trả nhầm release | khác identity, tra đúng record | resolve nhầm |
+| B11 | Publish fail ở integrity gate | active release không đổi | pointer giữ nguyên, `pointerVersion` không tăng | pointer bị đổi |
+
+### Đã thực hiện (Claude)
+
+- ADR-039 (reproducible build, LRM contract, attestation, provenance, failure semantics). ADR-038 ghi chú: S3-P13 rev 2.
+- Không cần sửa spec #1/#2 (spec #2 §9.3 rebuild và AC2-06 đã dựa trên tính tái lập của spec #3).
+
+### OPEN
+
+- **Q3-5 (static vs dynamic import, chunk splitting):** Plugin như `store-selector` chỉ dùng ở một nhánh (店頭買取). Bạn muốn code của nó nằm trong bundle ban đầu, hay tách thành chunk chỉ tải khi khách có khả năng đi vào nhánh đó?
+  - Ảnh hưởng: initial runtime JS bytes và T2/T3 (S3-P14); độ trễ khi chuyển step; xử lý chunk lỗi giữa form (không mất dữ liệu); prefetch; Motion lazy (biến thể Motion-none); cách chứng minh INV-F1/F6 khi có nhiều chunk. Mọi `import()` vẫn là literal do compiler sinh (INV-F3).
+  - Phỏng đoán của Claude: chunk ban đầu = engine + capability của step đầu tiên; capability của step khác tách chunk theo step/nhánh, prefetch khi form đã ready và trình duyệt rảnh; chunk lỗi → step đó hiện 再試行, giữ nguyên dữ liệu.

@@ -1,16 +1,16 @@
 # Current Status
 
-> Cập nhật lần cuối: 2026-10-24 (phiên 3: spec #3 Answer #3 → ADR-038 hoàn chỉnh; S3-P12..P16; đang hỏi Q3-4)
+> Cập nhật lần cuối: 2026-10-24 (phiên 3: spec #3 Answer #4 → ADR-039; S3-P17..P21; đang hỏi Q3-5)
 
 | Mục | Giá trị |
 |---|---|
-| Phase đang chạy | **P01 Discovery/Design IN_PROGRESS**. Spec #1 rev 3.2 (rev 3 + đồng bộ plugin contract và draft/release pinning): CONDITIONALLY ACCEPTED FOR DESIGN CONTINUATION (review #2), **chưa duyệt hoàn toàn**. Spec #2 rev 2.2 (rev 2 + đồng bộ ADR-037, ADR-038): review #1 = CHANGES REQUIRED — DESIGN DIRECTION ACCEPTED; chờ user review. Spec #3 (Compiler & Bundle): **đang brainstorm** (Q3-1 → ADR-036; Q3-2 → ADR-037; Q3-3 → ADR-038; Q3-4 OPEN). |
+| Phase đang chạy | **P01 Discovery/Design IN_PROGRESS**. Spec #1 rev 3.2 (rev 3 + đồng bộ plugin contract và draft/release pinning): CONDITIONALLY ACCEPTED FOR DESIGN CONTINUATION (review #2), **chưa duyệt hoàn toàn**. Spec #2 rev 2.2 (rev 2 + đồng bộ ADR-037, ADR-038): review #1 = CHANGES REQUIRED — DESIGN DIRECTION ACCEPTED; chờ user review. Spec #3 (Compiler & Bundle): **đang brainstorm** (Q3-1 → ADR-036; Q3-2 → ADR-037; Q3-3 → ADR-038; Q3-4 → ADR-039; Q3-5 OPEN). |
 | Plan đang active | Không có. `writing-plans` chỉ chạy sau G1. |
 | Git | local branch `p00-discovery`. Các commit WIP của P01 xem bằng `git log` (`21baa8c` = spec #1 rev 2; commit không có nghĩa là đã duyệt). Checkpoint P00 = `0d4fe7b`. Chưa push. Push bị gate bởi G9 (ADR-007). |
 | Remote | repo GitHub cá nhân, **PUBLIC**. G9 BLOCKED; user đang xử lý. |
 | AWS | **KHÔNG GHI**, và chưa gọi AWS API nào. Chưa chọn profile (ADR-006). |
 | Môi trường | macOS local; Node 20.20.2; Python 3.9.6; Docker 29.1.3 |
-| Scope đã duyệt | G0: ADR-001..007. Nguyên tắc của spec #1: ADR-008..012, ADR-015, ADR-016. Design direction: ADR-017 (OD-01), ADR-018 (OD-14), ADR-019 (OD-02), ADR-020 (OD-04), ADR-021 (OD-07), ADR-022 (OD-12). Spec #2: ADR-023..025, ADR-027, ADR-028 (nguyên tắc), ADR-026 (APPROVED AS DESIGN DIRECTION WITH ADJUSTMENTS), ADR-029..035 (OD2-01..07, review #1). Spec #3: ADR-036 (self-contained form release), ADR-037 (session-pinned revision + stable/immutable URL), ADR-038 (CSR + Loading Shell), cả ba APPROVED AS DESIGN DIRECTION. ADR-013/014 + addenda vẫn PROPOSED. (không phải là duyệt architecture). **G1 NOT APPROVED. G9 BLOCKED. G10 BLOCKED.** |
+| Scope đã duyệt | G0: ADR-001..007. Nguyên tắc của spec #1: ADR-008..012, ADR-015, ADR-016. Design direction: ADR-017 (OD-01), ADR-018 (OD-14), ADR-019 (OD-02), ADR-020 (OD-04), ADR-021 (OD-07), ADR-022 (OD-12). Spec #2: ADR-023..025, ADR-027, ADR-028 (nguyên tắc), ADR-026 (APPROVED AS DESIGN DIRECTION WITH ADJUSTMENTS), ADR-029..035 (OD2-01..07, review #1). Spec #3: ADR-036 (self-contained form release), ADR-037 (session-pinned revision + stable/immutable URL), ADR-038 (CSR + Loading Shell), ADR-039 (reproducible build), tất cả APPROVED AS DESIGN DIRECTION. ADR-013/014 + addenda vẫn PROPOSED. (không phải là duyệt architecture). **G1 NOT APPROVED. G9 BLOCKED. G10 BLOCKED.** |
 | URLs | không có |
 
 ## Đã xong (có evidence)
@@ -55,7 +55,7 @@
     - **Spec #2 Design Proposal rev 1:** `docs/superpowers/specs/2026-10-24-plugin-contracts-capability-registry-design.md`. Builder check đã chạy (§25.1).
     - **Review #1 (CHANGES REQUIRED — DESIGN DIRECTION ACCEPTED):** OD2-01..07 → ADR-029..035. **Rev 2** áp quyết định, sửa `valueOrigin` (→ provenance/authority/verification), `storeExists` = `storeIdValid`, postal-code lookup, React singleton, negative fixture; thêm Cross-Spec Interface Matrix #1 ↔ #2 (§19, I-01..I-21). Ví dụ JSON kiểm lại: PASS (`docs/evidence/P01/spec2-manifest-example-check.txt`). OPEN mới: OD2-08, OD2-09.
     - **Spec #1 rev 3.1:** chỉ đồng bộ contract plugin theo spec #2 §19 (ví dụ §7.2/§7.3, §7.1, §7.8, §10 D-03, §11, §12, §13, §16, §20, §26).
-  - **Spec #3 (Compiler & Bundle Architecture):** đang brainstorm. Q3-1 → ADR-036. Answer #2 (revision pinning, URL, recovery) → ADR-037; đề xuất S3-P01..P11 (release identity, bootstrap/resolver, INV-R1/R2, trạng thái release, consistency model, activation protocol, error contract, TM-R01..R14) trong notes, chờ chuyển vào tài liệu spec #3. Q3-3 → ADR-038 (CSR + Loading Shell trung tính; measurement contract; prerender tương lai); đề xuất S3-P12 (release identity tất định, thay định nghĩa cũ), S3-P13 (bootstrap B + CSP), S3-P14 (T1/T2/T3), S3-P15, S3-P16 (TM-L01..L14). Q3-4 (reproducible build) OPEN.
+  - **Spec #3 (Compiler & Bundle Architecture):** đang brainstorm. Q3-1 → ADR-036. Answer #2 (revision pinning, URL, recovery) → ADR-037; đề xuất S3-P01..P11 (release identity, bootstrap/resolver, INV-R1/R2, trạng thái release, consistency model, activation protocol, error contract, TM-R01..R14) trong notes, chờ chuyển vào tài liệu spec #3. Q3-3 → ADR-038 (CSR + Loading Shell trung tính; measurement contract; prerender tương lai); đề xuất S3-P12 (release identity tất định, thay định nghĩa cũ), S3-P13 (bootstrap B + CSP), S3-P14 (T1/T2/T3), S3-P15, S3-P16 (TM-L01..L14). Q3-4 → ADR-039 (byte-for-byte reproducible build; đề xuất S3-P12 rev 2, S3-P13 rev 2, S3-P17..P21, TM-B01..B11). Q3-5 (static vs dynamic import, chunk splitting) OPEN.
   - **Đồng bộ theo ADR-037:** spec #1 rev 3.2 (§9 `session`, §13), spec #2 rev 2.1 (§10.3, §10.6, §19 I-19/I-22); rev 2.2 (§10.2 LRM vs FRM).
   - **Pending cho spec #5 (chưa thiết kế chi tiết):** release record + active pointer, status API, activation protocol + reconciler, CDN invalidation và cache header thật (sau G10), retention job, HTTP status cuối cùng, TTL draft (OD-08), grace window (OD2-09), `T_edge_max` (notes S3-P11).
 
@@ -63,7 +63,7 @@
 - G9 (GitHub) và G10 (AWS): đang chờ user.
 
 ## Tiếp theo
-1. User trả lời Q3-4 (reproducible build), tiếp tục brainstorm spec #3, mỗi lần một câu hỏi.
+1. User trả lời Q3-5 (chunk splitting), tiếp tục brainstorm spec #3, mỗi lần một câu hỏi. Khi đủ thông tin: viết Spec #3 Architecture Proposal để user review.
 2. User review spec #2 rev 2.2 và quyết OD2-08/OD2-09 (cần trước spec #5, không chặn spec #3).
 3. User review spec #1 rev 3.2. Nếu đồng ý thì spec #1 chuyển sang READY_FOR_CROSS_REVIEW (chỉ khi user xác nhận).
 4. Sau spec #3: spec #4..#6 (Admin, API/persistence/publish, Motion). Spike đo isolation phải qua gate riêng (ADR-018).

@@ -1,6 +1,6 @@
 # Context Handoff
 
-> Dành cho một phiên Claude mới. Đọc file này trước, sau đó đến `CURRENT_STATUS.md`. Cập nhật 2026-10-24, phiên 3 (spec #3 Answer #3 → ADR-038; Q3-4 OPEN). Commit cuối xem `git log` trên branch `p00-discovery` (local, chưa push).
+> Dành cho một phiên Claude mới. Đọc file này trước, sau đó đến `CURRENT_STATUS.md`. Cập nhật 2026-10-24, phiên 3 (spec #3 Answer #4 → ADR-039; Q3-5 OPEN). Commit cuối xem `git log` trên branch `p00-discovery` (local, chưa push).
 
 **Dự án:** PoC multi-site form builder.
 - Form được định nghĩa bằng JSON có versioning.
@@ -23,15 +23,15 @@
   - Mức độ sẵn sàng ở §26.
 - **Spec #2 (Plugin Contracts & Capability Registry):** rev 2.2 ở `docs/superpowers/specs/2026-10-24-plugin-contracts-capability-registry-design.md` (rev 2 + đồng bộ ADR-037, ADR-038). Review #1: CHANGES REQUIRED — DESIGN DIRECTION ACCEPTED; OD2-01..07 đã quyết (ADR-029..035). Rev 2 chờ user review. OPEN: OD2-08, OD2-09 (§22). §19 là Cross-Spec Interface Matrix #1 ↔ #2.
 - **Spec #1** đã thành rev 3.2: chỉ đồng bộ plugin contract (spec #2) và draft/release pinning (ADR-037), không có review mới.
-- **Spec #3 (Compiler & Bundle Architecture):** đang brainstorm. Q3-1 → ADR-036 (self-contained form release). Answer #2 → ADR-037 (session-pinned revision, stable/immutable URL); đề xuất S3-P01..P11 + TM-R01..R14 nằm trong notes, sẽ chuyển vào tài liệu spec #3. Answer #3 → ADR-038 (CSR + Loading Shell; đề xuất S3-P12..P16, trong đó S3-P12 thay định nghĩa `releaseId` cũ). Câu hỏi đang mở Q3-4 (reproducible build) ở cuối `docs/discovery/P01_BRAINSTORM_NOTES.md`. Việc pending cho spec #5: notes S3-P11. Input từ spec #2: §9.2 (Capability Lock), §9.4 (tiêu thụ release), §10.2 (nội dung Release Manifest), §11 (INV-F1..F7, L1–L6), §11.4 (React singleton).
+- **Spec #3 (Compiler & Bundle Architecture):** đang brainstorm. Q3-1 → ADR-036 (self-contained form release). Answer #2 → ADR-037 (session-pinned revision, stable/immutable URL); đề xuất S3-P01..P11 + TM-R01..R14 nằm trong notes, sẽ chuyển vào tài liệu spec #3. Answer #3 → ADR-038 (CSR + Loading Shell; đề xuất S3-P12..P16, trong đó S3-P12 thay định nghĩa `releaseId` cũ). Answer #4 → ADR-039 (reproducible build; S3-P17..P21). Câu hỏi đang mở Q3-5 (static vs dynamic import, chunk splitting) ở cuối `docs/discovery/P01_BRAINSTORM_NOTES.md`. Việc pending cho spec #5: notes S3-P11. Input từ spec #2: §9.2 (Capability Lock), §9.4 (tiêu thụ release), §10.2 (nội dung Release Manifest), §11 (INV-F1..F7, L1–L6), §11.4 (React singleton).
 - Các ADR từ P01:
   - ADR-008..012, 015, 016: nguyên tắc spec #1.
   - ADR-017..022: design direction.
-  - ADR-023..025, ADR-027, ADR-028: nguyên tắc spec #2 (ACCEPTED). ADR-026: APPROVED AS DESIGN DIRECTION WITH ADJUSTMENTS. ADR-029..035: quyết định OD2-01..07 (review #1). ADR-036..038: spec #3.
+  - ADR-023..025, ADR-027, ADR-028: nguyên tắc spec #2 (ACCEPTED). ADR-026: APPROVED AS DESIGN DIRECTION WITH ADJUSTMENTS. ADR-029..035: quyết định OD2-01..07 (review #1). ADR-036..039: spec #3.
   - ADR-013, ADR-014, các addendum và mọi cơ chế chi tiết của spec #1/#2: **PROPOSED**.
 
 **Bước đầu tiên ở phiên tiếp theo:**
-1. Invoke `superpowers:brainstorming` và tiếp tục spec #3 từ câu hỏi OPEN cuối cùng trong notes (Q3-4). Mỗi lần một câu hỏi. Spec #3 phải khớp spec #2 §9–§11 và chịu trách nhiệm bằng chứng isolation thật (C5/L5).
+1. Invoke `superpowers:brainstorming` và tiếp tục spec #3 từ câu hỏi OPEN cuối cùng trong notes (Q3-5). Khi đủ thông tin: viết Spec #3 Architecture Proposal (chuyển S3-P01..P21, TM-R/L/B vào tài liệu spec) để user review. Mỗi lần một câu hỏi. Spec #3 phải khớp spec #2 §9–§11 và chịu trách nhiệm bằng chứng isolation thật (C5/L5).
 2. Nếu user review spec #2 rev 2: ghi vào notes + ADR, ra rev 3. Mọi thay đổi chạm interface #1 ↔ #2 phải cập nhật spec #2 §19 và spec #1 trong cùng thay đổi. Không tự đổi OD2-08/09 thành APPROVED.
 3. Không nâng bất kỳ mục PROPOSED/OPEN nào nếu chưa có approval rõ ràng. Spec #1 chỉ chuyển sang READY_FOR_CROSS_REVIEW khi user xác nhận.
 4. Giữ G1 NOT APPROVED, G9 BLOCKED, G10 BLOCKED. Không code. Spike phải qua gate riêng (ADR-018).

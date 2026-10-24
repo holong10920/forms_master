@@ -55,6 +55,7 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-036 | Self-contained Form Release ở P0: không có mutable shared runtime giữa các form (spec #3 Q3-1) | **APPROVED AS DESIGN DIRECTION** (spec #3 Q3-1); cơ chế PROPOSED (spec #3) | User (spec #3 Q3-1) | 2026-10-24 |
 | ADR-037 | Session-pinned revision + Stable Entry URL + Immutable Release URL; active ≠ supported; resolver trước khi khởi tạo runtime (spec #3 Q3-2) | **APPROVED AS DESIGN DIRECTION** (spec #3 Answer #2); resolver, consistency model, error contract PROPOSED; activation chi tiết → spec #5 | User (spec #3 Answer #2) | 2026-10-24 |
 | ADR-038 | P0 render phía client (CSR) với Loading Shell nhẹ, trung tính với revision; measurement contract; prerender chỉ là tối ưu tương lai (spec #3 Q3-3) | **APPROVED AS DESIGN DIRECTION** (spec #3 Answer #3); release identity, bootstrap/CSP, scenario matrix PROPOSED (S3-P12..P16) | User (spec #3 Answer #3) | 2026-10-24 |
+| ADR-039 | Byte-for-byte reproducible build cho trusted release; canonical build environment; verification hai build sạch; LRM contract; attestation `index.html`; provenance; failure semantics; bootstrap external (spec #3 Q3-4) | **APPROVED AS DESIGN DIRECTION** (spec #3 Answer #4); chi tiết PROPOSED (S3-P12 rev 2, S3-P13 rev 2, S3-P17..P21) | User (spec #3 Answer #4) | 2026-10-24 |
 
 ---
 
@@ -861,5 +862,24 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
   - **Bootstrap/CSP:** so sánh inline + CSP hash với external có version; không `unsafe-inline` mặc định; không nhúng mutable active pointer vào immutable bootstrap; stable entry có cache policy hợp activation protocol; resolver có nguồn sự thật rõ.
   - **Scenario matrix** 14 tình huống loading/bootstrap, phân loại automated / manual / future verification.
 - **Đề xuất của Claude (PROPOSED, notes S3-P12..P16):** LRM / release HTML / FRM, `releaseId = rel_ + base32(sha256(JCS(LRM)))[:26]`, idempotent + `E-RELEASE-ID-COLLISION`; khuyến nghị bootstrap B (external bất biến, SRI) + CSS shell inline có CSP hash + active pointer dạng dữ liệu JSON trong `entry.html`; mốc T1/T2/T3; prerender chỉ ở Immutable Release URL; TM-L01..L14.
+- **Cập nhật (spec #3 Answer #4, ADR-039):** bootstrap external có version được chọn cho P0; fallback thuần CSS là generic fallback notice, không phải CSP failure detector (S3-P13 rev 2); LRM contract chi tiết ở S3-P12 rev 2.
 - **Trạng thái:** APPROVED AS DESIGN DIRECTION. Cơ chế PROPOSED ở spec #3. G1 NOT APPROVED.
 - **Người duyệt:** User (spec #3 Answer #3). **Ngày:** 2026-10-24.
+
+## ADR-039 — Byte-for-byte reproducible build (spec #3 Q3-4)
+
+- **Bối cảnh:** build lại cùng release từ cùng input phải giống hệt từng byte, hay chỉ cần tương đương chức năng.
+- **Quyết định (user): APPROVED AS DESIGN DIRECTION — Byte-for-byte Reproducible Build cho trusted release artifact.**
+  - Cùng canonical input, toolchain, lock, artifact digest, build instruction, môi trường chuẩn → artifact giống hệt từng byte (SHA-256). Tương đương chức năng nhưng khác byte không phải là thành công. Phạm vi: release artifact đã định nghĩa; không gồm log, timestamp, báo cáo vận hành.
+  - **Môi trường chuẩn:** container pin theo digest; Node, package manager (và Python nếu tham gia) version chính xác; lockfile; version compiler/bundler/minifier; hash plugin release; version engine/runtime; build config chuẩn; locale/timezone cố định; thứ tự file và serialization tất định; không đường dẫn tuyệt đối; không timestamp/random trong artifact thuộc identity. Không floating dependency resolution. Local build không thay bằng chứng trusted release.
+  - **Verification:** hai build sạch độc lập từ cùng input, so toàn bộ inventory và hash; giống hệt → tiếp tục; khác → fail kèm diff. Không hợp thức hóa output khác nhau thành release mới. Cache không được che non-determinism.
+  - **LRM:** canonical serialization; inventory có path tương đối + hash; sort và path normalization tất định; hash algorithm và schema version được định nghĩa; không tự tham chiếu; xử lý duplicate/collision; cùng LRM → cùng `releaseId`; khác input có ý nghĩa → identity khác hoặc bị kiểm incompatibility. **Cùng input mà byte khác là reproducibility failure.**
+  - **`index.html`:** LRM → `releaseId` → `index.html` tất định → attestation ghi hash → integrity gate kiểm toàn bộ artifact set kể cả `index.html` → record cuối không sửa sau approval. Stable Entry HTML (mutable) không thuộc identity.
+  - **Provenance** (tinh thần SLSA Build Provenance, mức PoC): source commit, builder identity, build instruction, dependency đã resolve, toolchain, artifact hash, build config identity. Reproducibility ≠ provenance; không cần SLSA certification ở P0.
+  - **Failure semantics:** non-determinism, thiếu dependency, hash mismatch, manifest không nhất quán, file ngoài dự kiến, trùng path, lệch compiler, dependency không tin cậy, trùng `releaseId` → fail với diagnostic rõ; không fallback, không ghi đè artifact bất biến, không activate release lỗi; mọi check xong trước activation.
+  - **Bootstrap:** external `bootstrap.js` có version cho P0; CSP theo topology production; SRI khi phù hợp; không `unsafe-inline` mặc định; CSS shell inline tuân CSP; active pointer trong Stable Entry không phải bằng chứng authoritative; fallback thuần CSS là generic notice, không phải CSP detector; `<noscript>` cho JS tắt.
+  - **Scope:** không build farm, nhiều cloud builder, tất định giữa OS, registry phức tạp hay cache orchestration.
+  - **Test matrix** 11 case có expected, pass/fail, vị trí evidence.
+- **Đề xuất của Claude (PROPOSED, notes):** S3-P12 rev 2 (LRM contract: `lrmFormat`, JCS, SHA-256, path rules, scope), S3-P13 rev 2, S3-P17 (builder image, env), S3-P18 (protocol 10 bước), S3-P19 (Final Release Attestation write-once, integrity gate), S3-P20 (provenance), S3-P21 (TM-B01..B11).
+- **Trạng thái:** APPROVED AS DESIGN DIRECTION. Chi tiết PROPOSED. G1 NOT APPROVED.
+- **Người duyệt:** User (spec #3 Answer #4). **Ngày:** 2026-10-24.
