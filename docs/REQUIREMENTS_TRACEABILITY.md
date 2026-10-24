@@ -68,13 +68,14 @@ Các mục spike chưa chứng minh hoặc chưa kiểm. **OPEN** cho tới khi 
 | VG-10 | Hành vi cache CDN và trình duyệt thật (stable entry, immutable asset, activation) | spec #3 §16, spec #5 | sau G10 | OPEN |
 | VG-11 | S3 conditional write (`If-None-Match`/`If-Match`) cho release store và entry; CopyObject có điều kiện chưa dùng; DynamoDB transaction conflict/throughput thật | spec #5 §6.2, §6.4, §10.3, §11.2 | sau G10 | OPEN |
 | VG-12 | Throughput và tỉ lệ `TransactionConflict` của submission admission gate (gate FBK dùng chung; P0 một item, sharding P1), độ trễ commit của revocation dưới tải trên DynamoDB thật | spec #5 §9.3 | sau G10 | OPEN |
-| VG-13 | CT-26 + TM-5I01..04: thay đổi policy plugin, gate FBK, ingestion/repair với interleaving commit có kiểm soát (V5-01, SR-02) | spec #5 §9.3.5 | sau G1 (SQLite + DynamoDB Local); DynamoDB thật sau G10 | OPEN |
+| VG-13 | CT-26 + TM-5I01..04 + *(C1c)* TM-5L02: thay đổi policy plugin, gate FBK, ingestion/repair với interleaving commit có kiểm soát (V5-01, SR-02) | spec #5 §9.3.5 | sau G1 (SQLite + DynamoDB Local); DynamoDB thật sau G10 | OPEN |
 | VG-14 | Ma trận tương thích evaluator Python × release trong `S` bằng semantic conformance fixtures (CSR-11) + differential TS/Python cùng version (ADR-017) | spec #5 §9.2; spec #3 §5.2 K14 | sau G1 | OPEN |
 | VG-15 | Cổng đo Motion ở P04: bytes, INP, long task, CLS, reduced motion (ADR-064) | spec #6 §9, TM-6P01/P02 | P04 | OPEN |
 | VG-16 | Checklist isolation của ADR-053 (4Z01..15) và Admin build không có code plugin (4Z10, 4C03) | spec #4 §19; spec #2 INV-A1 | sau G1 | OPEN |
 | VG-17 | Điều kiện synthetic-only của ADR-063 (TM-5X01..05) | spec #5 §9.6 | sau G1, **trước mọi demo/đánh giá dựa vào ADR-063** | OPEN |
 | VG-18 | Tích hợp Cognito (OIDC BFF) chạy thật; cookie PKCE `SameSite=Lax` cross-site | spec #5 §7.6 | sau G10 | OPEN |
 | VG-19 | Contract test CT-01..26 trên DynamoDB thật (emulator không đủ) | spec #5 §11.2 | sau G10 | OPEN |
+| VG-20 | *(C1c, ADR-076)* SR-08: Preview bị chặn khi capability bị revoke (TM-5V07, 4Z16) | spec #5 §7.3; spec #4 §14.7 | sau G1 | OPEN |
 | — | Decision còn mở của spec #1 (OD-06, OD-10, OD-13). OD2-08/09 đã đóng (ADR-057/058) | spec #1 §21 | theo hạn từng mục | OPEN |
 
 > Cross-Subsystem Review (2026-10-24) MINOR-19: bảng này còn trích rev cũ và thiếu các gate sau G1/G10 (CT-26, ma trận TS/Python cross-version, cổng đo Motion P04, checklist ADR-053, Cognito, DynamoDB thật). **Đã cập nhật trong vòng sửa C1 (2026-10-25).**

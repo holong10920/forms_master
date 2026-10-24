@@ -1,6 +1,7 @@
 # Spec #3: Compiler, Bundle & Release Architecture (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.8** (2026-10-25).
+> **Trạng thái: PROPOSAL, revision 2.9** (2026-10-25).
+> - Rev 2.9 (C1c, closure review độc lập trên `0510369`): Build Request và LRM có `formats { draftFormat, loadFormat }` (C-02); semantic fixtures là file private trong danh sách đóng, digest trong attestation (C-01); `blockRevisions` từ `BLOCKREV#` (C-03); `entry.html` dùng `POINTER.bootstrap` theo spec #5 §6.6, bỏ `bootstrapDigest`/"không giảm" (N-03/B-02).
 > - Rev 2.8 (C1b): §5.1 output preflight + `inputIds` thống nhất (N-05, CSR-10); `previousDataContract = null`; ý nghĩa `ledgerSnapshotId` / `runtimeOverrideSnapshotId`.
 > - Rev 2.7 (ADR-074, SR-04): §10.1 mới — **Admin build và Preview build** do trusted pipeline build bằng cùng toolchain; module graph allowlist, canary trong mọi entry của plugin fixture, kiểm phụ thuộc bắc cầu và `import()` không literal; mã `E-ADMIN-BUILD-*`, `E-PREVIEW-BUILD-*`; test TM-C18..C22; X2-14.
 > - Rev 2.6 (vòng sửa C1, Cross-Subsystem Review): Build Request thêm `keyLedgerSnapshot`, `sitePolicy`, `motionPresets`, `platformRelease` (§5.1; nguồn: spec #5 §6.8); Data Contract mang `identity`, `renamedFrom` (§6, CSR-08); IR có `motion` và `regionId` (§6, CSR-12); LRM có trường `motion` (§11.1); K14 sinh **semantic conformance fixtures** (CSR-11); entry dùng bootstrap mới nhất từng active (§14.1, CSR-14); bootstrap xử lý thêm trạng thái của spec #5 (§14.2, MINOR-10); xác minh stable URL local vs CDN (§16.3); mã `E-ADMISSION-UNAVAILABLE` (§16.4, MINOR-05); catalog mã (§18.1a, MINOR-15).
@@ -149,6 +150,7 @@ Spec #5 tạo Build Request khi một revision được duyệt publish. Mọi t
   "sitePolicy": "sha256:6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e",
   "motionPresets": "sha256:708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f",
   "platformRelease": "plat-0012",
+  "formats": { "draftFormat": 1, "loadFormat": 1 },
   "buildConfig": "sha256:3d4e5f60718293a4b5c6d7e8f9012345678901234567890abcdef0123456789a",
   "bootstrap": "sha256:da73c9ebdf5b7d9abcde5f7b9dbacd4f6b8dacbdef5b7d9abcdf4b6e8acdef5f",
   "releaseHtmlTemplate": "sha256:4b6a1f0e3d2c5b8a7f6e9d0c1b4a3f2e5d8c7b6a9f0e1d2c3b4a5f6e7d8c9b0a",
@@ -161,6 +163,7 @@ Spec #5 tạo Build Request khi một revision được duyệt publish. Mọi t
 - **`preview`** (spec #4 §14.1; rev 2.2): **không** phải cả pipeline. Admin chỉ chạy **tập con thuần, tất định, an toàn cho browser**: kiểm cấu trúc (K1), version gate (K2), kiểm tra resolve **chỉ đọc** trên catalog snapshot (K3, không đọc store), expand/lower (K4), phân tích ngữ nghĩa (K5), sinh IR (K6) — bằng **cùng package TS và cùng version** với server. Package này không phụ thuộc code server-only, không I/O, không nạp plugin source. Input do Admin tải qua API (draft, block revision đã pin, catalog/ledger snapshot). Khác `release`: chỉ dừng ở diagnostic `gate: preview`; đích transition còn trống được lower thành node **`PREVIEW_ONLY_UNCONFIGURED_PATH`** (spec #1 §8.1: điểm dừng bị chặn, **không** phải hoàn tất). Không K7–K14, không artifact, **không authoritative**. *(rev 2.3, ADR-053)* Phân tích chạy trong Admin; IR preview chỉ được **thực thi** trong runtime preview cô lập (iframe trên origin preview riêng, spec #4 §14.7), không bao giờ trong document của Admin.
 - **`preflight`** (rev 2.2): K0–K6 chạy **phía server** (build worker), cùng package, input theo digest; là kết quả **authoritative** cho mức Review-ready, cho Submission Simulation (IR do server sinh, không tin IR của Admin) và trước publish. IR preflight không bao giờ chứa `PREVIEW_ONLY_UNCONFIGURED_PATH` (`E-IR-PREVIEW-NODE`). Kết quả gồm `platformReleaseId`, `engineVersion`, version analyzer, `inputIds` (`draftVersion`, `catalogSnapshotId`, `ledgerSnapshotId`, `runtimeOverrideSnapshotId`, `keyLedgerSnapshot`, `sitePolicy`, `platformReleaseId` — *C1b, N-05*: cùng tập với spec #4 §14.3 và spec #5 §7.2, §6.8) và digest **chỉ** của diagnostic K1–K6 để Admin phát hiện lệch (spec #4 §14.3); kết quả kiểm của spec #5 (ledger hiện tại, support matrix) trả riêng, ngoài digest.
 - `previousDataContract` = `null` khi là revision đầu (cùng quy ước với spec #5 §6.8). *(C1b)* `ledgerSnapshotId` là id `CATSNAP` (catalog + ledger), `runtimeOverrideSnapshotId` là digest của policy snapshot; mọi giá trị đều trỏ tới blob lấy lại được (spec #5 §6.8).
+- *(rev 2.9, C-02)* `formats` = `draftFormat`/`loadFormat` mà engine của `platformRelease` ghi/đọc (khai trong `PLATFORMREL`, spec #5 §5.1); K11 chép vào LRM `formats`. *(rev 2.9, C-03)* `blockRevisions` = `{ blockId, revision, digest }` của `BLOCKREV#` bất biến (spec #5 §5.1). *(rev 2.9, N-03)* `bootstrap` chọn theo spec #5 §6.6 (semver cao nhất, không `revoked`, hỗ trợ `formats`).
 - `bootstrap` và `releaseHtmlTemplate` (template `index.html` + CSS shell) là **platform asset** do trusted pipeline phát hành vào release store, được pin bằng digest như plugin (§14.1).
 - `ledgerSnapshotId` và `runtimeOverrideSnapshotId` cho K3 một snapshot cố định của trạng thái plugin, nên K3 là hàm thuần. Spec #5 kiểm lại trạng thái **hiện tại** trước activation.
 - **`buildOptions`** (private, không phải Build Request): ví dụ `sourcemap: private`, mức chi tiết báo cáo. Không được làm đổi byte phục vụ (TM-B15) nên không thuộc identity.
@@ -185,7 +188,7 @@ Spec #5 tạo Build Request khi một revision được duyệt publish. Mọi t
 | K11 | LRM & `releaseId` | IR, Data Contract, lock, plan, Chunk Manifest, toolchain, inventory → **LRM** → `releaseId` (§11) | ✔ | — | — | ✔ | so `releaseId` |
 | K12 | Release HTML | LRM + `releaseId` + template → `index.html` (§11.4) | ✔ | — | — | ✔ | so hash |
 | K13 | Reproducibility verification | **điều phối** hai lần chạy K0..K12 độc lập rồi so sánh (§12). K13 không đứng sau K12 trong một lần chạy; nó bao hai lần chạy. | ✘ (điều phối) | chạy hai builder | ✘ | ✔ (`E-BUILD-NON-REPRODUCIBLE`) | so lần chạy lại với release gốc |
-| K14 | Attestation & handoff | → **provenance**, **Final Release Attestation**, *(rev 2.6, CSR-11)* **semantic conformance fixtures** (private: kịch bản sinh tất định từ IR + kết quả của engine TS của chính release — đường đi active, lỗi validation, payload — để deploy gate chạy trên evaluator Python mới, spec #5 §9.2); ghi release bundle vào staging (write-once) | ✘ | **ghi** staging | ✘ | ✔ | không ghi; chỉ báo cáo |
+| K14 | Attestation & handoff | → **provenance**, **Final Release Attestation**, *(rev 2.6, CSR-11)* **semantic conformance fixtures** (private: kịch bản sinh tất định từ IR + kết quả của engine TS của chính release — đường đi active, lỗi validation, payload — để deploy gate chạy trên evaluator Python mới, spec #5 §9.2; *rev 2.9, C-01:* file `semantic-fixtures.json` trong danh sách private đóng §5.5, digest `semanticFixturesDigest` trong attestation, spec #5 chép vào `REL#`, VERIFYING và deploy gate tải theo digest và kiểm hash); ghi release bundle vào staging (write-once) | ✘ | **ghi** staging | ✘ | ✔ | không ghi; chỉ báo cáo |
 
 **Ngoài compiler (spec #5):** tạo Build Request; đăng ký release; integrity gate đọc lại từ storage; deploy gate (spec #2 §10.4); kiểm ledger **hiện tại** (trạng thái có thể đã đổi kể từ snapshot ở K3); activation; sinh `entry.html`; CDN. **Không có stage nào của compiler gọi AWS.**
 
@@ -268,7 +271,7 @@ flowchart LR
 | LRM tính trước hay sau reproducibility verification? | **Trước**: mỗi lần chạy tự tính LRM và `releaseId` ở K11. K13 so hai LRM (và mọi file). `releaseId` chỉ là **ứng viên** cho tới khi K13 pass; không có gì được ghi ra ngoài thư mục tạm trước K14. |
 | Có artifact nào bị đổi sau khi hash không? | Không. Sau K10, tập file phục vụ bị đóng băng; K11 hash nó. K12 chỉ **thêm** `index.html` (nằm ngoài inventory, được hash trong FRA). K14 chỉ ghi metadata private và copy nguyên vẹn sang staging. Minify và mọi hậu xử lý của bundler đều nằm trong K9, trước K10. |
 | Attestation cover những gì? | `lrmDigest` (bao gồm inventory của mọi file phục vụ trừ `index.html`, cộng digest của IR, Data Contract, phần identity của lock, Chunk Plan, Chunk Manifest, build config, bootstrap, template), `indexHtmlSha256`, `artifactSetDigest` (mọi file phục vụ kể cả `index.html`), `provenanceDigest`. |
-| File nằm ngoài inventory xử lý thế nào? | Trong thư mục phục vụ: ngoài inventory + `index.html` → `E-ARTIFACT-UNEXPECTED-FILE` (K10 và integrity gate của spec #5). Private, danh sách đóng: `lrm.json` (digest = `lrmDigest` trong FRA), `data-contract.json`, `capability-lock.json`, `chunk-plan.json`, `chunk-manifest.json` (bao qua digest trong LRM), `attestation.json`, `provenance.json`; sourcemap debug và bundle stats được liệt kê kèm hash trong `provenance.privateArtifacts`; file private khác → staging từ chối. |
+| File nằm ngoài inventory xử lý thế nào? | Trong thư mục phục vụ: ngoài inventory + `index.html` → `E-ARTIFACT-UNEXPECTED-FILE` (K10 và integrity gate của spec #5). Private, danh sách đóng: `lrm.json` (digest = `lrmDigest` trong FRA), `data-contract.json`, `capability-lock.json`, `chunk-plan.json`, `chunk-manifest.json` (bao qua digest trong LRM), `attestation.json`, `provenance.json`, *(rev 2.9, C-01)* `semantic-fixtures.json` (digest = `semanticFixturesDigest` trong FRA); sourcemap debug và bundle stats được liệt kê kèm hash trong `provenance.privateArtifacts`; file private khác → staging từ chối. |
 | Stage sau có thể đổi output stage trước mà không làm mất hiệu lực hash không? | Không có đường nào: (1) mỗi stage chỉ ghi vào vùng của nó (bảng §5.4); (2) K11 hash sau khi tập file phục vụ đóng băng; (3) integrity gate của spec #5 **tính lại** mọi hash từ storage trước đăng ký và trước activation, nên bất kỳ thay đổi nào sau K14 đều bị phát hiện. |
 | Side effect staging của compiler và side effect publishing của spec #5 tách thế nào? | Compiler chỉ **đọc** input theo digest (snapshot definition, **plugin** release store của spec #2, platform asset) và chỉ **ghi staging** (write-once theo `releaseId`). Nó không có quyền vào **form release store** (nơi phục vụ) hay active pointer. Spec #5 đọc staging, tự kiểm lại, kiểm trùng `releaseId` với form release store (nơi duy nhất quyết định collision), chép sang release store, rồi activation. Không bước nào của compiler gọi AWS hay đổi pointer. |
 
@@ -448,6 +451,7 @@ Hai bundle này **không** phải release của khách, nhưng do trusted pipeli
 | `lrmFormat` | `1`; có JSON Schema riêng; đổi cấu trúc = tăng số |
 | `form` | `formId`, `siteId`, `revision`, `schemaVersion` |
 | `inputs` | digest của IR (= sha256 của file IR), Data Contract, **phần identity** của Capability Lock, Chunk Plan, Chunk Manifest, build config, bootstrap, release HTML template (gồm CSS shell) |
+| `formats` *(rev 2.9, C-02)* | `{ draftFormat, loadFormat }` từ Build Request `formats`; spec #5 chép sang `REL#` và `POINTER.supportedReleases` |
 | `toolchain` | version chính xác: engine, `browserHostApi`, compiler, bundler, minifier, Node, package manager, shared externals; digest builder image; digest lockfile |
 | `inventory` | mọi file phục vụ dưới `/r/{releaseId}/` **trừ** `index.html`: `{ path, size, sha256, contentType }` |
 
@@ -483,6 +487,7 @@ Hai bundle này **không** phải release của khách, nhưng do trusted pipeli
     "bootstrap": "sha256:da73c9ebdf5b7d9abcde5f7b9dbacd4f6b8dacbdef5b7d9abcdf4b6e8acdef5f",
     "releaseHtmlTemplate": "sha256:4b6a1f0e3d2c5b8a7f6e9d0c1b4a3f2e5d8c7b6a9f0e1d2c3b4a5f6e7d8c9b0a"
   },
+  "formats": { "draftFormat": 1, "loadFormat": 1 },
   "toolchain": {
     "engine": "1.0.0",
     "browserHostApi": "1.0.0",
@@ -536,6 +541,7 @@ Sinh sau `releaseId` bằng template tất định (K12). Chỉ chứa:
   "indexHtmlSha256": "0d1c2b3a49586776859a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e",
   "artifactSetDigest": "sha256:1e2d3c4b5a6978877869a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4",
   "provenanceDigest": "sha256:2f3e4d5c6b7a8998897a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e",
+  "semanticFixturesDigest": "sha256:3a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f6071829",
   "createdAt": "2026-10-24T00:00:00Z"
 }
 ```
@@ -642,7 +648,7 @@ private:
 - Khối `active` trong `entry.html` chỉ dùng để **chọn release cho khách mới**; không phải bằng chứng authoritative. Backend vẫn kiểm support/security ở mọi query/submit.
 - **Vòng đời bootstrap** *(sửa sau consistency review)*:
   - Là platform asset, do trusted pipeline build bằng canonical builder, phát hành vào release store, pin bằng digest trong Build Request (§5.1) và trong LRM.
-  - Release `index.html` tham chiếu bootstrap **của chính nó** (`load.bootstrap`). *(rev 2.6, CSR-14)* `entry.html` (spec #5) dùng **`POINTER.bootstrapDigest`** = bootstrap mới nhất từng thuộc release active (không giảm khi rollback), **không** phải bootstrap của active release; nhờ luật dưới (bootstrap mới đọc được mọi `draftFormat` của release còn trong `S`), rollback không biến draft của release còn supported thành `incompatible`. Entry và release active vì vậy có thể khác bootstrap; release `index.html` vẫn dùng bootstrap của chính nó.
+  - Release `index.html` tham chiếu bootstrap **của chính nó** (`load.bootstrap`). *(rev 2.9, C1c N-03; thay rev 2.6)* `entry.html` (spec #5) dùng **`POINTER.bootstrap`** = bootstrap semver cao nhất, không `revoked`, có `supportedDraftFormats`/`supportedLoadFormats` bao trùm `POINTER.supportedReleases` của form (spec #5 §6.6), **không** phải bootstrap của active release; vì vậy rollback không biến draft của release còn supported thành `incompatible`, và bootstrap lỗi được thay bằng cách `revoked` nó (reconciler tính lại). Entry và release active vì vậy có thể khác bootstrap; release `index.html` vẫn dùng bootstrap của chính nó.
   - Được giữ ít nhất bằng release nào còn tham chiếu nó.
   - **Metadata draft có version (`draftFormat`)**: bootstrap mới phải đọc được mọi `draftFormat` mà một release còn supported có thể đã ghi. Thay đổi format chỉ được **thêm** trường. `draftFormat` lạ → coi là `incompatible` (thông báo + Start Over), không xóa draft.
 

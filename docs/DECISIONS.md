@@ -92,6 +92,8 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-073 | VG-07 Safari thật: bắt buộc trước rollout cho khách thật, **không** phải điều kiện G1; P0 dùng Playwright WebKit | **APPROVED** | User (C1 approval) | 2026-10-24 |
 | ADR-074 | SR-04: **Host-owned Declarative Presentation** cho Admin P0 — không import/thực thi JavaScript plugin trong origin Admin; primitive trong allowlist của Platform; Edit Canvas / Interactive Preview / Published Form tách bạch; không custom executable Inspector ở P0 | **APPROVED AS P0 DESIGN DIRECTION** (thay điều kiện tạm của ADR-070) | User (C1 review response) | 2026-10-25 |
 | ADR-075 | Phản hồi review C1: V5-01 cần independent design review theo 12 điểm + linearization; independent C1 closure review (Batch A/B/C, cùng rubric); tiêu chí trình G1 Approval Package | **APPROVED** (governance; không approve G1) | User (C1 review response) | 2026-10-25 |
+| ADR-076 | SR-08: code plugin đã revoke còn chạy trong iframe Preview đang mở — chấp nhận có điều kiện cho synthetic P0; Admin phản ứng khi phát hiện (invalidate session, gỡ iframe) | **CONDITIONALLY_ACCEPTED — ENFORCEMENT/VERIFICATION_PENDING** | User (C1 closure) | 2026-10-25 |
+| ADR-077 | Sole writer `forms-master-61` cho C1 Closure; Closure Mode (chỉ sửa BLOCKER/MAJOR có bằng chứng, MINOR ghi follow-up) | **APPROVED** (governance) | User (C1 closure) | 2026-10-25 |
 
 ---
 
@@ -1248,4 +1250,19 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 - **Independent C1 closure review:** trạng thái **INDEPENDENT_REVIEW_PENDING** cho tới khi reviewer trả kết quả; không ghi PASS/READY_FOR_G1; không suy ra PASS khi reviewer chưa phản hồi. Có thể chia Batch A (CSR-01..06, Security/Gates), Batch B (CSR-07..12, Integration/Version/Build), Batch C (CSR-13..17, Lifecycle/Recovery), cùng một severity rubric và xét tương tác giữa các batch. Mỗi finding: original issue, section đổi, fix thực tế, verification của reviewer, rủi ro còn lại, verdict RESOLVED / UNRESOLVED / ACCEPTED_RISK / VERIFICATION_PENDING.
 - **Tiêu chí trình G1 Approval Package:** cả 17 MAJOR có disposition được independent reviewer xác nhận; không còn BLOCKER/MAJOR unresolved; SR-04 đồng bộ nhất quán; V5-01 có design review rõ ràng (CT-26 pending nếu chưa implement); accepted risk có điều kiện enforcement và verification gate; trace end-to-end Sports/PC không thiếu producer, consumer hay authority; test implementation còn pending ghi trung thực, không PASS. MAJOR mới → báo đúng severity, sửa có trọng tâm. Claude không tự approve G1.
 - **Governance:** cho phép sửa tài liệu có trọng tâm và local commit theo hook/approval hiện tại. Không production code, không push, không ghi AWS, không merge spike code. Không mở rộng brainstorming hay thêm feature.
+- **Người duyệt:** User. **Ngày:** 2026-10-25.
+
+## ADR-076 — SR-08: plugin đã revoke trong Preview đang mở
+
+- **Bối cảnh:** sau C1/C1b, Admin không có code plugin (ADR-074); Preview nhận `blockedPrks` authoritative và build sau loại version bị chặn. Rủi ro còn lại: code đã nạp trong iframe Preview đang mở chạy tiếp tới khi session bị thay/hết hạn hoặc iframe nạp lại; version bị chặn sau khi build vẫn nằm trong Preview bundle (không được mount). Closure review phát hiện spec #4 §14.7 chưa có contract để Admin chủ động invalidate Preview khi revocation.
+- **Quyết định (user): CONDITIONALLY_ACCEPTED — ENFORCEMENT/VERIFICATION_PENDING**, chỉ cho synthetic P0. Điều kiện: Preview chỉ dùng dữ liệu tổng hợp và mock integration; không credential thật, PII, connector thật hay effect đặc quyền; Preview chạy trên origin cô lập; capability/session đã bị chặn phải bị từ chối ở điểm enforce authoritative phía server; Admin chủ động invalidate/reload Preview khi nhận revocation; không tuyên bố JS đã tải trong iframe dừng tức thời; trước rollout cho người dùng thật phải có security verification riêng.
+- **Thiết kế bổ sung (C1c):** Preview API trả `423 PREVIEW_CAPABILITY_BLOCKED { prk }` và thu hồi session; Admin gọi `DELETE /preview-sessions/current`, gỡ iframe, hiện diagnostic tiếng Nhật, không tạo session mới khi PRK còn bị chặn, không dùng lại session cũ; khi không có API traffic, Admin hỏi `GET /capabilities/status` mỗi 30 s và khi tab được focus (spec #4 §14.7; spec #5 §7.2, §7.3). Giới hạn: chỉ phản ứng khi phát hiện; không bảo đảm dừng tức thời ở mọi tab.
+- **Kiểm chứng:** TM-5V07, 4Z16 (VG-20), sau G1. Không đánh dấu CLOSED khi enforcement chưa được kiểm chứng.
+- **Owner:** vai trò platform-security. **Xem lại khi:** preview nối dữ liệu/connector thật; trước rollout. **Escalation:** user.
+- **Người duyệt:** User. **Ngày:** 2026-10-25.
+
+## ADR-077 — Sole writer và Closure Mode cho C1 Closure
+
+- **Quyết định (user): APPROVED.** `forms-master-61` là phiên ghi duy nhất của `forms_master` cho C1 Closure; `forms-master-e4` đã kết thúc; `forms-master-cf` bị thu hồi quyền ghi. Không tạo thêm writer. Trước mỗi thao tác ghi/commit: kiểm branch, HEAD, staged/unstaged, không có writer khác theo khả năng quan sát; không reset/stash/clean/ghi đè thay đổi của phiên khác. Reviewer chỉ đọc snapshot commit cố định. Chỉ định sole writer **không** là phê duyệt blanket cho commit.
+- **Closure Mode:** không brainstorming mới, không đổi phạm vi P0, không thêm subsystem hay phương án kiến trúc khi không có blocker; chỉ sửa BLOCKER/MAJOR có bằng chứng; MINOR không chặn vertical slice ghi follow-up; không review toàn diện lại từ đầu khi targeted re-review đủ; không hạ severity để qua G1. Phân biệt: design-resolved / independently reviewed / implementation verification pending / accepted risk / unresolved.
 - **Người duyệt:** User. **Ngày:** 2026-10-25.

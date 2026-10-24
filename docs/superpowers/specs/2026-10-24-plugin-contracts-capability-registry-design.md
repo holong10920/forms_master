@@ -1,6 +1,7 @@
 # Spec #2: Plugin Contracts & Capability Registry (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.13** (2026-10-25).
+> **Trạng thái: PROPOSAL, revision 2.14** (2026-10-25).
+> - Rev 2.14 (C1c, closure review độc lập trên `0510369`): §8.1 bước 11 không đòi `LEDGER#` có sẵn; bước 12 chạy theo trigger riêng, đọc ledger tại HEAD, đơn điệu theo `ledgerSeq` (V5-02/A-01, V5-03); §16.4: PRK chưa có entry nào = `active`.
 > - Rev 2.13 (C1b): §8.1 ingestion cho mọi release, bước 12 đồng bộ ledger (N1); §16.5 runtime override là API thật (ADR-072), override quá hạn vẫn mở, enforce chỉ cho admission (G-EXEC).
 > - Rev 2.12 (ADR-074, user duyệt SR-04): **Host-owned Declarative Presentation là hướng thiết kế P0 đã duyệt**. §6.2.2 mới: contract metadata (schema đóng, không có chuỗi tự do, primitive trong allowlist của Platform, không cấp quyền API), ba tầng Edit Canvas / Interactive Preview / Published Form và parity của từng tầng, negative fixture N-PRES-01..08; registry P0 từ chối `bindings.presentation`, `bindings.design`, export `./presentation`/`./design` (`E-PRESENTATION-EXECUTABLE-REF`); sửa chỗ còn ghi Admin build chứa `presentation`/`design` (§4, §6.5, INV-A2, L3, §17.2, §18.1, §21).
 > - Rev 2.11 (vòng sửa C1, Cross-Subsystem Review): **presentation khai báo do host sở hữu** thay cho export JS `Presentation` ở P0 (SR-04/ADR-070, đề xuất chờ user xác nhận; §6.2.1, §7.4); INV-A1: Admin build **không** chứa module nào của plugin; INV-A2: loại version `revoked`, cho phép adapter submit mock của preview (MINOR-14); §8.1 bước 11 ingestion runtime (CSR-01); §10.3/§10.4 theo `S` = release và miễn trừ (MINOR-18); §15 body có `schemaVersion` (MINOR-06); §16.3 `deprecated` chỉ thông tin (CSR-17); §16.5 G-ADM/G-EXEC (CSR-04); §21 phạm vi theo ADR-072; `motionPreset` không còn "Motion Animation Editor".
@@ -608,8 +609,8 @@ class ServerContext:
 | 8 | Build facet **của version trong workspace** và adapter; tính hash. PRK đã có trong store: cùng tree hash → bỏ qua (không build lại); khác → `E-RELEASE-IMMUTABLE`. Release cũ không bao giờ build lại. | build error, `E-RELEASE-IMMUTABLE` |
 | 9 | Conformance (§17) | `E-CONFORMANCE-FAILED` |
 | 10 | Ghi release + **provenance record**; emit `registry.catalog.json` và `adapter-inventory.json` từ **toàn bộ** release store | — |
-| 11 *(rev 2.11, CSR-01)* | **Ingestion runtime**: với **mọi** release mới (kể cả chỉ có facet browser; C1b m1), gọi ingestion của spec #5 §9.3.3 (tạo `CAPSTATUS#{PRK}` + mọi gate FBK trong một transaction); release chỉ vào Admin capability set / Preview build sau khi ingestion thành công | `CAPABILITY_INGEST_CONFLICT` |
-| 12 *(C1b, N1)* | **Đồng bộ status ledger**: chạy cho mỗi commit đổi `registry/status-ledger.jsonl`; với mỗi PRK đổi, gọi thao tác đồng bộ ledger của spec #5 §9.7 (CAS `LEDGER#{prk}`, cập nhật `CAPSTATUS` + gate nếu đã ingest); reconciler so sánh và chạy lại khi lệch | `LEDGER_SYNC_CONFLICT` (retry) |
+| 11 *(rev 2.11, CSR-01)* | **Ingestion runtime**: với **mọi** release mới (kể cả chỉ có facet browser; C1b m1), gọi ingestion của spec #5 §9.3.3 (tạo `CAPSTATUS#{PRK}` + mọi gate FBK trong một transaction; *rev 2.14:* không đòi `LEDGER#{prk}` có sẵn — chưa có entry = `active`); release chỉ vào Admin capability set / Preview build sau khi ingestion thành công | `CAPABILITY_INGEST_CONFLICT` |
+| 12 *(C1b, N1; rev 2.14: không phụ thuộc thứ tự với bước 11)* | **Đồng bộ status ledger**: chạy cho mỗi commit đổi `registry/status-ledger.jsonl` (trigger riêng, không phải bước sau ingestion); luôn đọc ledger tại **HEAD** của tree trusted (bước 0) và ghi `LEDGER#{prk}` với `ledgerSeq` tăng dần (spec #5 §9.7, §9.3.5 #11a); với mỗi PRK đổi, gọi thao tác đồng bộ ledger của spec #5 §9.7 (CAS `LEDGER#{prk}`, cập nhật `CAPSTATUS` + gate nếu đã ingest); reconciler so sánh và chạy lại khi lệch | `LEDGER_SYNC_CONFLICT` (retry) |
 
 **Provenance record** của mỗi release (ADR-030): PRK; source commit; tree hash thư mục plugin; version toolchain (Node, bundler, TypeScript, Python); hash npm lockfile và `pythonRequirements` đã resolve; facet inventory (FBK → hash từng file); adapter inventory; `compat`; hash báo cáo conformance; pipeline id; thời điểm. Ký artifact: phase sau (ADR-030).
 
@@ -1039,7 +1040,7 @@ sequenceDiagram
 ### 16.4. Status ledger (Git)
 
 - `registry/status-ledger.jsonl` append-only, đổi qua PR do Platform Maintainer duyệt; git history là audit baseline (ADR-035).
-- Entry theo version: `{ plugin, version, status, reason, blockNewUse?, supportEndsAt?, advisoryRef?, incidentId?, decidedBy, decidedAt }`.
+- Entry theo version: `{ plugin, version, status, reason, blockNewUse?, supportEndsAt?, advisoryRef?, incidentId?, decidedBy, decidedAt }`. *(rev 2.14)* Một version **chưa có entry** nào có trạng thái `active`; entry mới nhất của version (theo thứ tự dòng) là trạng thái hiện tại.
 - Entry theo plugin: `{ plugin, status: "retired", reason, decidedBy, decidedAt }` (không có `version`): không nhận release mới, id không dùng lại.
 
 ### 16.5. Emergency runtime override (ADR-035)

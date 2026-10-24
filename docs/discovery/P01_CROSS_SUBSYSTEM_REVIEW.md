@@ -267,4 +267,36 @@ MINOR đã sửa: m1 (ingestion mọi release), m2 (`REMOVE` tập rỗng, map k
 
 ### 10.6. C1 closure review độc lập (ADR-075)
 
-*(điền sau khi chạy)*
+> **Snapshot:** commit `0510369` (bản `git archive` chỉ đọc, không có `docs/internal/`). **Reviewer:** bốn reviewer độc lập, chỉ đọc, cùng severity rubric: V5-01 (12 điểm), Batch A (CSR-01..06 + N1–N3 + SR-01/03/05), Batch B (CSR-07..12 + N4, N5, N-01, N-02, N-05 + SR-04), Batch C (CSR-13..17 + N-03, N-04 + trace E2E Sports/PC). Claude chỉ tổng hợp, gộp trùng và đối chiếu bằng chứng với file thật.
+
+**Kết luận trên `0510369`:** 0 BLOCKER; **8 MAJOR unresolved** (sau gộp trùng) → chưa đạt G1. V5-01 design review: **FAIL (3 MAJOR)**; hướng materialized `CAPSTATUS` đúng nguyên lý (điểm 1, 2, 5, 6, 11, 12 PASS; 4 và 8 PASS khi sửa V5-01); không có revocation gap cho server FBK sau khi sửa V5-01 và V5-03. CT-26 vẫn **VERIFICATION_PENDING**.
+
+**Verdict theo item (reviewer):**
+
+| Item | Verdict |
+|---|---|
+| CSR-04, CSR-16, CSR-17, N5, N-01, N-02 | RESOLVED |
+| CSR-01, 02, 03, 05, 06, 07, 08, 09, 10, 11, 12, 13, 15; N1 (một phần), N2 (gate release), N3, N4, N-05 | RESOLVED IN DESIGN + VERIFICATION_PENDING (test sau G1 theo từng dòng của báo cáo reviewer) |
+| CSR-14 + N-03 | UNRESOLVED → M-04 |
+| N-04 | UNRESOLVED → M-05 |
+| SR-01, SR-03, SR-05 | ACCEPTED_RISK (owner, phạm vi, enforcement, gate, trigger, escalation đủ) |
+| SR-04 (ADR-074) | contract **nhất quán** giữa spec #2/#3/#4/#6 (Batch B); VERIFICATION_PENDING |
+| SR-08 | user quyết **CONDITIONALLY_ACCEPTED — ENFORCEMENT/VERIFICATION_PENDING** (ADR-076); thiếu contract invalidate Preview → sửa ở C1c |
+
+**MAJOR unresolved và vòng sửa C1c** (chỉ MAJOR, Closure Mode — ADR-077):
+
+| ID | Reviewer (trùng) | Vấn đề | Sửa C1c | Section |
+|---|---|---|---|---|
+| M-01 | V5-01, A-02 | gate FBK còn điều kiện `capVersion` ở ví dụ (a) và repair, trái §9.3.1 → revoke có thể hỏng mãi | gate không có version; (a) chỉ `attribute_exists`; repair = CAS `CAPSTATUS` + Put **mọi** gate từ `derive()` | #5 §9.3.3, §9.3.4 a, §9.3.5 #6; CT-26 |
+| M-02 | V5-02, A-01 | không ai tạo `LEDGER#` cho PRK chưa có entry → ingestion Sports/PC không chạy; thứ tự bước 11/12 ngược | ingestion không đòi `LEDGER#`: có thì ConditionCheck `ledgerVersion`, chưa có thì `attribute_not_exists` + `active`; đồng bộ ledger là trigger riêng; chưa có entry = `active` | #5 §5.1, §9.3.3, §9.3.5 #11; #2 §8.1, §16.4; TM-5L02 |
+| M-03 | V5-03 | đồng bộ ledger không đơn điệu → sync cũ/retry mở lại gate đã `revoked` (interleaving cụ thể) | đọc ledger tại HEAD; `ledgerSeq` chỉ tăng, điều kiện `ledgerSeq < :seq`; dòng #11a | #5 §5.1, §9.3.4 d, §9.3.5 #11a, §9.7; #2 §8.1; CT-26, TM-5L02 |
+| M-04 | N-03/CSR-14, B-02 | ba luật bootstrap mâu thuẫn (#3 §14.1 và TM-5P07 còn `bootstrapDigest` "không giảm"; #5 §6.6 nội dung entry dùng bootstrap của active release; writer không đọc `bootstrap`) | entry dùng `POINTER.bootstrap` (chọn semver bao trùm `supportedReleases`); writer đọc `bootstrap`; POINTER có `supportedReleases`, `bootstrap`; reconciler bước 7; luật chọn bootstrap cho Build Request | #5 §5.1, §6.6, §6.7, §6.8; #3 §5.1, §14.1; TM-5P07 |
+| M-05 | C-01 = N-04, B-04 | semantic fixtures không có trong danh sách private đóng, không digest → VERIFYING/deploy gate không chạy được | `semantic-fixtures.json` trong danh sách đóng; `semanticFixturesDigest` trong FRA và `REL#`; tải theo digest, kiểm hash; thiếu → FAILED/FAIL | #3 §5.2 K14, §5.5, §11.6; #5 §5.1, §5.4, §6.2, §9.2; TM-5F03 |
+| M-06 | C-02 | `REL#.draftFormat`/`loadFormat` không có producer | Build Request và LRM `formats` (từ `PLATFORMREL`); đăng ký release chép sang `REL#` | #3 §5.1, §11.1, §11.3; #5 §5.1, §5.4, §6.8; TM-5F03 |
+| M-07 | C-03 | block revision (`customer-info`, dùng cho cả Sports và PC) không có aggregate/API; `vulnerable` không có điểm enforce | `BLOCKREV#{blockId}#{rN}` bất biến (P0 platform-admin seed); API đọc/seed; approve ConditionCheck `status <> vulnerable`; GC giữ | #5 §5.1, §5.3, §5.4, §6.8, §7.2; #3 §5.1; TM-5B01 |
+| M-08 | B-01 | Admin không có endpoint đọc nội dung snapshot và trạng thái hiệu lực → phân tích client, 4C06, TM-4D02 không chạy | `GET /snapshots/catalog|policy|key-ledger/{id}`, `GET /capabilities/status`, `GET /blocks/…` | #5 §7.2; #4 §14.2 |
+| SR-08 | user (ADR-076) | thiếu contract Admin invalidate Preview khi revocation | `423 PREVIEW_CAPABILITY_BLOCKED` + thu hồi session; Admin gỡ iframe, không tạo session mới khi còn chặn; hỏi trạng thái 30 s; giới hạn ghi rõ | #5 §7.3, §7.5; #4 §14.7; TM-5V07, 4Z16 (VG-20) |
+
+**Trạng thái sau C1c:** M-01..M-08 và SR-08 là **DESIGN_RESOLVED — chờ targeted re-review độc lập trên commit C1c** (chưa independently reviewed). Không mục nào VERIFIED.
+
+**MINOR follow-up (không chặn vertical slice, không sửa trong Closure Mode):** V5-04..V5-06 (V5-04 đã ghi `attribute_not_exists` cho `CAPSTATUS` cùng lúc với M-02), A-03..A-08, B-03 (phần còn lại), B-05..B-10, C-04..C-08; tham chiếu lịch sử ở §10.1 dòng CSR-14 và §10.3 dòng 10–11 ("`bootstrapDigest` không giảm") đã bị thay bởi M-04.
