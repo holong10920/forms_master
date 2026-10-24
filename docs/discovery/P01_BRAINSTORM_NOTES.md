@@ -2078,3 +2078,8 @@ Khuyến nghị A vì: mọi quyết định authoritative (pointer, trạng th�
 - OD6-01 → ADR-064 (B, Motion Adapter); OD6-02 → ADR-065 (preset, tween, guided không auto-advance); OD6-03 → ADR-066 (per-step P1); OD6-04 → ADR-067 (tham số thấp cấp trong recipe; MOTION-01 traceability, không DONE vì đổi scope).
 - **Sửa Motion có trọng tâm:** reduced motion & lazy import (phân biệt form không Motion / Motion + reduced từ đầu / đổi giữa phiên / module đã tải không unload; kiểm preference trước dynamic import và prefetch; không prefetch khi reduced); exit snapshot không giữ PII (chỉ presentation shell đã làm sạch; negative test); rapid transitions & cancellation (10 tình huống); test design hiệu năng & cô lập artifact.
 - **Tiếp:** đồng bộ I6-01..06 vào spec #1–#5; cập nhật spec #6; ADR + traceability; Cross-Subsystem Review độc lập (end-to-end Sports/PC, ma trận interface, ưu tiên 1–10, phân loại BLOCKER/MAJOR/MINOR/ACCEPTED_RISK/VERIFICATION_PENDING); có BLOCKER thì sửa + review lại; không còn thì trình G1 Approval Package; không tự approve G1.
+
+### Đã thực hiện (Claude) — đồng bộ + Cross-Subsystem Review
+
+- ADR-063..067; spec #5 (ADR-063: G-EXEC TOCTOU, V5-01/V5-02 phân loại); `docs/SECURITY_RISK_REGISTER.md` mới; spec #6 rev 2; đồng bộ I6-01..06 (spec #1 rev 3.6, #2 rev 2.10, #3 rev 2.5, #4 rev 2.4, #5 I5-09).
+- Cross-Subsystem Review với ba reviewer độc lập (end-to-end; bảo mật; vòng đời/ngữ nghĩa) → `docs/discovery/P01_CROSS_SUBSYSTEM_REVIEW.md`: **NOT READY FOR G1**, 0 BLOCKER, 17 MAJOR (CSR-01..17), 19 MINOR; AR-01 (G-EXEC), AR-02 (cache); VP-01..05; register bổ sung SR-08..12. Khuyến nghị: user quyết §9 → vòng sửa C1 → targeted re-review → G1 Approval Package.

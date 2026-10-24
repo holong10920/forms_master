@@ -69,3 +69,5 @@ Các mục spike chưa chứng minh hoặc chưa kiểm. **OPEN** cho tới khi 
 | VG-11 | S3 conditional write (`If-None-Match`/`If-Match`) cho release store và entry; CopyObject có điều kiện chưa dùng; DynamoDB transaction conflict/throughput thật | spec #5 §6.2, §6.4, §10.3, §11.2 | sau G10 | OPEN |
 | VG-12 | Throughput và tỉ lệ `TransactionConflict` của submission admission gate (gate FBK dùng chung, shard `S`) trên DynamoDB thật | spec #5 §9.3 | sau G10 | OPEN |
 | — | OD2-08, OD2-09 và các decision còn mở của spec #1/#2 | spec #2 §22, spec #1 §21 | theo hạn từng mục | OPEN |
+
+> Cross-Subsystem Review (2026-10-24) MINOR-19: bảng này còn trích rev cũ và thiếu các gate sau G1/G10 (CT-26, ma trận TS/Python cross-version, cổng đo Motion P04, checklist ADR-053, Cognito, DynamoDB thật). Sẽ cập nhật trong vòng sửa C1.
