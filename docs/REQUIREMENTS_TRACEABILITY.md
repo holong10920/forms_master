@@ -34,10 +34,10 @@
 | Nhóm req | IDs | Design | Status |
 |---|---|---|---|
 | Schema & workflow | ARCH-01..10 | `docs/superpowers/specs/2026-10-23-form-schema-workflow-design.md` rev 3.7 §6–§17 (PROPOSED; design direction ADR-017..022; chưa duyệt hoàn toàn). ARCH-09/ARCH-10 chi tiết → `docs/superpowers/specs/2026-10-24-plugin-contracts-capability-registry-design.md` rev 2 §5–§13 (PROPOSED; ADR-023..035). | TODO (design đang review) |
-| Compiler & isolation | BUILD-01..10 | Contract isolation (BUILD-02/04/05/06/08): spec #2 rev 2.11 §9–§11 (PROPOSED). Bundling, release, reproducible build: `docs/superpowers/specs/2026-10-24-compiler-bundle-release-design.md` rev 2.6 (PROPOSED; ADR-036..042). Bằng chứng mức spike (không phải implementation): `docs/evidence/P01/spike-gate-01/`. Bundling, Release Manifest: spec #3 (P01-04). | TODO |
-| Motion | MOTION-01..07 | `docs/superpowers/specs/2026-10-24-motion-design.md` rev 2.1 (PROPOSED; ADR-062, ADR-064..067; truy vết requirement → test ở spec #6 §14). MOTION-01: engine/recipe hỗ trợ duration/delay/easing, UI P0 không mở tham số thấp cấp (ADR-067) — **không** DONE vì đổi scope | TODO (design) |
-| Backend & publishing | API-01..10 | `docs/superpowers/specs/2026-10-24-api-persistence-publishing-design.md` rev 2 + C1 (PROPOSED; ADR-054..060, ADR-063, ADR-068..072) | TODO (design; C1 chờ re-review) |
-| Admin UX | UX-01..05, UX-07 | `docs/superpowers/specs/2026-10-24-admin-form-builder-design.md` rev 2.5 (PROPOSED; ADR-046..053, ADR-061, ADR-070; test matrix §19) | TODO (design; C1 chờ re-review) |
+| Compiler & isolation | BUILD-01..10 | Contract isolation (BUILD-02/04/05/06/08): spec #2 rev 2.13 §9–§11 (PROPOSED). Bundling, release, reproducible build: `docs/superpowers/specs/2026-10-24-compiler-bundle-release-design.md` rev 2.8 (PROPOSED; ADR-036..042). Bằng chứng mức spike (không phải implementation): `docs/evidence/P01/spike-gate-01/`. Bundling, Release Manifest: spec #3 (P01-04). | TODO |
+| Motion | MOTION-01..07 | `docs/superpowers/specs/2026-10-24-motion-design.md` rev 2.2 (PROPOSED; ADR-062, ADR-064..067; truy vết requirement → test ở spec #6 §14). MOTION-01: engine/recipe hỗ trợ duration/delay/easing, UI P0 không mở tham số thấp cấp (ADR-067) — **không** DONE vì đổi scope | TODO (design) |
+| Backend & publishing | API-01..10 | `docs/superpowers/specs/2026-10-24-api-persistence-publishing-design.md` rev 2 + C1 + C1b (PROPOSED; ADR-054..060, ADR-063, ADR-068..075) | TODO (design; chờ C1 closure review, ADR-075) |
+| Admin UX | UX-01..05, UX-07 | `docs/superpowers/specs/2026-10-24-admin-form-builder-design.md` rev 2.7 (PROPOSED; ADR-046..053, ADR-061, ADR-074; test matrix §19) | TODO (design; C1 chờ re-review) |
 | Undo/redo | UX-06 | ADR-004: P1; design phải chừa chỗ cho nó | DEFERRED P1 (G0) |
 
 ## Chất lượng

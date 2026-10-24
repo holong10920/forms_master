@@ -204,6 +204,8 @@ MINOR-01 (`SET` tập tính lại), 02 (deploy gate ↔ mở gate), 03 (`GATEINT
 
 Không chứng minh được điều kiện "JavaScript plugin trong origin Admin an toàn" ở mức thiết kế (code cùng origin có thể tự gọi Admin API kèm cookie và lấy CSRF token; spy và L3 chỉ phát hiện). Vì vậy C1 **đề xuất** phương án ADR-070 cho phép: **presentation khai báo do host sở hữu** — plugin cung cấp dữ liệu (`primitive`, JSON Pointer vào config/fixture), Admin vẽ bằng component lõi; Admin build không chứa module plugin nào; JS `Presentation` chuyển P1 trong ranh giới cô lập thật (spec #2 rev 2.11 §6.2.1, §7.4, INV-A1; spec #4 §9). **Cần user xác nhận** đề xuất này; nếu không, SR-04 trở lại MAJOR/NOT ACCEPTED.
 
+*(2026-10-25)* User duyệt: **ADR-074** (Host-owned Declarative Presentation, APPROVED AS P0 DESIGN DIRECTION). Đồng bộ ở commit `26c59d4` (spec #2 rev 2.12, spec #3 rev 2.7 §10.1, spec #4 rev 2.6 §9.1, spec #6 rev 2.2). SR-04 → DESIGN_RESOLVED + VERIFICATION_PENDING (register).
+
 ### 10.3. Trace end-to-end sau C1 (Sports và PC)
 
 | # | Ranh giới | Authority | Input / output | Version pin | Lỗi | Test | Section |
@@ -227,6 +229,42 @@ Không chứng minh được điều kiện "JavaScript plugin trong origin Admi
 
 Sports: plugin server FBK = `jpPhone/server`, `katakana/server` (validator) + mock effect; Motion `subtle` (`sports-demo`) / Motion-none (`sports-demo-nomotion`). PC: `storeSelector` (browser + `presentation` khai báo), `storeList/server`, `storeIdValid/server`, `jpPhone/server`, mock effect; Motion `guided`.
 
-### 10.4. Targeted re-review sau C1
+### 10.4. Targeted re-review sau C1 (hai reviewer độc lập, chỉ đọc, 2026-10-25)
+
+**Kết luận:** 0 BLOCKER; **10 MAJOR còn mở** sau C1 → không đủ điều kiện G1; dẫn tới vòng sửa C1b (§10.5).
+
+| Item | Verdict re-review sau C1 |
+|---|---|
+| CSR-02, 03, 04, 05, 13, 15, 16, 17; SR-05; override API; M3 `block-operation` | RESOLVED_IN_DESIGN (+ VERIFICATION_PENDING khi cần test) |
+| CSR-01, 06, 07, 12; SR-04 (text cũ) | PARTIAL |
+| CSR-08, 09, 10, 11, 14 | PARTIAL — phần còn lại thành MAJOR mới N-05, N-01/N-02, CSR-10, N-04, N-03 |
+| M4 (ADR-072) | NOT_RESOLVED (N3) |
+
+**MAJOR mới:**
+- **Contract/vòng đời:** N-01 (vòng đời `PLATFORMREL`/`CATSNAP` không có actor/trigger); N-02 (snapshot đầu vào Build Request không lấy lại được theo digest); N-03 (`bootstrapDigest` "không giảm" không so được và chặn phục hồi); N-04 (activation release mới không kiểm semantic); N-05 (`inputIds` lệch giữa spec #3/#4/#5).
+- **Bảo mật:** N1 (thay đổi status ledger không lan truyền → gate có thể mở khi ledger `revoked`); N2 (CAS gate release sai version → hold bảo mật không chạy); N3 (M4/hold bảo mật một giá trị → resume xóa hold khác); N4 (`blockedPrks` không tới iframe); N5 (text cũ trái INV-A1).
+
+MINOR: m1–m11 (bảo mật), m-1–m-3 (contract) — disposition ở §10.5.
+
+### 10.5. Vòng sửa C1b (commit `60fcf9d` + commit đồng bộ C1b; SR-04 ở `26c59d4`)
+
+| MAJOR | Sửa | Section | Trạng thái sau C1b |
+|---|---|---|---|
+| N1 | thao tác đồng bộ ledger có actor/trigger (bước 12 pipeline, mỗi commit ledger), CAS `LEDGER#{prk}`; ingestion ConditionCheck `ledgerVersion`; reconcile; ma trận #11 | #5 §9.7, §9.3.3, §9.3.5; #2 §8.1 | DESIGN_RESOLVED + VERIFICATION_PENDING (CT-26, TM-5L01) |
+| N2 | gate chỉ điều kiện `attribute_exists`; CAS ở item authoritative | #5 §9.3.1, §9.3.4 e, §6.5 action 5 | DESIGN_RESOLVED |
+| N3 | hold theo nguồn: `AVAILABILITY.holds`, `REL#.securityHolds`; API hold/gỡ hold; RBAC; ma trận #12–#13 | #5 §5.1, §7.2, §9.3.4 e–f; TM-5F02 | DESIGN_RESOLVED + VERIFICATION_PENDING |
+| N4 | `blockedPrks` authoritative ở `GET session/ir`; gợi ý trong `session.start` | #5 §7.3; #4 §14.7 | DESIGN_RESOLVED; TM-5V06 |
+| N5 | text cũ sửa theo ADR-074 (phiên SR-04) + #4 §8.3 | #2, #4 (`26c59d4`); #4 §8.3 | DESIGN_RESOLVED |
+| N-01 | `PLATFORMREL#{id}` bất biến + `#CURRENT` con trỏ CAS; deploy platform (gồm kiểm Admin/Preview build); giữ builder image cũ; `CATSNAP#CURRENT` | #5 §5.1, §9.7 | DESIGN_RESOLVED |
+| N-02 | snapshot đầu vào là blob content-addressed ghi ở preflight; GC giữ mọi blob được review/release tham chiếu | #5 §6.8, §5.3 | DESIGN_RESOLVED |
+| N-03 | chọn bootstrap = semver cao nhất bao trùm `supportedReleases` (draft + load format); phục hồi bằng revoke bootstrap; `E-BOOTSTRAP-INCOMPATIBLE` | #5 §6.5, §6.6; TM-5P07, TM-5P10 | DESIGN_RESOLVED + VERIFICATION_PENDING |
+| N-04 | VERIFYING chạy semantic fixtures của release trên evaluator hiện tại; gắn `deploymentVersion` | #5 §6.2; TM-5P11 | DESIGN_RESOLVED + VERIFICATION_PENDING |
+| N-05 | `inputIds` thống nhất; Admin phân tích với site policy + key ledger; output preflight có `platformReleaseId`, `engineVersion`; approve/tạo operation ConditionCheck `PLATFORMREL#CURRENT` | #3 §5.1; #4 §14.3; #5 §7.2, §6.8 | DESIGN_RESOLVED |
+
+MINOR đã sửa: m1 (ingestion mọi release), m2 (`REMOVE` tập rỗng, map khởi tạo), m3, m4 (platform-security được repair), m5 (miễn trừ deploy gate thống nhất), m6 (CT-26 theo mô hình mới, đoạn cũ đánh dấu lịch sử), m7 (M3 = override `block-operation`, `fbk` ∈ `serverFbks`), m8 (Origin/`Sec-Fetch-Site`, thu hồi khi draft đổi thống nhất, TM-5V06), m9 (cờ `dataMode`, hàng effect đặc quyền, nơi lưu evidence), m10 (SR-06 owner; SR-08 tách rủi ro còn lại — **cần user phân loại**; Preview build loại trạng thái hiệu lực `revoked`), m11, m-1 (recheck xóa `buildRequestDigest`), m-2 (`null`, REL có `dataContractDigest`), m-3 (#2 §16.5, token editor do spec #4 sở hữu, ngày header spec #1), MINOR-06 (#1 §7.6.7 `releaseId`).
+
+**Trạng thái:** theo ADR-075, mọi disposition ở §10.1 và §10.5 là **INDEPENDENT_REVIEW_PENDING** cho tới khi closure review độc lập (Batch A/B/C + review V5-01 12 điểm) trả kết quả ở §10.6.
+
+### 10.6. C1 closure review độc lập (ADR-075)
 
 *(điền sau khi chạy)*

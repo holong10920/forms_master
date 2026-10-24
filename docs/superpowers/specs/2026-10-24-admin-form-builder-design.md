@@ -1,6 +1,7 @@
 # Spec #4: Admin Form Builder — UX & Architecture (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.6** (2026-10-25) — **READY_FOR_CROSS_SPEC_REVIEW** (điều kiện của ADR-055 đã thực hiện: targeted review §27a); OD4-07 đã quyết (ADR-061).
+> **Trạng thái: PROPOSAL, revision 2.7** (2026-10-25) — **READY_FOR_CROSS_SPEC_REVIEW** (điều kiện của ADR-055 đã thực hiện: targeted review §27a); OD4-07 đã quyết (ADR-061).
+> - Rev 2.7 (C1b): §8.3 compat theo facet thật ở P0 (CSR-06); §14.3 output preflight + `inputIds` thống nhất (N-05, CSR-10); §14.7 `blockedPrks` trong `session.start` (N4); 4Z07 thống nhất chính sách thu hồi khi draft đổi (m8); token editor do spec #4 sở hữu.
 > - Rev 2.6 (ADR-074, user duyệt SR-04): presentation khai báo do host sở hữu là **hướng P0 đã duyệt**; §9.1 mới: ba tầng Edit Canvas / Interactive Preview / Published Form, parity của từng tầng, UX khi primitive không đủ (「編集用の簡易表示」, 「プレビューで確認」); không custom executable Inspector ở P0 (§10); sửa chỗ còn ghi code plugin `presentation` trong origin Admin (§9 D5, §14.7); test 4C02, 4C07, 4C08, 4Z10.
 > - Rev 2.5 (vòng sửa C1, Cross-Subsystem Review): Canvas vẽ **presentation khai báo** do host sở hữu — không JavaScript plugin nào trong origin Admin (SR-04/ADR-070, đề xuất chờ user xác nhận; §2, §9); Admin build không chứa code plugin (CSR-06, §14.4); plugin đã revoke trong Admin/Preview (CSR-07, §9, §14.4); preview gắn `platformReleaseId` (CSR-10, §14.7); state machine review theo spec #5 §8.1 (CSR-16, §17); `dataContractAck`; sơ đồ preview session (MINOR-13).
 > - Rev 2.4: đồng bộ spec #6 (I6-05): §16 tab 設定 › モーション; command Motion; diagnostics `E-MOTION-*`, `E-ADMIN-MOTION-NOT-BUNDLED`; postMessage `preview.demo`, `preview.motionMode`; review diff Motion.
@@ -265,8 +266,8 @@ Admin
 1. Form hoặc block trong form **đã dùng** plugin X → dùng **đúng version đó** (ADR-031). Nếu version đó không có trong Admin capability set → không chèn được, giải thích (§14.4).
 2. Chưa dùng → ứng viên = release của X thỏa **tất cả**:
    - **trạng thái hiệu lực** (mức chặt nhất giữa status ledger và runtime override, spec #2 §16) là `active`. Chủ ý chặt hơn spec #2 §16.3: release `deprecated` vẫn dùng được nếu đã pin, nhưng không được chọn cho lần chèn mới;
-   - với **mỗi facet mà release có** (spec #2 §6.2: `compat` chỉ khai cho host có facet): facet design → `compat.designHostApi` chứa Admin; facet browser → `compat.browserHostApi` chứa engine hiện tại; facet server → `compat.serverHostApi` chứa backend deployment đang chạy (support matrix, spec #5). Không kiểm host mà release không có facet (ví dụ `dataSource` chỉ có facet server);
-   - nếu release có facet design hoặc browser: có trong **Admin capability set** (§14.4).
+   - với **mỗi facet mà release có** (spec #2 §6.2): facet browser → `compat.browserHostApi` chứa engine hiện tại; facet server → `compat.serverHostApi` chứa backend deployment đang chạy (support matrix, spec #5); `compat.designHostApi` = **phiên bản từ vựng presentation khai báo** (ADR-074) mà Admin hỗ trợ. Không kiểm host mà release không có facet. *(C1b, CSR-06: P0 không có facet design.)*
+   - release đã ingestion (spec #5 §9.3.3) và có trong **Admin capability set** (§14.4) — Admin chỉ nhận metadata dạng dữ liệu, không code.
    
    Chọn semver cao nhất trong ứng viên. **"Active mới nhất" không đồng nghĩa tương thích.**
 3. Không có ứng viên → precondition từ chối command (không phải diagnostic trong document), lý do `CAP_NO_COMPATIBLE_VERSION`, thông điệp 「この部品は現在の環境で利用できる版がありません。管理者に確認してください。」
@@ -604,7 +605,7 @@ Ví dụ: draft có thể đồng thời 「保存済み」, 「一部プレビ�
 
 ### 14.3. Phát hiện lệch giữa client và server
 
-- Preflight trả `{ analyzerVersion, inputIds: { draftVersion, catalogSnapshotId, ledgerSnapshotId, runtimeOverrideSnapshotId }, diagnostics, diagnosticsDigest }`. `diagnosticsDigest` **chỉ** tính trên diagnostic của K1–K6. Kết quả kiểm của spec #5 (ledger hiện tại, support matrix, quyền) trả trong một trường riêng và **không** nằm trong digest.
+- Preflight trả `{ platformReleaseId, engineVersion, analyzerVersion, inputIds: { draftVersion, catalogSnapshotId, ledgerSnapshotId, runtimeOverrideSnapshotId, keyLedgerSnapshot, sitePolicy, platformReleaseId }, diagnostics, diagnosticsDigest }` *(C1b, N-05, CSR-10; cùng tập với spec #3 §5.1, spec #5 §7.2)*. Admin phân tích với **cùng** input (gồm nội dung site policy và key ledger tải từ envelope draft) nên K5 phía client sinh được `E-EFFECT-NOT-ALLOWED` và `E-KEY-COLLISION` như server. `diagnosticsDigest` **chỉ** tính trên diagnostic của K1–K6. Kết quả kiểm của spec #5 (ledger hiện tại, support matrix, quyền) trả trong một trường riêng và **không** nằm trong digest.
 - Admin chỉ so digest khi `inputIds` của nó **trùng hoàn toàn** với server; khác bất kỳ id nào → không so, tải lại snapshot và phân tích lại.
 - Khác version → Admin coi kết quả client là không đáng tin, chỉ dùng kết quả server, hiện 「サーバーの確認結果を表示しています」.
 - Cùng version, cùng `inputIds` mà khác digest → **lỗi hệ thống** (vi phạm ADR-017): dùng kết quả server; báo vận hành `DIAGNOSTIC_DRIFT` kèm `formId`, snapshot version, hai digest (không PII); có test (TM-4D02).
@@ -613,7 +614,7 @@ Ví dụ: draft có thể đồng thời 「保存済み」, 「一部プレビ�
 
 ### 14.4. Plugin trong Admin
 
-- **Admin capability set** *(C1, CSR-06/07)*: lúc deploy, trusted pipeline chọn từ release store mọi release **đã ingestion runtime** (spec #5 §9.3.3), không có ledger `revoked`, `compat` khớp. **Admin build** chỉ nhận **manifest/catalog dạng dữ liệu** của các release này (Inspector tự sinh, `presentation` khai báo) — **không** module JS nào của plugin (INV-A1). **Preview build** (origin preview) chứa engine + browser facet + Motion của cùng tập (INV-A2). Danh sách ghi trong Admin build manifest, gắn `platformReleaseId` (spec #5 §6.8).
+- **Admin capability set** *(C1, CSR-06/07)*: lúc deploy, trusted pipeline chọn từ release store mọi release **đã ingestion runtime** (spec #5 §9.3.3), trạng thái hiệu lực **không** `revoked` tại lúc build (ledger **và** override, đọc `CAPSTATUS`; C1b m10), `compat` khớp. **Admin build** chỉ nhận **manifest/catalog dạng dữ liệu** của các release này (Inspector tự sinh, `presentation` khai báo) — **không** module JS nào của plugin (INV-A1). **Preview build** (origin preview) chứa engine + browser facet + Motion của cùng tập (INV-A2). Danh sách ghi trong Admin build manifest, gắn `platformReleaseId` (spec #5 §6.8).
 - **Plugin bị revoke sau khi build (CSR-07):** không cần build lại Admin ngay — Admin không có code plugin; Canvas và Inspector đọc trạng thái hiệu lực (freshness) và hiện thẻ 「この部品は利用停止中です」; chèn mới bị chặn (`publishBlockers`). Preview: `POST …/preview-sessions` trả `blockedPrks`; iframe **không mount** `Component` của PRK bị chặn (thẻ giữ chỗ) và mọi lời gọi server qua gate (spec #5 §9.3). **Không chặn được:** code đã nạp trong iframe preview đang mở chạy tiếp tới khi phiên bị thay/hết hạn (≤ 30 phút) hoặc iframe nạp lại; code vẫn nằm trong Preview bundle tới lần build sau (bundle tiếp theo loại version `revoked`). Không hứa JS đã tải biến mất ngay.
 - Design facet, browser facet và server facet của một FBK thuộc **cùng release** nên tương thích theo cấu trúc; có mặt adapter server trong backend được kiểm ở preflight (support matrix).
 - Draft pin một version có facet design/browser nhưng **không có** trong Admin capability set: field hiện thẻ giữ chỗ chỉ đọc, Inspector chỉ đọc, `E-ADMIN-CAP-NOT-BUNDLED` (gate preview); **không bao giờ đổi version cho hợp Admin**. Cách giải quyết: Platform deploy Admin có version đó, hoặc Editor chủ động 更新を確認.
@@ -680,7 +681,7 @@ Phong bì: `{ protocol: "fb-preview", v: 1, previewSessionId?, seq, type, payloa
 | Bước / hướng | `type` | `payload` | Ghi chú |
 |---|---|---|---|
 | 1. Preview → Admin | `preview.hello` | `{ buildManifestHash, engineVersion }` | không có session; gửi khi iframe sẵn sàng |
-| 2. Admin → Preview | `session.start` | `{ previewSessionId, mode: partial \| simulation \| review, ir? (chỉ partial), scenario, theme, viewport }` | chỉ sau `hello` hợp lệ và `buildManifestHash` khớp Admin build manifest; lệch → không start, hiện 「プレビューの版が管理画面と一致しません。再読み込みしてください。」 |
+| 2. Admin → Preview | `session.start` | `{ previewSessionId, mode: partial \| simulation \| review, ir? (chỉ partial), scenario, theme, viewport, blockedPrks (gợi ý; giá trị authoritative lấy từ `GET session/ir`, spec #5 §7.3 — C1b, N4) }` | chỉ sau `hello` hợp lệ và `buildManifestHash` khớp Admin build manifest; lệch → không start, hiện 「プレビューの版が管理画面と一致しません。再読み込みしてください。」 |
 | Admin → Preview | `session.replace` | như `session.start`, `previewSessionId` mới | |
 | Admin → Preview | `preview.reset`, `preview.gotoStep` | `{ stepId }` | |
 | Preview → Admin | `preview.ready` | `{}` | xác nhận đã nạp session |
@@ -736,7 +737,7 @@ Phong bì: `{ protocol: "fb-preview", v: 1, previewSessionId?, seq, type, payloa
 ## 16. 設定: theme và Motion
 
 - **フォーム情報:** tên, mô tả nội bộ.
-- **テーマ (P0, đã duyệt):** chỉ chọn trong theme đã duyệt của site; preview và canvas dùng đúng theme đó; không CSS editor, không sửa token tự do (token editor: P1, spec #6).
+- **テーマ (P0, đã duyệt):** chỉ chọn trong theme đã duyệt của site; preview và canvas dùng đúng theme đó; không CSS editor, không sửa token tự do (token editor: P1, **spec #4 sở hữu**).
 - **モーション:** tab 設定 › モーション theo spec #6 §10 (Preset Library / preview cô lập / thuộc tính; chọn preset, bật/tắt nhóm, `速さ`, so On/Off, 「動きを減らす設定で確認」). Review diff hiện thay đổi Motion bằng ngôn ngữ nghiệp vụ (「モーション: 控えめ → ガイド付き」). Animation không điều khiển business state (ADR-062).
 - **送信後の処理:** chọn effect đã approve cho site (P0 chỉ mock); mapping mặc định; tùy chỉnh mapping chỉ với quyền 詳細設定 và trong allowlist.
 
@@ -825,7 +826,7 @@ Loại: **A** automated · **M** manual · **U** usability (người không ph�
 | 4Z04 | Preview isolation | Plugin gán `top.location`, mở popup | bị sandbox chặn; Admin vẫn ở nguyên trang | A |
 | 4Z05 | Preview isolation | Gửi message sai origin, sai `source`, sai schema, `previewSessionId` cũ, `seq` lùi, quá kích thước | đều bị bỏ; Builder không đổi state; không throw | A |
 | 4Z06 | Preview isolation | Runtime trong iframe throw / treo | Admin hiện thông báo + 再読み込み; Document, Selection, Persistence không đổi | A |
-| 4Z07 | Preview isolation | Sửa draft trong lúc preview | phiên mới, `session.replace`; phiên cũ bị Preview API thu hồi; message phiên cũ bị bỏ | A |
+| 4Z07 | Preview isolation | Sửa draft trong lúc preview | session **không** tự thay; banner 「下書きが変更されました。[最新の内容で再読み込み]」; người dùng bấm → session mới + `session.replace`, session cũ bị Preview API thu hồi; message session cũ bị bỏ (C1b, m8) | A |
 | 4Z08 | Preview isolation | Cùng fixture chạy trong iframe preview và trong artifact đã publish | cùng step đi qua, cùng kết quả validation (cùng package/version engine) | A |
 | 4Z09 | Preview isolation | Cấu hình iframe và header | site iframe ≠ site Admin (kể cả local); sandbox không có cờ cấm; CSP/Permissions-Policy/Referrer-Policy/frame-ancestors của hai origin đúng §14.7 | A |
 | 4Z10 | Build boundary | *(rev 2.6)* Module graph của Admin build và Preview build; canary trong **mọi** entry của plugin fixture (`contract`, `browser`, `server`, `fixtures`, `presentation`/`design` của fixture âm) | Admin build: không module `rel:*`, không canary nào (spec #3 §10.1, C18); N-PRES-06 (bắc cầu) và N-PRES-07 (`import()` không literal) fail đúng mã, control pass; Preview build: không canary `design`/server/`fixtures` (C21) | A |

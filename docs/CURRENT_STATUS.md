@@ -70,7 +70,7 @@
 - G9 (GitHub) và G10 (AWS): đang chờ user.
 
 ## Tiếp theo
-1. Vòng sửa C1 (ADR-068..073) **đã áp vào spec** (spec #1 rev 3.7, #2 rev 2.11, #3 rev 2.6, #4 rev 2.5, #5 rev 2 + C1, #6 rev 2.1; register, traceability, report §10); đang targeted re-review độc lập. Không còn BLOCKER/MAJOR → G1 Approval Package (không tự approve). SR-04: đề xuất presentation khai báo chờ user xác nhận. — ưu tiên trải nghiệm Business Editor và hiệu năng runtime. Sau đó Cross-Subsystem Review.
+1. C1 (`2f514a1`) → targeted re-review: 10 MAJOR mới → C1b (`60fcf9d` + commit đồng bộ); SR-04 → ADR-074 (`26c59d4`); ADR-075: closure review độc lập Batch A/B/C + review V5-01 12 điểm, trạng thái INDEPENDENT_REVIEW_PENDING. Không còn BLOCKER/MAJOR → G1 Approval Package (không tự approve). SR-08 (rủi ro còn lại của preview) cần user phân loại. forms-master-e4 là phiên ghi duy nhất. — ưu tiên trải nghiệm Business Editor và hiệu năng runtime. Sau đó Cross-Subsystem Review.
 2. Spec #3 rev 2: final review + Cross-Spec Review (spec #1 §25). VG-01..VG-10 giữ OPEN tới khi có evidence.
 3. User review spec #2 rev 2.5 và quyết OD2-08/OD2-09 (cần trước spec #5, không chặn spec #3).
 4. User review spec #1 rev 3.3. Nếu đồng ý thì spec #1 chuyển sang READY_FOR_CROSS_REVIEW (chỉ khi user xác nhận).

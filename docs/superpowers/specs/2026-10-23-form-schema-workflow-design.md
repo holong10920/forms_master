@@ -1,6 +1,6 @@
 # Spec #1: Form Definition Schema & Workflow DSL (Architecture Proposal)
 
-> **Trạng thái: PROPOSAL, revision 3.7** (2026-10-24).
+> **Trạng thái: PROPOSAL, revision 3.7** (2026-10-25).
 > - Rev 3.7 (vòng sửa C1): §8.6 backend tải IR theo `releaseId` (MINOR-06); §17 sơ đồ submit có `releaseId`, ledger do spec #5 quản lý (MINOR-06, MINOR-16); §14 snapshot cố định ở review (ADR-050, MINOR-16); thứ tự ưu tiên focus (§8.4, MINOR-17).
 > - Rev 3.6: đồng bộ spec #6 (I6-01, I6-02): schema slot `motion` (§7.1); quy tắc focus khi chuyển step và khi node chứa focus thành inactive (§8.4); trạng thái `submit` và selector `transitionNotices` (§9).
 > - Rev 3.5: mã 422 field inactive là `E-INACTIVE-DATA-PRESENT` (dạng mã lỗi runtime công khai, spec #3 §16.4); body submit có `releaseId` (§8.6, spec #5 §10.2); đóng OD-05 (ADR-060), OD-08 và OD-09 (ADR-058, P0 defaults); TTL draft kiểm logic (§9).
@@ -571,7 +571,7 @@ Engine chỉ có **một** khái niệm "không có giá trị".
 - Bản ghi được lưu gồm:
   - giá trị đã project và chuẩn hóa
   - các `calculated` có `include`, do BE tự tính
-  - `formId`, `revision`, `schemaVersion`
+  - `formId`, `releaseId`, `revision`, `schemaVersion` *(C1b, MINOR-06)*
   - hash của Data Contract
 - Giá trị `displayOnly` không bao giờ được lưu. Giá trị ẩn chỉ nằm trong bộ nhớ trình duyệt, không bao giờ rời khỏi trình duyệt.
 

@@ -1,6 +1,7 @@
 # Spec #2: Plugin Contracts & Capability Registry (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.12** (2026-10-25).
+> **Trạng thái: PROPOSAL, revision 2.13** (2026-10-25).
+> - Rev 2.13 (C1b): §8.1 ingestion cho mọi release, bước 12 đồng bộ ledger (N1); §16.5 runtime override là API thật (ADR-072), override quá hạn vẫn mở, enforce chỉ cho admission (G-EXEC).
 > - Rev 2.12 (ADR-074, user duyệt SR-04): **Host-owned Declarative Presentation là hướng thiết kế P0 đã duyệt**. §6.2.2 mới: contract metadata (schema đóng, không có chuỗi tự do, primitive trong allowlist của Platform, không cấp quyền API), ba tầng Edit Canvas / Interactive Preview / Published Form và parity của từng tầng, negative fixture N-PRES-01..08; registry P0 từ chối `bindings.presentation`, `bindings.design`, export `./presentation`/`./design` (`E-PRESENTATION-EXECUTABLE-REF`); sửa chỗ còn ghi Admin build chứa `presentation`/`design` (§4, §6.5, INV-A2, L3, §17.2, §18.1, §21).
 > - Rev 2.11 (vòng sửa C1, Cross-Subsystem Review): **presentation khai báo do host sở hữu** thay cho export JS `Presentation` ở P0 (SR-04/ADR-070, đề xuất chờ user xác nhận; §6.2.1, §7.4); INV-A1: Admin build **không** chứa module nào của plugin; INV-A2: loại version `revoked`, cho phép adapter submit mock của preview (MINOR-14); §8.1 bước 11 ingestion runtime (CSR-01); §10.3/§10.4 theo `S` = release và miễn trừ (MINOR-18); §15 body có `schemaVersion` (MINOR-06); §16.3 `deprecated` chỉ thông tin (CSR-17); §16.5 G-ADM/G-EXEC (CSR-04); §21 phạm vi theo ADR-072; `motionPreset` không còn "Motion Animation Editor".
 > - Rev 2.10: đồng bộ spec #6 (I6-03, I6-06): INV-A2 có Motion runtime + mọi version `@platform/motion-presets` được hỗ trợ; luật L3 cho package Motion (không import dispatcher/store/selector của engine, không API mạng/storage).
@@ -607,7 +608,8 @@ class ServerContext:
 | 8 | Build facet **của version trong workspace** và adapter; tính hash. PRK đã có trong store: cùng tree hash → bỏ qua (không build lại); khác → `E-RELEASE-IMMUTABLE`. Release cũ không bao giờ build lại. | build error, `E-RELEASE-IMMUTABLE` |
 | 9 | Conformance (§17) | `E-CONFORMANCE-FAILED` |
 | 10 | Ghi release + **provenance record**; emit `registry.catalog.json` và `adapter-inventory.json` từ **toàn bộ** release store | — |
-| 11 *(rev 2.11, CSR-01)* | **Ingestion runtime**: với mỗi release mới có server facet, gọi ingestion của spec #5 §9.3.3 (tạo `CAPSTATUS#{PRK}` + mọi gate FBK trong một transaction); release chỉ vào Admin capability set / Preview build sau khi ingestion thành công | `CAPABILITY_INGEST_CONFLICT` |
+| 11 *(rev 2.11, CSR-01)* | **Ingestion runtime**: với **mọi** release mới (kể cả chỉ có facet browser; C1b m1), gọi ingestion của spec #5 §9.3.3 (tạo `CAPSTATUS#{PRK}` + mọi gate FBK trong một transaction); release chỉ vào Admin capability set / Preview build sau khi ingestion thành công | `CAPABILITY_INGEST_CONFLICT` |
+| 12 *(C1b, N1)* | **Đồng bộ status ledger**: chạy cho mỗi commit đổi `registry/status-ledger.jsonl`; với mỗi PRK đổi, gọi thao tác đồng bộ ledger của spec #5 §9.7 (CAS `LEDGER#{prk}`, cập nhật `CAPSTATUS` + gate nếu đã ingest); reconciler so sánh và chạy lại khi lệch | `LEDGER_SYNC_CONFLICT` (retry) |
 
 **Provenance record** của mỗi release (ADR-030): PRK; source commit; tree hash thư mục plugin; version toolchain (Node, bundler, TypeScript, Python); hash npm lockfile và `pythonRequirements` đã resolve; facet inventory (FBK → hash từng file); adapter inventory; `compat`; hash báo cáo conformance; pipeline id; thời điểm. Ký artifact: phase sau (ADR-030).
 
@@ -1042,14 +1044,14 @@ sequenceDiagram
 
 ### 16.5. Emergency runtime override (ADR-035)
 
-- **Runtime policy store** (P0: bảng trong DB local của backend; mô phỏng ở local): entry `{ target: PRK | FBK, effect: "vulnerable" | "revoked" | "block-operation", incidentId, reason, actor, createdAt, expiresAt? }`.
+- **Runtime policy store** (P0: `CAPSTATUS#{PRK}` trong domain store của backend, có API thật ở local PoC — ADR-072, spec #5 §9.3): entry `{ target: PRK | FBK, effect: "vulnerable" | "revoked" | "block-operation", incidentId, reason, actor, createdAt, expiresAt? }`.
 - **Thay đổi**: chỉ qua API admin đã xác thực, role `platform-security` (RBAC ở spec #5, F-P0-13). Business Editor, Reviewer và người dùng form không có quyền. P0 có thể có một tài khoản local giữ role này.
 - **Audit**: mọi thay đổi ghi audit log append-only (F-P0-16).
 - **Enforce**: *(rev 2.11, CSR-04)* override có hiệu lực cho **admission** tại commit (G-ADM, spec #5 §9.3.7: transaction submit kiểm gate). Thực thi adapter **không** được bảo đảm dừng ngay (G-EXEC, TOCTOU — ADR-063): chỉ lời gọi có lần đọc gate sau commit mới không chạy. Trạng thái hiệu lực là `CAPSTATUS#{PRK}` (spec #5 §9.3.2).
 - **Trạng thái hiệu lực** = mức **chặt nhất** của ledger và override (`active` < `deprecated` < `vulnerable` < `revoked`). Override không bao giờ nới lỏng ledger.
 - **Release manifest không bị đụng tới.**
-- **Reconciliation** (chạy ở generator và khi backend khởi động): báo cáo override chưa có entry ledger tương ứng sau hạn ghi trong incident; ledger đã chặt hơn override → override có thể đóng; override hết `expiresAt` → không tự gỡ nếu ledger chưa được cập nhật, mà báo cáo để người quyết.
-- **Runtime status store không khả dụng:** ADR-057 — submit fail closed (503); chỉ query thông tin dùng cache ≤ 60 s (spec #5 §9.3). Override có hiệu lực tại commit nhờ admission gate (spec #5 §9.3).
+- **Reconciliation** (chạy ở generator và khi backend khởi động): báo cáo override chưa có entry ledger tương ứng sau hạn ghi trong incident; ledger đã chặt hơn override → override có thể đóng; override hết `expiresAt` → không tự gỡ nếu ledger chưa được cập nhật, mà báo cáo để người quyết. *(C1b, MINOR-04)* Override quá `expiresAt` **vẫn mở** cho tới khi đóng tường minh (spec #5 §9.3.2); reconciliation chỉ báo cáo.
+- **Runtime status store không khả dụng:** ADR-057 — submit fail closed (503); chỉ query thông tin dùng cache ≤ 60 s (spec #5 §9.3). Override có hiệu lực **cho admission** tại commit nhờ admission gate (thực thi adapter: G-EXEC, ADR-063) (spec #5 §9.3).
 
 ---
 
