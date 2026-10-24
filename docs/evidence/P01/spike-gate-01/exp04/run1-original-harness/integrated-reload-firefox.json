@@ -1,0 +1,40 @@
+{
+  "kind1": "evaluation",
+  "warning": "再読み込みすると、お名前・電話番号などの個人情報は再入力が必要です。",
+  "releaseBefore": "rel_4xajnf3dzfyfv777uhbkvtk4n2",
+  "releaseAfter": "rel_4xajnf3dzfyfv777uhbkvtk4n2",
+  "checkedAfter": true,
+  "outcomeAfterReload": "stp_store",
+  "storeRequestsAfterReloadNext": [
+    {
+      "t": 1792824534250,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "",
+      "status": 200
+    },
+    {
+      "t": 1792824534251,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "status": 200
+    }
+  ],
+  "storeHits": [
+    {
+      "t": 1792824534250,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "",
+      "status": 200
+    },
+    {
+      "t": 1792824534251,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "status": 200
+    }
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "browser": "webkit",
+  "version": "27.2",
+  "scenarios": [
+    {
+      "id": "http404",
+      "first": {
+        "ok": false,
+        "name": "TypeError",
+        "message": "Importing a module script failed.",
+        "ms": 5
+      },
+      "requestsDuringFirst": 1,
+      "retrySameUrl": {
+        "ok": true,
+        "value": 1,
+        "ms": 2
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 2
+      },
+      "requestsSameUrlTotal": 2,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "http503",
+      "first": {
+        "ok": false,
+        "name": "TypeError",
+        "message": "Importing a module script failed.",
+        "ms": 2
+      },
+      "requestsDuringFirst": 1,
+      "retrySameUrl": {
+        "ok": true,
+        "value": 1,
+        "ms": 2
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 2
+      },
+      "requestsSameUrlTotal": 2,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "reset-persistent",
+      "first": {
+        "ok": false,
+        "name": "TypeError",
+        "message": "Importing a module script failed.",
+        "ms": 5
+      },
+      "requestsDuringFirst": 4,
+      "retrySameUrl": {
+        "ok": true,
+        "value": 1,
+        "ms": 3
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 2
+      },
+      "requestsSameUrlTotal": 5,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "evalthrow",
+      "first": {
+        "ok": false,
+        "name": "Error",
+        "message": "spike-eval-throw",
+        "ms": 2
+      },
+      "requestsDuringFirst": 1,
+      "retrySameUrl": {
+        "ok": false,
+        "name": "Error",
+        "message": "spike-eval-throw",
+        "ms": 0
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 2
+      },
+      "requestsSameUrlTotal": 1,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "reset-once-observation",
+      "first": {
+        "ok": true,
+        "value": 1,
+        "ms": 2
+      },
+      "requests": 2
+    },
+    {
+      "id": "slow-timeout",
+      "first": {
+        "ok": false,
+        "name": "HarnessTimeout",
+        "message": "harness-timeout",
+        "ms": 1002
+      },
+      "secondWhilePendingOrAfter": {
+        "ok": true,
+        "value": 1,
+        "ms": 2005
+      },
+      "requestsSameUrl": 1
+    }
+  ]
+}

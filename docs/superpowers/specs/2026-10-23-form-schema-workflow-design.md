@@ -912,7 +912,7 @@ Các bảng T1–T3 và ví dụ E1–E10 sẽ thành **test dạng bảng** ch�
 | C8 | Double-click 次へ | Click thứ hai mang `fromStep` = step cũ, khác `current` mới, nên bị bỏ qua (INV-N3). Không có chuyện **nhảy qua hai step**. |
 | C9 | Double-click Submit | Click đầu khóa runtime (`disabled`) và tạo một submit duy nhất (INV-N5). Click sau bị bỏ qua. Mạng lỗi rồi thử lại thì dùng cùng `idempotencyKey`, và BE trả về kết quả đã lưu. |
 | C10 | Validation thành công nhưng transition không còn hợp lệ vì state đã đổi | Không thể dùng transition cũ (INV-N2). Kết quả validation chỉ được dùng nếu fingerprint của step còn khớp. Nếu không khớp thì validate lại. |
-| C11 | *(Rev 3.3)* Bấm 次へ tới step có capability lazy chưa tải (ví dụ `store-selector` ở `stp_store`) | Vào `awaitingCapability { group, fromStep, stateVersion }`, nút 次へ hiện đang xử lý. Tải xong: transition **được tính lại** từ state hiện tại (INV-N2) rồi commit. Tải lỗi: ở lại step hiện tại, hiện lỗi theo spec #3 §15.3, không đổi giá trị (INV-N9). Input, 戻る hoặc popstate trong lúc chờ: hủy ý định (INV-N8). |
+| C11 | *(Rev 3.3)* Bấm 次へ tới step có capability lazy chưa tải (ví dụ `store-selector` ở `stp_store`) | Vào `awaitingCapability { groups, fromStep, stateVersion }`, nút 次へ hiện đang xử lý. Tải xong: transition **được tính lại** từ state hiện tại (INV-N2) rồi commit. Tải lỗi: ở lại step hiện tại, hiện lỗi theo spec #3 §15.3, không đổi giá trị (INV-N9). Input, 戻る hoặc popstate trong lúc chờ: hủy ý định (INV-N8). |
 
 Các dòng C1–C10 được thêm vào T3 dưới dạng sự kiện và guard, và thành test dạng bảng (AC-34).
 
@@ -1253,7 +1253,7 @@ sequenceDiagram
 
 | ID | Edge case → hành vi mong đợi |
 |---|---|
-| EC-36 | Plugin `store-selector` không tải được → field báo lỗi kèm 再試行. Field required nên chặn 次へ. Các field khác vẫn hoạt động (error boundary). |
+| EC-36 | *(Sửa ở rev 3.3 theo INV-N9/spec #3 §15.)* Chunk của `store-selector` **không tải được** → khách không vào được step đó: ở lại step hiện tại, lỗi kèm 再試行, giá trị giữ nguyên (spec #3 §15.3). Plugin **đã tải nhưng lỗi khi render** → error boundary của field báo lỗi kèm 再試行; field required nên chặn 次へ; các field khác vẫn hoạt động. `fallback: manualEntry` (spec #2) chỉ áp cho lỗi `dataSource`, không cho lỗi tải chunk. |
 | EC-37 | Editor map field `personal` vào input của một lookup không khai quyền nhận PII → `E-PERM-PII`, chặn publish. |
 | EC-38 | Capability `@x@1.2.0` bị đánh dấu `vulnerable` sau khi form đã publish → form đang chạy không tự đổi. Publish mới bị chặn cho đến khi nâng version. Quy trình khẩn cấp theo ADR-009. |
 | EC-39 | Validator authoritative timeout ở backend lúc submit → lỗi retryable, dữ liệu không được chấp nhận. Draft được giữ. |

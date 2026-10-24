@@ -1,0 +1,100 @@
+{
+  "kind": "network",
+  "runtimeLog": [
+    {
+      "gid": "g-stp_store",
+      "tier": 0,
+      "ok": false,
+      "kind": "network",
+      "errorName": "TypeError",
+      "errorMessage": "Failed to fetch dynamically imported module: http://127.0.0.1:4173/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.50c062eedbca.js",
+      "ms": 15
+    },
+    {
+      "gid": "g-stp_store",
+      "tier": 1,
+      "ok": true,
+      "ms": 15
+    }
+  ],
+  "hits": [
+    {
+      "t": 1792825032156,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.50c062eedbca.js",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792825032156,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "status": 200
+    },
+    {
+      "t": 1792825032157,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.50c062eedbca.js",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792825032158,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.50c062eedbca.js",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792825032158,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.50c062eedbca.js",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792825032159,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.50c062eedbca.js",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792825032202,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.50c062eedbca.js",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792825032212,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.50c062eedbca.js",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792825032213,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.50c062eedbca.js",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792825032264,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.50c062eedbca.js",
+      "query": "?retry=mvm1qgcn-1",
+      "status": 200
+    }
+  ]
+}

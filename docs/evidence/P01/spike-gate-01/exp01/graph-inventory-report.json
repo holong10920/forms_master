@@ -1,0 +1,293 @@
+{
+  "pc-demo": {
+    "releaseId": "rel_umzw3lkdxz7dcxs6mdmmtv74so",
+    "G_storeSelectorModules": [
+      "platform:@platform/store-selector@1.0.0/browser/index.js",
+      "platform:@platform/store-selector@1.0.0/browser/store-selector.css",
+      "platform:@platform/store-selector@1.0.0/contract/index.js"
+    ],
+    "G_motionModules": 156,
+    "G_motionModulesOutsideMotionChunk": [],
+    "G_dynamicImportsToMotion": [
+      "assets/motion.365a19ccc35a.js"
+    ],
+    "G_designOrServerModules": [],
+    "G_reactModules": [
+      "pkg:react-dom@19.3.1",
+      "pkg:react@19.3.1"
+    ],
+    "G_reactPackagesVersions": [
+      "pkg:react-dom@19.3.1",
+      "pkg:react@19.3.1",
+      "pkg:scheduler@0.28.0"
+    ],
+    "G_reactChunks": [
+      "assets/core.1d34d523e08a.js"
+    ],
+    "G_unnormalizedModuleIds": [],
+    "G_staticCycles": [],
+    "G_chunks": [
+      {
+        "kind": "core",
+        "file": "assets/core.1d34d523e08a.js",
+        "static": [],
+        "dynamic": []
+      },
+      {
+        "kind": "entry",
+        "file": "assets/entry.8ba03744cc42.js",
+        "static": [
+          "assets/core.1d34d523e08a.js"
+        ],
+        "dynamic": [
+          "assets/g-stp_store.50c062eedbca.js",
+          "assets/motion.365a19ccc35a.js"
+        ]
+      },
+      {
+        "kind": "group",
+        "file": "assets/g-stp_store.50c062eedbca.js",
+        "static": [
+          "assets/core.1d34d523e08a.js"
+        ],
+        "dynamic": []
+      },
+      {
+        "kind": "group",
+        "file": "assets/motion.365a19ccc35a.js",
+        "static": [],
+        "dynamic": []
+      }
+    ],
+    "I_files": [
+      "assets/core.1d34d523e08a.js",
+      "assets/core.d3acac3d9206.css",
+      "assets/entry.8ba03744cc42.js",
+      "assets/form-ir.87725e644d95.json",
+      "assets/g-stp_store.388caee6d610.css",
+      "assets/g-stp_store.50c062eedbca.js",
+      "assets/motion.365a19ccc35a.js",
+      "index.html"
+    ],
+    "I_filesWithStoreSelectorMarker": [
+      "assets/g-stp_store.50c062eedbca.js"
+    ],
+    "I_filesWithDesignCanary": [],
+    "I_filesWithServerCanary": [],
+    "I_filesWithFixtureCanary": [],
+    "I_filesWithServerHandlerNames": [],
+    "I_pyFiles": [],
+    "I_mapFiles": [],
+    "I_sourceMappingURL": [],
+    "I_absolutePathHits": [],
+    "I_privateAbsolutePathHits": [],
+    "I_pathCharsetViolations": []
+  },
+  "pc-demo-rev8": {
+    "releaseId": "rel_dpxfqdokjrxwjti3zoxebh7xmi",
+    "G_storeSelectorModules": [
+      "platform:@platform/store-selector@1.0.0/browser/index.js",
+      "platform:@platform/store-selector@1.0.0/browser/store-selector.css",
+      "platform:@platform/store-selector@1.0.0/contract/index.js"
+    ],
+    "G_motionModules": 156,
+    "G_motionModulesOutsideMotionChunk": [],
+    "G_dynamicImportsToMotion": [
+      "assets/motion.365a19ccc35a.js"
+    ],
+    "G_designOrServerModules": [],
+    "G_reactModules": [
+      "pkg:react-dom@19.3.1",
+      "pkg:react@19.3.1"
+    ],
+    "G_reactPackagesVersions": [
+      "pkg:react-dom@19.3.1",
+      "pkg:react@19.3.1",
+      "pkg:scheduler@0.28.0"
+    ],
+    "G_reactChunks": [
+      "assets/core.1d34d523e08a.js"
+    ],
+    "G_unnormalizedModuleIds": [],
+    "G_staticCycles": [],
+    "G_chunks": [
+      {
+        "kind": "core",
+        "file": "assets/core.1d34d523e08a.js",
+        "static": [],
+        "dynamic": []
+      },
+      {
+        "kind": "entry",
+        "file": "assets/entry.8ba03744cc42.js",
+        "static": [
+          "assets/core.1d34d523e08a.js"
+        ],
+        "dynamic": [
+          "assets/g-stp_store.50c062eedbca.js",
+          "assets/motion.365a19ccc35a.js"
+        ]
+      },
+      {
+        "kind": "group",
+        "file": "assets/g-stp_store.50c062eedbca.js",
+        "static": [
+          "assets/core.1d34d523e08a.js"
+        ],
+        "dynamic": []
+      },
+      {
+        "kind": "group",
+        "file": "assets/motion.365a19ccc35a.js",
+        "static": [],
+        "dynamic": []
+      }
+    ],
+    "I_files": [
+      "assets/core.1d34d523e08a.js",
+      "assets/core.d3acac3d9206.css",
+      "assets/entry.8ba03744cc42.js",
+      "assets/form-ir.57b7b9e4af9d.json",
+      "assets/g-stp_store.388caee6d610.css",
+      "assets/g-stp_store.50c062eedbca.js",
+      "assets/motion.365a19ccc35a.js",
+      "index.html"
+    ],
+    "I_filesWithStoreSelectorMarker": [
+      "assets/g-stp_store.50c062eedbca.js"
+    ],
+    "I_filesWithDesignCanary": [],
+    "I_filesWithServerCanary": [],
+    "I_filesWithFixtureCanary": [],
+    "I_filesWithServerHandlerNames": [],
+    "I_pyFiles": [],
+    "I_mapFiles": [],
+    "I_sourceMappingURL": [],
+    "I_absolutePathHits": [],
+    "I_privateAbsolutePathHits": [],
+    "I_pathCharsetViolations": []
+  },
+  "sports-demo": {
+    "releaseId": "rel_sftahbrrsqazgk7wpty6zdte3m",
+    "G_storeSelectorModules": [],
+    "G_motionModules": 156,
+    "G_motionModulesOutsideMotionChunk": [],
+    "G_dynamicImportsToMotion": [
+      "assets/motion.365a19ccc35a.js"
+    ],
+    "G_designOrServerModules": [],
+    "G_reactModules": [
+      "pkg:react-dom@19.3.1",
+      "pkg:react@19.3.1"
+    ],
+    "G_reactPackagesVersions": [
+      "pkg:react-dom@19.3.1",
+      "pkg:react@19.3.1",
+      "pkg:scheduler@0.28.0"
+    ],
+    "G_reactChunks": [
+      "assets/core.1fa44b9f73a2.js"
+    ],
+    "G_unnormalizedModuleIds": [],
+    "G_staticCycles": [],
+    "G_chunks": [
+      {
+        "kind": "core",
+        "file": "assets/core.1fa44b9f73a2.js",
+        "static": [],
+        "dynamic": []
+      },
+      {
+        "kind": "entry",
+        "file": "assets/entry.e56900dad14e.js",
+        "static": [
+          "assets/core.1fa44b9f73a2.js"
+        ],
+        "dynamic": [
+          "assets/motion.365a19ccc35a.js"
+        ]
+      },
+      {
+        "kind": "group",
+        "file": "assets/motion.365a19ccc35a.js",
+        "static": [],
+        "dynamic": []
+      }
+    ],
+    "I_files": [
+      "assets/core.1fa44b9f73a2.js",
+      "assets/core.d3acac3d9206.css",
+      "assets/entry.e56900dad14e.js",
+      "assets/form-ir.5155249dc8ac.json",
+      "assets/motion.365a19ccc35a.js",
+      "index.html"
+    ],
+    "I_filesWithStoreSelectorMarker": [],
+    "I_filesWithDesignCanary": [],
+    "I_filesWithServerCanary": [],
+    "I_filesWithFixtureCanary": [],
+    "I_filesWithServerHandlerNames": [],
+    "I_pyFiles": [],
+    "I_mapFiles": [],
+    "I_sourceMappingURL": [],
+    "I_absolutePathHits": [],
+    "I_privateAbsolutePathHits": [],
+    "I_pathCharsetViolations": []
+  },
+  "sports-demo-nomotion": {
+    "releaseId": "rel_7uugkriotjphpcptcum4p6ilzt",
+    "G_storeSelectorModules": [],
+    "G_motionModules": 0,
+    "G_motionModulesOutsideMotionChunk": [],
+    "G_dynamicImportsToMotion": [],
+    "G_designOrServerModules": [],
+    "G_reactModules": [
+      "pkg:react-dom@19.3.1",
+      "pkg:react@19.3.1"
+    ],
+    "G_reactPackagesVersions": [
+      "pkg:react-dom@19.3.1",
+      "pkg:react@19.3.1",
+      "pkg:scheduler@0.28.0"
+    ],
+    "G_reactChunks": [
+      "assets/core.1fa44b9f73a2.js"
+    ],
+    "G_unnormalizedModuleIds": [],
+    "G_staticCycles": [],
+    "G_chunks": [
+      {
+        "kind": "core",
+        "file": "assets/core.1fa44b9f73a2.js",
+        "static": [],
+        "dynamic": []
+      },
+      {
+        "kind": "entry",
+        "file": "assets/entry.8405cfd0d47f.js",
+        "static": [
+          "assets/core.1fa44b9f73a2.js"
+        ],
+        "dynamic": []
+      }
+    ],
+    "I_files": [
+      "assets/core.1fa44b9f73a2.js",
+      "assets/core.d3acac3d9206.css",
+      "assets/entry.8405cfd0d47f.js",
+      "assets/form-ir.a65fd879476c.json",
+      "index.html"
+    ],
+    "I_filesWithStoreSelectorMarker": [],
+    "I_filesWithDesignCanary": [],
+    "I_filesWithServerCanary": [],
+    "I_filesWithFixtureCanary": [],
+    "I_filesWithServerHandlerNames": [],
+    "I_pyFiles": [],
+    "I_mapFiles": [],
+    "I_sourceMappingURL": [],
+    "I_absolutePathHits": [],
+    "I_privateAbsolutePathHits": [],
+    "I_pathCharsetViolations": []
+  }
+}

@@ -1,6 +1,7 @@
 # Spec #2: Plugin Contracts & Capability Registry (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.3** (2026-10-24).
+> **Trạng thái: PROPOSAL, revision 2.4** (2026-10-24).
+> - Rev 2.4: thêm lớp **L1b (resolve allowlist trong bundler)** và cập nhật §11.5 theo evidence SPIKE-GATE-01 EXP-03 (spec #3 rev 2 §25.2).
 > - Rev 2.2: §10.2 tách Logical Release Manifest (input của `releaseId`) và Final Release Metadata theo ADR-038 / spec #3 notes S3-P12.
 > - Rev 2.3: đồng bộ với spec #3 rev 1 sau consistency review: Capability Lock tách identity / resolution context (§9.2); rebuild dùng Build Request đã lưu (§9.3); §10.2 (vị trí `browserHostApi`, `serverHostApi`); INV-F1 có Motion của core (§11.1); L3 cấm engine import Motion; `fieldType` có `Summary` tùy chọn cho 確認 (§7.4).
 > - Rev 2.1: chỉ **đồng bộ với ADR-037** (spec #3 Answer #2): §10.3 (active ≠ supported, theo release), §10.6 (phân loại lỗi, không gom thành 503), §19 (I-19, I-22). Chưa có review mới của user cho rev 2.
@@ -702,18 +703,19 @@ Không có nhánh nào thay bằng version khác.
 
 | Lớp | Cơ chế | Lúc chạy | Bắt được |
 |---|---|---|---|
-| **L1 Resolution** | `./design` chỉ có điều kiện `design`; build của khách không bật `design`. Server facet là Python, không có trong đồ thị module JS. | build | import design từ browser; mọi ý định bundle server code |
+| **L1 Resolution** | `./design` chỉ có điều kiện `design`; build của khách không bật `design`. Server facet (Python) không có trong `exports`. | build | import design hoặc server **qua `exports`**. *(Rev 2.4: không chặn import tương đối bên trong package — xem L1b.)* |
+| **L1b Resolve allowlist** *(rev 2.4)* | Plugin của compiler trong bundler (K9, spec #3 §9) từ chối mọi module resolve ra ngoài tập cho phép: facet được phép của FBK trong lock (browser + `contract`), engine/core, Motion của core (chỉ group `motion`), shared externals, module sinh ra, danh sách đóng các module ảo của bundler; module có file thật phải có đuôi JS/CSS/JSON. | build | import **tương đối** sang `design/`, `server/`, `fixtures/` hay file `.py` — những thứ `exports` không chặn được (spike EXP-03 n2, n4) |
 | **L2 Generation** | Compiler sinh một entry/form, chỉ import literal tới `packageExport` browser của FBK trong lock. Code-split chỉ bằng `import()` literal do compiler sinh. Definition chỉ có key có cấu trúc, kiểm theo ngữ pháp §5.2. | compile | kéo plugin không dùng; Admin JSON điều khiển import |
 | **L3 Static boundary** | Đồ thị phụ thuộc bắc cầu từ mỗi facet entry. `contract` → chỉ contract; `browser` → contract, SDK browser, thư viện allowlist; `design` → browser, contract, SDK design; cấm `browser` → `design`; cấm `node:*`, `fs`, `child_process`, `server/`, `fixtures/`, `test/`; cấm trong browser/design: `fetch`, `XMLHttpRequest`, `WebSocket`, `sendBeacon`, `import()` không literal; shared externals không được gói vào facet; *(rev 2.3)* package engine không được import Motion (Motion chỉ vào qua group `motion` do compiler sinh). Python: cấm `requests`, `urllib`, `http.client`, `socket`, `subprocess`, `os.environ`, import tuyệt đối sang plugin khác. | registry | import sai hướng trực tiếp/bắc cầu; mạng trực tiếp; gói React riêng |
 | **L4 Secret hygiene** | Không có trường secret trong manifest; secret ở cấu hình connector của host. Secret scanner trên source plugin, artifact, sourcemap, metadata. Sourcemap không phục vụ công khai (SEC-04; chi tiết spec #3). | registry + build | hardcode token |
-| **L5 Artifact verification** | Module stats của bundler phải thuộc tập INV-F1; canary marker của design facet và fixtures không xuất hiện; INV-F6 giữa Sports và PC; INV-F7. | sau build (spec #3) | lỗi của L1–L3, cấu hình bundler sai, thư viện kéo code lạ |
+| **L5 Artifact verification** | Module stats của bundler phải thuộc tập INV-F1; canary marker của design facet, server facet và fixtures không xuất hiện; không module có đuôi `.py` hay mã của server facet; INV-F6 giữa Sports và PC; INV-F7. | sau build (spec #3) | lỗi của L1–L3, cấu hình bundler sai, thư viện kéo code lạ |
 | **L6 Negative fixtures** | Mỗi guard có fixture vi phạm cố ý (§17.3). | CI | guard bị vô hiệu hoặc hỏng mà không ai biết |
 
 ### 11.3. Lập luận
 
 | Kịch bản lỗi | L1 | L2 | L3 | L4 | L5 |
 |---|---|---|---|---|---|
-| F1 browser facet import design | ✔ | | ✔ | | ✔ |
+| F1 browser facet import design | ✔ (qua `exports`); ✘ nếu import tương đối — L1b bắt | | ✔ | | ✔ |
 | F2 browser facet kéo bắc cầu thư viện chỉ dành cho Admin | | | ✔ | | ✔ |
 | F3 compiler sinh import facet sai | ✔ | | | | ✔ |
 | F4 Admin JSON chứa path/URL | | ✔ | | | ✔ |
@@ -721,11 +723,12 @@ Không có nhánh nào thay bằng version khác.
 | F6 Sports kéo `store-selector` | | ✔ | | | ✔ |
 | F7 server facet phụ thuộc Node | | | ✔ | | (L6: chạy không có Node) |
 | F8 Python facet nạp version plugin khác | | | ✔ | | (router theo hash) |
-| F9 fixture/mock lọt vào artifact | ✔ | | ✔ | | ✔ |
+| F9 fixture/mock lọt vào artifact | ✔ (qua `exports`); ✘ nếu import tương đối — L1b bắt | | ✔ | | ✔ |
+| F11 *(rev 2.4)* browser facet import file server/`.py` bằng đường dẫn tương đối | ✘ (spike n4) — L1b bắt | | ✔ | | ✔ |
 | F10 hai bản React | | | ✔ | | ✔ |
 
 Mỗi kịch bản phải qua ít nhất hai lớp độc lập (F7, F8 được bổ sung bởi L6 và router). Điểm mấu chốt:
-1. Server code ở ngôn ngữ và toolchain khác, không có đường resolve từ đồ thị JS.
+1. Server code ở ngôn ngữ khác và không nằm trong `exports`. *(Rev 2.4: điều này **không** đủ — bundler vẫn đưa được file `.py` vào bundle nếu bị import tương đối (spike n4); L1b, L3 và L5 mới là lớp chặn.)*
 2. Design facet không resolve được trong build của khách, không chỉ "không được import" theo quy ước. Nhưng L1 **không** được coi là boundary duy nhất: L3 và L5 kiểm độc lập.
 3. Đầu vào của generator là catalog, không phải definition.
 4. L5 kiểm trên output, không tin lớp nào trước đó.
@@ -741,6 +744,7 @@ Mỗi kịch bản phải qua ít nhất hai lớp độc lập (F7, F8 được
 
 - Đây là chứng minh ở mức thiết kế. **Không kết luận isolation PASS** trước khi có artifact build thật và L5 chạy trên nó (spec #3/P07). Spike đo isolation cần gate riêng (ADR-018).
 - Hành vi của custom export condition (`design`) phụ thuộc bundler; phải được kiểm trong bundler thật ở spike spec #3. Nếu bundler không hỗ trợ đúng, L1 được thay bằng alias chặn tường minh, còn L3/L5 giữ nguyên.
+- *(Rev 2.4, SPIKE-GATE-01 EXP-03, Vite 8.3.5 + Rolldown 1.2.15)* Export condition hoạt động đúng: build khách từ chối `./design` với lý do `is not exported under the conditions [...]`, build design resolve được. Nhưng `exports` **không** áp cho import tương đối bên trong package: browser facet import `../design/index.js` đưa được code design vào build khách, và import `../server/handler.py` đưa được nội dung file Python vào bundle (Rolldown coi đuôi lạ là JS). L3 bắt cả hai trước khi build và L5 thấy canary sau khi build. Vì vậy thêm L1b.
 
 ---
 
@@ -1000,7 +1004,7 @@ sequenceDiagram
 
 ### 17.3. Negative fixture cho từng guard (Review #1 §9)
 
-Mỗi guard `G` (L1, L2, từng luật L3, L4, từng kiểm tra L5, từng luật C0) có fixture `N_G` vi phạm **đúng một** luật. Test của `G` phải chứng minh ba điều:
+Mỗi guard `G` (L1, L1b, L2, từng luật L3, L4, từng kiểm tra L5, từng luật C0) có fixture `N_G` vi phạm **đúng một** luật. Test của `G` phải chứng minh ba điều:
 1. Chạy trên `N_G` → thất bại.
 2. Thất bại **đúng lý do**: diagnostic có mã lỗi của `G` và trỏ tới module/vị trí vi phạm trong `N_G`; không được là lỗi phụ (cú pháp, thiếu file, timeout).
 3. **Control**: `N_G` sau khi bỏ đúng vi phạm đó → pass. Nếu control fail, fixture hỏng chứ không phải guard tốt.

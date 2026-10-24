@@ -1,0 +1,1764 @@
+{
+  "profile": {
+    "name": "slow-4g-like",
+    "latencyMs": 150,
+    "downKbps": 1600,
+    "upKbps": 750,
+    "cpuSlowdown": 4
+  },
+  "browser": "156.0.8078.4",
+  "runs": 5,
+  "labOnly": true,
+  "forms": {
+    "sports-demo-nomotion": {
+      "cold": {
+        "ttfb": 1.4000000357627869,
+        "t1Fcp": 204,
+        "t2Visible": 947.3999999761581,
+        "t3Ready": 953.6000000238419,
+        "lcp": 952,
+        "cls": 0.2804,
+        "requestsUpToT3": 6,
+        "jsTransferUpToT3": 73035,
+        "cssTransferUpToT3": 582,
+        "jsDecodedUpToT3": 229718,
+        "inpProxyMaxEventMs": 16
+      },
+      "warm": {
+        "ttfb": 1.199999988079071,
+        "t1Fcp": 208,
+        "t2Visible": 287,
+        "t3Ready": 306.5999999642372,
+        "lcp": 312,
+        "cls": 0.2804,
+        "requestsUpToT3": 6,
+        "jsTransferUpToT3": 0,
+        "cssTransferUpToT3": 0,
+        "jsDecodedUpToT3": 229718
+      },
+      "rawCold": [
+        {
+          "ttfb": 7.799999952316284,
+          "t1Fcp": 296,
+          "t2Visible": 1004.5999999642372,
+          "t3Ready": 1029.5,
+          "lcp": 1032,
+          "cls": 0.2804,
+          "docTransfer": 1561,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 73035,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 3,
+              "transfer": 73035,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "inpProxyMaxEventMs": 40
+        },
+        {
+          "ttfb": 1.600000023841858,
+          "t1Fcp": 204,
+          "t2Visible": 944,
+          "t3Ready": 953.6000000238419,
+          "lcp": 952,
+          "cls": 0.2804,
+          "docTransfer": 1561,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 73035,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 3,
+              "transfer": 73035,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "inpProxyMaxEventMs": 16
+        },
+        {
+          "ttfb": 1.2999999523162842,
+          "t1Fcp": 204,
+          "t2Visible": 945.8999999761581,
+          "t3Ready": 953.5999999642372,
+          "lcp": 952,
+          "cls": 0.2804,
+          "docTransfer": 1561,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 73035,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 3,
+              "transfer": 73035,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "inpProxyMaxEventMs": 16
+        },
+        {
+          "ttfb": 1.399999976158142,
+          "t1Fcp": 204,
+          "t2Visible": 947.3999999761581,
+          "t3Ready": 954,
+          "lcp": 952,
+          "cls": 0.2804,
+          "docTransfer": 1561,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 73035,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 3,
+              "transfer": 73035,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "inpProxyMaxEventMs": 0
+        },
+        {
+          "ttfb": 1.4000000357627869,
+          "t1Fcp": 204,
+          "t2Visible": 948,
+          "t3Ready": 952.6999999880791,
+          "lcp": 952,
+          "cls": 0.2804,
+          "docTransfer": 1561,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 73035,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 3,
+              "transfer": 73035,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "inpProxyMaxEventMs": 16
+        }
+      ],
+      "rawWarm": [
+        {
+          "ttfb": 1.899999976158142,
+          "t1Fcp": 208,
+          "t2Visible": 287,
+          "t3Ready": 306.5999999642372,
+          "lcp": 312,
+          "cls": 0.2804,
+          "docTransfer": 1561,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          }
+        },
+        {
+          "ttfb": 1.199999988079071,
+          "t1Fcp": 204,
+          "t2Visible": 282.4000000357628,
+          "t3Ready": 300.69999998807907,
+          "lcp": 304,
+          "cls": 0.2804,
+          "docTransfer": 1561,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          }
+        },
+        {
+          "ttfb": 1.0999999642372131,
+          "t1Fcp": 208,
+          "t2Visible": 285.69999998807907,
+          "t3Ready": 304.19999998807907,
+          "lcp": 308,
+          "cls": 0.2804,
+          "docTransfer": 1561,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          }
+        },
+        {
+          "ttfb": 1.199999988079071,
+          "t1Fcp": 208,
+          "t2Visible": 288.39999997615814,
+          "t3Ready": 306.5999999642372,
+          "lcp": 312,
+          "cls": 0.2804,
+          "docTransfer": 1561,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          }
+        },
+        {
+          "ttfb": 1.199999988079071,
+          "t1Fcp": 212,
+          "t2Visible": 308.39999997615814,
+          "t3Ready": 317.69999998807907,
+          "lcp": 316,
+          "cls": 0.2804,
+          "docTransfer": 1561,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 229718
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1140
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          }
+        }
+      ]
+    },
+    "sports-demo": {
+      "cold": {
+        "ttfb": 1.5,
+        "t1Fcp": 204,
+        "t2Visible": 945.8000000119209,
+        "t3Ready": 954.5,
+        "lcp": 952,
+        "cls": 0.2804,
+        "requestsUpToT3": 6,
+        "jsTransferUpToT3": 73846,
+        "cssTransferUpToT3": 582,
+        "jsDecodedUpToT3": 231443,
+        "inpProxyMaxEventMs": 16
+      },
+      "warm": {
+        "ttfb": 1.100000023841858,
+        "t1Fcp": 208,
+        "t2Visible": 285.9000000357628,
+        "t3Ready": 304,
+        "lcp": 308,
+        "cls": 0.2804,
+        "requestsUpToT3": 6,
+        "jsTransferUpToT3": 0,
+        "cssTransferUpToT3": 0,
+        "jsDecodedUpToT3": 231443
+      },
+      "rawCold": [
+        {
+          "ttfb": 1.699999988079071,
+          "t1Fcp": 204,
+          "t2Visible": 946.3999999761581,
+          "t3Ready": 954.1999999880791,
+          "lcp": 952,
+          "cls": 0.2804,
+          "docTransfer": 1583,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 73846,
+              "decoded": 231443
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 96855,
+              "decoded": 294379
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "inpProxyMaxEventMs": 0
+        },
+        {
+          "ttfb": 1.4000000357627869,
+          "t1Fcp": 204,
+          "t2Visible": 945.8000000119209,
+          "t3Ready": 956,
+          "lcp": 952,
+          "cls": 0.2804,
+          "docTransfer": 1583,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 73846,
+              "decoded": 231443
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 96855,
+              "decoded": 294379
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "inpProxyMaxEventMs": 16
+        },
+        {
+          "ttfb": 1.5,
+          "t1Fcp": 204,
+          "t2Visible": 938.1000000238419,
+          "t3Ready": 961.1000000238419,
+          "lcp": 944,
+          "cls": 0.2804,
+          "docTransfer": 1583,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 73846,
+              "decoded": 231443
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 96855,
+              "decoded": 294379
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "inpProxyMaxEventMs": 16
+        },
+        {
+          "ttfb": 1.4000000357627869,
+          "t1Fcp": 216,
+          "t2Visible": 950.1000000238419,
+          "t3Ready": 954.5,
+          "lcp": 956,
+          "cls": 0.2804,
+          "docTransfer": 1583,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 73846,
+              "decoded": 231443
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 96855,
+              "decoded": 294379
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "inpProxyMaxEventMs": 0
+        },
+        {
+          "ttfb": 1.5,
+          "t1Fcp": 204,
+          "t2Visible": 945.5,
+          "t3Ready": 953.5,
+          "lcp": 952,
+          "cls": 0.2804,
+          "docTransfer": 1583,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 73846,
+              "decoded": 231443
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 96855,
+              "decoded": 294379
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 848,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "inpProxyMaxEventMs": 16
+        }
+      ],
+      "rawWarm": [
+        {
+          "ttfb": 1,
+          "t1Fcp": 204,
+          "t2Visible": 286,
+          "t3Ready": 304,
+          "lcp": 308,
+          "cls": 0.2804,
+          "docTransfer": 1583,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 231443
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 0,
+              "decoded": 294379
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          }
+        },
+        {
+          "ttfb": 1.300000011920929,
+          "t1Fcp": 204,
+          "t2Visible": 280.80000001192093,
+          "t3Ready": 299.69999998807907,
+          "lcp": 304,
+          "cls": 0.2804,
+          "docTransfer": 1583,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 231443
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 0,
+              "decoded": 294379
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          }
+        },
+        {
+          "ttfb": 1.100000023841858,
+          "t1Fcp": 216,
+          "t2Visible": 285.9000000357628,
+          "t3Ready": 304,
+          "lcp": 308,
+          "cls": 0.2804,
+          "docTransfer": 1583,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 231443
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 0,
+              "decoded": 294379
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          }
+        },
+        {
+          "ttfb": 1.199999988079071,
+          "t1Fcp": 212,
+          "t2Visible": 319.5,
+          "t3Ready": 324.5,
+          "lcp": 324,
+          "cls": 0.2804,
+          "docTransfer": 1583,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 231443
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 0,
+              "decoded": 294379
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          }
+        },
+        {
+          "ttfb": 0.8999999761581421,
+          "t1Fcp": 208,
+          "t2Visible": 283.5999999642372,
+          "t3Ready": 301.39999997615814,
+          "lcp": 304,
+          "cls": 0.2804,
+          "docTransfer": 1583,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 231443
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 0,
+              "decoded": 294379
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1139
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          }
+        }
+      ]
+    },
+    "pc-demo": {
+      "cold": {
+        "ttfb": 1.399999976158142,
+        "t1Fcp": 208,
+        "t2Visible": 946.8999999761581,
+        "t3Ready": 957,
+        "lcp": 952,
+        "cls": 0.2804,
+        "requestsUpToT3": 6,
+        "jsTransferUpToT3": 73990,
+        "cssTransferUpToT3": 582,
+        "jsDecodedUpToT3": 231797,
+        "inpProxyMaxEventMs": 16
+      },
+      "warm": {
+        "ttfb": 1.199999988079071,
+        "t1Fcp": 208,
+        "t2Visible": 285.5,
+        "t3Ready": 304.30000001192093,
+        "lcp": 308,
+        "cls": 0.2804,
+        "requestsUpToT3": 6,
+        "jsTransferUpToT3": 0,
+        "cssTransferUpToT3": 0,
+        "jsDecodedUpToT3": 231797
+      },
+      "rawCold": [
+        {
+          "ttfb": 1.699999988079071,
+          "t1Fcp": 204,
+          "t2Visible": 961.6999999880791,
+          "t3Ready": 971.5,
+          "lcp": 968,
+          "cls": 0.2804,
+          "docTransfer": 1619,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 73990,
+              "decoded": 231797
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 1068,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 96999,
+              "decoded": 294733
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 1068,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "inpProxyMaxEventMs": 16
+        },
+        {
+          "ttfb": 1.199999988079071,
+          "t1Fcp": 204,
+          "t2Visible": 959.1999999880791,
+          "t3Ready": 968.5999999642372,
+          "lcp": 964,
+          "cls": 0.2804,
+          "docTransfer": 1619,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 73990,
+              "decoded": 231797
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 1068,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 96999,
+              "decoded": 294733
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 1068,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "inpProxyMaxEventMs": 16
+        },
+        {
+          "ttfb": 1.199999988079071,
+          "t1Fcp": 212,
+          "t2Visible": 946.8999999761581,
+          "t3Ready": 954.8999999761581,
+          "lcp": 952,
+          "cls": 0.2804,
+          "docTransfer": 1619,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 73990,
+              "decoded": 231797
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 1068,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 96999,
+              "decoded": 294733
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 1068,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "inpProxyMaxEventMs": 16
+        },
+        {
+          "ttfb": 1.399999976158142,
+          "t1Fcp": 208,
+          "t2Visible": 944.6999999880791,
+          "t3Ready": 957,
+          "lcp": 952,
+          "cls": 0.2804,
+          "docTransfer": 1619,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 73990,
+              "decoded": 231797
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 1068,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 96999,
+              "decoded": 294733
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 1068,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "inpProxyMaxEventMs": 16
+        },
+        {
+          "ttfb": 1.399999976158142,
+          "t1Fcp": 208,
+          "t2Visible": 946.6999999880791,
+          "t3Ready": 952.8999999761581,
+          "lcp": 952,
+          "cls": 0.2804,
+          "docTransfer": 1619,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 73990,
+              "decoded": 231797
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 1068,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 96999,
+              "decoded": 294733
+            },
+            "css": {
+              "count": 1,
+              "transfer": 582,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 1068,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "inpProxyMaxEventMs": 16
+        }
+      ],
+      "rawWarm": [
+        {
+          "ttfb": 1.199999988079071,
+          "t1Fcp": 212,
+          "t2Visible": 311.9000000357628,
+          "t3Ready": 320.4000000357628,
+          "lcp": 316,
+          "cls": 0.2804,
+          "docTransfer": 1619,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 231797
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 0,
+              "decoded": 294733
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          }
+        },
+        {
+          "ttfb": 1.199999988079071,
+          "t1Fcp": 208,
+          "t2Visible": 312.7999999523163,
+          "t3Ready": 322,
+          "lcp": 320,
+          "cls": 0.2804,
+          "docTransfer": 1619,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 231797
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 0,
+              "decoded": 294733
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          }
+        },
+        {
+          "ttfb": 1.100000023841858,
+          "t1Fcp": 204,
+          "t2Visible": 285.30000001192093,
+          "t3Ready": 303.9000000357628,
+          "lcp": 308,
+          "cls": 0.2804,
+          "docTransfer": 1619,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 231797
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 0,
+              "decoded": 294733
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          }
+        },
+        {
+          "ttfb": 1.199999988079071,
+          "t1Fcp": 208,
+          "t2Visible": 283.69999998807907,
+          "t3Ready": 301.80000001192093,
+          "lcp": 308,
+          "cls": 0.2804,
+          "docTransfer": 1619,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 231797
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 0,
+              "decoded": 294733
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          }
+        },
+        {
+          "ttfb": 1,
+          "t1Fcp": 204,
+          "t2Visible": 285.5,
+          "t3Ready": 304.30000001192093,
+          "lcp": 308,
+          "cls": 0.2804,
+          "docTransfer": 1619,
+          "requestsUpToT3": 6,
+          "resourcesUpToT3": {
+            "js": {
+              "count": 3,
+              "transfer": 0,
+              "decoded": 231797
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          },
+          "allResources": {
+            "js": {
+              "count": 4,
+              "transfer": 0,
+              "decoded": 294733
+            },
+            "css": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 458
+            },
+            "json": {
+              "count": 1,
+              "transfer": 0,
+              "decoded": 1796
+            },
+            "other": {
+              "count": 0,
+              "transfer": 0,
+              "decoded": 0
+            }
+          }
+        }
+      ]
+    }
+  },
+  "pcStoreFullFlowCold": {
+    "js": {
+      "count": 6,
+      "transfer": 97805,
+      "decoded": 296165
+    },
+    "css": {
+      "count": 3,
+      "transfer": 1065,
+      "decoded": 824
+    },
+    "json": {
+      "count": 1,
+      "transfer": 1068,
+      "decoded": 1796
+    },
+    "other": {
+      "count": 0,
+      "transfer": 0,
+      "decoded": 0
+    }
+  }
+}

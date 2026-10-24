@@ -1,13 +1,15 @@
 # Spec #3: Compiler, Bundle & Release Architecture (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 1** (2026-10-24). Chưa được user review. Đã qua consistency review độc lập và sửa (§25.1).
+> **Trạng thái: PROPOSAL, revision 2** (2026-10-24).
+> - Review #1 (rev 1): **CONDITIONALLY ACCEPTED FOR TECHNICAL VERIFICATION**; OD3-01 → ADR-041, OD3-02 → ADR-042 (SPIKE-GATE-01).
+> - Rev 2 cập nhật theo **evidence của SPIKE-GATE-01** ([báo cáo](../../discovery/P01_SPIKE_GATE_01_REPORT.md), `docs/evidence/P01/spike-gate-01/`) và thêm pipeline consistency review (§5.4, §5.5). Thay đổi so với rev 1: §27.
 > - Hướng đi đã duyệt: ADR-036..040 (spec #3 Answer #1..#5). Cơ chế trong tài liệu này **PROPOSED**.
 > - **G1 NOT APPROVED.** G9 và G10 BLOCKED. Không có code; không có AWS.
 > - Nguồn:
 >   - [P01_BRAINSTORM_NOTES.md](../../discovery/P01_BRAINSTORM_NOTES.md), Session 3: Spec #3 Answer #1..#5 (đề xuất S3-P01..P21 được chuyển vào đây và thay thế bản trong notes)
 >   - [DECISIONS.md](../../DECISIONS.md): ADR-002, 004, 005, 012, 017, 018, 030, 031, 036..040
 >   - [Spec #1 rev 3.3](2026-10-23-form-schema-workflow-design.md) §8, §9, §13, §14
->   - [Spec #2 rev 2.3](2026-10-24-plugin-contracts-capability-registry-design.md) §9, §10, §11, §17
+>   - [Spec #2 rev 2.4](2026-10-24-plugin-contracts-capability-registry-design.md) §9, §10, §11, §17
 >   - Master BUILD-01..10, PERF-01..07, SEC-04/05
 >
 > Phạm vi: subsystem spec số 3 trên 6. Spec này là **nguồn sự thật** cho: compiler pipeline, định dạng Normalized IR và các manifest của release, chunk planning, release identity, reproducible build, artifact verification, cách runtime nạp release (bootstrap, lazy loading, prefetch) và measurement contract. **Không** gồm: lưu trữ release, activation, CDN, API (spec #5); Admin UI (spec #4); Motion preset contract (spec #6).
@@ -36,8 +38,13 @@
 | ADR-038 | CSR + Loading Shell trung tính; measurement contract; prerender là tương lai | APPROVED AS DESIGN DIRECTION |
 | ADR-039 | Byte-for-byte reproducible build; LRM; attestation; provenance | APPROVED AS DESIGN DIRECTION |
 | ADR-040 | Hybrid code splitting + prefetch có điều kiện; chunk failure an toàn | APPROVED AS DESIGN DIRECTION |
+| ADR-041 | Vite + Rolldown là ứng viên bundler đánh giá | APPROVED AS EVALUATION DIRECTION; spike: đáp ứng §9 (OD3-01 chờ user chọn chính thức) |
+| ADR-042 | SPIKE-GATE-01 | APPROVED WITH LIMITED SCOPE; đã chạy (§25.2) |
 | §5–§21 | Cơ chế | **PROPOSED** |
-| OD3-01, OD3-02 | Bundler; gate cho spike | **OPEN** (§22) |
+| ADR-041 (OD3-01) | Vite 8.3.5 + Rolldown 1.2.15 là baseline đã kiểm chứng; chốt implementation sau VG-01..03 | **CONDITIONALLY APPROVED** |
+| ADR-043 (OD3-03) | WebKit có thể tải lại chunk đã prefetch; evaluation failure không tự reload | **ACCEPTED FOR P0** |
+| ADR-044 (OD3-04) | pnpm là ứng viên ưu tiên ở P02 | **APPROVED AS EVALUATION DIRECTION** |
+| ADR-045 | Node 20 EOL; P02 đánh giá Node 24 LTS | **ACCEPTED** |
 
 ---
 
@@ -206,7 +213,50 @@ flowchart LR
   LRM --> FRA
 ```
 
-Không nút nào phụ thuộc vào nút đứng sau nó. Không file trong inventory chứa `releaseId`; `index.html` là file duy nhất chứa `releaseId` và nằm ngoài LRM.
+Không nút nào phụ thuộc vào nút đứng sau nó. Không file trong inventory chứa `releaseId`; `index.html` là file duy nhất chứa `releaseId` và nằm ngoài LRM. *(Spike EXP-02: thứ tự này cho `releaseId` giống hệt giữa hai build sạch, khi đổi thư mục làm việc trong container và giữa macOS/Linux arm64.)*
+
+### 5.4. Thứ tự thực thi và ma trận phụ thuộc stage (rev 2, pipeline consistency review)
+
+```mermaid
+flowchart LR
+  BR["Build Request"] --> RA["Run A: K0→K1→…→K12<br/>(container sạch, không mạng ở K9)"]
+  BR --> RB["Run B: K0→K1→…→K12<br/>(container sạch khác)"]
+  RA --> K13{"K13 so A/B"}
+  RB --> K13
+  K13 -->|giống hệt| K14["K14 provenance + FRA<br/>ghi staging (write-once)"]
+  K13 -->|khác| X["E-BUILD-NON-REPRODUCIBLE<br/>dừng"]
+  K14 --> S5R["spec #5: đăng ký<br/>integrity gate (tính lại hash)"] --> S5A["spec #5: deploy gate,<br/>ledger hiện tại, CAS pointer"]
+```
+
+| Stage | Phụ thuộc (output của) | Sinh ra | Ghi vào | Hash nào bao phủ | Đóng băng sau | Chạy lại ở mỗi lần build của K13 |
+|---|---|---|---|---|---|---|
+| K0 | Build Request | input đã freeze theo digest | thư mục làm việc tạm (input chỉ đọc) | digest trong Build Request; một phần vào `LRM.inputs` | K0 | ✔ |
+| K1, K2 | K0 | kết quả kiểm | — | — | — | ✔ |
+| K3 | K0, K2 | Capability Lock (identity + context) | private tạm | phần identity → `LRM.inputs.capabilityLock` | K3 | ✔ (`release`); thay bằng lock đã lưu (`rebuild-verify`) |
+| K4, K5 | K3, K1 | definition đã expand; diagnostic; diff Data Contract | báo cáo | — | — | ✔ |
+| K6 | K5 | IR, Data Contract | IR → thư mục phục vụ; Data Contract → private | `LRM.inputs.ir` (= sha256 file IR), `LRM.inputs.dataContract` | K6 | ✔ |
+| K7 | K6, K3, build config | Chunk Plan | private | `LRM.inputs.chunkPlan` | K7 | ✔ |
+| K8 | K7 | module sinh ra | thư mục `gen` tạm (không phục vụ) | gián tiếp qua byte phục vụ | K8 | ✔ |
+| K9 | K8, facet từ release store, lockfile | file phục vụ (trừ IR, `index.html`), module graph | thư mục output tạm | inventory (K11) | — | ✔ |
+| K10 | K9, K7, K3 (lock cho INV-F1 và L1b) | Chunk Manifest, kết quả kiểm | private | `LRM.inputs.chunkManifest` | **tập file phục vụ đóng băng** | ✔ |
+| K11 | K0 (digest build config, bootstrap, template), K3, K6, K7, K10, toolchain, inventory | LRM, `releaseId` (ứng viên) | private | chính LRM | K11 | ✔ |
+| K12 | K11, template | `index.html` | thư mục phục vụ (ngoài inventory) | `FRA.indexHtmlSha256`, `artifactSetDigest` | K12 | ✔ |
+| K13 | output A và B | kết luận + diff | báo cáo | — | — | (điều phối) |
+| K14 | K13 pass | provenance, FRA, release bundle | **staging** (write-once) | FRA: `lrmDigest`, `indexHtmlSha256`, `artifactSetDigest`, `provenanceDigest` | K14 | không (một lần) |
+| spec #5 đăng ký | staging | release record | release store | integrity gate tính lại toàn bộ | — | — |
+| spec #5 activation | release record | active pointer | pointer store | — | — | — |
+
+### 5.5. Trả lời pipeline consistency review (spec #3 review #1 §4)
+
+| Câu hỏi | Trả lời |
+|---|---|
+| Orchestrator chạy lại stage nào cho hai build độc lập? | **Toàn bộ K0–K12** ở mỗi lần, trong container sạch riêng, không cache chung. K3 chạy ở cả hai lần (hàm thuần của snapshot); ở `rebuild-verify` K3 được thay bằng lock đã lưu. |
+| LRM tính trước hay sau reproducibility verification? | **Trước**: mỗi lần chạy tự tính LRM và `releaseId` ở K11. K13 so hai LRM (và mọi file). `releaseId` chỉ là **ứng viên** cho tới khi K13 pass; không có gì được ghi ra ngoài thư mục tạm trước K14. |
+| Có artifact nào bị đổi sau khi hash không? | Không. Sau K10, tập file phục vụ bị đóng băng; K11 hash nó. K12 chỉ **thêm** `index.html` (nằm ngoài inventory, được hash trong FRA). K14 chỉ ghi metadata private và copy nguyên vẹn sang staging. Minify và mọi hậu xử lý của bundler đều nằm trong K9, trước K10. |
+| Attestation cover những gì? | `lrmDigest` (bao gồm inventory của mọi file phục vụ trừ `index.html`, cộng digest của IR, Data Contract, phần identity của lock, Chunk Plan, Chunk Manifest, build config, bootstrap, template), `indexHtmlSha256`, `artifactSetDigest` (mọi file phục vụ kể cả `index.html`), `provenanceDigest`. |
+| File nằm ngoài inventory xử lý thế nào? | Trong thư mục phục vụ: ngoài inventory + `index.html` → `E-ARTIFACT-UNEXPECTED-FILE` (K10 và integrity gate của spec #5). Private, danh sách đóng: `lrm.json` (digest = `lrmDigest` trong FRA), `data-contract.json`, `capability-lock.json`, `chunk-plan.json`, `chunk-manifest.json` (bao qua digest trong LRM), `attestation.json`, `provenance.json`; sourcemap debug và bundle stats được liệt kê kèm hash trong `provenance.privateArtifacts`; file private khác → staging từ chối. |
+| Stage sau có thể đổi output stage trước mà không làm mất hiệu lực hash không? | Không có đường nào: (1) mỗi stage chỉ ghi vào vùng của nó (bảng §5.4); (2) K11 hash sau khi tập file phục vụ đóng băng; (3) integrity gate của spec #5 **tính lại** mọi hash từ storage trước đăng ký và trước activation, nên bất kỳ thay đổi nào sau K14 đều bị phát hiện. |
+| Side effect staging của compiler và side effect publishing của spec #5 tách thế nào? | Compiler chỉ **đọc** input theo digest (snapshot definition, **plugin** release store của spec #2, platform asset) và chỉ **ghi staging** (write-once theo `releaseId`). Nó không có quyền vào **form release store** (nơi phục vụ) hay active pointer. Spec #5 đọc staging, tự kiểm lại, kiểm trùng `releaseId` với form release store (nơi duy nhất quyết định collision), chép sang release store, rồi activation. Không bước nào của compiler gọi AWS hay đổi pointer. |
 
 ---
 
@@ -300,7 +350,7 @@ flowchart LR
 ## 8. Code generation (K8)
 
 - **Entry module** (sinh ra, chỉ có import + bootstrap của runtime): import tĩnh literal tới `core`, core field dùng trong form, validator TS và `fieldType` của entry; tạo **scoped capability map** (key CK, spec #2 §5.3) và truyền vào engine bằng DI.
-- **Group loader:** với mỗi group, một hàm `() => import("./g-stp_store.js")` với **specifier literal** (INV-F3); bundler đổi thành tên có hash. Không có specifier ghép chuỗi hay biến. CSS của group (nếu có) được loader chèn bằng `<link rel="stylesheet">` same-origin (không style inline), và group chỉ "sẵn sàng" khi cả JS và CSS đã tải (tránh nháy giao diện).
+- **Group loader:** với mỗi group, một hàm `() => import("./g-stp_store.js")` với **specifier literal** (INV-F3); bundler đổi thành tên có hash. Không có specifier ghép chuỗi hay biến. Group loader chịu trách nhiệm nạp CSS của group bằng `<link rel="stylesheet">` same-origin (không style inline) ở mọi đường tải (bậc 0 có thể ủy cho helper preload của bundler, xem §9), và group chỉ "sẵn sàng" khi cả JS và CSS đã tải (tránh nháy giao diện).
 - **Không có registry toàn bộ.** Code sinh ra không import catalog, không import package `@platform/*` nào ngoài những gì có trong Chunk Plan.
 - **Engine không tham chiếu Motion.** Motion chỉ được import từ module group `motion` do codegen sinh; luật L3 cấm package engine import Motion (bổ sung spec #2 §11.2).
 - Nguồn của mọi specifier: Chunk Plan ← Capability Lock ← catalog (spec #2). Definition chỉ đóng góp alias đã được kiểm ngữ pháp; không chuỗi nào từ definition trở thành specifier.
@@ -321,8 +371,12 @@ flowchart LR
 | Resolve plugin từ release store (alias tới thư mục release, spec #2 §9.4); shared externals về đúng một bản | spec #2 §11.4 |
 | Không sinh sourcemap vào thư mục phục vụ; không chèn `sourceMappingURL` | §11.5 |
 | Chạy được không mạng | ADR-039 |
+| Tên file chỉ gồm `[a-z0-9._-]` | §11.1. *(Spike: Rolldown mặc định sinh hash có chữ hoa và `_`; phải đặt `output.hashCharacters: 'hex'` và `[hash:12]`.)* |
+| **L1b — resolve allowlist** *(rev 2, từ EXP-03)*: plugin của compiler trong bundler từ chối mọi module resolve ra ngoài tập cho phép: facet được phép của FBK trong lock (browser + `contract`), engine/core, Motion runtime và preset của core (chỉ trong group `motion`), shared externals, module sinh ra ở K8, và **danh sách đóng các module ảo của bundler** (ví dụ `virtual:vite/preload-helper`, `virtual:rolldown/runtime`); module có file thật phải có đuôi JS/CSS/JSON | Spike: `exports` không áp cho import tương đối trong package; design (n2) và cả file `.py` (n4) lọt vào build khách |
 
 - Builder: canonical image (§12.1), thư mục làm việc cố định trong container, không mạng.
+- **Cấu hình đã kiểm ở spike (Vite 8.3.5 + Rolldown 1.2.15):** `build.rolldownOptions.input`; `build.rolldownOptions.output.codeSplitting.groups` (nhóm `core`); `entryFileNames`/`chunkFileNames`/`assetFileNames` với `[hash:12]`; `hashCharacters: 'hex'`; `base: './'` (đường dẫn tương đối, không có `releaseId` trong asset); `build.modulePreload.polyfill: false`; `resolve.conditions` không có `design` ở build khách. Không dùng `rollupOptions`, `advancedChunks`, `manualChunks` (deprecated).
+- **Nạp CSS của group** thuộc trách nhiệm của **group loader** (§8) ở mọi đường. Với Vite, ở lần tải thường (bậc 0) helper preload (`virtual:vite/preload-helper`) làm việc này; ở retry bậc 1 không đi qua helper nên group loader tự chèn `<link>` (§15.3).
 - Tên file: `assets/<label>.<hash>.<ext>`, `hash` do bundler sinh **tất định**; chỉ ký tự `[a-z0-9._-]`. Vì đồ thị import tĩnh là DAG (§7.1), tên có hash tính được theo thứ tự phụ thuộc, không vòng. Hash trong tên file **không** phải bằng chứng integrity; `sha256` trong inventory mới là bằng chứng. *(Ví dụ trong tài liệu dùng 12 hex đầu của sha256 cho dễ đọc.)*
 
 ---
@@ -343,6 +397,7 @@ Chạy trên output thật của K9, không tin lớp nào trước đó (spec #
 | Không đường dẫn tuyệt đối của máy build (ví dụ thư mục làm việc trong container, `/home/`, `/Users/`, `C:\`) trong file phục vụ **và** trong artifact private thuộc identity (Chunk Plan, Chunk Manifest, lock) | quét nội dung | `E-ARTIFACT-ABSOLUTE-PATH` |
 | Không secret (scanner, spec #2 L4) | quét nội dung | `E-ARTIFACT-SECRET` |
 | Path hợp lệ, không trùng khi bỏ qua hoa/thường | inventory | `E-ARTIFACT-PATH-COLLISION` |
+| *(rev 2)* Không module nào nằm ngoài resolve allowlist (L1b); không module có đuôi khác JS/CSS/JSON (ví dụ `.py`) | module graph | `E-ARTIFACT-ILLEGAL-MODULE` |
 
 Output: **Chunk Manifest** (private, digest trong LRM): `{ chunkManifestFormat: 1, chunks: [{ file, sha256, kind: core|entry|group|shared, groupId?, modules: [...], staticImports: [...], dynamicImports: [...] }] }`. Đây là build graph evidence cho TM-C.
 - **Module id được chuẩn hóa**, không bao giờ là đường dẫn tuyệt đối: `pkg:<name>@<version>/<path trong package>` (thư viện), `rel:<PRK>/<facet>/<path>` (facet plugin từ release store), `gen:<path tương đối>` (module do compiler sinh), `platform:<package>@<version>/<path>` (engine, core), `virtual:<tên>` (module ảo của bundler, bỏ ký tự điều khiển như `\0`). Id không chuẩn hóa được → `E-CHUNK-MANIFEST-MODULE-ID`.
@@ -465,6 +520,7 @@ Sinh sau `releaseId` bằng template tất định (K12). Chỉ chứa:
 ### 12.1. Môi trường chuẩn
 
 - Một Docker image pin theo **digest**: Node và package manager version chính xác; không công cụ thừa.
+- *(ADR-045)* Spike dùng Node 20.20.2, nay đã EOL; image đó chỉ để tái hiện spike. Canonical build cho production: đánh giá Node.js 24 LTS ở P02, pin digest, chạy lại verification tái lập và isolation (VG-05).
 - `TZ=UTC`, `LANG=C.UTF-8`, `LC_ALL=C.UTF-8`, umask cố định, `NODE_ENV=production`, `SOURCE_DATE_EPOCH` = thời điểm commit (chỉ để công cụ cần timestamp có giá trị cố định; artifact không được chứa timestamp).
 - Thư mục làm việc **cố định trong container** (ví dụ `/build`).
 - Cài dependency từ lockfile ở chế độ frozen; plugin từ release store theo hash; sau bước cài, build chạy **không mạng**.
@@ -487,7 +543,7 @@ Sinh sau `releaseId` bằng template tất định (K12). Chỉ chứa:
 | 4 | So inventory (tập path, size), Chunk Plan, Chunk Manifest | `E-BUILD-NON-REPRODUCIBLE` + diff |
 | 5 | So SHA-256 từng file, digest LRM, hash `index.html` | `E-BUILD-NON-REPRODUCIBLE` + diff |
 | 6 | Toolchain thực tế khớp LRM | `E-TOOLCHAIN-MISMATCH` |
-| 7 | Kiểm trùng `releaseId` trong store theo bộ identity (§11.6): khớp → no-op + verification record | `E-RELEASE-ID-COLLISION` |
+| 7 | Kiểm trùng `releaseId` **trong staging** theo bộ identity (§11.6): khớp → no-op + verification record. Kiểm trùng có thẩm quyền với form release store do spec #5 làm khi đăng ký. | `E-RELEASE-ID-COLLISION` |
 | 8 | K14: provenance + attestation (lần đầu), ghi staging | `E-STAGING-WRITE` |
 
 Báo cáo diff gồm path khác nhau, hash A/B, diff text với file text.
@@ -506,8 +562,8 @@ Báo cáo diff gồm path khác nhau, hash A/B, diff text với file text.
   assets/form.<h12>.css
   assets/form-ir.<h12>.json
 private (không phục vụ):
-  chunk-plan.json  chunk-manifest.json  capability-lock.json  bundle-stats.json
-  provenance.json  attestation.json
+  lrm.json  data-contract.json  capability-lock.json  chunk-plan.json  chunk-manifest.json
+  attestation.json  provenance.json  bundle-stats.json
 ```
 
 - Không file `motion.*`, không `g-*`. Chunk Plan: `groups: []`. Hai chunk JS (`core`, `entry`) tải song song.
@@ -527,8 +583,8 @@ private (không phục vụ):
   assets/form.<h12>.css
   assets/form-ir.<h12>.json
 private:
-  chunk-plan.json  chunk-manifest.json  capability-lock.json  bundle-stats.json
-  provenance.json  attestation.json  [sourcemaps/ nếu sourcemap: private]
+  lrm.json  data-contract.json  capability-lock.json  chunk-plan.json  chunk-manifest.json
+  attestation.json  provenance.json  bundle-stats.json  [sourcemaps/ nếu sourcemap: private]
 ```
 
 - Chunk Plan: `groups: [{ groupId: "g-stp_store", units: [FBK storeSelector/browser], triggerSteps: ["stp_store"] }, { groupId: "motion", … }]`.
@@ -611,6 +667,7 @@ Mở `/r/{R}/` trực tiếp: bootstrap đọc khối `release` của `index.htm
 - HTML/CSS tối giản, responsive, `role="status"` `aria-live="polite"` 「読み込み中…」; skeleton trung tính, không field giả, không nội dung đặc thù revision, không thông tin nhạy cảm.
 - Reduced motion: không chuyển động.
 - Chừa không gian để tránh layout shift lớn khi form thay shell (CLS đo ở §17).
+- *(Rev 2, EXP-05)* **Gỡ shell trong cùng commit với lần render form đầu tiên** (trước khi trình duyệt vẽ, ví dụ layout effect), không gỡ sau khi form đã hiện. Spike: gỡ sau khi vẽ cho CLS 0.28; gỡ trong cùng commit cho CLS 0, T2/T3 không đổi.
 - Chuyển sang form: thông báo 「フォームを読み込みました」; đưa focus tới tiêu đề step (tabindex=-1) chỉ khi người dùng chưa tự di chuyển focus.
 - **Generic fallback notice** thuần CSS, hiện sau N giây nếu shell chưa được thay: 「読み込みに時間がかかっています。通信環境をご確認のうえ、ページを再読み込みしてください。」. Không đoán nguyên nhân (không phải CSP detector).
 - `<noscript>`: 「このフォームをご利用いただくには、JavaScriptを有効にしてください。」
@@ -640,6 +697,7 @@ Prefetch group `g` khi **tất cả** điều kiện sau đúng:
 5. `g` chưa tải và chưa từng prefetch trong session này.
 
 - **Cơ chế:** `fetch()` độ ưu tiên thấp tới URL của JS và CSS của group (và shared chunk phụ thuộc, lấy từ khối `groups` trong `index.html`) để đưa vào HTTP cache. **Không** dùng `modulepreload` cho prefetch: nếu prefetch thất bại, nó không được làm hỏng module map dùng cho lần tải thật *[Claude]*.
+- *(Rev 2, EXP-01)* Chromium 156 và Firefox 157 dùng lại response của prefetch cho lần tải module (2 request tổng); **WebKit 27.2 thì không** (4 request: JS và CSS bị tải hai lần). Cách xử lý trên WebKit: **OD3-03**.
 - Prefetch **không** khởi tạo module, không đổi state, không phải validation hay transition. Branch đổi sau khi đã prefetch → byte nằm trong cache, không có gì được khởi tạo.
 - Group `motion`: tải (không phải prefetch) sau T3 nếu form có Motion và `prefers-reduced-motion` không bật. Chưa tải xong thì step transition không có animation; không bao giờ chờ Motion.
 
@@ -648,7 +706,7 @@ Prefetch group `g` khi **tất cả** điều kiện sau đúng:
 **Phân loại** (theo thứ tự, mỗi bước có timeout):
 1. `navigator.onLine === false` → `network`.
 2. Status API của release đang chạy: `suspended` → `security-suspended`; `retired` → `retired`; release không khớp record → `incompatible`.
-3. Probe `fetch(chunkUrl, { cache: "no-store" })`: 404/410 → `missing-asset`; lỗi mạng → `network`.
+3. Probe `fetch(chunkUrl, { cache: "no-store" })`: 404/410 → `missing-asset`; 503 → `network` (tạm thời); lỗi mạng → `network`; **200** → `evaluation` (chunk tải được nhưng module ném lỗi khi evaluate; rev 2, EXP-04).
 
 | Loại | Thông báo (ví dụ) | Recovery |
 |---|---|---|
@@ -657,15 +715,27 @@ Prefetch group `g` khi **tất cả** điều kiện sau đúng:
 | `retired` | 「このフォームは更新されました。」 | Start Over trên active release (giữ draft tới TTL) |
 | `security-suspended` | 「現在この機能はご利用いただけません。」 | không retry; không Start Over nếu active cũng bị suspend |
 | `incompatible` | 「このフォームの読み込みに問題が発生しました。」 | Start Over trên active release |
+| `evaluation` | 「このフォームの読み込みに問題が発生しました。再試行してください。」 | 再試行 (bậc 1 với token duy nhất → bậc 2); nếu lặp lại ở mọi lần thử thì đó là lỗi của release: báo vận hành, không tải active release |
 
-**Retry hai bậc** (vì `import()` lần hai với cùng URL không chắc tạo request mới):
-- **Bậc 1:** `import(url + "?retry=" + n)`. URL mới → module record mới → request mới. Chỉ hiệu quả khi chính chunk gốc lỗi; import tương đối bên trong vẫn resolve về URL gốc (không query) nên không nhân đôi module đã tải.
-- **Bậc 2** (bậc 1 thất bại hoặc lỗi nằm ở chunk phụ thuộc): đề xuất **tải lại trang**.
+**Hành vi đã đo** (SPIKE-GATE-01 EXP-04; Chromium 156, Firefox 157, WebKit 27.2 — giống nhau trên cả ba trừ chỗ ghi rõ):
+
+| Lỗi lần đầu | `import()` lại **cùng URL** sau khi server phục hồi | `import()` với **query duy nhất** |
+|---|---|---|
+| HTTP 404 / 503, lỗi mạng | **có** request mới, thành công | thành công |
+| Module throw khi evaluate | **không** request; ném lại lỗi cũ | thành công **nếu lỗi là tạm thời** (server đã trả nội dung đúng); lỗi lặp lại thì không token nào cứu được |
+| Request còn đang chờ | dùng chung request đang bay | — |
+
+- Khi kết nối bị reset, trình duyệt **tự gửi lại** trước khi báo lỗi (Chromium 1 lần, WebKit khoảng 3, Firefox khoảng 9 trong spike). Timeout tải group phải tính cả khoảng này.
+- **WebKit (27.2 của Playwright; chưa kiểm Safari):** sau một lỗi evaluate, kể cả khi đã reload sang document mới và trình duyệt đã gửi request mới nhận 200 với nội dung đúng, `import()` cùng URL vẫn ném lỗi cũ. Nguyên nhân chưa rõ. `import()` với query mới thì phục hồi được.
+
+**Retry (rev 2):**
+- **Bậc 1** (nút 再試行): `import(url + "?retry=" + <token duy nhất mỗi lần thử>)`. Dùng token duy nhất thay cho bộ đếm là **biện pháp phòng ngừa** (bộ đếm có thể lặp lại URL đã thử trước reload); spike không đo trường hợp bộ đếm. Runtime tự chèn CSS của group vì đường này không đi qua helper preload của bundler. Import tương đối bên trong chunk vẫn resolve về URL gốc (không query), nên không nhân đôi module đã tải (spike: một React).
+- **Bậc 2** (bậc 1 thất bại): đề xuất **tải lại trang**.
   - Cảnh báo trước: 「再読み込みすると、お名前・電話番号などの個人情報は再入力が必要です。」
   - Không bao giờ tự reload.
   - Trước khi reload: lưu draft (không PII) theo ADR-012.
   - Reload tới `/r/{pinnedReleaseId}/` → bootstrap release mode → resume đúng release; retired/suspended → hướng dẫn theo §14.2.
-- Hành vi bậc 1 trên Chromium, WebKit, Gecko **phải được kiểm ở spike** (OD3-02) trước khi coi là thiết kế cuối. Nếu không đáng tin trên một engine, engine đó chỉ dùng bậc 2.
+  - **Sau reload, nếu group lỗi lại thì vẫn đề xuất bậc 1** (token mới). Reload **không** được coi là chắc chắn phục hồi (WebKit).
 - Lỗi của chunk entry (trước khi runtime khởi tạo) do bootstrap xử lý (TM-L06), cùng nguyên tắc.
 
 ---
@@ -740,6 +810,11 @@ Ràng buộc (chưa có con số; chờ OD-08, OD2-09):
 - Báo cáo luôn tách T1, T2, T3. Không dùng T1 để kết luận về form; không tuyên bố LCP/INP đạt mục tiêu khi chưa đo.
 - **Budget:** chưa có con số; đặt sau baseline của chính PoC, duyệt ở G1 (ADR-005, PERF-05).
 - Evidence (sau G1): `docs/evidence/<phase>/perf/<releaseId>/`.
+- *(Rev 2, EXP-05)* **Phương pháp:**
+  - Throttling bằng CDP của Chromium cộng độ trễ **sau** `responseStart`, nên TTFB đo theo cách này không có ý nghĩa. Muốn đo TTFB thì throttling ở tầng mạng (proxy).
+  - INP chỉ đo được bằng tương tác thật hoặc kịch bản tương tác có định nghĩa; một cú click chỉ là proxy.
+  - Throttling CDP chỉ có trên Chromium; Firefox/WebKit đo không throttle hoặc dùng proxy mạng.
+- *(Rev 2)* **Số đo lab của spike** (fixture nhỏ, localhost, không CDN; **không** phải baseline hay budget): xem báo cáo spike §3.5. Bootstrap external tạo thêm một bước tuần tự khoảng một RTT trước khi tải `core`/`entry`/IR.
 
 ---
 
@@ -757,9 +832,10 @@ Ràng buộc (chưa có con số; chờ OD-08, OD2-09):
 | K7 | plan không lập được (ví dụ unit không thuộc step nào) | `E-CHUNK-PLAN-INVALID` |
 | K9 | bundler lỗi; facet trong store sai hash | `E-BUNDLE-FAILED`, `E-LOCK-UNRESOLVABLE` |
 | K10 | module trái phép, facet cấm, React trùng, chunk ngoài plan, Motion có mặt, cycle, sourcemap công khai, path tuyệt đối, secret, trùng path | §10 |
-| K11 | LRM không nhất quán; trùng `releaseId` | `E-LRM-INCONSISTENT`, `E-RELEASE-ID-COLLISION` |
+| K11 | LRM không nhất quán (tính lại không khớp) | `E-LRM-INCONSISTENT` |
 | K13 | hai lần build khác byte; toolchain lệch | `E-BUILD-NON-REPRODUCIBLE`, `E-TOOLCHAIN-MISMATCH` |
-| K14 | không ghi được staging; staging đã có `releaseId` với nội dung khác | `E-STAGING-WRITE`, `E-RELEASE-ID-COLLISION` |
+| K14 | không ghi được staging; staging đã có `releaseId` với bộ identity khác | `E-STAGING-WRITE`, `E-RELEASE-ID-COLLISION` |
+| spec #5 đăng ký | form release store đã có `releaseId` với bộ identity khác | `E-RELEASE-ID-COLLISION` |
 | spec #5 | integrity gate lỗi; deploy gate lỗi; ledger chặn | `E-ARTIFACT-HASH-MISMATCH`, `E-ARTIFACT-UNEXPECTED-FILE`, spec #2 §10.4, `E-CAP-VULNERABLE`/`E-CAP-REVOKED` |
 
 ### 18.2. Runtime
@@ -797,6 +873,11 @@ Bốn loại evidence: **G** = build graph (Chunk Plan, Chunk Manifest, module g
 | C12 | Không có chunk ngoài dự kiến | ✔ | ✔ | | | mọi chunk khớp Chunk Plan + shared chunk được ghi nhận |
 | C13 | Khôi phục draft ở 確認 của nhánh 店頭 | | | ✔ | ✔ | `g-stp_store` được tải trước khi 確認 hiển thị (`Summary`); nhánh 宅配 thì không |
 | C14 | Đồ thị import tĩnh giữa chunk là DAG | ✔ | | | | không vòng entry↔group; group chỉ import tĩnh `core`/shared |
+| C15 | *(rev 2)* Browser facet import design hoặc file server bằng đường dẫn tương đối | ✔ | ✔ | | | L1b từ chối ở K9; L3 báo `browser->design`/`browser->server`; nếu lọt thì L5 thấy canary |
+| C16 | *(rev 2)* Prefetch được dùng lại cho lần tải module | | | ✔ | | Chromium/Firefox: không request lần hai; WebKit: theo OD3-03 |
+| C17 | *(rev 2)* Lỗi evaluate → bậc 1 với token duy nhất phục hồi; sau reload vẫn có bậc 1 | | | ✔ | ✔ | phục hồi trên cả ba engine |
+
+Evidence đầu tiên cho C01–C14 và C15–C17 (mức spike): `docs/evidence/P01/spike-gate-01/` (EXP-01, EXP-03, EXP-04).
 
 ### 19.2. TM-B: reproducible build (ADR-039; sửa từ S3-P21)
 
@@ -895,6 +976,7 @@ Loại: **A** automated · **M** manual · **F** future (sau G10/hạ tầng th�
 | X2-10 | Dev Preview không là release | §9.5 | §12.1 (`mode: dev`) | Đồng bộ |
 | X2-11 | `Summary` tùy chọn của `fieldType` cho 確認 | §7.4 (rev 2.3) | §15.1 | Đồng bộ |
 | X2-12 | Rebuild dùng Build Request đã lưu | §9.3 (rev 2.3) | §5.1 | Đồng bộ |
+| X2-13 | L1b resolve allowlist (gồm `contract`, Motion của core, module ảo); giới hạn của conditional exports đã đo; L5 kiểm cả server/`.py` | §11.2, §11.3, §11.5, §17.3 (rev 2.4) | §9, §10 | Đồng bộ |
 
 ### 20.3. Pending cho spec #5 và spec #6
 
@@ -909,9 +991,10 @@ Loại: **A** automated · **M** manual · **F** future (sau G10/hạ tầng th�
 | IR/Data Contract format | ✔ | | |
 | Chunk plan theo step-set, entry/lazy/motion | ✔ | điều chỉnh theo kích thước sau khi đo | |
 | Prefetch luật tất định, một step lookahead | ✔ | | heuristic nâng cao nếu có số liệu |
-| Chunk failure: phân loại + retry hai bậc | ✔ (sau khi spike xác nhận bậc 1) | | |
+| Chunk failure: phân loại + retry hai bậc (token duy nhất) | ✔ (spike đã xác nhận bậc 1 trên ba engine) | | |
+| L1b resolve allowlist trong bundler | ✔ | | |
 | LRM, `releaseId`, attestation, provenance (không ký) | ✔ | | ký artifact |
-| Reproducible build: canonical image, K13 | ✔ | path independence test (B14) | tất định giữa OS: không làm |
+| Reproducible build: canonical image, K13 | ✔ | path independence test (B14; spike đã pass cho fixture) | tất định giữa kiến trúc CPU/OS: không cam kết (spike: macOS/Linux arm64 giống nhau; x86_64 chưa kiểm) |
 | Bootstrap B, shell, `<noscript>`, generic fallback | ✔ | | |
 | Measurement contract, báo cáo lab-only | ✔ | dữ liệu thật (RUM) | |
 | Prerender | ✘ | đánh giá nếu benchmark chứng minh cần | |
@@ -922,8 +1005,10 @@ Loại: **A** automated · **M** manual · **F** future (sau G10/hạ tầng th�
 
 | ID | Vấn đề | Phương án | Khuyến nghị | Ảnh hưởng | Hạn |
 |---|---|---|---|---|---|
-| **OD3-01** | Chọn bundler | (a) Vite/Rollup (stack sơ bộ ở P00). (b) bundler khác đáp ứng §9. | Quyết **sau spike** theo bảng yêu cầu §9; (a) là ứng viên đầu tiên | K9, K10, tính tái lập | Trước G1 |
-| **OD3-02** | Gate cho spike kỹ thuật (ADR-018) | Phạm vi đề xuất: code dùng xong bỏ, ngoài nhánh chính, build hai form tối giản (Sports-nomotion và PC có một plugin giả) để đo: (1) isolation L5/TM-C01/C02/C04; (2) hai build sạch byte-identical; (3) export condition `design`; (4) hành vi `import()` retry bậc 1 trên Chromium/WebKit/Gecko; (5) số byte và T1/T2/T3 lab. Evidence giữ lại, code xóa. | Duyệt spike trước khi chốt spec #3 | Xác nhận các giả định chưa kiểm chứng của §9, §12, §15.3 | Khi user sẵn sàng; trước G1 |
+| OD3-01 ✅ *(ADR-041, CONDITIONALLY APPROVED)* | Chọn bundler chính thức | (a) Vite 8.3.5 + Rolldown 1.2.15. (b) bundler khác. | **(a), có điều kiện**: spike cho thấy đáp ứng các yêu cầu §9 **đã kiểm** (chunk group `core`, export condition, module graph, tái lập byte-for-byte, không mạng, tên file hex khi cấu hình). **Chưa kiểm:** resolve plugin từ release store (spike dùng `node_modules` workspace) và plugin L1b; hai mục này phải pass ở verification đầu của implementation | K9, K10 | Trước G1 |
+| OD3-02 | Gate cho spike | — | **Đã quyết** (ADR-042) và đã chạy (§25.2) | — | — |
+| OD3-03 ✅ *(ADR-043, ACCEPTED FOR P0)* | Prefetch trên WebKit (response prefetch không được dùng lại) | (a) P0 chấp nhận tải hai lần (group nhỏ; spike `g-stp_store` ~0.4 KB Brotli), đo lại với plugin thật. (b) Dùng `<link rel="modulepreload">` sau khi kiểm hành vi khi lỗi (rủi ro làm hỏng module map). (c) Tắt prefetch trên WebKit (cần nhận diện engine). | **(a)** cho P0; kiểm (b) trong verification của implementation | Băng thông trên Safari; độ phức tạp | Trước plan |
+| OD3-04 ✅ *(ADR-044, đánh giá)* | Package manager | (a) npm với `legacy-peer-deps` (spike chạy được). (b) pnpm. (c) npm phiên bản khác. | **(b)** là ứng viên ưu tiên, chưa khóa version; kiểm theo VG-04 ở P02 | Lockfile, tái lập | P02 |
 
 Còn OPEN từ spec trước và liên quan: OD2-08, OD2-09 (trước spec #5); OD-08, OD-09 (spec #1).
 
@@ -931,8 +1016,9 @@ Còn OPEN từ spec trước và liên quan: OD2-08, OD2-09 (trước spec #5); 
 
 | Rủi ro | Mức | Giảm thiểu |
 |---|---|---|
-| Bundler không tất định hoặc không hỗ trợ export condition | Cao | spike (OD3-02); K13 bắt; L3/L5 độc lập với L1 |
-| `import()` retry khác nhau giữa trình duyệt | Trung bình | retry hai bậc; spike xác nhận; bậc 2 luôn đúng |
+| Bundler không tất định hoặc không hỗ trợ export condition | Trung bình (spike: tất định, condition hoạt động) | K13 bắt; L1b/L3/L5 độc lập với L1; chưa kiểm x86_64 |
+| Bundler đưa file không phải JS (ví dụ `.py`) vào bundle khi bị import tương đối | Cao (spike n4) | L1b, L3, L5 |
+| `import()` retry khác nhau giữa trình duyệt | Trung bình | retry hai bậc; spike đã đo ba engine; bậc 2 (reload) **không** chắc phục hồi trên WebKit nên luôn đề xuất lại bậc 1 sau reload |
 | Thêm một request (bootstrap external) làm chậm cold load | Trung bình | đo T1/T2; tối ưu sau khi có số |
 | Group nhỏ gây nhiều request (over-splitting) | Thấp | chỉ tách `fieldType` plugin và Motion; điều chỉnh sau đo |
 | Prefetch lãng phí khi khách đổi nhánh | Thấp | một step lookahead, chỉ sau khi field quyết định đã commit và hợp lệ |
@@ -976,21 +1062,71 @@ Một subagent mới đọc spec #3 đối chiếu ADR-029..040, spec #1, spec #
 | Thứ tự mảng chưa định nghĩa; "thứ tự topo" không duy nhất | Lỗ hổng tất định | quy tắc sắp xếp (§5.2, §7.2, §10, §11.1); label theo thứ tự `steps` trong IR; TM-B02 mở rộng |
 | Sơ đồ gợi ý K13 đứng sau K12 | Nhỏ | sơ đồ §5.2 vẽ hai lần chạy |
 
-## 26. Mức độ sẵn sàng (revision 1)
+### 25.2. SPIKE-GATE-01 (rev 2)
+
+| EXP | Kết quả | Ảnh hưởng đã áp |
+|---|---|---|
+| EXP-01 Build isolation | PASS | §9 (`hashCharacters`), §15.2 (WebKit, OD3-03) |
+| EXP-02 Reproducible build | PASS (thêm: đổi thư mục trong container và macOS/Linux arm64 cũng giống hệt) | §12, §21 |
+| EXP-03 Conditional exports | **FAIL** (hai điều kiện đã chốt): import tương đối vượt qua `exports` (design và `.py`); L3 và quét canary bắt đúng | §9, §10 (L1b), C15; spec #2 rev 2.4 |
+| EXP-04 Dynamic import failure | PASS; giả định "reload luôn phục hồi" FAIL trên WebKit (Playwright) | §15.3 (thêm `evaluation`), C17 |
+| EXP-05 Performance (lab) | PASS (đã đo); CLS 0.28 khi gỡ shell muộn → 0 sau khi sửa; preset Motion theo form chưa kiểm | §14.5, §17 |
+
+Chi tiết, lệnh tái hiện, giới hạn: [P01_SPIKE_GATE_01_REPORT.md](../../discovery/P01_SPIKE_GATE_01_REPORT.md).
+
+### 25.3. Consistency review sau spike (reviewer độc lập, 2026-10-24)
+
+Một subagent mới đối chiếu spec #3 rev 2, báo cáo spike, spec #1 rev 3.3, spec #2 rev 2.4, ADR-036..042 và evidence JSON. Mọi phát hiện đã được xử lý:
+
+| Phát hiện | Loại | Xử lý |
+|---|---|---|
+| Spec #2 §11.2 L1, §11.3 điểm 1 vẫn nói server code không thể bị bundle; thiếu dòng import tương đối server/`.py`; F9 vẫn tick L1; §17.3 thiếu L1b; L5 không kiểm server/`.py` | Không đồng bộ | spec #2 rev 2.4: sửa L1, điểm 1, F9, thêm F11, L1b trong §17.3, L5 kiểm server/`.py` |
+| L1b allowlist thiếu `contract`, Motion của core, module ảo của bundler; báo cáo ghi "JS/CSS" | Mâu thuẫn (sẽ chặn build hợp lệ) | §9 và spec #2 L1b bổ sung; báo cáo D3 |
+| `awaitingCapability { group }` (spec #1) vs `{ groups }` (spec #3) | Không đồng bộ | spec #1 C11 → `groups` |
+| Spec #1 EC-36 (vào step có plugin lỗi tải) mâu thuẫn INV-N9 | Mâu thuẫn cũ | spec #1 EC-36 tách lỗi tải chunk / lỗi render; `manualEntry` chỉ cho `dataSource` |
+| §23 "bậc 2 luôn đúng" vs §15.3 | Mâu thuẫn | §23 sửa |
+| Lỗi evaluate không có loại trong phân loại §15.3 | Thiếu | thêm `evaluation` (probe 200) |
+| Kiểm trùng `releaseId` ở ba nơi | Mâu thuẫn | staging ở K13/K14; có thẩm quyền ở spec #5 đăng ký (§5.5, §12.3, §18.1) |
+| Danh sách file private thiếu LRM, Data Contract | Thiếu | §5.5, §13 |
+| Hai chủ sở hữu việc nạp CSS group | Mâu thuẫn | group loader chịu trách nhiệm; bậc 0 có thể ủy cho helper (§8, §9) |
+| Ma trận §5.4: K10 thiếu K3, K11 thiếu digest từ K0 | Thiếu | §5.4 |
+| OD3-01 "đáp ứng mọi yêu cầu" — chưa kiểm release store và L1b | Tuyên bố quá mức | OD3-01 "có điều kiện"; báo cáo §0 |
+| WebKit "dùng lại response lỗi trong bộ nhớ" — evidence cho thấy có request mới trả 200 | Tuyên bố quá mức | chỉ ghi điều quan sát được; nguyên nhân chưa rõ; Playwright WebKit ≠ Safari |
+| "Bộ đếm retry không đủ" chưa đo | Tuyên bố quá mức | ghi là biện pháp phòng ngừa |
+| Phục hồi lỗi evaluate bằng query chỉ đúng khi lỗi tạm thời | Tuyên bố quá mức | §15.3 bảng và loại `evaluation` |
+| "Lần chạy đầu EXP-02 cũng giống hệt" không có evidence; spike ghi attestation mỗi lần build | Tuyên bố quá mức / khác biệt | báo cáo §3.2 |
+| Preset Motion theo form chưa thật sự được kiểm | Thiếu bằng chứng | báo cáo §3.5, §25.2 |
+| EXP-03 "FAIL một điều kiện" — thực tế hai điều kiện | Ghi sai kết quả | "FAIL (hai điều kiện)" ở báo cáo, §25.2, notes, CURRENT_STATUS |
+| "L5" trong EXP-03 chỉ là quét canary của harness | Tuyên bố quá mức | báo cáo §3.3 |
+
+## 26. Mức độ sẵn sàng (revision 2)
 
 | Phần | Trạng thái | Còn mở |
 |---|---|---|
 | Pipeline (§5) | Chờ user review | — |
 | IR/Data Contract (§6) | Chờ user review | — |
 | Chunk planning, codegen (§7, §8) | Chờ user review | — |
-| Bundle (§9) | Yêu cầu đã rõ; công cụ chưa chọn | OD3-01, OD3-02 |
+| Bundle (§9) | Yêu cầu đã rõ; Vite + Rolldown đáp ứng ở spike | OD3-01 (chọn chính thức), OD3-04 |
 | Verification K10 (§10) | Chờ user review | — |
 | Identity, attestation, provenance (§11) | Theo ADR-039; chờ review | — |
-| Reproducible build (§12) | Theo ADR-039; chờ review | OD3-02 (bằng chứng) |
+| Reproducible build (§12) | Theo ADR-039; spike PASS | x86_64 chưa kiểm |
 | Runtime loading (§14) | Theo ADR-037/038; chờ review | — |
-| Lazy/prefetch/failure (§15) | Theo ADR-040; chờ review | OD3-02 (retry bậc 1) |
+| Lazy/prefetch/failure (§15) | Theo ADR-040; retry đã kiểm ở spike | OD3-03 |
 | Trạng thái release, activation (§16) | Khung; chi tiết spec #5 | OD2-08, OD2-09, OD-08, OD-09 |
 | Measurement (§17) | Chờ review | budget: sau baseline |
 | Test matrix (§19) | Chờ review | — |
 
-**Blocker:** không có blocker kiến trúc cho spec #4. Bằng chứng thực nghiệm (isolation, tái lập, retry) cần spike (OD3-02) trước G1.
+**Trạng thái tổng thể:** rev 2 **cần final review và Cross-Spec Review**; chưa duyệt hoàn toàn.
+
+**Blocker:** không có blocker kiến trúc cho spec #4. Risk còn mở được chuyển thành verification gate VG-01..VG-10 (`docs/REQUIREMENTS_TRACEABILITY.md`): L1b, resolve từ release store, isolation với import tương đối, pnpm, Node 24, tái lập khác kiến trúc CPU, Safari thật, phục hồi lỗi evaluate trên WebKit, isolation của preset Motion, cache CDN/browser thật. Các mục này giữ OPEN cho tới khi có bằng chứng.
+
+## 27. Thay đổi so với revision 1
+
+- Áp ADR-041, ADR-042; kết quả SPIKE-GATE-01 (§25.2).
+- §5.4, §5.5: thứ tự thực thi, ma trận phụ thuộc stage, trả lời pipeline consistency review.
+- §9: `hashCharacters: 'hex'`; L1b resolve allowlist; cấu hình Vite/Rolldown đã kiểm; CSS của group ở đường retry.
+- §10: kiểm L1b và đuôi file lạ.
+- §14.5: gỡ shell trong cùng commit với lần render đầu.
+- §15.2, §15.3: WebKit không dùng lại prefetch; bảng hành vi `import()` đã đo; retry token duy nhất; bậc 1 sau reload.
+- §17: giới hạn phương pháp đo (TTFB với CDP, INP proxy).
+- §19: C15–C17. §21, §22 (OD3-01 khuyến nghị, OD3-03, OD3-04), §23.

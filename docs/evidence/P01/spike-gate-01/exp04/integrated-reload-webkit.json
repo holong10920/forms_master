@@ -1,0 +1,79 @@
+{
+  "kind1": "evaluation",
+  "warning": "再読み込みすると、お名前・電話番号などの個人情報は再入力が必要です。",
+  "releaseBefore": "rel_umzw3lkdxz7dcxs6mdmmtv74so",
+  "releaseAfter": "rel_umzw3lkdxz7dcxs6mdmmtv74so",
+  "checkedAfter": true,
+  "outcomeAfterReload": "error:evaluation",
+  "outcomeAfterTier1": "stp_store",
+  "runtimeLogAfterReload": [
+    {
+      "gid": "g-stp_store",
+      "tier": 0,
+      "ok": false,
+      "kind": "evaluation",
+      "errorName": "Error",
+      "errorMessage": "spike-eval-throw",
+      "ms": 7
+    },
+    {
+      "gid": "g-stp_store",
+      "tier": 1,
+      "ok": true,
+      "ms": 4
+    }
+  ],
+  "storeRequestsAfterReloadNext": [
+    {
+      "t": 1792825105852,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "status": 200
+    },
+    {
+      "t": 1792825105856,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.50c062eedbca.js",
+      "query": "",
+      "status": 200
+    }
+  ],
+  "storeHits": [
+    {
+      "t": 1792825105615,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "status": 200
+    },
+    {
+      "t": 1792825105651,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "status": 200
+    },
+    {
+      "t": 1792825105717,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "status": 200
+    },
+    {
+      "t": 1792825105852,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "status": 200
+    },
+    {
+      "t": 1792825105856,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.50c062eedbca.js",
+      "query": "",
+      "status": 200
+    }
+  ]
+}

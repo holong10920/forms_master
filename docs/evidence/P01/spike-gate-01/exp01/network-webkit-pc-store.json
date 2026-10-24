@@ -1,0 +1,51 @@
+{
+  "releaseId": "rel_umzw3lkdxz7dcxs6mdmmtv74so",
+  "beforeChoosingStore": [],
+  "afterChoosingStoreBeforeNext": [
+    {
+      "t": 1792825091588,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.50c062eedbca.js",
+      "query": "",
+      "status": 200
+    },
+    {
+      "t": 1792825091589,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "status": 200
+    }
+  ],
+  "instantiatedBeforeNext": false,
+  "allStoreSelectorRequests": [
+    {
+      "t": 1792825091588,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.50c062eedbca.js",
+      "query": "",
+      "status": 200
+    },
+    {
+      "t": 1792825091589,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "status": 200
+    },
+    {
+      "t": 1792825093136,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.50c062eedbca.js",
+      "query": "",
+      "status": 200
+    },
+    {
+      "t": 1792825093137,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "status": 200
+    }
+  ]
+}

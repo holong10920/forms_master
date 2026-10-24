@@ -1,0 +1,125 @@
+{
+  "browser": "firefox",
+  "version": "157.0",
+  "scenarios": [
+    {
+      "id": "http404",
+      "first": {
+        "ok": false,
+        "name": "TypeError",
+        "message": "error loading dynamically imported module: http://127.0.0.1:4173/__mod/s-http404.js",
+        "ms": 8
+      },
+      "retrySameUrl": {
+        "ok": true,
+        "value": 1,
+        "ms": 2
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 25
+      },
+      "requestsSameUrl": 2,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "http503",
+      "first": {
+        "ok": false,
+        "name": "TypeError",
+        "message": "error loading dynamically imported module: http://127.0.0.1:4173/__mod/s-http503.js",
+        "ms": 4
+      },
+      "retrySameUrl": {
+        "ok": true,
+        "value": 1,
+        "ms": 3
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 8
+      },
+      "requestsSameUrl": 2,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "reset-once",
+      "first": {
+        "ok": true,
+        "value": 1,
+        "ms": 5
+      },
+      "retrySameUrl": {
+        "ok": true,
+        "value": 1,
+        "ms": 2
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 10
+      },
+      "requestsSameUrl": 2,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "reset-persistent",
+      "first": {
+        "ok": true,
+        "value": 1,
+        "ms": 28
+      },
+      "retrySameUrl": {
+        "ok": true,
+        "value": 1,
+        "ms": 1
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 3
+      },
+      "requestsSameUrl": 4,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "evalthrow",
+      "first": {
+        "ok": false,
+        "name": "Error",
+        "message": "spike-eval-throw",
+        "ms": 2
+      },
+      "retrySameUrl": {
+        "ok": false,
+        "name": "Error",
+        "message": "spike-eval-throw",
+        "ms": 0
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 1
+      },
+      "requestsSameUrl": 1,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "slow-timeout",
+      "first": {
+        "ok": false,
+        "name": "HarnessTimeout",
+        "message": "harness-timeout",
+        "ms": 1004
+      },
+      "secondWhilePendingOrAfter": {
+        "ok": true,
+        "value": 1,
+        "ms": 1999
+      },
+      "requestsSameUrl": 1
+    }
+  ]
+}

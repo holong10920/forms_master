@@ -1,0 +1,158 @@
+{
+  "l3": [
+    {
+      "package": "store-selector",
+      "expectViolation": false,
+      "expectRule": null,
+      "diagnostics": [],
+      "filesVisited": [
+        "browser/index.js",
+        "browser/store-selector.css",
+        "contract/index.js"
+      ],
+      "verdict": "as-expected"
+    },
+    {
+      "package": "neg-control",
+      "expectViolation": false,
+      "expectRule": null,
+      "diagnostics": [],
+      "filesVisited": [
+        "browser/index.js"
+      ],
+      "verdict": "as-expected"
+    },
+    {
+      "package": "neg-design-relative",
+      "expectViolation": true,
+      "expectRule": "browser->design",
+      "diagnostics": [
+        {
+          "code": "E-BOUNDARY-VIOLATION",
+          "rule": "browser->design",
+          "file": "design/index.js"
+        }
+      ],
+      "filesVisited": [
+        "browser/index.js",
+        "design/index.js"
+      ],
+      "verdict": "as-expected"
+    },
+    {
+      "package": "neg-server-relative",
+      "expectViolation": true,
+      "expectRule": "browser->server",
+      "diagnostics": [
+        {
+          "code": "E-BOUNDARY-VIOLATION",
+          "rule": "browser->server",
+          "file": "server/handler.py"
+        },
+        {
+          "code": "E-BOUNDARY-VIOLATION",
+          "rule": "browser->python",
+          "file": "server/handler.py"
+        }
+      ],
+      "filesVisited": [
+        "browser/index.js",
+        "server/handler.py"
+      ],
+      "verdict": "as-expected"
+    }
+  ],
+  "builds": [
+    {
+      "id": "n1",
+      "entry": "n1-design-via-exports.js",
+      "mode": "customer",
+      "build": "failed",
+      "error": "Build failed with 1 error: [rolldown:vite-resolve] plugin `rolldown:vite-resolve` threw an error Caused by: \"./design\" is not exported under the conditions [\"browser\", \"module\", \"production\", \"import\"] from package <spike>/node_modules/@platform/store-selector (see exports field in <spike>/node_modules/@platform/store-selector/package.json)",
+      "verdict": "as-expected"
+    },
+    {
+      "id": "c1",
+      "entry": "c1-browser-via-exports.js",
+      "mode": "customer",
+      "build": "succeeded",
+      "files": [
+        "assets/core.e62f277cf376.js",
+        "assets/entry.388caee6d610.css",
+        "assets/entry.921de25edefa.js"
+      ],
+      "canaryHits": [],
+      "verdict": "as-expected"
+    },
+    {
+      "id": "d1",
+      "entry": "d1-design-build.js",
+      "mode": "design",
+      "build": "succeeded",
+      "files": [
+        "assets/entry.bc00f1381ed8.js"
+      ],
+      "canaryHits": [
+        {
+          "file": "assets/entry.bc00f1381ed8.js",
+          "canary": "CANARY_DESIGN_7f3a91"
+        }
+      ],
+      "verdict": "as-expected"
+    },
+    {
+      "id": "n2",
+      "entry": "n2-design-relative.js",
+      "mode": "customer",
+      "build": "succeeded",
+      "files": [
+        "assets/core.e62f277cf376.js",
+        "assets/entry.409e7acb268a.js"
+      ],
+      "canaryHits": [
+        {
+          "file": "assets/entry.409e7acb268a.js",
+          "canary": "CANARY_DESIGN_7f3a91"
+        }
+      ],
+      "verdict": "as-expected"
+    },
+    {
+      "id": "c2",
+      "entry": "c2-control.js",
+      "mode": "customer",
+      "build": "succeeded",
+      "files": [
+        "assets/core.e62f277cf376.js",
+        "assets/entry.6c6061e99f63.js"
+      ],
+      "canaryHits": [],
+      "verdict": "as-expected"
+    },
+    {
+      "id": "n3",
+      "entry": "n3-server-via-package-path.js",
+      "mode": "customer",
+      "build": "failed",
+      "error": "Build failed with 1 error: [rolldown:vite-resolve] plugin `rolldown:vite-resolve` threw an error Caused by: \"./server/store_selector_server/__init__.py\" is not exported under the conditions [\"browser\", \"module\", \"production\", \"import\"] from package <spike>/node_modules/@platform/store-selector (see exports field in <spike>/node_modules/@platform/store-selector/package.json)",
+      "verdict": "as-expected"
+    },
+    {
+      "id": "n4",
+      "entry": "n4-server-relative.js",
+      "mode": "customer",
+      "build": "succeeded",
+      "files": [
+        "assets/core.e62f277cf376.js",
+        "assets/entry.a99837ae7340.js"
+      ],
+      "canaryHits": [
+        {
+          "file": "assets/entry.a99837ae7340.js",
+          "canary": "CANARY_SERVER_4b2c88"
+        }
+      ],
+      "verdict": "as-expected"
+    }
+  ]
+}

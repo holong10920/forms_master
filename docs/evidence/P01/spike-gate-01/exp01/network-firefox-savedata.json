@@ -1,0 +1,19 @@
+{
+  "afterChoosingStoreBeforeNext": [],
+  "all": [
+    {
+      "t": 1792825081692,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.50c062eedbca.js",
+      "query": "",
+      "status": 200
+    },
+    {
+      "t": 1792825081693,
+      "method": "GET",
+      "path": "/r/rel_umzw3lkdxz7dcxs6mdmmtv74so/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "status": 200
+    }
+  ]
+}

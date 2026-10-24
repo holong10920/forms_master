@@ -1,0 +1,119 @@
+{
+  "browser": "chromium",
+  "version": "156.0.8078.4",
+  "scenarios": [
+    {
+      "id": "http404",
+      "first": {
+        "ok": false,
+        "name": "TypeError",
+        "message": "Failed to fetch dynamically imported module: http://127.0.0.1:4173/__mod/s-http404.js",
+        "ms": 5
+      },
+      "requestsDuringFirst": 1,
+      "retrySameUrl": {
+        "ok": true,
+        "value": 1,
+        "ms": 1
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 1
+      },
+      "requestsSameUrlTotal": 2,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "http503",
+      "first": {
+        "ok": false,
+        "name": "TypeError",
+        "message": "Failed to fetch dynamically imported module: http://127.0.0.1:4173/__mod/s-http503.js",
+        "ms": 1
+      },
+      "requestsDuringFirst": 1,
+      "retrySameUrl": {
+        "ok": true,
+        "value": 1,
+        "ms": 1
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 1
+      },
+      "requestsSameUrlTotal": 2,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "reset-persistent",
+      "first": {
+        "ok": false,
+        "name": "TypeError",
+        "message": "Failed to fetch dynamically imported module: http://127.0.0.1:4173/__mod/s-reset-persistent.js",
+        "ms": 1
+      },
+      "requestsDuringFirst": 2,
+      "retrySameUrl": {
+        "ok": true,
+        "value": 1,
+        "ms": 1
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 1
+      },
+      "requestsSameUrlTotal": 3,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "evalthrow",
+      "first": {
+        "ok": false,
+        "name": "Error",
+        "message": "spike-eval-throw",
+        "ms": 2
+      },
+      "requestsDuringFirst": 1,
+      "retrySameUrl": {
+        "ok": false,
+        "name": "Error",
+        "message": "spike-eval-throw",
+        "ms": 0
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 1
+      },
+      "requestsSameUrlTotal": 1,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "reset-once-observation",
+      "first": {
+        "ok": true,
+        "value": 1,
+        "ms": 1
+      },
+      "requests": 2
+    },
+    {
+      "id": "slow-timeout",
+      "first": {
+        "ok": false,
+        "name": "HarnessTimeout",
+        "message": "harness-timeout",
+        "ms": 1002
+      },
+      "secondWhilePendingOrAfter": {
+        "ok": true,
+        "value": 1,
+        "ms": 2004
+      },
+      "requestsSameUrl": 1
+    }
+  ]
+}

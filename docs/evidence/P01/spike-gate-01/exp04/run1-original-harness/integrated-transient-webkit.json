@@ -1,0 +1,180 @@
+{
+  "kind": "network",
+  "runtimeLog": [
+    {
+      "gid": "g-stp_store",
+      "tier": 0,
+      "ok": false,
+      "kind": "network",
+      "errorName": "Error",
+      "errorMessage": "Unable to preload CSS for http://127.0.0.1:4173/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.388caee6d610.css",
+      "ms": 14
+    },
+    {
+      "gid": "g-stp_store",
+      "tier": 1,
+      "ok": true,
+      "ms": 5
+    }
+  ],
+  "hits": [
+    {
+      "t": 1792824448962,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792824448962,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792824448963,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792824448963,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792824448964,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792824448965,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792824448966,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792824448968,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792824448992,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792824448994,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792824448994,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792824448996,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792824448996,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792824448997,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792824449000,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792824449001,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792824449002,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792824449002,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "",
+      "rule": "reset",
+      "status": "reset"
+    },
+    {
+      "t": 1792824449059,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "status": 200
+    },
+    {
+      "t": 1792824449059,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "?retry=1",
+      "status": 200
+    }
+  ]
+}

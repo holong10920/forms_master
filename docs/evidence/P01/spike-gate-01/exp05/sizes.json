@@ -1,0 +1,200 @@
+{
+  "bootstrap": {
+    "raw": 2339,
+    "gzip": 1063,
+    "brotli": 846
+  },
+  "releases": {
+    "pc-demo": {
+      "releaseId": "rel_umzw3lkdxz7dcxs6mdmmtv74so",
+      "files": {
+        "assets/core.1d34d523e08a.js": {
+          "raw": 227226,
+          "gzip": 70862,
+          "brotli": 61048
+        },
+        "assets/core.d3acac3d9206.css": {
+          "raw": 458,
+          "gzip": 282,
+          "brotli": 209
+        },
+        "assets/entry.8ba03744cc42.js": {
+          "raw": 2310,
+          "gzip": 1174,
+          "brotli": 1047
+        },
+        "assets/form-ir.87725e644d95.json": {
+          "raw": 1796,
+          "gzip": 768,
+          "brotli": 593
+        },
+        "assets/g-stp_store.388caee6d610.css": {
+          "raw": 183,
+          "gzip": 159,
+          "brotli": 113
+        },
+        "assets/g-stp_store.50c062eedbca.js": {
+          "raw": 716,
+          "gzip": 505,
+          "brotli": 419
+        },
+        "assets/motion.365a19ccc35a.js": {
+          "raw": 62936,
+          "gzip": 22709,
+          "brotli": 20793
+        },
+        "index.html": {
+          "raw": 2147,
+          "gzip": 1318,
+          "brotli": 999
+        }
+      },
+      "initialIncludingHtmlNoBootstrap": {
+        "raw": 233937,
+        "gzip": 74404,
+        "brotli": 63896
+      },
+      "allJs": {
+        "raw": 293188,
+        "brotli": 83307
+      }
+    },
+    "pc-demo-rev8": {
+      "releaseId": "rel_dpxfqdokjrxwjti3zoxebh7xmi",
+      "files": {
+        "assets/core.1d34d523e08a.js": {
+          "raw": 227226,
+          "gzip": 70862,
+          "brotli": 61048
+        },
+        "assets/core.d3acac3d9206.css": {
+          "raw": 458,
+          "gzip": 282,
+          "brotli": 209
+        },
+        "assets/entry.8ba03744cc42.js": {
+          "raw": 2310,
+          "gzip": 1174,
+          "brotli": 1047
+        },
+        "assets/form-ir.57b7b9e4af9d.json": {
+          "raw": 1805,
+          "gzip": 773,
+          "brotli": 599
+        },
+        "assets/g-stp_store.388caee6d610.css": {
+          "raw": 183,
+          "gzip": 159,
+          "brotli": 113
+        },
+        "assets/g-stp_store.50c062eedbca.js": {
+          "raw": 716,
+          "gzip": 505,
+          "brotli": 419
+        },
+        "assets/motion.365a19ccc35a.js": {
+          "raw": 62936,
+          "gzip": 22709,
+          "brotli": 20793
+        },
+        "index.html": {
+          "raw": 2147,
+          "gzip": 1317,
+          "brotli": 1001
+        }
+      },
+      "initialIncludingHtmlNoBootstrap": {
+        "raw": 233946,
+        "gzip": 74408,
+        "brotli": 63904
+      },
+      "allJs": {
+        "raw": 293188,
+        "brotli": 83307
+      }
+    },
+    "sports-demo": {
+      "releaseId": "rel_sftahbrrsqazgk7wpty6zdte3m",
+      "files": {
+        "assets/core.1fa44b9f73a2.js": {
+          "raw": 227195,
+          "gzip": 70851,
+          "brotli": 61007
+        },
+        "assets/core.d3acac3d9206.css": {
+          "raw": 458,
+          "gzip": 282,
+          "brotli": 209
+        },
+        "assets/entry.e56900dad14e.js": {
+          "raw": 1987,
+          "gzip": 1043,
+          "brotli": 905
+        },
+        "assets/form-ir.5155249dc8ac.json": {
+          "raw": 1139,
+          "gzip": 548,
+          "brotli": 406
+        },
+        "assets/motion.365a19ccc35a.js": {
+          "raw": 62936,
+          "gzip": 22709,
+          "brotli": 20793
+        },
+        "index.html": {
+          "raw": 2045,
+          "gzip": 1278,
+          "brotli": 968
+        }
+      },
+      "initialIncludingHtmlNoBootstrap": {
+        "raw": 232824,
+        "gzip": 74002,
+        "brotli": 63495
+      },
+      "allJs": {
+        "raw": 292118,
+        "brotli": 82705
+      }
+    },
+    "sports-demo-nomotion": {
+      "releaseId": "rel_7uugkriotjphpcptcum4p6ilzt",
+      "files": {
+        "assets/core.1fa44b9f73a2.js": {
+          "raw": 227195,
+          "gzip": 70851,
+          "brotli": 61007
+        },
+        "assets/core.d3acac3d9206.css": {
+          "raw": 458,
+          "gzip": 282,
+          "brotli": 209
+        },
+        "assets/entry.8405cfd0d47f.js": {
+          "raw": 262,
+          "gzip": 231,
+          "brotli": 179
+        },
+        "assets/form-ir.a65fd879476c.json": {
+          "raw": 1140,
+          "gzip": 548,
+          "brotli": 409
+        },
+        "index.html": {
+          "raw": 1996,
+          "gzip": 1257,
+          "brotli": 940
+        }
+      },
+      "initialIncludingHtmlNoBootstrap": {
+        "raw": 231051,
+        "gzip": 73169,
+        "brotli": 62744
+      },
+      "allJs": {
+        "raw": 227457,
+        "brotli": 61186
+      }
+    }
+  }
+}

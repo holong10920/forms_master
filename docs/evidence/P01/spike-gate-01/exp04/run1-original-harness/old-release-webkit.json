@@ -1,0 +1,34 @@
+{
+  "tabRelease": "rel_4xajnf3dzfyfv777uhbkvtk4n2",
+  "hits": [
+    {
+      "t": 1792824474655,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "",
+      "status": 200
+    },
+    {
+      "t": 1792824474657,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "status": 200
+    },
+    {
+      "t": 1792824474686,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "",
+      "status": 200
+    },
+    {
+      "t": 1792824474687,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "status": 200
+    }
+  ],
+  "newVisitorRelease": "rel_zsmor2mgxpzyaknm227sxqlpr6"
+}

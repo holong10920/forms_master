@@ -57,8 +57,11 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-038 | P0 render phía client (CSR) với Loading Shell nhẹ, trung tính với revision; measurement contract; prerender chỉ là tối ưu tương lai (spec #3 Q3-3) | **APPROVED AS DESIGN DIRECTION** (spec #3 Answer #3); release identity, bootstrap/CSP, scenario matrix PROPOSED (S3-P12..P16) | User (spec #3 Answer #3) | 2026-10-24 |
 | ADR-039 | Byte-for-byte reproducible build cho trusted release; canonical build environment; verification hai build sạch; LRM contract; attestation `index.html`; provenance; failure semantics; bootstrap external (spec #3 Q3-4) | **APPROVED AS DESIGN DIRECTION** (spec #3 Answer #4); chi tiết PROPOSED (S3-P12 rev 2, S3-P13 rev 2, S3-P17..P21) | User (spec #3 Answer #4) | 2026-10-24 |
 | ADR-040 | Hybrid code splitting với prefetch có điều kiện; chunk load failure không mất dữ liệu, không tải nhầm release; Motion-none bắt buộc (spec #3 Q3-5) | **APPROVED AS DESIGN DIRECTION** (spec #3 Answer #5); chunk plan, prefetch rule, retry PROPOSED (spec #3) | User (spec #3 Answer #5) | 2026-10-24 |
-| ADR-041 | OD3-01: Vite + Rolldown là ứng viên bundler ưu tiên để kiểm chứng; lựa chọn cuối chờ evidence | **APPROVED AS EVALUATION DIRECTION** (spec #3 review #1) | User (spec #3 review #1) | 2026-10-24 |
-| ADR-042 | OD3-02: SPIKE-GATE-01 — Compiler Feasibility Spike trước G1, phạm vi giới hạn (EXP-01..05) | **APPROVED WITH LIMITED SCOPE** (spec #3 review #1); không phải duyệt implementation | User (spec #3 review #1) | 2026-10-24 |
+| ADR-041 | OD3-01: Vite 8.3.5 + Rolldown 1.2.15 là baseline đã kiểm chứng cho compiler design; chốt implementation sau verification gate | **CONDITIONALLY APPROVED** (spike review); trước đó: APPROVED AS EVALUATION DIRECTION | User (spec #3 review #1, spike review) | 2026-10-24 |
+| ADR-042 | OD3-02: SPIKE-GATE-01 — Compiler Feasibility Spike trước G1, phạm vi giới hạn (EXP-01..05) | **APPROVED WITH LIMITED SCOPE** (spec #3 review #1); đã chạy và được user review; không phải duyệt implementation | User (spec #3 review #1, spike review) | 2026-10-24 |
+| ADR-043 | OD3-03: chấp nhận ở P0 việc WebKit có thể tải lại chunk đã prefetch; xử lý evaluation failure không tự reload | **ACCEPTED FOR P0** (spike review) | User (spike review) | 2026-10-24 |
+| ADR-044 | OD3-04: pnpm là package manager ưu tiên để đánh giá ở P02 (chưa khóa version) | **APPROVED AS EVALUATION DIRECTION** (spike review) | User (spike review) | 2026-10-24 |
+| ADR-045 | Toolchain Node.js: Node 20 đã EOL; chỉ giữ để tái hiện spike; P02 đánh giá Node 24 LTS | **ACCEPTED** (spike review); version cụ thể chốt ở P02 | User (spike review) | 2026-10-24 |
 
 ---
 
@@ -910,7 +913,9 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
   - Pin chính xác version Vite, Rolldown, Node, plugin, toolchain. Không trộn cấu hình Rollup cũ vào Rolldown nếu không được hỗ trợ.
   - Kiểm chứng API chunking thật, dependency graph, hành vi output.
   - Không coi Vite là đã chọn nếu spike thất bại. Không đáp ứng yêu cầu cứng → đề xuất phương án khác kèm evidence và trade-off. Không chọn vì phổ biến.
-- **Trạng thái:** APPROVED AS EVALUATION DIRECTION; lựa chọn cuối chờ kết quả SPIKE-GATE-01.
+- **Kết quả spike (2026-10-24):** đáp ứng các yêu cầu §9 đã kiểm; cần `hashCharacters: 'hex'` và plugin L1b; chưa kiểm resolve từ release store và L1b. Khuyến nghị chọn có điều kiện (spec #3 rev 2 §22, OD3-01). Chưa phải quyết định.
+- **Quyết định sau spike (user, 2026-10-24): CONDITIONALLY APPROVED.** Vite 8.3.5 + Rolldown 1.2.15 là baseline đã kiểm chứng cho compiler design. Trước khi chốt implementation phải: kiểm chứng resolve plugin từ release store; kiểm chứng L1b resolve allowlist; chạy positive và negative fixture; kiểm build graph và artifact isolation; không bỏ qua import tương đối; không dùng conditional exports làm security boundary duy nhất. **EXP-03 vẫn là FAIL**, không được đánh dấu PASS. (VG-01..VG-03, `docs/REQUIREMENTS_TRACEABILITY.md`.)
+- **Trạng thái:** CONDITIONALLY APPROVED.
 - **Người duyệt:** User (spec #3 review #1). **Ngày:** 2026-10-24.
 
 ## ADR-042 — SPIKE-GATE-01: Compiler Feasibility Spike (OD3-02)
@@ -923,5 +928,30 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
   - **Thí nghiệm:** EXP-01 Build isolation · EXP-02 Reproducible build · EXP-03 Conditional exports · EXP-04 Dynamic import failure (Chromium, Firefox, WebKit) · EXP-05 Performance (lab-only).
   - **Báo cáo** mỗi thí nghiệm: ID, giả thuyết, lệnh tái hiện, môi trường/toolchain, kết quả quan sát, PASS/FAIL/INCONCLUSIVE, đường dẫn evidence, giới hạn, ảnh hưởng tới spec #3, thay đổi thiết kế đề xuất. **Không sửa tiêu chí sau khi xem kết quả**; FAIL phải báo rõ.
   - Sau spike: independent consistency review spec #3 (đối chiếu spec #1 rev 3.3, spec #2 rev 2.3); spec #3 rev 2 nếu cần; rà K0–K14 (thứ tự thực thi, stage nào chạy lại ở hai lần build, LRM trước/sau verification, artifact có bị đổi sau khi hash, attestation cover gì, file ngoài inventory, tách side effect staging với spec #5) kèm diagram và stage dependency matrix.
-- **Trạng thái:** APPROVED WITH LIMITED SCOPE. G1 NOT APPROVED, G9/G10 BLOCKED.
+- **Thực hiện (2026-10-24):** tiêu chí chốt trước ở `22ecfaf`. EXP-01 PASS, EXP-02 PASS, EXP-03 FAIL (hai điều kiện), EXP-04 PASS (một giả định FAIL), EXP-05 PASS (lab-only). Báo cáo `docs/discovery/P01_SPIKE_GATE_01_REPORT.md`; evidence `docs/evidence/P01/spike-gate-01/`; source `spikes/compiler-feasibility/` (chưa commit; hook yêu cầu user duyệt).
+- **Review của user (2026-10-24):** giữ nguyên kết quả: EXP-01 PASS; EXP-02 PASS trong phạm vi môi trường đã thử; EXP-03 FAIL; EXP-04 PASS theo acceptance criteria, có limitation với WebKit và evaluation failure; EXP-05 PASS, lab-only. Không nâng tuyên bố ngoài phạm vi evidence; spike PASS không đồng nghĩa requirement production DONE. Đã duyệt hai commit local: `b3070d2` (branch `spike/compiler-feasibility`) và commit docs trên `p00-discovery`. Không merge spike branch.
+- **Trạng thái:** APPROVED WITH LIMITED SCOPE; spike đã chạy và được review. G1 NOT APPROVED, G9/G10 BLOCKED.
 - **Người duyệt:** User (spec #3 review #1). **Ngày:** 2026-10-24.
+
+## ADR-043 — Prefetch trên WebKit và evaluation failure ở P0 (OD3-03)
+
+- **Bối cảnh:** SPIKE-GATE-01 EXP-01: WebKit 27.2 (Playwright) không dùng lại response prefetch bằng `fetch()` cho lần tải module (4 request so với 2). EXP-04: trên WebKit, reload không phục hồi được lỗi evaluate.
+- **Quyết định (user): ACCEPTED FOR P0.**
+  - Chấp nhận WebKit có thể tải lại chunk đã prefetch trong phạm vi PoC, dựa trên số đo hiện tại. Ghi limitation và overhead byte/request; không hứa prefetch được dùng lại hoàn hảo; không ảnh hưởng correctness; không kết luận Safari thật giống Playwright WebKit; đánh giá lại nếu plugin thật lớn hơn nhiều.
+  - Evaluation failure: không khẳng định nguyên nhân khi evidence chưa đủ; không tự động reload làm mất dữ liệu trong memory; phải có recovery cho người dùng thấy và giữ pinned release.
+- **Trạng thái:** ACCEPTED FOR P0. Verification: VG-07, VG-08.
+- **Người duyệt:** User (spike review). **Ngày:** 2026-10-24.
+
+## ADR-044 — Package manager: đánh giá pnpm (OD3-04)
+
+- **Bối cảnh:** spike gặp lỗi arborist của npm 10.8.2 (`edgesOut`) với workspace + optional peer; phải dùng `legacy-peer-deps`.
+- **Quyết định (user): APPROVED AS EVALUATION DIRECTION.** pnpm là package manager ưu tiên cho P02, **chưa khóa version**. Yêu cầu: tạo fixture tái hiện lỗi optional-peer của npm 10.8.2; kiểm pnpm cài fixture thành công; kiểm resolve dependency của workspace; kiểm frozen lockfile; kiểm React peer singleton; pin `packageManager` version chính xác sau khi chọn; không floating dependency trong release CI. Không suy ra mọi phiên bản npm đều lỗi từ một lần gặp lỗi.
+- **Trạng thái:** APPROVED AS EVALUATION DIRECTION. Verification: VG-04.
+- **Người duyệt:** User (spike review). **Ngày:** 2026-10-24.
+
+## ADR-045 — Toolchain Node.js sau khi Node 20 EOL
+
+- **Bối cảnh:** spike dùng Node 20.20.2 (khớp máy local); Node.js 20 đã EOL.
+- **Quyết định (user): ACCEPTED.** Giữ image Node 20 để tái hiện spike, **không** mặc định dùng cho canonical production build. Ở P02: ưu tiên đánh giá Node.js 24 LTS; pin image theo digest bất biến; kiểm tương thích Vite/Rolldown và plugin; chạy lại verification reproducibility và isolation; ghi rõ nếu kết quả khác spike. Không sửa evidence gốc của spike.
+- **Trạng thái:** ACCEPTED; version cụ thể chốt ở P02. Verification: VG-05.
+- **Người duyệt:** User (spike review). **Ngày:** 2026-10-24.

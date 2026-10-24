@@ -1,0 +1,127 @@
+{
+  "browser": "chromium",
+  "version": "156.0.8078.4",
+  "scenarios": [
+    {
+      "id": "http404",
+      "first": {
+        "ok": false,
+        "name": "TypeError",
+        "message": "Failed to fetch dynamically imported module: http://127.0.0.1:4173/__mod/s-http404.js",
+        "ms": 8
+      },
+      "retrySameUrl": {
+        "ok": true,
+        "value": 1,
+        "ms": 3
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 1
+      },
+      "requestsSameUrl": 2,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "http503",
+      "first": {
+        "ok": false,
+        "name": "TypeError",
+        "message": "Failed to fetch dynamically imported module: http://127.0.0.1:4173/__mod/s-http503.js",
+        "ms": 1
+      },
+      "retrySameUrl": {
+        "ok": true,
+        "value": 1,
+        "ms": 1
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 1
+      },
+      "requestsSameUrl": 2,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "reset-once",
+      "first": {
+        "ok": true,
+        "value": 1,
+        "ms": 2
+      },
+      "retrySameUrl": {
+        "ok": true,
+        "value": 1,
+        "ms": 0
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 1
+      },
+      "requestsSameUrl": 2,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "reset-persistent",
+      "first": {
+        "ok": false,
+        "name": "TypeError",
+        "message": "Failed to fetch dynamically imported module: http://127.0.0.1:4173/__mod/s-reset-persistent.js",
+        "ms": 2
+      },
+      "retrySameUrl": {
+        "ok": false,
+        "name": "TypeError",
+        "message": "Failed to fetch dynamically imported module: http://127.0.0.1:4173/__mod/s-reset-persistent.js",
+        "ms": 1
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 1
+      },
+      "requestsSameUrl": 3,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "evalthrow",
+      "first": {
+        "ok": false,
+        "name": "Error",
+        "message": "spike-eval-throw",
+        "ms": 3
+      },
+      "retrySameUrl": {
+        "ok": false,
+        "name": "Error",
+        "message": "spike-eval-throw",
+        "ms": 0
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 1
+      },
+      "requestsSameUrl": 1,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "slow-timeout",
+      "first": {
+        "ok": false,
+        "name": "HarnessTimeout",
+        "message": "harness-timeout",
+        "ms": 1003
+      },
+      "secondWhilePendingOrAfter": {
+        "ok": true,
+        "value": 1,
+        "ms": 1998
+      },
+      "requestsSameUrl": 1
+    }
+  ]
+}

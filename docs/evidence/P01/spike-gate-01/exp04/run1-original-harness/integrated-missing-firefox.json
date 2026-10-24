@@ -1,0 +1,92 @@
+{
+  "kind1": "missing-asset",
+  "step1": "stp_method",
+  "checked1": true,
+  "kind2": "missing-asset",
+  "runtimeLog": [
+    {
+      "gid": "g-stp_store",
+      "tier": 0,
+      "ok": false,
+      "kind": "missing-asset",
+      "errorName": "Error",
+      "errorMessage": "Unable to preload CSS for http://127.0.0.1:4173/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.388caee6d610.css",
+      "ms": 5
+    },
+    {
+      "gid": "g-stp_store",
+      "tier": 1,
+      "ok": false,
+      "kind": "missing-asset",
+      "errorName": "TypeError",
+      "errorMessage": "error loading dynamically imported module: http://127.0.0.1:4173/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js?retry=1",
+      "ms": 4
+    }
+  ],
+  "hits": [
+    {
+      "t": 1792824533267,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "",
+      "rule": "404",
+      "status": 404
+    },
+    {
+      "t": 1792824533267,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "rule": "404",
+      "status": 404
+    },
+    {
+      "t": 1792824533301,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "",
+      "rule": "404",
+      "status": 404
+    },
+    {
+      "t": 1792824533301,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "rule": "404",
+      "status": 404
+    },
+    {
+      "t": 1792824533304,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "",
+      "rule": "404",
+      "status": 404
+    },
+    {
+      "t": 1792824533366,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.388caee6d610.css",
+      "query": "",
+      "rule": "404",
+      "status": 404
+    },
+    {
+      "t": 1792824533366,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "?retry=1",
+      "rule": "404",
+      "status": 404
+    },
+    {
+      "t": 1792824533368,
+      "method": "GET",
+      "path": "/r/rel_4xajnf3dzfyfv777uhbkvtk4n2/assets/g-stp_store.c75b7877dd22.js",
+      "query": "",
+      "rule": "404",
+      "status": 404
+    }
+  ]
+}

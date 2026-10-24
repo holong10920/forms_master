@@ -1,0 +1,125 @@
+{
+  "browser": "webkit",
+  "version": "27.2",
+  "scenarios": [
+    {
+      "id": "http404",
+      "first": {
+        "ok": false,
+        "name": "TypeError",
+        "message": "Importing a module script failed.",
+        "ms": 4
+      },
+      "retrySameUrl": {
+        "ok": true,
+        "value": 1,
+        "ms": 2
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 1
+      },
+      "requestsSameUrl": 2,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "http503",
+      "first": {
+        "ok": false,
+        "name": "TypeError",
+        "message": "Importing a module script failed.",
+        "ms": 3
+      },
+      "retrySameUrl": {
+        "ok": true,
+        "value": 1,
+        "ms": 2
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 3
+      },
+      "requestsSameUrl": 2,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "reset-once",
+      "first": {
+        "ok": true,
+        "value": 1,
+        "ms": 4
+      },
+      "retrySameUrl": {
+        "ok": true,
+        "value": 1,
+        "ms": 0
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 3
+      },
+      "requestsSameUrl": 2,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "reset-persistent",
+      "first": {
+        "ok": true,
+        "value": 1,
+        "ms": 7
+      },
+      "retrySameUrl": {
+        "ok": true,
+        "value": 1,
+        "ms": 0
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 3
+      },
+      "requestsSameUrl": 4,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "evalthrow",
+      "first": {
+        "ok": false,
+        "name": "Error",
+        "message": "spike-eval-throw",
+        "ms": 2
+      },
+      "retrySameUrl": {
+        "ok": false,
+        "name": "Error",
+        "message": "spike-eval-throw",
+        "ms": 0
+      },
+      "retryWithQuery": {
+        "ok": true,
+        "value": 1,
+        "ms": 2
+      },
+      "requestsSameUrl": 1,
+      "requestsWithQuery": 1
+    },
+    {
+      "id": "slow-timeout",
+      "first": {
+        "ok": false,
+        "name": "HarnessTimeout",
+        "message": "harness-timeout",
+        "ms": 1001
+      },
+      "secondWhilePendingOrAfter": {
+        "ok": true,
+        "value": 1,
+        "ms": 2002
+      },
+      "requestsSameUrl": 1
+    }
+  ]
+}

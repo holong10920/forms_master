@@ -1759,3 +1759,53 @@ Ghi tại commit này để có mốc thời gian trước khi spike chạy. Chi
 | 03 | build khách không resolve được `./design` (build fail đúng lý do); build design resolve được; server marker không vào build khách; mỗi negative fixture làm guard tương ứng fail đúng lý do và bản control pass | guard không fail với negative fixture, hoặc fail vì lý do khác, hoặc build khách resolve được design | — |
 | 04 | với mỗi engine: ghi được hành vi của 6 kịch bản; retry bậc 1 (URL có query) được phân loại đúng là hoạt động/không hoạt động; reload về đúng release giữ được dữ liệu không-PII đã lưu; chunk release cũ tải đúng | spike không phân biệt được các kịch bản, hoặc thiết kế §15.3 sai ở điểm cốt lõi (ví dụ query-retry không tạo request mới trên cả 3 engine) — ghi FAIL cho giả định đó | engine không chạy được trong môi trường |
 | 05 | thu được T1/T2/T3, byte, request, cold/warm với throttling ghi rõ cho cả hai form | — (không có ngưỡng; chỉ đo) | không đo được một mốc nào đó → ghi rõ mốc thiếu |
+
+## Session 3: SPIKE-GATE-01 đã chạy (2026-10-24)
+
+### Kết quả (Claude; chờ user review)
+
+- Báo cáo: `docs/discovery/P01_SPIKE_GATE_01_REPORT.md`. Evidence: `docs/evidence/P01/spike-gate-01/`. Source spike: `spikes/compiler-feasibility/` (branch local `spike/compiler-feasibility`; **chưa commit** — hook yêu cầu user duyệt từng lần commit).
+- Đánh giá theo tiêu chí đã chốt ở commit `22ecfaf`:
+  - EXP-01 **PASS**.
+  - EXP-02 **PASS** (thêm: đổi thư mục trong container và macOS/Linux arm64 giống hệt).
+  - EXP-03 **FAIL** (hai điều kiện đã chốt): import tương đối vượt qua `exports` (design và `.py`); L3 và quét canary bắt đúng.
+  - EXP-04 **PASS**; giả định "reload luôn phục hồi" FAIL trên WebKit (Playwright 27.2, nguyên nhân chưa rõ). "Bộ đếm retry không đủ" chỉ là suy luận, chưa đo.
+- Consistency review độc lập sau spike phát hiện các chỗ tuyên bố quá mức và mâu thuẫn; đã sửa trong báo cáo, spec #3 rev 2 (§25.3), spec #2 rev 2.4, spec #1 rev 3.3 (C11 `groups`, EC-36).
+  - EXP-05 **PASS** (lab-only).
+- Minh bạch: EXP-04 lần 1 có lỗi harness (reset một lần bị trình duyệt tự gửi lại; rule lỗi khớp cả CSS); evidence lần 1 giữ nguyên. EXP-05 lần 1 đo CLS 0.28 do runtime spike gỡ shell muộn; evidence giữ nguyên.
+- Thay đổi thiết kế: spec #3 rev 2 (§5.4/§5.5 ma trận stage, L1b, `hashCharacters: 'hex'`, retry token duy nhất, gỡ shell cùng commit, giới hạn đo) và spec #2 rev 2.4 (L1b).
+- OPEN mới: OD3-03 (prefetch trên WebKit), OD3-04 (package manager). OD3-01: khuyến nghị chọn Vite 8.3.5 + Rolldown 1.2.15.
+
+### OPEN
+
+- User review kết quả spike và spec #3 rev 2; quyết OD3-01, OD3-03, OD3-04; duyệt commit (spike branch và docs). → đã review ở "SPIKE-GATE-01 review".
+
+## Session 3: SPIKE-GATE-01 review (2026-10-24) → ADR-041 (cập nhật), ADR-043..045
+
+### CONFIRMED (user)
+
+- **Duyệt hai commit local cụ thể:** commit 1 trên `spike/compiler-feasibility` (source spike, fixture giả lập, test, script, evidence đã che path) → `b3070d2`; commit 2 trên `p00-discovery` (báo cáo, evidence cần thiết, spec #1/#2/#3, ADR, notes, checklist, traceability, handoff). Kiểm branch, status, staged diff, secret, file nội bộ, dữ liệu thật, đường dẫn local trước mỗi commit; không stage source spike vào branch docs; không tắt hook; hook từ chối thì ghi blocker. Không merge spike branch. Không push, không AWS write. Duyệt này chỉ cho hai commit, không phải quyền bypass hook về sau.
+- **Giữ kết quả spike:** EXP-01 PASS; EXP-02 PASS trong phạm vi môi trường đã thử; EXP-03 FAIL; EXP-04 PASS theo acceptance criteria nhưng có limitation với WebKit và evaluation failure; EXP-05 PASS, lab-only. Không nâng tuyên bố ngoài evidence; spike PASS ≠ production DONE.
+- **OD3-01 → ADR-041 CONDITIONALLY APPROVED:** Vite 8.3.5 + Rolldown 1.2.15 là baseline đã kiểm chứng cho compiler design; trước khi chốt implementation: release-store resolution, L1b, positive/negative fixture, build graph/artifact isolation, không bỏ qua import tương đối, conditional exports không là boundary duy nhất. Không đánh dấu EXP-03 PASS.
+- **OD3-03 → ADR-043 ACCEPTED FOR P0:** WebKit có thể tải lại chunk đã prefetch; ghi limitation và overhead; không hứa reuse hoàn hảo; không ảnh hưởng correctness; không suy ra Safari thật giống Playwright WebKit; đánh giá lại nếu plugin lớn hơn nhiều. Evaluation failure: không khẳng định nguyên nhân; không tự reload làm mất dữ liệu; recovery người dùng thấy được, giữ pinned release.
+- **OD3-04 → ADR-044:** pnpm ưu tiên cho P02, chưa khóa version; danh sách kiểm (fixture lỗi npm, workspace, frozen lockfile, React singleton, pin `packageManager`, không floating dependency). Không suy ra mọi npm đều lỗi.
+- **Node.js → ADR-045:** Node 20 đã EOL; giữ image Node 20 chỉ để tái hiện spike; P02 ưu tiên Node 24 LTS, pin digest, chạy lại tái lập và isolation; không sửa evidence gốc.
+- **Risk giữ OPEN:** L1b, release-store resolution, tái lập khác kiến trúc, Safari thật, phục hồi lỗi evaluate trên WebKit, isolation của preset Motion, cache CDN/browser thật, OD2-08/09 và các decision còn mở.
+- **Tiếp theo:** cập nhật CURRENT_STATUS/CONTEXT_HANDOFF với SHA thật; giữ spec #3 rev 2 ở trạng thái cần final/cross-spec review; đưa verification gate vào traceability; brainstorm **spec #4 — Admin Form Builder UX & Architecture** từ góc nhìn Business Editor (tạo form không cần code, kéo thả field/step, conditional logic trực quan, cấu hình validation, Plugin Inspector, preview, quản lý draft/published revision, cảnh báo khi thay đổi ảnh hưởng dependency). Không implementation chính thức. G1 NOT APPROVED, G9/G10 BLOCKED.
+
+### Đã thực hiện (Claude)
+
+- ADR-041 cập nhật; ADR-043, ADR-044, ADR-045. Spec #3 rev 2: §0.1, §12.1 (Node), §22, §26 (cần final/cross-spec review). Traceability: VG-01..VG-10.
+- Commit 1: `b3070d2` (spike branch). Commit 2: xem `git log` của `p00-discovery`.
+
+## Session 3: Spec #4, Admin Form Builder UX & Architecture (bắt đầu 2026-10-24)
+
+> Bối cảnh ràng buộc (không hỏi lại):
+> - ADR-008 (người dùng; no-code; người sửa ≠ người publish), ADR-004 (vertical slice; undo/redo P1 nhưng builder state là immutable document + typed commands), ADR-009/011 (shared block, template, identity), ADR-015 (validation UX), ADR-019..021 (schema, exports, classification), ADR-033 (design binding/inspector), ADR-037/038 (preview vs release, CSR).
+> - Spec #1 rev 3.3 (DSL, rule AST, navigation, derived state), spec #2 rev 2.4 (catalog, design binding, Dev Preview, status ledger), spec #3 rev 2 (release, preview không phải release).
+> - Ưu tiên của user: góc nhìn Business Editor — tạo form không cần code; kéo thả field và step; conditional logic qua visual editor; cấu hình validation; Plugin Inspector; preview; quản lý draft/published revision; cảnh báo khi thay đổi ảnh hưởng dependency.
+> - OPEN liên quan từ spec #1: OD-03 (cách biểu diễn rule trong UI), OD-11 (ngôn ngữ của Admin), OD-13 (block trải nhiều step).
+
+### OPEN
+
+- **Q4-1:** Hãy kể (hoặc hình dung) buổi làm việc đầu tiên của một Business Editor khi được giao tạo form thu mua PC mới trên Admin: họ là ai, họ mở Admin ra và làm những gì theo thứ tự, và tới lúc nào thì bạn coi là họ đã thành công?

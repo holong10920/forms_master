@@ -34,7 +34,7 @@
 | Nhóm req | IDs | Design | Status |
 |---|---|---|---|
 | Schema & workflow | ARCH-01..10 | `docs/superpowers/specs/2026-10-23-form-schema-workflow-design.md` rev 3.1 §6–§16, §19 (PROPOSED; design direction ADR-017..022; chưa duyệt hoàn toàn). ARCH-09/ARCH-10 chi tiết → `docs/superpowers/specs/2026-10-24-plugin-contracts-capability-registry-design.md` rev 2 §5–§13 (PROPOSED; ADR-023..035). | TODO (design đang review) |
-| Compiler & isolation | BUILD-01..10 | Contract isolation (BUILD-02/04/05/06/08): spec #2 rev 2 §9–§11 (PROPOSED). Bundling, release, reproducible build: `docs/superpowers/specs/2026-10-24-compiler-bundle-release-design.md` rev 1 (PROPOSED; ADR-036..040). Bundling, Release Manifest: spec #3 (P01-04). | TODO |
+| Compiler & isolation | BUILD-01..10 | Contract isolation (BUILD-02/04/05/06/08): spec #2 rev 2 §9–§11 (PROPOSED). Bundling, release, reproducible build: `docs/superpowers/specs/2026-10-24-compiler-bundle-release-design.md` rev 2 (PROPOSED; ADR-036..042). Bằng chứng mức spike (không phải implementation): `docs/evidence/P01/spike-gate-01/`. Bundling, Release Manifest: spec #3 (P01-04). | TODO |
 | Motion | MOTION-01..07 | — (P01-06) | TODO |
 | Backend & publishing | API-01..10 | — (P01-05) | TODO |
 | Admin UX | UX-01..05, UX-07 | — (P01-03) | TODO |
@@ -49,3 +49,21 @@
 | Bảo mật | SEC-01..08 | TODO (threat model ở P01-07) |
 | CI/CD | CICD-01..10 | TODO (CD bị gate G10) |
 | Definition of Done | DOD-01..10 | TODO |
+
+## Verification gates (từ SPIKE-GATE-01, ADR-041..045)
+
+Các mục spike chưa chứng minh hoặc chưa kiểm. **OPEN** cho tới khi có evidence; không đóng bằng suy luận. Chạy ở verification đầu của implementation (sau G1) hoặc tại P02 như ghi.
+
+| ID | Kiểm chứng | Nguồn | Khi nào | Status |
+|---|---|---|---|---|
+| VG-01 | Compiler resolve browser facet từ **release store** theo FBK + hash (không từ workspace `node_modules`) | ADR-041, spec #2 §9.4, spec #3 §9 | trước khi chốt implementation compiler | OPEN |
+| VG-02 | **L1b** resolve allowlist trong bundler: positive fixture (contract, Motion của core, module ảo) build được; negative fixture (import tương đối design/server/`.py`/fixtures) bị từ chối đúng lý do; control pass | ADR-041, spec #2 §11.2 rev 2.4, spec #3 §9/§10 | như trên | OPEN |
+| VG-03 | Build graph + artifact isolation trên compiler thật, gồm import tương đối; conditional exports không là boundary duy nhất | ADR-041, spec #3 §19.1 (C15) | như trên | OPEN |
+| VG-04 | pnpm: tái hiện lỗi optional-peer của npm 10.8.2 bằng fixture; pnpm cài fixture thành công; resolve workspace; frozen lockfile; React peer singleton; pin `packageManager` | ADR-044 | P02 | OPEN |
+| VG-05 | Node.js 24 LTS: image pin digest; tương thích Vite/Rolldown/plugin; chạy lại tái lập (A/B) và isolation; ghi khác biệt với spike | ADR-045 | P02 | OPEN |
+| VG-06 | Tái lập khác kiến trúc CPU (ví dụ x86_64 vs arm64) | spec #3 §12, §21 | khi có runner | OPEN |
+| VG-07 | Safari thật (không phải Playwright WebKit): prefetch reuse, retry `import()` | ADR-043 | trước G1 hoặc khi có thiết bị | OPEN |
+| VG-08 | Phục hồi lỗi evaluate trên WebKit: UI phục hồi người dùng thấy được, giữ pinned release, không tự reload | ADR-043, spec #3 §15.3 | verification runtime | OPEN |
+| VG-09 | Isolation của preset Motion theo từng form (preset chỉ có trong form dùng nó) | spike limitation EXP-05, spec #3 §7.3–§7.4, spec #6 | sau spec #6 | OPEN |
+| VG-10 | Hành vi cache CDN và trình duyệt thật (stable entry, immutable asset, activation) | spec #3 §16, spec #5 | sau G10 | OPEN |
+| — | OD2-08, OD2-09 và các decision còn mở của spec #1/#2 | spec #2 §22, spec #1 §21 | theo hạn từng mục | OPEN |
