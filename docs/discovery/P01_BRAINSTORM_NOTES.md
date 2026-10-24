@@ -1350,3 +1350,156 @@ Mọi thứ phụ thuộc vào câu trả lời lúc runtime **không** phải l
 - **Q3-1:** Khi một form được publish, artifact phục vụ khách nên **tự chứa hoàn toàn** (mỗi form có engine, React và plugin riêng trong thư mục của nó; rollback chỉ là đổi con trỏ) hay các form **dùng chung một lớp runtime** (engine/React) được cache chung giữa nhiều form/site?
   - Ảnh hưởng: cache của trình duyệt giữa các form, cách chứng minh isolation (INV-F1, INV-F6), rollback có kéo theo runtime chung không, React singleton, PERF-02.
   - Phỏng đoán của Claude (chưa phải đề xuất chính thức): P0 tự chứa hoàn toàn để bằng chứng BUILD-04/06 và rollback đơn giản; runtime dùng chung chỉ xem xét sau khi có số đo.
+  - → đã trả lời ở Spec #3 Answer #1.
+
+## Session 3: Spec #3 Answer #1 (2026-10-24), self-contained form release → ADR-036
+
+### CONFIRMED (user)
+
+- **Q3-1: APPROVED AS DESIGN DIRECTION — Self-contained Form Release cho P0.**
+  - Mỗi form release độc lập về deployment, runtime dependency và rollback; vẫn có code splitting, lazy loading, internal chunk.
+  - Không có mutable shared runtime giữa các form ở P0.
+  - Yêu cầu: asset bất biến riêng cho release; Capability Lock chính xác; import tường minh do compiler sinh; bundle isolation cho Sports, PC và Motion-none; không bundle server/design facet; browser cache và tương thích revision cũ; rollback không cần rebuild; đo bundle size và runtime performance từ artifact thật; không tự kết luận isolation PASS khi chưa có bằng chứng.
+- Nhắc lại: OD2-08/09 vẫn OPEN, giải quyết trước spec #5. G1 NOT APPROVED, G9/G10 BLOCKED. Không code, không push, không AWS write.
+
+### OPEN
+
+- **Q3-2:** Khách đang điền dở form PC ở rev 7 thì Editor publish rev 8 (hoặc rollback về rev 6). Khi khách bấm 次へ tiếp trong tab đang mở, và khi khách reload trang, khách nên ở revision nào?
+  - Ảnh hưởng: entry URL ổn định và con trỏ revision hiện hành, URL bất biến theo revision, thời gian giữ asset cũ (lazy chunk của tab đang mở), cache header, draft gắn revision (ADR-012, spec #1 §13), supported set và grace window (spec #2 §10.3, OD2-09).
+  - Phỏng đoán của Claude: tab đang mở tiếp tục rev 7 tới khi submit; reload có draft rev 7 còn được hỗ trợ thì tiếp tục rev 7 qua URL bất biến của revision, nếu không thì báo nhẹ nhàng và bắt đầu lại trên rev 8; khách mới luôn nhận revision hiện hành.
+  - → đã trả lời ở Spec #3 Answer #2.
+
+## Session 3: Spec #3 Answer #2 (2026-10-24), revision pinning, URL và recovery → ADR-037
+
+### CONFIRMED (user)
+
+- **Decision: Session-pinned Revision + Stable Entry URL + Immutable Release URL.** APPROVED AS DESIGN DIRECTION cho spec #3 (chưa duyệt toàn spec, chưa G1).
+- **Active vs Supported:**
+  - Active Release: release phân phối cho khách mới.
+  - Supported Release: release backend vẫn chấp nhận xử lý.
+  - Retired/Unsupported Release: backend không còn hỗ trợ.
+  - Suspended/Revoked Release: bị hạn chế vì security hoặc operational policy.
+  - Inactive ≠ Unsupported. Rollback chỉ đổi Active Release, không mặc nhiên revoke các release publish sau đó.
+- **Session pinning:** mở PC rev 7 → pin `formId`, `publishedRevision`, `releaseId`, identity của Capability Lock. Transition theo rev 7. Publish rev 8 hay rollback rev 6 không làm tab đang mở đổi workflow. Backend validate submit theo definition và lock tin cậy của rev 7. Rev 7 còn supported → khách hoàn thành được; bị suspend hoặc không còn supported → backend từ chối theo policy rõ ràng. Không chuyển revision chỉ vì active pointer đổi. Runtime state và active pointer độc lập.
+- **Hai loại URL:**
+  - Stable Entry URL: cho landing page; khách mới nhận Active Release; phát hiện draft cũ hợp lệ để đề xuất Resume; không nhúng dữ liệu khách vào URL.
+  - Immutable Release URL: trỏ tới một release artifact cụ thể; không đổi nội dung sau publish; phục vụ reload, deep link, tab cũ, dynamic import; chỉ tồn tại khi release còn được phân phối theo retention policy.
+  - URL chứa revision **không** đủ để định danh artifact; release identity phải phân biệt được nhiều artifact release nếu cần.
+  - Phải có resolver/bootstrap cụ thể để **không bao giờ** xảy ra: có draft rev 7 → mở stable URL → tải runtime rev 8 → runtime rev 8 hydrate draft rev 7. Được dùng bootstrap nhẹ quyết định release trước khi khởi tạo runtime; **không** đưa mọi version engine vào bootstrap.
+- **Publish/rollback:** publish rev 8 → active pointer chuyển theo activation protocol; session rev 7 không bị chuyển; artifact rev 7 không bị xóa; backend giữ compatibility theo support policy. Rollback rev 6 → pointer về rev 6; khách mới nhận rev 6 sau khi activation/caching có hiệu lực; session rev 7/8 tiếp tục nếu còn supported; không rebuild rev 6; không migrate draft rev 7/8 sang rev 6. Không hứa mọi CloudFront edge cập nhật tức thời; phải mô tả cache propagation và consistency model.
+- **Draft recovery:** tuân thủ chính sách đã duyệt (chỉ dữ liệu được phép; không PII bền vững trong browser ở P0). Metadata draft có release identity đã pin. Reload có draft hợp lệ → resume đúng release; không có draft → active release. Không silently migrate. PII mất thì nhập lại. Re-evaluate visibility/validation trước khi khôi phục step; không khôi phục mù `currentStep`. Draft không tương thích hoặc release không còn supported: thông báo rõ; **không âm thầm xóa draft**; đề xuất Start Over trên **current active release**; không đoán mapping; không hứa khôi phục PII. Xét trường hợp hai tab cùng form, tránh draft collision.
+- **Old assets retention:** không xóa asset chỉ vì release không còn active. Xét: draft TTL, open-session grace window, backend compatibility window, dynamic import/lazy chunk, browser/CDN cache, security incident, rollback eligibility, storage/cleanup. Phân biệt: không còn cho submit · asset không còn được phục vụ · giữ để rollback · security quarantine (các thời điểm có thể khác nhau). OD2-09 vẫn OPEN; không tự chọn con số trong spec #3.
+- **Backend enforcement:** frontend không quyết định support. Backend kiểm: form identity, trusted published revision, Capability Lock, runtime compatibility, release support status, security policy, idempotency. Không tin `revision`/`releaseId` client gửi như bằng chứng authorization. Không còn supported: không xử lý theo bản mới, không làm mất dữ liệu đã nhập, lỗi có contract rõ, UI hướng dẫn. Phân biệt incompatible / temporarily unavailable / permanently retired / security suspended; **không gom mọi lỗi thành 503**.
+- **Test matrix** tối thiểu 14 case (ở dưới), mỗi case có expected behavior và nguồn sự thật.
+- **Governance:** ghi notes + ADR; đồng bộ assumption ở spec #1 (draft recovery), spec #2 (lock, backend compatibility), spec #3, spec #5 (publishing/activation: pending detailed design). Không tự duyệt OD2-08/09. Cho phép local documentation commit sau khi kiểm staged diff, secret, file nội bộ. Không push, không AWS write. G1 NOT APPROVED, G9/G10 BLOCKED. Sau đó hỏi câu tiếp theo của spec #3.
+
+### PROPOSAL (Claude): release resolution, phiên 3. Chờ review, NOT approved. Sẽ chuyển vào spec #3.
+
+**S3-P01 Release identity.**
+- `releaseId` định danh **một artifact đã build**, khác `revision`. Dạng: `rel_<formId>_r<revision>_<contentHash12>`; `contentHash` là hash của Release Manifest (gồm file inventory), nên hai lần build khác nhau của cùng revision có hai `releaseId` khác nhau.
+- Backend giữ **release record** tin cậy: `{ releaseId, formId, revision, siteId, releaseManifestHash, capabilityLockHash, supportStatus, securityStatus, retention, createdAt }`. Client gửi `releaseId` chỉ để backend **tra cứu**; mọi thông tin khác lấy từ record, và record phải khớp `formId` + `revision` của request.
+
+**S3-P02 URL (minh họa; hosting thật thuộc spec #5, sau G10).**
+
+| URL | Nội dung | Cache |
+|---|---|---|
+| Stable Entry `/f/{site}/{form}/` | `entry.html` nhỏ: bootstrap inline + `activeReleaseId` của lần activation | mutable: browser `no-cache`; CDN TTL ngắn `T_edge` và/hoặc invalidation khi activation |
+| Immutable Release `/r/{releaseId}/` | `index.html` của release (nhúng `releaseId`, IR) | bất biến: `max-age` dài, `immutable` |
+| Assets `/r/{releaseId}/assets/{name}.{hash}.{ext}` | JS/CSS/chunk lazy của release | bất biến |
+| Status API (backend) | `GET /api/forms/{formId}/releases/{releaseId}/status` | không cache (hoặc rất ngắn) |
+
+**S3-P03 Bootstrap/resolver.** Inline trong `entry.html`, **không có engine, không có React**, chỉ biết `formId` và `activeReleaseId`. Kích thước đo trên artifact thật (ADR-005).
+1. Đọc metadata draft của form trong browser storage (chỉ metadata, không PII): `{ releaseId, revision, sessionId, savedAt, draftFormat }`.
+2. Không có draft, hoặc draft của đúng `activeReleaseId` → điều hướng/tải runtime của active release.
+3. Draft của release khác `R_d` → gọi status API của `R_d` (timeout ngắn):
+   - `supported` → hiện lựa chọn (HTML tĩnh, tiếng Nhật): 「前回の入力を再開する」 / 「最初からやり直す」. Resume = **điều hướng toàn trang** sang `/r/{R_d}/`; runtime active không bao giờ được khởi tạo trong lần tải này.
+   - `retired` / `suspended` / `incompatible` → thông báo rõ lý do; nút 「最初からやり直す」 tải active release; draft cũ **không bị xóa ngầm** (giữ tới TTL, có nút xóa tường minh).
+   - lỗi mạng / timeout → 「確認できませんでした」 + 再試行 + Start Over; **không** tải active runtime kèm draft.
+4. Start Over tạo draft mới cho active release; draft cũ giữ nguyên tới TTL hoặc tới khi khách xóa.
+- **INV-R1 (phòng thủ thứ hai):** runtime chỉ hydrate draft có `releaseId` **bằng** `releaseId` nhúng trong chính nó. Lệch → không hydrate, chuyển về stable entry. Nhờ vậy dù bootstrap lỗi, runtime rev 8 cũng không thể hydrate draft rev 7.
+- **INV-R2:** Immutable Release URL **không** khởi tạo session mới cho release không active. Mở `/r/{R}/` mà không có draft/session của `R` → chuyển về stable entry (khách mới luôn nhận active). Ngoại lệ: preview/QA có token ký (P1).
+
+**S3-P04 Session pinning trong tab.** Runtime giữ `releaseId` trong bộ nhớ; mọi lazy chunk tải từ `/r/{releaseId}/assets/…` (đường dẫn tương đối của release). `sessionStorage` giữ `{ releaseId, sessionId }`, nên reload trong cùng tab đi qua bootstrap và resume đúng release (nếu còn supported). Submit gửi `{ formId, revision, releaseId, values, idempotencyKey }`.
+
+**S3-P05 Hai tab cùng form.**
+- Mỗi tab có `sessionId` riêng; draft lưu theo `formId + sessionId` (không ghi đè lẫn nhau). Không merge giữa các tab.
+- `BroadcastChannel` báo tab khác đang mở form (thông tin, không khóa).
+- Stable entry có nhiều draft → đề xuất draft mới nhất; các draft khác giữ tới TTL.
+- Một tab submit thành công → báo qua `BroadcastChannel`; tab kia hiện 「別のタブで送信が完了しました」 và hỏi trước khi cho submit tiếp. **Giới hạn:** đây là best-effort phía client; hai `idempotencyKey` khác nhau vẫn tạo hai submission nếu khách cố ý xác nhận gửi lại. P0 không dedupe theo nội dung (không dùng PII).
+
+**S3-P06 Trạng thái release và các mốc thời gian.** Bốn chiều độc lập:
+
+| Chiều | Giá trị | Ai quyết | Ghi chú |
+|---|---|---|---|
+| Activation | `active` / `inactive` | publish/rollback | đúng một active mỗi form |
+| Support | `supported` / `retired` | support policy (OD-09, OD2-09) | inactive ≠ retired |
+| Security | `normal` / `suspended` | Platform Security (ADR-032, ADR-035) | suspended chặn submit ngay |
+| Asset retention | `served` / `withdrawn` / `archived` / `quarantined` | retention policy, security | archived = không phục vụ nhưng giữ để rollback/audit |
+
+Ràng buộc (không có con số cố định, chờ OD2-09/OD-08):
+- `supportEndsAt ≥ deactivatedAt + max(G, T_edge_max)`: mọi release từng có thể được cache phục vụ như active phải còn supported đủ lâu.
+- `assetsWithdrawnAt ≥ supportEndsAt`: còn nhận submit thì asset (kể cả lazy chunk) còn phục vụ.
+- Draft của release đã `withdrawn` vẫn được bootstrap xử lý (status API trả `retired`), không cần asset.
+- Rollback tới `R` yêu cầu: `R` không `suspended`/`quarantined`; asset `served` hoặc khôi phục được từ `archived`; precheck adapter (spec #2 §10.4); `R` được đặt lại `supported` nếu đã `retired` (thao tác tường minh, có audit).
+- `quarantined` (security): asset có thể bị gỡ ngay; mọi tab đang mở bị chặn ở backend (submit/query); bootstrap báo suspended.
+
+**S3-P07 Consistency model của active pointer.**
+- **Nguồn sự thật** là active pointer record ở backend (`formId → { releaseId, pointerVersion }`, đổi bằng compare-and-swap). `entry.html` là **bản chiếu** của record đó.
+- Asset và release HTML bất biến → nhất quán mạnh theo URL.
+- Stable entry nhất quán **cuối cùng (eventual)**: sau activation, một khách có thể còn nhận release active trước đó trong tối đa `T_edge_max` (TTL hoặc thời gian invalidation lan tới mọi edge, cộng cache trình duyệt nếu có). Hai request tới hai edge khác nhau có thể thấy hai release khác nhau. **Không** đảm bảo monotonic.
+- An toàn vì: mọi session pin release của nó; release vừa rời active vẫn supported (ràng buộc ở S3-P06). Security suspend không dựa vào CDN: backend chặn ngay, bootstrap/runtime hiển thị khi gọi status hoặc submit.
+
+**S3-P08 Activation protocol (khung; chi tiết spec #5).**
+1. Ghi mọi file immutable của release, kiểm hash từng file.
+2. Tạo release record (`inactive`, `supported`).
+3. Deploy gate / adapter precheck (spec #2 §10.4).
+4. **Đổi active pointer bằng CAS** (`pointerVersion` + 1). Đây là bước duy nhất làm release thành active.
+5. Sinh lại `entry.html` từ pointer record và ghi ra.
+6. Invalidate CDN cho đường dẫn entry (sau G10).
+7. Xác minh: tải stable URL tới khi thấy `releaseId` mới (giới hạn số lần).
+- Gián đoạn ở 1–3: release mới chưa active, không ảnh hưởng khách; dọn dẹp hoặc chạy lại. Gián đoạn sau 4: backend đã trỏ release mới nhưng `entry.html` có thể còn cũ → **reconciler** so pointer record với `entry.html` đang phục vụ và ghi lại cho khớp. Rollback dùng cùng protocol, bỏ bước 1 (không rebuild).
+
+**S3-P09 Error contract** (mã lỗi ổn định; HTTP status đề xuất, chốt ở spec #5).
+
+| Loại | Mã | HTTP | `retryable` | UI |
+|---|---|---|---|---|
+| Incompatible: trạng thái client không xử lý được bằng release tin cậy (release không thuộc form/revision, `draftFormat` lạ, lock lệch) | `E-RELEASE-INCOMPATIBLE` | 409 | không | giải thích; Start Over trên active; draft giữ |
+| Temporarily unavailable: adapter/backend tạm không dùng được | `E-CAPABILITY-UNAVAILABLE` | 503 + `Retry-After` | có | 再試行; giữ state |
+| Permanently retired | `E-RELEASE-RETIRED` | 410 | không | giải thích; Start Over trên active; draft giữ |
+| Security suspended (release hoặc capability) | `E-RELEASE-SUSPENDED`, `E-CAPABILITY-BLOCKED` | 423 | không (tới khi incident xử lý xong) | giải thích, không hứa thời điểm; giữ state |
+| Validation | (spec #1 V-08) | 422 | không | về step lỗi |
+| Idempotency key dùng lại với payload khác | `E-IDEMPOTENCY-KEY-REUSED` | 409 | không | nội bộ (engine tạo key mới) |
+
+Mọi lỗi kèm `{ code, retryable, releaseId, userAction }`; không chứa PII.
+
+**S3-P10 Test matrix (TM-R01..R14).**
+
+| # | Tình huống | Kết quả mong đợi | Nguồn sự thật |
+|---|---|---|---|
+| R01 | Publish rev 8 khi tab đang mở rev 7 | tab tiếp tục rev 7, transition theo rev 7, submit được nếu rev 7 supported | session pin (runtime) + release record rev 7 |
+| R02 | Rollback rev 6 khi tab đang mở rev 7 | như R01; rev 7 không bị revoke | session pin + release record rev 7 |
+| R03 | Reload với draft rev 7 hợp lệ (rev 7 vẫn active) | bootstrap tải rev 7, khôi phục theo NR-08/NR-09 | draft metadata + `activeReleaseId` |
+| R04 | Reload không có draft | tải active release | `entry.html` (bản chiếu pointer) |
+| R05 | Resume draft rev 7 khi rev 8 active | đề xuất Resume; Resume → điều hướng `/r/rel_…r7…/`; runtime rev 8 không khởi tạo | status API (`supported`) + INV-R1 |
+| R06 | Resume khi rev 7 retired | thông báo, Start Over trên active, draft giữ | status API (`retired`) |
+| R07 | Resume khi rev 7 security-suspended | thông báo suspended, không tải rev 7; Start Over chỉ nếu active không bị suspend | status API (`suspended`) |
+| R08 | Tab rev 7 lazy-load chunk sau khi rev 8 active | chunk tải từ `/r/{rev7}/assets/…` thành công | asset retention (`served`) |
+| R09 | CDN/browser còn cache `entry.html` cũ | khách nhận release active trước đó, session pin release đó, submit được | ràng buộc `supportEndsAt` (S3-P06) |
+| R10 | Submit đúng lúc trạng thái rev 7 đổi | backend quyết theo trạng thái tại thời điểm xử lý (đọc trong cùng transaction); trước thay đổi → nhận; sau → 410/423; không ghi nửa chừng | release record trong transaction submit |
+| R11 | Hai tab cùng form | hai draft riêng theo `sessionId`; báo tab khác; submit ở tab A → tab B được cảnh báo | browser storage + `BroadcastChannel` (best-effort) |
+| R12 | Reload ở step không còn hợp lệ, PII mất | về `firstIncomplete` kèm giải thích (NR-08/NR-09, E9) | engine `derivedPath(values)` |
+| R13 | Mở trực tiếp immutable URL cũ | có draft/session của release đó và còn supported → resume; không có → chuyển về stable entry | INV-R2 + status API |
+| R14 | Publish/rollback gián đoạn giữa các bước | trước bước 4: không đổi gì với khách; sau bước 4: reconciler đưa `entry.html` khớp pointer | active pointer record (CAS) |
+
+**S3-P11 Pending cho spec #5 (Publishing/Activation, chưa thiết kế chi tiết):** lưu trữ release record và pointer; status API; activation protocol và reconciler; CDN invalidation và cache header thật (sau G10); retention job; HTTP status cuối cùng của S3-P09; lưu draft metadata và TTL (OD-08); grace window (OD2-09); số `T_edge_max` theo hạ tầng.
+
+### Đã thực hiện (Claude)
+
+- ADR-037 (session-pinned revision + stable entry URL + immutable release URL).
+- Đồng bộ: spec #1 rev 3.2 (§9 `session`, §13 draft và submit của revision cũ), spec #2 rev 2.1 (§10.3 active ≠ supported, §10.6 phân loại lỗi, §19 I-19/I-22). Spec #3 chưa có tài liệu; S3-P01..P11 sẽ chuyển vào spec #3.
+
+### OPEN
+
+- **Q3-3:** Khi khách mở form trên điện thoại với mạng chậm, bạn muốn step đầu tiên hiện ra ngay từ HTML tĩnh trước khi JavaScript tải xong (prerender lúc build), hay chấp nhận một khung chờ nhẹ cho tới khi runtime khởi động (render hoàn toàn phía client)?
+  - Ảnh hưởng: LCP/INP (PERF-03), độ phức tạp của compiler (render React lúc build, hydration), tương tác với bootstrap/resolver (HTML prerender của active release không được hiện cho khách có draft của release khác), A11y/IME khi trang hiện trước lúc tương tác được, kích thước `entry.html`.
+  - Phỏng đoán của Claude: P0 render phía client với bootstrap nhỏ và khung chờ; chỉ thêm prerender nếu số đo trên artifact thật cho thấy cần (ADR-005).

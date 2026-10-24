@@ -52,6 +52,8 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-033 | Phạm vi capability kind P0 (5 kind + design binding), phần còn lại do core hoặc chỉ có contract; Motion vẫn P0 (OD2-05) | **APPROVED WITH P0 SCOPE** (spec #2 review #1) | User (spec #2 review #1) | 2026-10-24 |
 | ADR-034 | Definition bind post-commit effect đã được platform approve; P0 chỉ mock; kiểm registry + permission + site policy (OD2-06) | **APPROVED WITH RESTRICTIONS** (spec #2 review #1) | User (spec #2 review #1) | 2026-10-24 |
 | ADR-035 | Git-managed status ledger + emergency runtime override có kiểm soát (OD2-07) | **APPROVED WITH ADJUSTMENTS** (spec #2 review #1); failure policy chi tiết OPEN (OD2-08) | User (spec #2 review #1) | 2026-10-24 |
+| ADR-036 | Self-contained Form Release ở P0: không có mutable shared runtime giữa các form (spec #3 Q3-1) | **APPROVED AS DESIGN DIRECTION** (spec #3 Q3-1); cơ chế PROPOSED (spec #3) | User (spec #3 Q3-1) | 2026-10-24 |
+| ADR-037 | Session-pinned revision + Stable Entry URL + Immutable Release URL; active ≠ supported; resolver trước khi khởi tạo runtime (spec #3 Q3-2) | **APPROVED AS DESIGN DIRECTION** (spec #3 Answer #2); resolver, consistency model, error contract PROPOSED; activation chi tiết → spec #5 | User (spec #3 Answer #2) | 2026-10-24 |
 
 ---
 
@@ -804,3 +806,42 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 - **Đề xuất của Claude (PROPOSED, spec #2 rev 2 §16.5):** effective status = mức chặt nhất của ledger và override; override bắt buộc gắn incident; reconciliation report. Failure policy: **OD2-08 (OPEN)**.
 - **Trạng thái:** APPROVED WITH ADJUSTMENTS.
 - **Người duyệt:** User (spec #2 review #1). **Ngày:** 2026-10-24.
+
+## ADR-036 — Self-contained Form Release (spec #3 Q3-1)
+
+- **Bối cảnh:** spec #3. Artifact của mỗi form nên tự chứa hoàn toàn, hay các form dùng chung một lớp runtime (engine/React) được cache chung.
+- **Quyết định (user): APPROVED AS DESIGN DIRECTION — Self-contained Form Release cho P0.**
+  - Mỗi form release độc lập về deployment, runtime dependency và rollback. Vẫn hỗ trợ code splitting, lazy loading và internal chunk.
+  - **Không** có mutable shared runtime giữa các form ở P0.
+  - Yêu cầu:
+    - asset bất biến, riêng cho từng release
+    - Capability Lock chính xác
+    - import tường minh do compiler sinh
+    - bundle isolation cho Sports, PC và biến thể Motion-none
+    - không bundle server/design facet
+    - browser cache và tương thích với revision cũ
+    - rollback không cần rebuild
+    - đo bundle size và runtime performance trên artifact thật
+    - không tự kết luận isolation PASS khi chưa có bằng chứng
+- **Đánh đổi:**
+  - Ưu: rollback và isolation đơn giản, kiểm chứng được theo từng release; không có thay đổi runtime chung nào ảnh hưởng nhiều form cùng lúc.
+  - Nhược: khách mở nhiều form không dùng chung cache engine/React; mỗi release chứa bản riêng.
+- **Trạng thái:** APPROVED AS DESIGN DIRECTION. Cơ chế PROPOSED ở spec #3. G1 NOT APPROVED.
+- **Người duyệt:** User (spec #3 Q3-1). **Ngày:** 2026-10-24.
+
+## ADR-037 — Session-pinned revision, Stable Entry URL, Immutable Release URL (spec #3 Q3-2)
+
+- **Bối cảnh:** khách đang mở form khi có revision mới được publish hoặc rollback; reload; draft của release cũ.
+- **Quyết định (user): APPROVED AS DESIGN DIRECTION.**
+  - **Bốn khái niệm:** Active Release (phân phối cho khách mới) · Supported Release (backend còn xử lý) · Retired/Unsupported · Suspended/Revoked. Inactive ≠ Unsupported. Rollback chỉ đổi Active Release, không revoke release publish sau đó.
+  - **Session pinning:** session pin `formId`, `publishedRevision`, `releaseId`, identity của Capability Lock. Publish hay rollback không đổi workflow của tab đang mở. Backend validate theo definition và lock tin cậy của release đã pin. Runtime state và active pointer độc lập.
+  - **Stable Entry URL** (khách mới nhận active; phát hiện draft hợp lệ để đề xuất Resume; không có dữ liệu khách trong URL) và **Immutable Release URL** (một artifact cụ thể, không đổi sau publish, phục vụ reload/deep link/tab cũ/dynamic import, tồn tại theo retention policy). Release identity phân biệt được nhiều artifact của cùng revision.
+  - **Resolver/bootstrap** quyết định release trước khi khởi tạo runtime; không bao giờ để runtime của release A hydrate draft của release B; bootstrap không chứa mọi version engine.
+  - **Publish/rollback:** đổi active pointer theo activation protocol; không xóa artifact cũ; không rebuild khi rollback; không migrate draft; không hứa CDN cập nhật tức thời, phải có consistency model.
+  - **Draft recovery:** theo ADR-012; metadata draft pin release identity; không migrate ngầm; re-evaluate visibility/validation trước khi khôi phục step; không xóa draft ngầm; Start Over trên current active release; không đoán mapping; không hứa khôi phục PII; xử lý hai tab.
+  - **Retention:** không xóa asset chỉ vì không còn active; tách "không còn nhận submit", "asset không còn phục vụ", "giữ để rollback", "security quarantine". Không tự chọn con số (OD2-09 OPEN).
+  - **Backend enforcement:** frontend không quyết support; không tin `revision`/`releaseId` của client như bằng chứng; phân biệt incompatible / temporarily unavailable / permanently retired / security suspended, không gom thành 503.
+  - Test matrix tối thiểu 14 case có expected behavior và nguồn sự thật.
+- **Đề xuất của Claude (PROPOSED, notes S3-P01..P11):** `releaseId` theo hash của Release Manifest; bootstrap inline trong `entry.html` + status API; INV-R1 (runtime chỉ hydrate draft cùng `releaseId`), INV-R2 (immutable URL không mở session mới cho release không active); bốn chiều trạng thái release và ràng buộc mốc thời gian; consistency model eventual cho stable entry; activation protocol với CAS và reconciler; error contract 409/503/410/423; TM-R01..R14.
+- **Trạng thái:** APPROVED AS DESIGN DIRECTION. Cơ chế PROPOSED. Activation, lưu trữ, cache thật: pending spec #5. G1 NOT APPROVED.
+- **Người duyệt:** User (spec #3 Answer #2). **Ngày:** 2026-10-24.

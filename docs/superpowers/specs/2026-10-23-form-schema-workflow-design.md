@@ -1,6 +1,7 @@
 # Spec #1: Form Definition Schema & Workflow DSL (Architecture Proposal)
 
-> **Trạng thái: PROPOSAL, revision 3.1** (2026-10-24).
+> **Trạng thái: PROPOSAL, revision 3.2** (2026-10-24).
+> - Rev 3.2: chỉ **đồng bộ draft recovery với ADR-037** (spec #3 Answer #2): draft và session pin `releaseId`; §9 `session`, §13. Chưa có review mới của user cho spec #1.
 > - Rev 3.1: chỉ **đồng bộ contract plugin với spec #2 rev 2** (theo yêu cầu của spec #2 review #1). Không đổi ngữ nghĩa DSL ngoài các mục liệt kê ở spec #2 §19 (Cross-Spec Interface Matrix). Chưa có review mới của user cho spec #1.
 > - Review #1: CHANGES / VERIFICATION REQUIRED.
 > - Review #2: CONDITIONALLY ACCEPTED FOR DESIGN CONTINUATION. User cho phép brainstorm spec #2, nhưng spec #1 **chưa được duyệt hoàn toàn**.
@@ -923,7 +924,7 @@ Các dòng C1–C10 được thêm vào T3 dưới dạng sự kiện và guard,
 | `interaction` | theo field: `pristine` / `touched` / `dirty`. Theo step: `submitAttempted`. |
 | `async` | theo node: `idle` / `pending` / `success` / `error` / `timeout`, kèm `fingerprint` và `seq` |
 | `nav` | `current`, `furthestReached`. Đường đi **không lưu** mà được dẫn xuất qua `derivedPath(values)` (§8.2). |
-| `session` | `formId`, `revision`, `schemaVersion`, dấu thời gian. **Không chứa PII.** |
+| `session` | `formId`, `revision`, `releaseId`, identity của Capability Lock, `schemaVersion`, `sessionId`, dấu thời gian. Lấy từ release đang chạy, **không** từ active pointer (ADR-037). **Không chứa PII.** |
 
 - **Engine là reducer thuần:** `(state, event) → (state', effects[])`.
   - Event gồm:
@@ -1125,11 +1126,12 @@ Khái niệm `failOpen` ở đề xuất trước bị loại bỏ, thay bằng 
   - Quy trình: dry run → preview diff → xác nhận → lưu draft mới (optimistic concurrency) → giữ lại draft cũ.
   - Nguyên tử. Idempotent: `migrate∘migrate = migrate`, kiểm bằng fixture.
   - Không bao giờ đụng tới published revision, draft của khách hay dữ liệu đã submit.
-- **Draft của khách:** gắn với đúng revision (ADR-012).
-  - Revision cũ còn được hỗ trợ thì tiếp tục dùng.
-  - Không còn hỗ trợ thì hướng dẫn khách bắt đầu lại.
-  - Không tự map field bằng cách đoán.
-- **Backend nhận submit của revision cũ:** validate theo IR của chính revision đó. Bao lâu thì revision cũ ngừng được nhận submit là OD-09.
+- **Draft của khách:** gắn với đúng **release** (`releaseId`, kèm `revision`) (ADR-012, ADR-037).
+  - Metadata draft: `{ releaseId, revision, sessionId, savedAt, draftFormat }`, không PII. Mỗi tab có `sessionId` riêng, draft không ghi đè lẫn nhau.
+  - Chọn release **trước khi** khởi tạo runtime: bootstrap ở Stable Entry URL đọc metadata draft và hỏi backend trạng thái release (spec #3, notes S3-P03). Runtime chỉ hydrate draft có cùng `releaseId` với chính nó (INV-R1).
+  - Release còn supported → đề xuất Resume trên đúng release đó (Immutable Release URL), khôi phục theo NR-08/NR-09.
+  - Retired / suspended / incompatible → thông báo rõ, đề xuất Start Over trên **active release** hiện tại. **Không xóa draft ngầm**, không migrate, không tự map field bằng cách đoán, không hứa khôi phục PII.
+- **Backend nhận submit của release cũ:** tra release record tin cậy theo `releaseId`, kiểm khớp `formId` + `revision`, validate theo IR và Capability Lock của chính release đó. Không tin `revision`/`releaseId` của client như bằng chứng. Lỗi phân loại theo ADR-037: incompatible (409), tạm thời không khả dụng (503), retired (410), suspended (423) (mã HTTP chốt ở spec #5). Bao lâu thì release cũ ngừng được hỗ trợ: OD-09, OD2-09.
 
 ---
 

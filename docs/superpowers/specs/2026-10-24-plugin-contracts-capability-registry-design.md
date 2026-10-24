@@ -1,6 +1,7 @@
 # Spec #2: Plugin Contracts & Capability Registry (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2** (2026-10-24).
+> **Trạng thái: PROPOSAL, revision 2.1** (2026-10-24).
+> - Rev 2.1: chỉ **đồng bộ với ADR-037** (spec #3 Answer #2): §10.3 (active ≠ supported, theo release), §10.6 (phân loại lỗi, không gom thành 503), §19 (I-19, I-22). Chưa có review mới của user cho rev 2.
 > - Review #1 (rev 1): **CHANGES REQUIRED — DESIGN DIRECTION ACCEPTED.** OD2-01..07 đã được user quyết (ADR-029..035). Rev 2 áp các quyết định đó và sửa các mâu thuẫn được nêu. Thay đổi so với rev 1: §27.
 > - Spec #2 **chưa được duyệt hoàn toàn**. **G1 NOT APPROVED.** G9 và G10 BLOCKED.
 > - Nguồn:
@@ -619,14 +620,16 @@ ADR-026 nói một `engineApi` range; spec tách theo host vì các host có ver
 
 Version chính xác của engine, `browserHostApi`, compiler, bundler, Node, shared externals; `serverHostApi` và backend deployment version lúc publish; Python; hash lockfile; hash catalog; id ledger snapshot; Capability Lock đầy đủ.
 
-### 10.3. Tập revision được hỗ trợ (supported set)
+### 10.3. Tập release được hỗ trợ (supported set)
 
-Backend phải hỗ trợ mọi revision trong tập `S`:
+*(Rev 2.1, ADR-037.)* Đơn vị hỗ trợ là **release** (`releaseId`, một artifact cụ thể của một revision), không chỉ revision. Active ≠ supported: release `inactive` vẫn có thể `supported`. Rollback chỉ đổi active, không làm release publish sau đó thành `retired`. Bốn chiều trạng thái (activation, support, security, asset retention) và các mốc thời gian: spec #3 (notes S3-P06).
+
+Backend phải hỗ trợ mọi release trong tập `S` (dưới đây "revision" hiểu là release của revision đó):
 - revision đang active của mọi form;
 - revision vừa bị thay (publish mới hoặc rollback) trong **grace window** `G` kể từ lúc bị thay, vì khách có thể đang mở form cũ trong browser (OD2-09);
 - revision mà policy OD-09 của spec #1 vẫn giữ nhận submit.
 
-Revision chỉ rời `S` bằng **retire tường minh** sau `G`. Khách gửi tới revision đã retire nhận `410 E-REVISION-NOT-SUPPORTED`, UI hướng dẫn bắt đầu lại (spec #1 §13).
+Revision chỉ rời `S` bằng **retire tường minh** sau `G`. Khách gửi tới release đã retire nhận `410 E-RELEASE-RETIRED`, UI hướng dẫn bắt đầu lại trên active release (spec #1 §13, ADR-037).
 
 ### 10.4. Deploy gate
 
@@ -658,11 +661,14 @@ FAIL → không nhận traffic. Báo cáo (revision, FBK, lý do).
 
 Trước khi xử lý query hoặc submission (final submission bước 2), backend kiểm: revision ∈ `S`; mọi adapter cần dùng có trong deployment với đúng hash; host API trong range; trạng thái hiệu lực cho phép.
 
-| Tình huống | Phản hồi | Ghi submission? | Khách thấy |
-|---|---|---|---|
-| Revision đã retire | `410 E-REVISION-NOT-SUPPORTED` | không | form đã được cập nhật, bắt đầu lại |
-| Adapter thiếu/sai hash/host không tương thích | `503 E-CAPABILITY-UNAVAILABLE`, `retryable: true`, cảnh báo vận hành | không | lỗi tạm thời, 再試行, draft giữ nguyên |
-| Capability bị chặn bởi policy (`revoked`, override) | `503 E-CAPABILITY-BLOCKED`, `retryable: false`, kèm incident id | không | thông báo chức năng tạm ngừng (§16.3) |
+*(Rev 2.1, ADR-037: phân biệt bốn loại, không gom thành 503. HTTP status chốt ở spec #5.)*
+
+| Loại | Tình huống | Phản hồi | Ghi submission? | Khách thấy |
+|---|---|---|---|---|
+| Incompatible | `releaseId` không thuộc `formId` + `revision` trong record tin cậy; lock lệch; `draftFormat` lạ | `409 E-RELEASE-INCOMPATIBLE`, `retryable: false` | không | giải thích, Start Over trên active, draft giữ |
+| Temporarily unavailable | adapter thiếu/sai hash/host không tương thích (lỗi vận hành) | `503 E-CAPABILITY-UNAVAILABLE` + `Retry-After`, `retryable: true`, cảnh báo vận hành | không | lỗi tạm thời, 再試行, draft giữ nguyên |
+| Permanently retired | release đã `retired` | `410 E-RELEASE-RETIRED`, `retryable: false` | không | form đã được cập nhật, Start Over trên active, draft giữ |
+| Security suspended | release `suspended`, hoặc capability bị chặn bởi policy (`revoked`, override) | `423 E-RELEASE-SUSPENDED` / `423 E-CAPABILITY-BLOCKED`, `retryable: false`, kèm incident id | không | thông báo tạm ngừng (§16.3), giữ state |
 
 Không có nhánh nào thay bằng version khác.
 
@@ -1069,7 +1075,8 @@ Trạng thái: **Đồng bộ** = spec #1 rev 3.1 đã được sửa để kh�
 | I-16 | Lỗi plugin, fallback, error boundary | §12 PL-05, EC-36 | §12 | spec #2 | Tham chiếu |
 | I-17 | Canonicalization | §7.6.5 | §7.1 (core P0, kind P1) | spec #1 | Đồng bộ |
 | I-18 | Admin preview: release vs dev | §15 (BUILD-08) | §9.5 | spec #2 | Đồng bộ |
-| I-19 | Revision được hỗ trợ, retire, grace window | §13, OD-09 | §10.3 | spec #5 | **Chờ** OD-09, OD2-09 |
+| I-19 | Release được hỗ trợ, retire, grace window | §13, OD-09 | §10.3 | spec #5 | Đồng bộ theo ADR-037 (đơn vị là release; active ≠ supported); con số **chờ** OD-09, OD2-09 |
+| I-22 | Session/draft pin `releaseId`; resolver trước runtime; phân loại lỗi 409/503/410/423 | §9 `session`, §13 | §10.3, §10.6 | spec #3 (resolver), spec #5 (transport, activation) | Đồng bộ (rev 3.2 / rev 2.1) |
 | I-20 | Motion preset | §7.3 (ví dụ), spec #6 | §7.1 (core P0, kind P1) | spec #6 | Đồng bộ (bỏ `scaleSpring` khỏi `capabilities` ở ví dụ) |
 | I-21 | Option set tĩnh (`optionsFrom`) | §7.2 (`jpPrefectures`) | §7.1 | spec #1 (core) | Đồng bộ: `core:jpPrefectures`, không còn là capability |
 
