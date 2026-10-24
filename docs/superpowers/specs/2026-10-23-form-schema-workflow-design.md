@@ -1,6 +1,7 @@
 # Spec #1: Form Definition Schema & Workflow DSL (Architecture Proposal)
 
-> **Trạng thái: PROPOSAL, revision 3.6** (2026-10-24).
+> **Trạng thái: PROPOSAL, revision 3.7** (2026-10-24).
+> - Rev 3.7 (vòng sửa C1): §8.6 backend tải IR theo `releaseId` (MINOR-06); §17 sơ đồ submit có `releaseId`, ledger do spec #5 quản lý (MINOR-06, MINOR-16); §14 snapshot cố định ở review (ADR-050, MINOR-16); thứ tự ưu tiên focus (§8.4, MINOR-17).
 > - Rev 3.6: đồng bộ spec #6 (I6-01, I6-02): schema slot `motion` (§7.1); quy tắc focus khi chuyển step và khi node chứa focus thành inactive (§8.4); trạng thái `submit` và selector `transitionNotices` (§9).
 > - Rev 3.5: mã 422 field inactive là `E-INACTIVE-DATA-PRESENT` (dạng mã lỗi runtime công khai, spec #3 §16.4); body submit có `releaseId` (§8.6, spec #5 §10.2); đóng OD-05 (ADR-060), OD-08 và OD-09 (ADR-058, P0 defaults); TTL draft kiểm logic (§9).
 > - Rev 3.4: theo spec #4 review #1 (ADR-048, ADR-049): named condition tham chiếu bằng `conditionId` ổn định (§7.1, §7.3, §7.4); đóng OD-03 và OD-11 (§21); node `PREVIEW_ONLY_UNCONFIGURED_PATH` chỉ có trong IR preview (§8.1); `draftVersion` là metadata do server quản lý (§7.1). Chưa có review mới của user cho spec #1.
@@ -768,7 +769,7 @@ Runtime, preview và backend evaluator đều dùng hàm này với cùng bộ f
   - Field vừa sửa kéo theo việc tính lại và revalidate **toàn bộ** phần phụ thuộc phía sau, trên mọi step của đường đi.
   - Nút "quay lại 確認" chỉ xuất hiện khi đường đi không đổi **và** toàn bộ đường đi hợp lệ.
   - 確認 luôn render từ state mới, không dùng bản tóm tắt cũ.
-- **Focus (rev 3.6, spec #6 §6.3):** khi `current` đổi, adapter React chuyển focus tới tiêu đề step mới **ngay** khi state commit (không chờ animation). Khi node đang chứa focus thành inactive, focus chuyển tới điều khiển đã gây thay đổi. Khi 次へ/submit thất bại: focus field lỗi đầu tiên (§11).
+- **Focus (rev 3.6, spec #6 §6.3; thứ tự ưu tiên rev 3.7):** (1) điều hướng do lỗi (次へ/submit thất bại, kể cả lỗi backend làm đổi step) → focus **field lỗi đầu tiên**; (2) chuyển step do người dùng → tiêu đề step mới; (3) node chứa focus thành inactive do thao tác người dùng → điều khiển gây thay đổi; (4) thay đổi không do người dùng (lookup/async, `restoreDraft`) → không di chuyển focus nếu phần tử đang focus còn tồn tại, ngược lại về tiêu đề step. khi `current` đổi, adapter React chuyển focus tới tiêu đề step mới **ngay** khi state commit (không chờ animation). Khi node đang chứa focus thành inactive, focus chuyển tới điều khiển đã gây thay đổi. Khi 次へ/submit thất bại: focus field lỗi đầu tiên (§11).
 - **Deep link và reload (N-10, A2):**
   - Một step chỉ được chấp nhận nếu **mọi step trước nó trên đường đi được dựng lại đều hoàn tất**. "Hoàn tất" được tính **từ dữ liệu thực sự còn tồn tại và validation hiện hành**, không dựa vào cờ completion được lưu trữ.
   - Nếu không thỏa, khách được đưa tới step chưa hoàn tất đầu tiên.
@@ -797,7 +798,7 @@ Các kiểm tra graph khác (đều chặn publish):
 2. Build payload chỉ gồm giá trị active và `include`, theo key của Data Contract.
 3. Gửi `{ formId, releaseId, revision, schemaVersion, values, idempotencyKey }` (thêm `releaseId` theo spec #5 rev 1 §10.2; backend chỉ dùng `formId`/`revision` để so khớp với release record). Chi tiết idempotency thuộc spec #5.
 4. **Backend:**
-   - Tải IR của đúng revision từ registry chính thức. Revision không tồn tại hoặc không còn được hỗ trợ thì từ chối.
+   - Tải IR của đúng **release** (`releaseId`) từ release record tin cậy; `formId`/`revision` chỉ để so khớp. Release không tồn tại, không thuộc form, hoặc không còn được hỗ trợ thì từ chối (spec #5 §10.2).
    - Dựng lại đường đi active bằng cùng hàm activity.
    - Có field inactive trong payload thì trả **`422 E-INACTIVE-DATA-PRESENT`**.
    - Validate, tính lại `calculated`, chạy validator authoritative.
@@ -1153,7 +1154,7 @@ Khái niệm `failOpen` ở đề xuất trước bị loại bỏ, thay bằng 
 
 ```mermaid
 flowchart TD
-  S0["0 · Freeze snapshot<br/>(draftVersion at publish request)"] --> S1
+  S0["0 · Snapshot vN bất biến<br/>(tạo khi gửi review, ADR-050; spec #5 §6.8)"] --> S1
   S1["1 · Structural validate<br/>JSON Schema for schemaVersion"] --> S2
   S2["2 · Version gate<br/>supported schemaVersion? if not → migrate in Admin first"] --> S3
   S3["3 · Resolve<br/>exact pins: blocks + capabilities (spec #2 §9.2: một version/plugin, Capability Lock); trạng thái hiệu lực"] --> S4
@@ -1241,10 +1242,10 @@ sequenceDiagram
   Rv->>St: approve (acknowledge contract changes)
   St->>Pp: frozen snapshot
   Pp->>Pp: resolve → expand → analyze → emit IR + Data Contract + Lock
-  Pp->>St: Published Revision (immutable) + ledger update
+  Pp->>St: release (immutable); key ledger xác nhận khi activation (spec #5 §6.4 R4)
   Pp-->>Cu: static artifact (IR + engine + used capabilities) [spec #3]
   Cu->>Cu: engine in memory; DraftPersistenceAdapter (no PII)
-  Cu->>Be: submit {formId, revision, schemaVersion, values, idempotencyKey}
+  Cu->>Be: submit {formId, releaseId, revision, schemaVersion, values, idempotencyKey}
   Be->>St: load IR for that exact revision
   Be->>Be: rebuild active path · validate · recompute · authoritative checks
   Be-->>Cu: ok → complete(branch) | 422/4xx errors by external path

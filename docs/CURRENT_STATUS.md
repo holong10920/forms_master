@@ -70,7 +70,7 @@
 - G9 (GitHub) và G10 (AWS): đang chờ user.
 
 ## Tiếp theo
-1. User quyết các điểm ở Cross-Subsystem Review §9 (cho phép vòng sửa C1; phân loại SR-03..05; scope M4/override/M3; hạn VG-07; amend ADR-003). Sau đó vòng sửa C1 → targeted re-review → G1 Approval Package (không tự approve). — ưu tiên trải nghiệm Business Editor và hiệu năng runtime. Sau đó Cross-Subsystem Review.
+1. Vòng sửa C1 (ADR-068..073) **đã áp vào spec** (spec #1 rev 3.7, #2 rev 2.11, #3 rev 2.6, #4 rev 2.5, #5 rev 2 + C1, #6 rev 2.1; register, traceability, report §10); đang targeted re-review độc lập. Không còn BLOCKER/MAJOR → G1 Approval Package (không tự approve). SR-04: đề xuất presentation khai báo chờ user xác nhận. — ưu tiên trải nghiệm Business Editor và hiệu năng runtime. Sau đó Cross-Subsystem Review.
 2. Spec #3 rev 2: final review + Cross-Spec Review (spec #1 §25). VG-01..VG-10 giữ OPEN tới khi có evidence.
 3. User review spec #2 rev 2.5 và quyết OD2-08/OD2-09 (cần trước spec #5, không chặn spec #3).
 4. User review spec #1 rev 3.3. Nếu đồng ý thì spec #1 chuyển sang READY_FOR_CROSS_REVIEW (chỉ khi user xác nhận).

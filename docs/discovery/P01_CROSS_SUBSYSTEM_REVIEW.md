@@ -167,3 +167,66 @@ Các gate "thiếu VG" trong traceability (CT-26, ma trận cross-version, cổn
 3. Xác nhận phạm vi P0: **M4** (ngừng nhận submit) và **runtime override qua API thật** ở P0 (spec #5) thay cho "tối thiểu / mô phỏng" của spec #2 §21; **M3 `block-operation` chặn cả FBK** ở P0.
 4. Chốt hạn **VG-07**.
 5. Cho phép **ghi chú amend ADR-003** (preset `subtle`/`guided`, tween) theo ADR-065.
+
+---
+
+## 10. Vòng sửa C1 (2026-10-25; ADR-068..073)
+
+> Quyết định user: G1 NOT APPROVED; C1 APPROVED; SR-03, SR-05 conditionally accepted (ADR-069, ADR-071); SR-04 NOT YET ACCEPTED (ADR-070); M4, runtime override API, M3 `block-operation` bắt buộc P0 (ADR-072); VG-07 trước rollout thật (ADR-073); amendment ADR-003. Các finding §3 **giữ nguyên** làm lịch sử; bảng dưới ghi disposition. "DESIGN_RESOLVED" = đã sửa trong spec, **chưa** có test chạy — không phải VERIFIED.
+
+### 10.1. Disposition CSR-01..17
+
+| ID | Sửa trong C1 (producer → consumer, hành vi, acceptance) | Section đổi | Trạng thái sau C1 | Verdict re-review |
+|---|---|---|---|---|
+| CSR-01 | Thao tác **ingestion** (platform-admin / bước 11 pipeline plugin) tạo `CAPSTATUS#{PRK}` + **mọi** gate FBK trong một transaction trước khi PRK vào Admin/Preview build; preflight `E-CAP-NOT-INGESTED`; repair dưới CAS; không có thao tác xóa (IAM sau G10). Acceptance: TM-5I01..03 | #5 §9.3.3, §7.2, §5.1–§5.2; #2 §8.1; #3 §18.1a | DESIGN_RESOLVED + VERIFICATION_PENDING | *(§10.3)* |
+| CSR-02 | `CAPSTATUS` = trạng thái policy hiệu lực **một item** (`sources` gồm ledger, override, M3); gate là phép chiếu `SET` từ `derive()` cùng transaction, CAS `capVersion`; không `Query` trong đường quyết định; ma trận interleaving §9.3.5. Acceptance: CT-26, TM-5I04 | #5 §9.3.1–§9.3.5, §23.4 | DESIGN_RESOLVED + VERIFICATION_PENDING (V5-01) | |
+| CSR-03 | Tập FBK kiểm = mọi server FBK trong lock được gọi trên đường submit/query, gồm server facet của `validator`. Acceptance: TM-5I05 | #5 §9.3.6 | DESIGN_RESOLVED | |
+| CSR-04 | Văn bản G-ADM / G-EXEC thống nhất; bỏ "adapter ngừng ngay"; TM-5G18 bỏ kỳ vọng lease; ghi chú ADR-035 | #5 §9.3.7, §9.3.11, §10.5, §13 #12, §14; #2 §16.5; ADR-035 | DESIGN_RESOLVED | |
+| CSR-05 | Kế hoạch enforce + kiểm chứng cho từng điều kiện ADR-063 (egress, connector mock, secret, synthetic data, fail closed), owner, thời điểm phải PASS. Acceptance: TM-5X01..05 (VG-17) | #5 §9.6; register SR-01 | DESIGN_RESOLVED + VERIFICATION_PENDING | |
+| CSR-06 | Admin build **không** chứa module plugin nào (INV-A1 rev 2.11); sửa §14.4 | #4 §14.4, §9 D7; #2 INV-A1 | DESIGN_RESOLVED | |
+| CSR-07 | Admin: không có code plugin → thẻ "利用停止中" theo trạng thái hiệu lực; Preview: `blockedPrks` trong preview session, iframe không mount `Component`; build sau loại `revoked`; nêu rõ điều **không** chặn được (iframe đang mở ≤ 30 phút). Acceptance: 4C06 | #4 §9, §14.4; #2 §10.1, INV-A2; #5 §7.2 | DESIGN_RESOLVED | |
+| CSR-08 | Data Contract v2 có `identity`, `renamedFrom`; `keyLedgerSnapshot` trong Build Request và `inputIds`; `previousDataContract` = release tại `basePointerVersion`; K5 bắt collision sớm | #3 §5.1, §6; #5 §6.8 | DESIGN_RESOLVED | |
+| CSR-09 | Bảng **trường Build Request → nguồn authoritative** (review/preflight, `CATSNAP`, `SITEPOLICY`, `PLATFORMREL`); Build Request digest lưu vào review → retry cùng `releaseId` | #5 §6.8, §5.1, §6.2; #3 §5.1 | DESIGN_RESOLVED | |
+| CSR-10 | `platformReleaseId` ghi ở preflight/review; preview chỉ start khi cùng platform release; deploy platform → `STALE(platform)` + recheck; VERIFYING kiểm `toolchain.engine`. Acceptance: TM-5P09, TM-5V05 | #5 §6.8, §8.1, §6.2; #4 §14.7, §17 | DESIGN_RESOLVED | |
+| CSR-11 | Evaluator khai `supportedIrFormats`; K14 sinh semantic conformance fixtures; deploy gate chạy fixtures của mọi release trong `S`, lệch → FAIL; ma trận tương thích. Acceptance: TM-5C01 (VG-14) | #5 §9.2; #3 §5.2 (K14) | DESIGN_RESOLVED + VERIFICATION_PENDING | |
+| CSR-12 | `motion-presets` = platform asset pin digest (`motionPresets`) trong Build Request; LRM có `motion`; IR có `motion` + `regionId`; version hỗ trợ ở `PLATFORMREL` | #3 §5.1, §6, §11.1; #5 §6.8, I5-08; #6 §7.3 | DESIGN_RESOLVED | |
+| CSR-13 | `ExitShell` do slot vẽ từ IR theo `regionId`, không giữ element con, không giá trị khách; sửa câu "invalidate". TM-6R10 viết lại | #6 §6.2–§6.3, §12 | DESIGN_RESOLVED + VERIFICATION_PENDING | |
+| CSR-14 | `POINTER.bootstrapDigest` không giảm khi rollback; entry dùng nó. Acceptance: TM-5P07 (R8 → rollback R6, draft R7 resume) | #5 §6.5, §6.6; #3 §14.1 | DESIGN_RESOLVED | |
+| CSR-15 | `verified`: `state IN (registered, verified)`. Acceptance: TM-5P08 | #5 §5.4 | DESIGN_RESOLVED | |
+| CSR-16 | State machine review chính thức ở #5 §8.1 (STALE được **ghi**, có `staleReason`, `recheck`); #4 §17 dùng bảng đó; `dataContractAck` | #5 §8.1, §7.2; #4 §17, §13.2 | DESIGN_RESOLVED | |
+| CSR-17 | `deprecated.supportEndsAt` chỉ thông tin; muốn ngừng phải áp M2–M5 | #2 §16.3; #5 §9.3.2 | DESIGN_RESOLVED | |
+
+### 10.2. MINOR liên quan trực tiếp đã sửa
+
+MINOR-01 (`SET` tập tính lại), 02 (deploy gate ↔ mở gate), 03 (`GATEINTENT` có hạn), 04 (phạm vi override, override quá hạn vẫn mở), 05 (`E-ADMISSION-UNAVAILABLE`), 06 (body submit), 07 (`pointerVersion = 0`), 08 (GSI theo user), 10 (status API + nhánh bootstrap), 11 (outbox kiểm `allowedEffects`), 12 (origin local, cookie), 13 (sơ đồ preview session, process phục vụ origin preview), 14 (mock submit preview trong INV-A2), 15 (catalog mã), 16 (ADR-003 amendment, spec #1 §14/§17), 17 (thứ tự focus), 18 (pseudo-code deploy gate), 19 (traceability). Còn lại: MINOR-09 (đặt tên revision/`retired`) — chưa sửa, không ảnh hưởng contract.
+
+### 10.2a. SR-04 (ADR-070)
+
+Không chứng minh được điều kiện "JavaScript plugin trong origin Admin an toàn" ở mức thiết kế (code cùng origin có thể tự gọi Admin API kèm cookie và lấy CSRF token; spy và L3 chỉ phát hiện). Vì vậy C1 **đề xuất** phương án ADR-070 cho phép: **presentation khai báo do host sở hữu** — plugin cung cấp dữ liệu (`primitive`, JSON Pointer vào config/fixture), Admin vẽ bằng component lõi; Admin build không chứa module plugin nào; JS `Presentation` chuyển P1 trong ranh giới cô lập thật (spec #2 rev 2.11 §6.2.1, §7.4, INV-A1; spec #4 §9). **Cần user xác nhận** đề xuất này; nếu không, SR-04 trở lại MAJOR/NOT ACCEPTED.
+
+### 10.3. Trace end-to-end sau C1 (Sports và PC)
+
+| # | Ranh giới | Authority | Input / output | Version pin | Lỗi | Test | Section |
+|---|---|---|---|---|---|---|---|
+| 1 | Admin typed command → draft | `DRAFT#` | `Command` → document; `PUT /forms/{id}/draft` | `draftVersion` CAS | 409/`KEY_COLLISION`/413 | CT-01, 4K01 | #4 §8, §15; #5 §7.2 |
+| 2 | Draft → server preflight | build worker `preflight` | `inputIds { draftVersion, catalogSnapshotId, ledgerSnapshotId, runtimeOverrideSnapshotId, keyLedgerSnapshot, sitePolicy }`, `platformReleaseId`, diagnostics digest | `PLATFORMREL` | fail closed; `E-CAP-NOT-INGESTED` | TM-4D02/03 | #3 §5.1; #4 §14.3; #5 §6.8 |
+| 3 | Preflight → snapshot vN | `SNAP#`, `REVIEW#` | blob snapshot + ReviewRequest (`basePointerVersion`, `platformReleaseId`, preflight result) | `snapshotVersion` | ConditionCheck `draftVersion` | CT-02, CT-16 | #5 §5.4, §8.1 |
+| 4 | Snapshot → approval | `REVIEW#`, `POINTER`, `CAPSTATUS` | approve + ConditionCheck pointer, `CAPSTATUS.publishBlockers` | `version`, `capVersion` | STALE được ghi; 409 | CT-14, CT-25 | #5 §5.4, §8.1 |
+| 5 | Approval → policy/gate (đã có từ ingestion) | `CAPSTATUS`, gate FBK | ingestion trước preflight đầu tiên | `capVersion` | thiếu → fail closed | TM-5I01..03 | #5 §9.3.3 |
+| 6 | Operation → Build Request | spec #5 §6.8 | mọi trường từ review/record bất biến | digest | `E-BUILD-INPUT-DIGEST` | TM-B* | #5 §6.8; #3 §5.1 |
+| 7 | Build Request → compiler → release | K0–K14 | LRM, `releaseId`, Data Contract v2, semantic fixtures | `releaseId` | fail closed | TM-B*, TM-C* | #3 §5–§12 |
+| 8 | Release → đăng ký | `REL#`, `GATE#REL` (`rel#pending`), `PRKUSE#` | Put có điều kiện; không reset trạng thái | `lrmDigest` | `E-RELEASE-ID-COLLISION` | CT-19, TM-5G10 | #5 §5.4 |
+| 9 | Staging/integrity → verified | operation runner | integrity gate, deploy gate, evaluator support, engine khớp `platformReleaseId` | `state IN (registered, verified)` | FAILED | TM-5P02, TM-5P08 | #5 §6.2 |
+| 10 | Activation | `POINTER` | 8 + p + f action; `bootstrapDigest` không giảm | `pointerVersion` (0 cho lần đầu) | SUPERSEDED/FAILED | CT-03/04/20/23 | #5 §6.5 |
+| 11 | Entry → bootstrap → runtime | `POINTER.entryVersion`, status API | entry, status `{ releaseState, admission, freshness, … }` | `draftFormat`, bootstrap mới nhất | resume / Start Over | TM-5G09, TM-5P07, TM-L*, TM-R* | #5 §6.6, §7.4; #3 §14 |
+| 12 | Runtime → Motion | LRM `motion`, IR `motion`/`regionId` | group `motion` chỉ recipe dùng | `motionPresets` digest | không chuyển động | TM-6B01..04 | #6 §7; #3 §6, §7 |
+| 13 | Runtime → server validation | release record (`releaseId`) | adapter sau đọc gate (G-EXEC caveat) | Capability Lock | 422/423/503 | TM-5S01..03, TM-5I05 | #5 §9.3.6, §10.2 |
+| 14 | Submission | gate FORM/REL/FBK + `SUBIDEMP#` | transaction §10.3 | — | 409/410/423/503 | TM-5G01..07 | #5 §10.3 |
+| 15 | Outbox → mock effect | `EVT#` | đọc gate + `allowedEffects` trước `handle()` | `generation` | `blocked`/`dead` | CT-07/10, TM-5G08, TM-5E01 | #5 §9.3.11, §10.5 |
+| 16 | Rollback | `POINTER` | release đã từng active, eligible | CAS | 422/409 | TM-5P03..07 | #5 §6.2 |
+
+Sports: plugin server FBK = `jpPhone/server`, `katakana/server` (validator) + mock effect; Motion `subtle` (`sports-demo`) / Motion-none (`sports-demo-nomotion`). PC: `storeSelector` (browser + `presentation` khai báo), `storeList/server`, `storeIdValid/server`, `jpPhone/server`, mock effect; Motion `guided`.
+
+### 10.4. Targeted re-review sau C1
+
+*(điền sau khi chạy)*

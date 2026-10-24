@@ -1,21 +1,26 @@
 # Security Risk Register (P0, synthetic PoC)
 
-> Danh sách rủi ro bảo mật đã biết của thiết kế P0. Mỗi mục ghi trạng thái theo phân loại của Cross-Subsystem Review: **ACCEPTED_RISK** (user đã chấp nhận có điều kiện), **VERIFICATION_PENDING** (thiết kế có cơ chế, chưa kiểm chứng), **OPEN** (chưa có quyết định). Không mục nào ở đây được coi là đã giải quyết khi chưa có quyết định hoặc evidence tương ứng.
-> Cập nhật: 2026-10-24 (bổ sung sau Cross-Subsystem Review, `docs/discovery/P01_CROSS_SUBSYSTEM_REVIEW.md`).
+> Danh sách rủi ro bảo mật đã biết của thiết kế P0. Trạng thái theo phân loại của Cross-Subsystem Review: **ACCEPTED_RISK** (user đã chấp nhận có điều kiện, có ADR), **VERIFICATION_PENDING** (thiết kế có cơ chế, chưa kiểm chứng), **DESIGN_RESOLVED** (đã sửa trong spec, chưa có test chạy), **OPEN** (chưa có quyết định). Không mục nào được coi là đã giải quyết khi chưa có quyết định hoặc evidence tương ứng.
+> Cập nhật: 2026-10-25 (vòng sửa C1, ADR-068..073).
 
-| ID | Rủi ro | Nguồn | Trạng thái | Điều kiện / kiểm chứng | Phải xem lại khi |
-|---|---|---|---|---|---|
-| SR-01 | **G-EXEC TOCTOU:** sau commit của revocation plugin, adapter (kể cả read-only) vẫn có thể **bắt đầu** chạy nếu lần đọc gate xảy ra trước commit; không có guarantee zero new execution | spec #5 §9.3, §23.4 V5-02; ADR-063 | **ACCEPTED_RISK** — chỉ PoC synthetic | dữ liệu synthetic; không PII thật; không connector/effect thật; mock không chạm hệ thống thật; không secret thật; network theo allowlist; store không khả dụng → fail closed; TM-5G18 ghi nhận hành vi. **Các điều kiện này chưa được kiểm chứng** (CSR-05): cần test egress mọi process, cấu hình chỉ mock connector, scan secret host — phải PASS trước mọi đánh giá dựa vào ADR-063. Văn bản spec chưa nhất quán (CSR-04) | bất kỳ điều kiện nào đổi; trước mọi tích hợp thật (cần security gate riêng) |
-| SR-02 | **Race tạo gate FBK** với override/đồng bộ ledger (`CAPSTATUS.version` CAS) | spec #5 §9.3, §23.3, §23.4 V5-01; ADR-063 | **VERIFICATION_PENDING** | design review độc lập **đã làm** (Cross-Subsystem Review R2): đúng nguyên lý, phải sửa CSR-01 (vòng đời `CAPSTATUS`/gate), CSR-02 (M3 khi tạo gate; đọc một item thay vì `Query`); CT-26 — post-G1 implementation verification gate; emulator PASS không đủ cho AWS | khi có code (post-G1); trước AWS |
-| SR-03 | Revocation do rủi ro **browser facet**: code đã trong artifact, chỉ chặn được bằng M4/M5 theo từng form, **không nguyên tử** giữa các form; chịu độ trễ entry/CDN | spec #5 §9.3; spec #2 §16.3 | OPEN (đã nêu trong thiết kế, chưa có quyết định chấp nhận riêng) | tiến độ N/M trong incident; không tuyên bố chặn toàn bộ trước khi xong | trước G1 (cần user phân loại) |
-| SR-04 | `presentation` của plugin là code chạy trong origin Admin; spy/conformance chỉ phát hiện, không chứng minh; chống developer thiện chí, không chống mã độc | spec #2 §7.2, §17.2; spec #4 §9; ADR-061 | OPEN (giới hạn đã ghi) | P0 không design binding; INV-A1; CSP Admin; L3 | khi có plugin từ bên ngoài platform |
-| SR-05 | `previewSessionId` là bearer capability hẹp (chỉ dữ liệu tổng hợp) | spec #4 §14.7; spec #5 §7.3 | OPEN (thiết kế theo ADR-053) | header, không URL, redact log, TTL 30 phút, thu hồi | nếu preview được nối tới dữ liệu thật |
-| SR-06 | Cache thông tin ≤ 60 s khi store không khả dụng có thể hiển thị dữ liệu đã cũ | spec #5 §9.3; ADR-057 | ACCEPTED_RISK (ADR-057, chỉ thông tin) | không dùng cho quyết định bảo mật; nhãn freshness | nếu danh sách query "thông tin" mở rộng |
-| SR-07 | Contention trên gate dùng chung có thể làm revocation commit chậm dưới tải | spec #5 §9.3; VG-12 | VERIFICATION_PENDING (sau G10) | `GATEINTENT`, retry không giới hạn; đo VG-12 | trước tải thật |
-| SR-08 | Code plugin đã `revoked` vẫn chạy trong Admin (`presentation`) và Preview (browser facet) tới khi deploy lại Admin | Cross-Subsystem Review CSR-07 | OPEN — cần sửa thiết kế (CSR-07) | Canvas/iframe đọc trạng thái hiệu lực; Preview build loại `revoked` | vòng sửa C1 |
-| SR-09 | Local demo: origin form khách cùng site với Admin nếu dùng `localhost`; `__Host-` cần `Secure` trên HTTP local; khác biệt mock IdP và Cognito (cookie `state`/PKCE với `SameSite=Strict`) | Cross-Subsystem Review MINOR-12 | OPEN | chỉ định origin local khác site; kiểm Cognito sau G10 | vòng sửa C1; G10 |
-| SR-10 | `GATEINTENT` bị bỏ lại khi crash chặn request mới (DoS) | MINOR-03 | OPEN | `expiresAt` + reconciler dọn | vòng sửa C1 |
-| SR-11 | Miễn trừ deploy gate có race với mở lại gate | MINOR-02 | OPEN (fail closed, 503) | deploy gate ghi trong transaction có ConditionCheck gate | vòng sửa C1 |
-| SR-12 | Xóa/sửa trái phép item `CAPSTATUS#`/`GATE#`; không thu hồi được session theo user | CSR-01, MINOR-08 | OPEN | cấm Delete (IAM); repair dưới CAS; GSI theo user | vòng sửa C1 |
+## Accepted risks (có owner, phạm vi, enforcement, điều kiện xem lại, escalation)
 
-Ghi chú: SR-03, SR-04, SR-05 chờ user phân loại (Cross-Subsystem Review §3.5; đề xuất ACCEPTED_RISK chỉ cho P0 synthetic).
+| ID | Rủi ro | ADR | Owner | Phạm vi | Enforcement / kiểm chứng | Hết hiệu lực / xem lại khi | Escalation |
+|---|---|---|---|---|---|---|---|
+| SR-01 | **G-EXEC TOCTOU**: adapter (kể cả read-only) có thể bắt đầu sau commit của revocation nếu lần đọc gate trước commit | ADR-063 | vai trò platform-security | chỉ PoC synthetic | điều kiện synthetic-only có kế hoạch kiểm chứng (spec #5 §9.6, TM-5X01..05) — **phải PASS trước mọi demo/đánh giá dựa vào ADR-063**; TM-5G18 ghi nhận hành vi | bất kỳ điều kiện nào đổi; trước tích hợp thật (security gate riêng) | user (project owner) quyết; incident record |
+| SR-03 | Revocation browser facet nhiều form **không nguyên tử** toàn cục; tab đã mở không ngừng ngay | ADR-069 | platform-security | chỉ synthetic P0, không khách thật | M2 chặn release mới; `PRKUSE` liệt kê chính xác; M5 từng form idempotent; tiến độ N/M; reconcile (spec #5 §9.3.8; TM-5I06); backend admission fail closed | trước rollout khách thật (security review riêng) | user; incident record |
+| SR-05 | `previewSessionId` là bearer capability hẹp | ADR-071 | platform-security | chỉ synthetic P0 | gắn snapshot/`platformReleaseId`; TTL 30 phút; thu hồi; Origin/scope check; không URL/log (spec #5 §7.3; TM-5V01..05, spec #4 4Z13) | preview nối dữ liệu thật; trước rollout | user |
+| SR-06 | Cache thông tin ≤ 60 s khi store không khả dụng | ADR-057 | platform | chỉ query thông tin | không dùng cho quyết định bảo mật; nhãn freshness (spec #5 §9.3.10) | danh sách query thông tin mở rộng | user |
+
+## Verification pending / design resolved / open
+
+| ID | Rủi ro | Nguồn | Trạng thái | Ghi chú |
+|---|---|---|---|---|
+| SR-02 | Race giữa thay đổi policy plugin và gate FBK | spec #5 §9.3.2–§9.3.5 (C1: `CAPSTATUS` là trạng thái policy hiệu lực; gate tạo đủ ở ingestion; không `Query` trong đường quyết định; M3 là nguồn) | **VERIFICATION_PENDING** | CT-26 + TM-5I01..04 — post-G1 implementation verification gate; DynamoDB thật sau G10 |
+| SR-04 | JavaScript plugin trong origin Admin | ADR-070; C1: **presentation khai báo do host sở hữu**, Admin build không có code plugin (spec #2 rev 2.11 INV-A1; spec #4 §9) | **DESIGN_RESOLVED — chờ user xác nhận đề xuất** | nếu user không chấp nhận phương án khai báo → quay lại NOT ACCEPTED (ADR-070); kiểm chứng 4C03, 4Z10 sau G1 |
+| SR-07 | Contention gate dùng chung làm revocation commit chậm | spec #5 §9.3.9; VG-12 | VERIFICATION_PENDING (sau G10) | `GATEINTENT` có hạn; retry không giới hạn |
+| SR-08 | Code plugin đã revoke trong Admin / Preview | CSR-07 | DESIGN_RESOLVED (Admin không có code plugin; Preview `blockedPrks`, build sau loại `revoked`) | giới hạn còn lại: iframe đang mở tới khi phiên bị thay/hết hạn (≤ 30 phút) |
+| SR-09 | Local same-site / `__Host-` trên HTTP / mock IdP vs Cognito | MINOR-12 | DESIGN_RESOLVED (ba origin khác site: `localhost`, `127.0.0.1`, `[::1]`; cookie PKCE `Lax`) + VERIFICATION_PENDING (trình duyệt demo; Cognito sau G10) | |
+| SR-10 | `GATEINTENT` bị bỏ lại | MINOR-03 | DESIGN_RESOLVED (`expiresAt` 60 s, logical expiration, reconciler) | |
+| SR-11 | Miễn trừ deploy gate race với mở lại gate | MINOR-02 | DESIGN_RESOLVED (spec #5 §9.3.4 b, §9.3.5 #10) | |
+| SR-12 | Xóa/sửa trái phép `CAPSTATUS#`/`GATE#`; thu hồi session theo user | CSR-01, MINOR-08 | DESIGN_RESOLVED (không có thao tác xóa; IAM deny sau G10; repair dưới CAS; GSI theo user) | IAM chỉ kiểm được sau G10 |

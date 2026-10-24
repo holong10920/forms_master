@@ -1,6 +1,7 @@
 # Spec #3: Compiler, Bundle & Release Architecture (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.5** (2026-10-24).
+> **Trạng thái: PROPOSAL, revision 2.6** (2026-10-25).
+> - Rev 2.6 (vòng sửa C1, Cross-Subsystem Review): Build Request thêm `keyLedgerSnapshot`, `sitePolicy`, `motionPresets`, `platformRelease` (§5.1; nguồn: spec #5 §6.8); Data Contract mang `identity`, `renamedFrom` (§6, CSR-08); IR có `motion` và `regionId` (§6, CSR-12); LRM có trường `motion` (§11.1); K14 sinh **semantic conformance fixtures** (CSR-11); entry dùng bootstrap mới nhất từng active (§14.1, CSR-14); bootstrap xử lý thêm trạng thái của spec #5 (§14.2, MINOR-10); xác minh stable URL local vs CDN (§16.3); mã `E-ADMISSION-UNAVAILABLE` (§16.4, MINOR-05); catalog mã (§18.1a, MINOR-15).
 > - Rev 2.5: đồng bộ spec #6 (I6-04): preset ví dụ đổi thành `subtle`/`guided`; group `motion` chỉ chứa recipe dùng, canary từng recipe (`E-ARTIFACT-MOTION-UNUSED-RECIPE`); kiểm reduced motion **trước** `import()` và prefetch; mã `E-MOTION-*` vào catalog; version `motion-presets` và thư viện Motion là input của LRM.
 > - Rev 2.4: error contract thêm 423 cho form availability (§16.4, spec #5 §9.1); §16.1 dùng P0 defaults của ADR-058 (`TTL_draft` 72 giờ, `G` 7 ngày, `T_edge_max` là mục kiểm chứng khi deploy); bootstrap kiểm TTL draft theo logic (`savedAt`).
 > - Rev 2.3: đồng bộ catalog diagnostic với spec #4 rev 2.1 (§18.1a); IR preview chỉ được thực thi trong runtime preview cô lập trên origin riêng (ADR-053, §5.1).
@@ -142,6 +143,10 @@ Spec #5 tạo Build Request khi một revision được duyệt publish. Mọi t
   "registryCatalog": "sha256:2c3d4e5f60718293a4b5c6d7e8f9012345678901234567890abcdef012345678",
   "ledgerSnapshotId": "ledger-0042",
   "runtimeOverrideSnapshotId": "override-0007",
+  "keyLedgerSnapshot": "sha256:5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d",
+  "sitePolicy": "sha256:6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e",
+  "motionPresets": "sha256:708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f",
+  "platformRelease": "plat-0012",
   "buildConfig": "sha256:3d4e5f60718293a4b5c6d7e8f9012345678901234567890abcdef0123456789a",
   "bootstrap": "sha256:da73c9ebdf5b7d9abcde5f7b9dbacd4f6b8dacbdef5b7d9abcdf4b6e8acdef5f",
   "releaseHtmlTemplate": "sha256:4b6a1f0e3d2c5b8a7f6e9d0c1b4a3f2e5d8c7b6a9f0e1d2c3b4a5f6e7d8c9b0a",
@@ -178,7 +183,7 @@ Spec #5 tạo Build Request khi một revision được duyệt publish. Mọi t
 | K11 | LRM & `releaseId` | IR, Data Contract, lock, plan, Chunk Manifest, toolchain, inventory → **LRM** → `releaseId` (§11) | ✔ | — | — | ✔ | so `releaseId` |
 | K12 | Release HTML | LRM + `releaseId` + template → `index.html` (§11.4) | ✔ | — | — | ✔ | so hash |
 | K13 | Reproducibility verification | **điều phối** hai lần chạy K0..K12 độc lập rồi so sánh (§12). K13 không đứng sau K12 trong một lần chạy; nó bao hai lần chạy. | ✘ (điều phối) | chạy hai builder | ✘ | ✔ (`E-BUILD-NON-REPRODUCIBLE`) | so lần chạy lại với release gốc |
-| K14 | Attestation & handoff | → **provenance**, **Final Release Attestation**; ghi release bundle vào staging (write-once) | ✘ | **ghi** staging | ✘ | ✔ | không ghi; chỉ báo cáo |
+| K14 | Attestation & handoff | → **provenance**, **Final Release Attestation**, *(rev 2.6, CSR-11)* **semantic conformance fixtures** (private: kịch bản sinh tất định từ IR + kết quả của engine TS của chính release — đường đi active, lỗi validation, payload — để deploy gate chạy trên evaluator Python mới, spec #5 §9.2); ghi release bundle vào staging (write-once) | ✘ | **ghi** staging | ✘ | ✔ | không ghi; chỉ báo cáo |
 
 **Ngoài compiler (spec #5):** tạo Build Request; đăng ký release; integrity gate đọc lại từ storage; deploy gate (spec #2 §10.4); kiểm ledger **hiện tại** (trạng thái có thể đã đổi kể từ snapshot ở K3); activation; sinh `entry.html`; CDN. **Không có stage nào của compiler gọi AWS.**
 
@@ -269,10 +274,10 @@ flowchart LR
 
 ## 6. Normalized IR và Data Contract (spec #1 §12 giao cho spec #3)
 
-- **IR envelope:** `{ "irFormat": 1, "engineIrRange": ">=1.0.0 <2.0.0", "form": {...}, "steps": [...], "nodes": [...], "conditions": {...}, "capabilities": { alias: CK }, "effects": [...] }`. Nội dung là kết quả K4–K5 của spec #1 (phẳng, đã resolve, không dạng viết tắt). Có JSON Schema 2020-12 riêng; TS engine và Python evaluator cùng đọc (ADR-017).
+- **IR envelope:** `{ "irFormat": 1, "engineIrRange": ">=1.0.0 <2.0.0", "form": {...}, "steps": [...], "nodes": [...], "conditions": {...}, "capabilities": { alias: CK }, "effects": [...] }`. Nội dung là kết quả K4–K5 của spec #1 (phẳng, đã resolve, không dạng viết tắt). Có JSON Schema 2020-12 riêng; TS engine và Python evaluator cùng đọc (ADR-017). *(rev 2.6, CSR-12)* Thêm `motion` (IR Motion đã chuẩn hóa: `{ presetRef: { package, version, digest }, recipesByCategory, durationsMs, reduced: "none" }`, không có khi Motion-none — spec #6 §7.3) và `regionId` ổn định cho mỗi step/section/field/block instance (dùng cho `MotionRegion` và `ExitShell`, spec #6 §6).
 - **Canonical:** RFC 8785, UTF-8; key sắp xếp; mảng giữ thứ tự ngữ nghĩa (thứ tự step, thứ tự field), không sắp xếp lại.
 - **Phân phối:** IR là **file asset** `assets/form-ir.<hash>.json` trong inventory, được `index.html` preload. Byte của file **chính là** JCS(IR), nên `sha256(file)` = `inputs.ir` trong LRM (K11 kiểm). Backend dùng **đúng byte đó** (lưu kèm release record, spec #5). *[Claude: tách file thay vì inline vào HTML để HTML nhỏ, IR cache được, và backend/browser dùng cùng byte.]*
-- **Data Contract:** `{ dataContractFormat: 1, keys: [{ key, type, classification, include }] }`, dùng cho diff ở K5 và cho backend projection (spec #1 §7.6.7).
+- **Data Contract:** `{ dataContractFormat: 2, keys: [{ key, identity, renamedFrom?, type, classification, include }] }` *(rev 2.6, CSR-08: thêm `identity` (fieldDefId / qualified identity, spec #1 R-01) và `renamedFrom` theo spec #1 §6.4 R-04(3))*. Dùng cho diff ở K5, cho backend projection (spec #1 §7.6.7) và là nguồn của key ledger (spec #5 §6.4 R4). K5 kiểm key mới với `keyLedgerSnapshot` của Build Request (key đã giữ cho identity khác → `E-KEY-COLLISION` ngay khi build, không đợi VERIFYING).
 - IR **không** chứa giá trị khách (spec #1 §16).
 
 ---
@@ -429,7 +434,7 @@ Output: **Chunk Manifest** (private, digest trong LRM): `{ chunkManifestFormat: 
 - **Hash:** SHA-256. Digest viết `sha256:<64 hex>`.
 - **Path:** tương đối với gốc release; `/`; `[a-z0-9._/-]`; cấm `..`, `./`, `/` đầu, `//`, rỗng; trùng khi bỏ hoa/thường → lỗi; sắp xếp theo byte UTF-8.
 - **`contentType`:** từ bảng cố định theo đuôi file.
-- *(rev 2.5)* Form có Motion: version `@platform/motion-presets`, version thư viện Motion (pin chính xác) và IR `motion` đã chuẩn hóa là input của LRM (spec #6 §7.3).
+- *(rev 2.5)* Form có Motion: version `@platform/motion-presets`, version thư viện Motion (pin chính xác) và IR `motion` đã chuẩn hóa là input của LRM (spec #6 §7.3). *(rev 2.6)* LRM có trường `motion: { presetsPackage, version, digest, library, libraryVersion }` (không có khi Motion-none); `motionPresets` của Build Request là digest platform asset trong release store (CSR-12).
 - **Không thuộc LRM** (để `releaseId` không đổi khi chúng đổi): resolution context của lock (hash catalog, ledger/override snapshot), `buildOptions` (ví dụ `sourcemap: private`), platform commit, thời điểm, pipeline, operator. Chúng nằm trong provenance.
 - **Khóa sắp xếp:** `inventory` theo `path` (byte UTF-8); `sharedExternals` theo tên; các mảng của Chunk Plan, Chunk Manifest như §7.2, §10; lock theo chuỗi CK rồi FBK; `resolvedDependencies` của provenance theo `name` rồi `version`.
 
@@ -616,7 +621,7 @@ private:
 - Khối `active` trong `entry.html` chỉ dùng để **chọn release cho khách mới**; không phải bằng chứng authoritative. Backend vẫn kiểm support/security ở mọi query/submit.
 - **Vòng đời bootstrap** *(sửa sau consistency review)*:
   - Là platform asset, do trusted pipeline build bằng canonical builder, phát hành vào release store, pin bằng digest trong Build Request (§5.1) và trong LRM.
-  - Release `index.html` tham chiếu bootstrap **của chính nó** (`load.bootstrap`). `entry.html` (spec #5) dùng bootstrap mà **active release** tham chiếu, nên entry và release active luôn cùng bootstrap.
+  - Release `index.html` tham chiếu bootstrap **của chính nó** (`load.bootstrap`). *(rev 2.6, CSR-14)* `entry.html` (spec #5) dùng **`POINTER.bootstrapDigest`** = bootstrap mới nhất từng thuộc release active (không giảm khi rollback), **không** phải bootstrap của active release; nhờ luật dưới (bootstrap mới đọc được mọi `draftFormat` của release còn trong `S`), rollback không biến draft của release còn supported thành `incompatible`. Entry và release active vì vậy có thể khác bootstrap; release `index.html` vẫn dùng bootstrap của chính nó.
   - Được giữ ít nhất bằng release nào còn tham chiếu nó.
   - **Metadata draft có version (`draftFormat`)**: bootstrap mới phải đọc được mọi `draftFormat` mà một release còn supported có thể đã ghi. Thay đổi format chỉ được **thêm** trường. `draftFormat` lạ → coi là `incompatible` (thông báo + Start Over), không xóa draft.
 
@@ -649,6 +654,7 @@ sequenceDiagram
   end
 ```
 
+- *(rev 2.6, MINOR-10)* Status API (spec #5 §7.4) trả thêm `releaseState`, `retention`, `availability`, `admission`, `freshness`. Bootstrap: `quarantined`/`withdrawn` → không Resume, thông báo + Start Over; availability `degraded` → cho Resume nhưng báo trước 「現在は送信を受け付けていません」; `suspended` → trang bảo trì; `rel#pending` (409) → coi như `incompatible`; `freshness: cached` → chỉ gợi ý Resume, `unknown` → 「確認できませんでした」 + 再試行.
 - Không tải engine, plugin hay Motion **trước** khi bootstrap quyết định release (ADR-038). Không preload asset của active release trong `entry.html`.
 - Fast path (không draft): `entry.html` → `bootstrap.js` → asset của active release, tải song song.
 
@@ -780,7 +786,7 @@ Ràng buộc (P0 defaults theo ADR-058: `TTL_draft` 72 giờ, `G` 7 ngày; `T_ed
 3. **CAS active pointer** — bước duy nhất làm release thành active.
 4. Sinh `entry.html` từ pointer + khối `load` của release; ghi ra.
 5. Invalidate CDN (sau G10).
-6. Xác minh stable URL trả `releaseId` mới.
+6. Xác minh stable URL trả `releaseId` mới. *(rev 2.6)* Local / trước G10: đọc trực tiếp object entry ở origin (`delivery.cdn = n/a`); probe qua CDN chỉ có sau G10 (spec #5 §6.6).
 - Lỗi ở 1–2 → active không đổi (TM-B11). Lỗi sau 3 → reconciler đưa `entry.html` khớp pointer. Rollback = cùng protocol, không có build.
 
 ### 16.4. Error contract (mã HTTP chốt ở spec #5)
@@ -789,11 +795,12 @@ Ràng buộc (P0 defaults theo ADR-058: `TTL_draft` 72 giờ, `G` 7 ngày; `T_ed
 |---|---|---|---|
 | Incompatible | `E-RELEASE-INCOMPATIBLE` | 409 | không |
 | Tạm thời không khả dụng | `E-CAPABILITY-UNAVAILABLE` | 503 + `Retry-After` | có |
+| *(rev 2.6)* Không xác minh được admission (gate thiếu, store không khả dụng, đang đóng gate) | `E-ADMISSION-UNAVAILABLE` (khác `E-CAPABILITY-UNAVAILABLE`) | 503 + `Retry-After` | có |
 | Retired | `E-RELEASE-RETIRED` | 410 | không |
 | Security suspended | `E-RELEASE-SUSPENDED`, `E-CAPABILITY-BLOCKED` | 423 | không |
 | Form tạm ngừng (spec #5 §9.1, M4/M5) | `E-FORM-SUBMISSION-PAUSED`, `E-FORM-SUSPENDED` | 423 | không |
 | Field inactive trong payload (ADR-060) | `E-INACTIVE-DATA-PRESENT` (chỉ path, không giá trị) | 422 | không |
-| Validation | (spec #1 V-08) | 422 | không |
+| Validation | (spec #1 V-08) — gồm `UNKNOWN_FIELD`, lỗi kiểu, `E-INACTIVE-DATA-PRESENT` (rev 2.6, MINOR-15) | 422 | không |
 | Idempotency key dùng lại với payload khác | `E-IDEMPOTENCY-KEY-REUSED` | 409 | không |
 
 ---
@@ -864,6 +871,8 @@ Ràng buộc (P0 defaults theo ADR-058: `TTL_draft` 72 giờ, `G` 7 ngày; `T_ed
 | `E-READONLY-FEATURE-BROKEN` | error | ✔ | prefill/lookup/`skipWhen`/nhóm lặp tham chiếu thứ không còn hợp lệ | spec #4 §8.1 |
 | `E-ADMIN-CAP-NOT-BUNDLED` | error (chỉ Admin) | — (compiler **không** phát) | version đã pin không có trong Admin/Preview build | spec #4 §14.4 |
 
+| `E-CAP-NOT-INGESTED` *(rev 2.6)* | error | ✔ | plugin version chưa ingestion runtime (spec #5 §9.3.3) | spec #5 |
+| `E-ADMIN-MOTION-NOT-BUNDLED` *(rev 2.6, chỉ Admin)* | error | — (compiler không phát) | version preset pin không có trong Preview build | spec #6 §10 |
 | `E-MOTION-PRESET-UNKNOWN` | error | ✔ | preset/version không có trong catalog | spec #6 §7.3 |
 | `E-MOTION-CATEGORY-UNSUPPORTED` | error | ✔ | nhóm không được preset hỗ trợ | spec #6 §7.3 |
 | `E-MOTION-PRESET-INCOMPATIBLE` | error | ✔ | `compat.engine` của preset không chứa engine | spec #6 §7.2 |
@@ -1014,7 +1023,7 @@ Loại: **A** automated · **M** manual · **F** future (sau G10/hạ tầng th�
 ### 20.3. Pending cho spec #5 và spec #6
 
 - **Spec #5:** tạo Build Request; release staging/store; release record; status API; integrity gate đọc từ storage; activation (CAS) + reconciler; sinh `entry.html`; cache header thật và CDN invalidation (sau G10); retention job; HTTP status cuối cùng; TTL draft (OD-08); grace window (OD2-09); `T_edge_max`; lưu và phục vụ `bootstrap.js` của platform.
-- **Spec #6:** contract preset Motion; nội dung group `motion`; hành vi reduced motion chi tiết; Motion Animation Editor (P0).
+- **Spec #6:** contract preset Motion; nội dung group `motion`; hành vi reduced motion chi tiết; *(rev 2.6)* tab モーション chọn preset/nhóm/speed (không có animation editor ở P0, ADR-066/067).
 
 ## 21. Phạm vi P0 / P1 / P2
 

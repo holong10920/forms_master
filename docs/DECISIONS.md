@@ -84,6 +84,12 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-065 | OD6-02: preset P0 `none` / `subtle` / `guided`, recipe tween có ID + version, không spring; guided không auto-advance | **APPROVED** | User (spec #6 rev 1 review) | 2026-10-24 |
 | ADR-066 | OD6-03: override Motion theo step → P1 | **APPROVED** | User (spec #6 rev 1 review) | 2026-10-24 |
 | ADR-067 | OD6-04: duration/delay/easing trong recipe có version do platform kiểm soát; Editor chỉ chọn preset, nhóm, speed | **APPROVED AS P0 SCOPE REFINEMENT** | User (spec #6 rev 1 review) | 2026-10-24 |
+| ADR-068 | Cross-Subsystem Review: G1 NOT APPROVED; vòng sửa C1 cho CSR-01..17 + MINOR liên quan; giữ severity; tiêu chí thoát C1 | **APPROVED** | User (C1 approval) | 2026-10-24 |
+| ADR-069 | SR-03: revocation browser facet nhiều form không nguyên tử toàn cục | **CONDITIONALLY ACCEPTED RISK** (chỉ synthetic P0) | User (C1 approval) | 2026-10-24 |
+| ADR-070 | SR-04: `presentation` là JavaScript chạy trong origin Admin đã xác thực | **NOT YET ACCEPTED — VERIFICATION REQUIRED**; không accept chỉ vì "trusted" | User (C1 approval) | 2026-10-24 |
+| ADR-071 | SR-05: preview session là bearer capability hẹp | **CONDITIONALLY ACCEPTED RISK** (chỉ synthetic P0) | User (C1 approval) | 2026-10-24 |
+| ADR-072 | Phạm vi P0: M4 (suspend submission) thật, runtime override API hoạt động ở local, M3 `block-operation` theo FBK với contract tối thiểu | **APPROVED** | User (C1 approval) | 2026-10-24 |
+| ADR-073 | VG-07 Safari thật: bắt buộc trước rollout cho khách thật, **không** phải điều kiện G1; P0 dùng Playwright WebKit | **APPROVED** | User (C1 approval) | 2026-10-24 |
 
 ---
 
@@ -130,6 +136,8 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
     - Motion `scale-spring`
 - Gakki là tùy chọn và không nằm trong MVP hiện tại.
 - **Người duyệt:** User (G0 §1). **Ngày:** 2026-10-23.
+
+- **Amendment (2026-10-24, user approval sau Cross-Subsystem Review; lịch sử ở trên giữ nguyên):** preset P0 là `subtle` (Sports) và `guided` (PC), dùng recipe **tween** (ADR-065); `fade-slide` có thể triển khai bằng tween; `scale-spring` **không còn bắt buộc** cho P0; chỉnh tham số thấp cấp chuyển P1 (ADR-066, ADR-067).
 
 ## ADR-004 — MVP = vertical slice
 
@@ -837,6 +845,8 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 - **Trạng thái:** APPROVED WITH ADJUSTMENTS.
 - **Người duyệt:** User (spec #2 review #1). **Ngày:** 2026-10-24.
 
+- **Ghi chú (2026-10-25, C1 / CSR-04; không đổi quyết định):** "enforce ngay" áp cho **admission** (G-ADM, spec #5 §9.3.7). Thực thi adapter sau commit của override **không** được bảo đảm dừng ngay (G-EXEC, TOCTOU — ADR-063).
+
 ## ADR-036 — Self-contained Form Release (spec #3 Q3-1)
 
 - **Bối cảnh:** spec #3. Artifact của mỗi form nên tự chứa hoàn toàn, hay các form dùng chung một lớp runtime (engine/React) được cache chung.
@@ -1168,4 +1178,43 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 ## ADR-067 — Tham số thấp cấp của Motion (OD6-04)
 
 - **Quyết định (user): APPROVED AS P0 SCOPE REFINEMENT** — duration/delay/easing nằm trong recipe có version do platform kiểm soát; Business Editor không chỉnh ms, easing curve hay thuộc tính animation tùy ý; chỉ chọn preset, nhóm, speed. Traceability MOTION-01: engine/recipe vẫn hỗ trợ duration/delay/easing; UI P0 không mở tham số thấp cấp; chỉnh nâng cao chuyển P1 nếu có nhu cầu. **Không** đánh dấu requirement DONE chỉ vì đã sửa scope.
+- **Người duyệt:** User. **Ngày:** 2026-10-24.
+
+## ADR-068 — Vòng sửa C1 (Cross-Subsystem Review)
+
+- **Quyết định (user):** G1 NOT APPROVED. **C1 APPROVED** cho CSR-01..17 và các MINOR liên quan trực tiếp. Giữ nguyên 0 BLOCKER / 17 MAJOR / 19 MINOR; chỉ đổi phân loại khi có evidence và lập luận kỹ thuật cụ thể. Không coi MAJOR là MINOR chỉ vì fail closed.
+- **Yêu cầu:** sửa có trọng tâm theo từng finding; không viết lại sáu spec; không thêm tính năng ngoài scope; không mở lại ADR đã duyệt nếu không có mâu thuẫn thực sự; mỗi sửa có producer/consumer contract, expected behavior, acceptance kiểm được; không dùng "FIXED VERIFIED" khi mới sửa tài liệu. Phân biệt: design issue resolved / accepted risk / verification pending / unresolved contradiction.
+- **Ưu tiên:** A (CSR-01, CSR-08, CSR-09/12), B (CSR-10, CSR-11), C (CSR-03, CSR-04, CSR-05, CSR-07), D (CSR-14, CSR-15, CSR-16); còn lại theo finding thực tế.
+- **V5-01:** đánh giá **per-plugin authoritative effective policy state** có version: một nguồn sự thật; thay đổi override/status cập nhật quyết định hiệu lực + version theo protocol nguyên tử; tạo gate kiểm đúng trạng thái/version; không đọc `Query` rồi coi là snapshot serializable; không tạo gate mở khi thiếu/stale/unknown; linearization cho revoke/create/resume đồng thời; M3 là nguồn chặn được bảo toàn; tránh hot item toàn cục; lưu ý DynamoDB không cho ConditionCheck và Update **cùng item** trong một transaction; ví dụ transaction + ma trận interleaving; không đánh dấu V5-01 VERIFIED trước CT-26.
+- **Trace end-to-end** Sports và PC qua mọi ranh giới (authority, schema, version pin, failure, test, section); field không có producer, transition không có actor/trigger, guarantee tương thích không có điểm enforce → MAJOR chưa giải quyết.
+- **Tiêu chí thoát C1:** cập nhật report giữ lịch sử disposition; bảng CSR-01..17 (finding → fix → section đổi → verdict reviewer); sửa MINOR liên quan; targeted re-review độc lập trên file thật; không ghi PASS cho test chưa chạy; tách design-resolved khỏi verification-pending; mọi accepted risk có owner, scope, enforcement, expiry/review trigger, escalation; không còn BLOCKER/MAJOR trước G1 Approval Package; package có verification gate mở và giới hạn synthetic-only; MAJOR mới phải báo rõ.
+- **Người duyệt:** User. **Ngày:** 2026-10-24.
+
+## ADR-069 — SR-03: revocation browser facet nhiều form
+
+- **Quyết định (user): CONDITIONALLY ACCEPTED RISK cho synthetic P0.** Điều kiện: không traffic khách thật / PII thật; ngăn plugin bị revoke xuất hiện trong release mới; xác định chính xác form/release bị ảnh hưởng; suspend từng form bằng operation idempotent; hiển thị tiến độ N/M và form chưa suspend được; reconcile operation bị gián đoạn; không tuyên bố revocation browser toàn cục là nguyên tử; không tuyên bố code trong tab đã mở ngừng ngay; backend admission/authorization tiếp tục fail closed. Trước rollout khách thật: security review riêng cho emergency browser-plugin revocation.
+- **Người duyệt:** User. **Ngày:** 2026-10-24.
+
+## ADR-070 — SR-04: presentation trong origin Admin
+
+- **Quyết định (user): NOT YET ACCEPTED; VERIFICATION REQUIRED.** Presentation là JavaScript thực thi trong origin Admin đã xác thực; contract "thuần" không tạo ranh giới bảo mật. Giữ tạm thiết kế P0 với điều kiện: chỉ code plugin first-party/trusted được Platform duyệt; không code tùy ý hay URL runtime từ cấu hình Admin; presentation không import Component hay code server/design ngoài allowlist; static import graph guard; negative fixture side effect lúc import và mount; kiểm dependency bắc cầu; CSP/network phù hợp; plugin không nhận credential hay capability đặc quyền qua props/context. Code chạy cùng origin → không được tuyên bố sandbox isolation. Không chứng minh được → giữ MAJOR và đề xuất **host-owned declarative presentation** hoặc ranh giới cô lập thật. Không chuyển thành accepted risk chỉ vì code được gọi là trusted.
+- **Người duyệt:** User. **Ngày:** 2026-10-24.
+
+## ADR-071 — SR-05: preview session bearer capability
+
+- **Quyết định (user): CONDITIONALLY ACCEPTED RISK cho synthetic P0.** Yêu cầu: session gắn đúng snapshot/build identity của preview; quyền chỉ đủ cho simulation mock/synthetic; không có quyền Admin hay ghi nghiệp vụ thật; TTL hữu hạn; thu hồi khi logout, draft đổi, session bị thay; kiểm origin/source/schema message; từ chối replay và dùng chéo session theo policy; không đưa capability vào URL/query/log; không nhầm với token xác thực Admin. Làm rõ session được cấp và truyền tới iframe thế nào (điều hướng iframe không mang custom header). Negative test: rò token, replay, session hết hạn, sai snapshot, gọi API trái phép.
+- **Người duyệt:** User. **Ngày:** 2026-10-24.
+
+## ADR-072 — Phạm vi P0: M4, runtime override API, M3 block-operation
+
+- **Quyết định (user): APPROVED.**
+  - **M4 (suspend submission của form):** bắt buộc P0 — operation server-side thật, RBAC, audit, admission gate authoritative, không chỉ ẩn nút; resume theo policy không xóa blocker khác.
+  - **Runtime override API:** bắt buộc chạy được ở local PoC — không chỉ sửa file cấu hình hay mock function; authorization, audit, CAS/versioning, idempotency, fail closed, chỉ dữ liệu synthetic. AWS vẫn không trước G10.
+  - **M3 `block-operation` theo FBK:** bắt buộc P0 theo contract tối thiểu — nguồn chặn độc lập; chặn toàn bộ operation của FBK theo policy; không bị xóa khi nguồn khác resume/retire; có transition rule, API contract, test; không xây policy engine tổng quát.
+- Thay phạm vi "M3, M5 tối thiểu / override mô phỏng" của spec #2 §21.
+- **Người duyệt:** User. **Ngày:** 2026-10-24.
+
+## ADR-073 — Hạn VG-07 (Safari thật)
+
+- **Quyết định (user): APPROVED.** Test Safari thật **bắt buộc trước rollout cho khách thật**, **không** phải điều kiện G1. P0 kiểm chứng bằng Playwright WebKit. Không có môi trường test → giữ NOT VERIFIED và chặn rollout, hoặc cần exception approval riêng. Bỏ cách ghi "trước G1 hoặc khi có thiết bị".
 - **Người duyệt:** User. **Ngày:** 2026-10-24.
