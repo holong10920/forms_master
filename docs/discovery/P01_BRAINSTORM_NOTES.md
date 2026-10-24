@@ -1993,3 +1993,38 @@ Từ ngữ hiển thị (ngôn ngữ Admin: OD-11): Form, 下書き (Draft), 公
 
 - ADR-048..052. Spec #4 rev 2; spec #1 rev 3.4 (named condition theo ID, đóng OD-03, OD-11; node preview chưa cấu hình; `draftVersion` là metadata); spec #2 rev 2.6 (`Presentation` của `fieldType` + conformance không side effect; registry kiểm `designHostApi`); spec #3 rev 2.2 (mode `preview` = tập con an toàn cho browser, không node hoàn tất tổng hợp; mode `preflight` phía server là authoritative).
 - Consistency review độc lập của spec #4 rev 2 (spec #4 §27): 0 BLOCKER, 6 MAJOR, 10 MINOR, tất cả đã xử lý. Quan trọng nhất: (1) shadowing chứng minh được là error như spec #1 §8.5 (`E-TRANSITION-SHADOWED`); (2) thay đổi Data Contract là cảnh báo kèm xác nhận khi gửi review (`W-CONTRACT-CHANGE`); (3) trùng key là từ chối lưu, không phải diagnostic; (4) chỉ kiểm `compat` của host mà release có facet; (5) digest phát hiện lệch tính theo `inputIds`, chỉ K1–K6. Các mã diagnostic mới cần bổ sung vào catalog của spec #3 (I4-15).
+
+## Session 3: Review spec #4 rev 2 + Spec #5 Answer #1 (2026-10-24) → ADR-047 refinement, ADR-053, ADR-054
+
+### CONFIRMED (user)
+
+- **Spec #4 rev 2: CONDITIONALLY ACCEPTED — targeted corrections only.** Không mở lại Hybrid Workspace.
+- **ADR-047 refinement APPROVED:** Canvas chỉ Presentation thuần + design-time adapter; bốn mức sẵn sàng với entry criteria, blocking diagnostics, allowed actions tường minh; không nhầm với trạng thái lưu, vòng đời review, trạng thái revision đã publish.
+- **OD4-06 → ADR-053:** bác chạy cùng document. Preview/Simulation P0 trong iframe sandbox trên origin riêng; postMessage có kiểu; không credential/PII; không code từ message; không `allow-scripts` + `allow-same-origin` cùng origin; cân nhắc origin `null`. Không tự fallback cùng document; isolation thành blocker thì báo trade-off. Test: storage/cookie, API đặc quyền, fetch ngoài allowlist, top-level navigation, message sai dạng, crash, đổi session khi draft đổi, cùng semantic engine. Server authorization vẫn bắt buộc.
+- **Việc còn lại của spec #4:** đồng bộ 10 mã vào spec #3; preflight server authoritative; digest không thay differential test; khôi phục trùng key bảo toàn tham chiếu, không đổi ngầm mã option; giữ bảo toàn tính năng chỉ đọc và snapshot bất biến. Sau đó READY_FOR_CROSS_SPEC_REVIEW nếu không có blocker mới.
+- **Spec #5 Answer #1 → ADR-054** (kịch bản PC Rev 7→8 là **SYNTHETIC**, không phải evidence lịch sử): trải nghiệm Publisher; publication state machine 9 stage khái niệm (idempotent, CAS, không activation trước gate, không pointer trỏ artifact chưa sẵn sàng, retry/reconcile, artifact bất biến, activation ≠ CDN propagation, không hứa atomicity phân tán); rollback thủ công không rebuild, phân biệt pointer/CDN/session; session safety theo ADR-037; audit tối thiểu không PII; P0 manual, P1 canary/auto-rollback; vertical slice đầy đủ Editor → rollback; không tự chọn `T_stale`, `G`.
+- **Bước tiếp:** đưa 2–3 phương án kiến trúc cho publication/activation/persistence, trade-off, đề xuất P0; rồi brainstorming với câu hỏi thực sự ảnh hưởng kiến trúc. Vertical slice nhỏ chạy được sau G1, không thành deployment platform tổng quát.
+
+### Đã thực hiện (Claude)
+
+- ADR-047 cập nhật refinement; ADR-053, ADR-054.
+- Spec #4 rev 2.1: §14.1 bảng bốn mức sẵn sàng + bảng tách trục; §14.7 cô lập Preview (origin riêng, `sandbox="allow-scripts allow-same-origin"` trên origin **khác** Admin, không cấp top-navigation/popups/modals/downloads/forms; CSP preview; postMessage `fb-preview` v1; preview session là capability hẹp; crash/timeout; cùng engine); §9 D5/D7; §8.2 khôi phục trùng key bằng composite command; §14.3 digest ≠ differential test; test 4Z01–4Z09, 4D03; OD4-06 đóng; đề xuất READY_FOR_CROSS_SPEC_REVIEW.
+- Spec #2 rev 2.7: `Presentation` ở sub-entry `presentation` có đồ thị import thuần; Admin build chỉ chứa design facet + entry `presentation`; Preview build trên origin preview chứa browser facet; conformance lúc import. (Lý do: design facet import browser facet thì code `Component` vẫn bị evaluate trong origin Admin.)
+- Spec #3 rev 2.3: §18.1a catalog 10 mã mới; IR preview chỉ thực thi trong runtime preview cô lập.
+
+### S5-P01 Phương án kiến trúc publication / activation / persistence (PROPOSED, chờ user chọn)
+
+Bối cảnh từ master: Python API (FastAPI/Lambda adapter), local durable adapter + DynamoDB cho AWS PoC nếu phù hợp (API-02), build worker tách khỏi request (API-06), artifact versioned trên S3 + stable entry + rollback pointer (API-07), CloudFront cache (API-08). Spec #3 §16 đã chốt khung: active pointer record ở backend là nguồn sự thật (CAS), `entry.html` là bản chiếu, reconciler.
+
+| | **A. Operation Record + Reconciler trên một store authoritative** | **B. Workflow engine được quản lý (Step Functions) + DB** | **C. Pointer trong object storage (conditional write) + DB cho draft/review** |
+|---|---|---|---|
+| Nguồn sự thật | một store (DynamoDB ở AWS; SQLite ở local, cùng repository interface): draft, snapshot, review, release record, active pointer, operation, audit, submission + outbox | DB cho dữ liệu; trạng thái tiến trình nằm trong execution của workflow engine | pointer `active.json` trên S3 (If-Match); DB cho draft/review/operation/audit |
+| State machine | hàng `PublishOperation` với trạng thái tường minh; mỗi chuyển là conditional write theo `opVersion`; worker (process local / CodeBuild) chạy stage; reconciler định kỳ đẩy tiếp operation bị treo và sửa `entry.html` lệch pointer | định nghĩa trong engine; retry/timeout có sẵn | tự viết như A, nhưng pointer ở store khác |
+| Activation | một transaction: điều kiện `pointerVersion == expected` ∧ release `VERIFIED` ∧ security `normal` → đổi pointer + đánh dấu operation + audit + outbox `project-entry` | bước Task gọi DB CAS (vẫn cần như A) | conditional PUT `active.json`; audit/operation ghi riêng → không cùng transaction |
+| Submit + outbox | transaction trong cùng store | như A | như A (DB) |
+| Local demo | SQLite + filesystem/MinIO + static server làm "CDN"; cùng code state machine | cần Step Functions Local hoặc một orchestrator local khác → hai bản ngữ nghĩa | MinIO phải hỗ trợ conditional write giống S3; dễ lệch |
+| Ưu | một miền nhất quán cho mọi trạng thái authoritative; audit và pointer đổi cùng transaction; test được hoàn toàn local; khớp master (DynamoDB) | lịch sử execution trực quan; retry sẵn | đường phục vụ đơn giản; pointer gần CDN |
+| Nhược | tự viết state machine + reconciler (phải test kỹ: crash giữa stage, retry, duplicate); DynamoDB cần thiết kế access pattern cho lịch sử/audit; hai adapter phải cùng ngữ nghĩa (contract test) | thêm hạ tầng và IaC; local ≠ AWS; vẫn cần CAS ở DB; quá sức P0 | hai nguồn sự thật; pointer đổi và audit không cùng transaction; backend kiểm support/security phải đọc S3 (trễ, cache) |
+| Phù hợp P0 | **Khuyến nghị** | P1 nếu vận hành cần | Không khuyến nghị |
+
+Khuyến nghị A vì: mọi quyết định authoritative (pointer, trạng thái release, support/security, operation, audit, submission/outbox) nằm trong **một** miền có conditional write/transaction, nên không phải hứa atomicity phân tán; các bước có side effect ngoài store (ghi artifact write-once, ghi `entry.html`, invalidation) đều idempotent và được reconciler đẩy lại; cùng một code state machine chạy local và AWS. Chi tiết sẽ viết trong spec #5 sau khi user chọn.

@@ -1,6 +1,7 @@
 # Spec #3: Compiler, Bundle & Release Architecture (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.2** (2026-10-24).
+> **Trạng thái: PROPOSAL, revision 2.3** (2026-10-24).
+> - Rev 2.3: đồng bộ catalog diagnostic với spec #4 rev 2.1 (§18.1a); IR preview chỉ được thực thi trong runtime preview cô lập trên origin riêng (ADR-053, §5.1).
 > - Rev 2.1: thêm mode `preview` (§5.1) theo spec #4.
 > - Rev 2.2: theo spec #4 review #1: `preview` là **tập con phân tích an toàn cho browser**, không có node hoàn tất tổng hợp (dùng `PREVIEW_ONLY_UNCONFIGURED_PATH`); thêm mode **`preflight`** phía server, authoritative (§5.1).
 > - Review #1 (rev 1): **CONDITIONALLY ACCEPTED FOR TECHNICAL VERIFICATION**; OD3-01 → ADR-041, OD3-02 → ADR-042 (SPIKE-GATE-01).
@@ -148,7 +149,7 @@ Spec #5 tạo Build Request khi một revision được duyệt publish. Mọi t
 ```
 
 - `mode`: `release` (trusted) · `rebuild-verify` · `dev` (không trusted, cho phát triển) · *(rev 2.1)* `preview`.
-- **`preview`** (spec #4 §14.1; rev 2.2): **không** phải cả pipeline. Admin chỉ chạy **tập con thuần, tất định, an toàn cho browser**: kiểm cấu trúc (K1), version gate (K2), kiểm tra resolve **chỉ đọc** trên catalog snapshot (K3, không đọc store), expand/lower (K4), phân tích ngữ nghĩa (K5), sinh IR (K6) — bằng **cùng package TS và cùng version** với server. Package này không phụ thuộc code server-only, không I/O, không nạp plugin source. Input do Admin tải qua API (draft, block revision đã pin, catalog/ledger snapshot). Khác `release`: chỉ dừng ở diagnostic `gate: preview`; đích transition còn trống được lower thành node **`PREVIEW_ONLY_UNCONFIGURED_PATH`** (spec #1 §8.1: điểm dừng bị chặn, **không** phải hoàn tất). Không K7–K14, không artifact, **không authoritative**.
+- **`preview`** (spec #4 §14.1; rev 2.2): **không** phải cả pipeline. Admin chỉ chạy **tập con thuần, tất định, an toàn cho browser**: kiểm cấu trúc (K1), version gate (K2), kiểm tra resolve **chỉ đọc** trên catalog snapshot (K3, không đọc store), expand/lower (K4), phân tích ngữ nghĩa (K5), sinh IR (K6) — bằng **cùng package TS và cùng version** với server. Package này không phụ thuộc code server-only, không I/O, không nạp plugin source. Input do Admin tải qua API (draft, block revision đã pin, catalog/ledger snapshot). Khác `release`: chỉ dừng ở diagnostic `gate: preview`; đích transition còn trống được lower thành node **`PREVIEW_ONLY_UNCONFIGURED_PATH`** (spec #1 §8.1: điểm dừng bị chặn, **không** phải hoàn tất). Không K7–K14, không artifact, **không authoritative**. *(rev 2.3, ADR-053)* Phân tích chạy trong Admin; IR preview chỉ được **thực thi** trong runtime preview cô lập (iframe trên origin preview riêng, spec #4 §14.7), không bao giờ trong document của Admin.
 - **`preflight`** (rev 2.2): K0–K6 chạy **phía server** (build worker), cùng package, input theo digest; là kết quả **authoritative** cho mức Review-ready, cho Submission Simulation (IR do server sinh, không tin IR của Admin) và trước publish. IR preflight không bao giờ chứa `PREVIEW_ONLY_UNCONFIGURED_PATH` (`E-IR-PREVIEW-NODE`). Kết quả gồm version analyzer, `inputIds` (`draftVersion`, `catalogSnapshotId`, `ledgerSnapshotId`, `runtimeOverrideSnapshotId`) và digest **chỉ** của diagnostic K1–K6 để Admin phát hiện lệch (spec #4 §14.3); kết quả kiểm của spec #5 (ledger hiện tại, support matrix) trả riêng, ngoài digest.
 - `previousDataContract` vắng khi là revision đầu.
 - `bootstrap` và `releaseHtmlTemplate` (template `index.html` + CSS shell) là **platform asset** do trusted pipeline phát hành vào release store, được pin bằng digest như plugin (§14.1).
@@ -832,7 +833,7 @@ Ràng buộc (chưa có con số; chờ OD-08, OD2-09):
 | K0/K13 | dependency không pin, thiếu, không tin cậy | `E-BUILD-UNPINNED-DEP`, `E-BUILD-DEP-MISSING`, `E-BUILD-UNTRUSTED-DEP` |
 | K1–K2 | schema sai; `schemaVersion` không hỗ trợ | (spec #1 §14) |
 | K3 | capability thiếu/xung đột/không tương thích/bị chặn | `E-CAP-*` (spec #2 §9.2) |
-| K5 | lỗi phân tích | `E-REF-*`, `E-TYPE-*`, `E-GRAPH-*`, `E-PERM-*`, `E-CLASS-*` (spec #1/#2) |
+| K5 | lỗi phân tích | `E-REF-*`, `E-TYPE-*`, `E-GRAPH-*`, `E-TRANSITION-*`, `E-PERM-*`, `E-CLASS-*`, `E-LABEL-MISSING`, `E-READONLY-FEATURE-BROKEN` (spec #1/#2; bổ sung §18.1a) |
 | K7 | plan không lập được (ví dụ unit không thuộc step nào) | `E-CHUNK-PLAN-INVALID` |
 | K9 | bundler lỗi; facet trong store sai hash | `E-BUNDLE-FAILED`, `E-LOCK-UNRESOLVABLE` |
 | K10 | module trái phép, facet cấm, React trùng, chunk ngoài plan, Motion có mặt, cycle, sourcemap công khai, path tuyệt đối, secret, trùng path | §10 |
@@ -841,6 +842,23 @@ Ràng buộc (chưa có con số; chờ OD-08, OD2-09):
 | K14 | không ghi được staging; staging đã có `releaseId` với bộ identity khác | `E-STAGING-WRITE`, `E-RELEASE-ID-COLLISION` |
 | spec #5 đăng ký | form release store đã có `releaseId` với bộ identity khác | `E-RELEASE-ID-COLLISION` |
 | spec #5 | integrity gate lỗi; deploy gate lỗi; ledger chặn | `E-ARTIFACT-HASH-MISMATCH`, `E-ARTIFACT-UNEXPECTED-FILE`, spec #2 §10.4, `E-CAP-VULNERABLE`/`E-CAP-REVOKED` |
+
+### 18.1a. Mã diagnostic bổ sung từ spec #4 rev 2.1 (K5 trừ khi ghi khác)
+
+| Mã | Severity | Chặn publish | Kiểm tra | Nguồn quy tắc |
+|---|---|---|---|---|
+| `E-GRAPH-UNREACHABLE` | error | ✔ | step không có đường từ start (chứng minh được) | spec #1 §8.5 (1) |
+| `E-GRAPH-NO-TERMINAL` | error | ✔ | có đường không tới `complete` | spec #1 §8.5 |
+| `E-GRAPH-REVIEW-ORDER` | error | ✔ | `review` không đứng trước mọi `complete` | spec #1 §8.5 |
+| `E-TRANSITION-TARGET-UNSET` | error | ✔ | dòng transition có điều kiện mà thiếu `to` (mode `preview`: lower thành `PREVIEW_ONLY_UNCONFIGURED_PATH`) | spec #4 §11.2 |
+| `E-TRANSITION-SHADOWED` | error | ✔ | điều kiện hằng `false`/mâu thuẫn, hoặc bị che bởi điều kiện vô điều kiện/giống hệt đứng trước | spec #1 §8.5 (2), (3) |
+| `W-RULE-SHADOWED` | warning | ✘ | tập giá trị là tập con của nhánh trước (chứng minh được, ngoài danh sách §8.5) | spec #4 §11.3 |
+| `W-CONTRACT-CHANGE` | warning | ✘ (spec #5 đòi xác nhận khi gửi review) | data contract diff có contract-change (spec #1 R-02) | spec #4 §13.2 |
+| `E-LABEL-MISSING` | error | ✔ | field/step thiếu nhãn `ja` | spec #4 §13.2 |
+| `E-READONLY-FEATURE-BROKEN` | error | ✔ | prefill/lookup/`skipWhen`/nhóm lặp tham chiếu thứ không còn hợp lệ | spec #4 §8.1 |
+| `E-ADMIN-CAP-NOT-BUNDLED` | error (chỉ Admin) | — (compiler **không** phát) | version đã pin không có trong Admin/Preview build | spec #4 §14.4 |
+
+Phân biệt: `E-GRAPH-NO-DEFAULT` (spec #1) là thiếu `default`; `E-TRANSITION-TARGET-UNSET` là thiếu đích của dòng có điều kiện.
 
 ### 18.2. Runtime
 

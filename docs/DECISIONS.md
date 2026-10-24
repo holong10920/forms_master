@@ -63,12 +63,14 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-044 | OD3-04: pnpm là package manager ưu tiên để đánh giá ở P02 (chưa khóa version) | **APPROVED AS EVALUATION DIRECTION** (spike review) | User (spike review) | 2026-10-24 |
 | ADR-045 | Toolchain Node.js: Node 20 đã EOL; chỉ giữ để tái hiện spike; P02 đánh giá Node 24 LTS | **ACCEPTED** (spike review); version cụ thể chốt ở P02 | User (spike review) | 2026-10-24 |
 | ADR-046 | Spec #4: Business-first Visual Form Builder, Developer-extensible Architecture; persona và hành trình ngày đầu; tiêu chí thành công A/B; nguyên tắc UX | **APPROVED AS PRODUCT DIRECTION** (spec #4 Answer #1); IA, mô hình UI, chỉ số PROPOSED | User (spec #4 Answer #1) | 2026-10-24 |
-| ADR-047 | Spec #4: Hybrid Workspace (Outline · Canvas · Inspector; 作成/フロー/プレビュー/設定), P0 giới hạn; tách 5 loại state; single selection; typed command; ba mức draft; autosave + optimistic locking | **APPROVED AS PRODUCT/UX DESIGN DIRECTION** (spec #4 Answer #2); cơ chế PROPOSED (spec #4) | User (spec #4 Answer #2) | 2026-10-24 |
+| ADR-047 | Spec #4: Hybrid Workspace (Outline · Canvas · Inspector; 作成/フロー/プレビュー/設定), P0 giới hạn; tách 5 loại state; single selection; typed command; bốn mức sẵn sàng (refinement 2026-10-24); Canvas chỉ dùng Presentation thuần; autosave + optimistic locking | **APPROVED AS PRODUCT/UX DESIGN DIRECTION** (spec #4 Answer #2); refinement **APPROVED** (spec #4 rev 2 review); cơ chế PROPOSED (spec #4) | User | 2026-10-24 |
 | ADR-048 | OD4-01: Admin P0 dùng tiếng Nhật qua message catalog | **APPROVED** (spec #4 review #1) | User (spec #4 review #1) | 2026-10-24 |
 | ADR-049 | OD4-02: điều kiện gắn với đích (transition first-match có thứ tự + `それ以外`) và named condition có ID ổn định; cho phép đóng OD-03 sau khi mapping nhất quán | **APPROVED WITH CONDITIONS** (spec #4 review #1) | User (spec #4 review #1) | 2026-10-24 |
 | ADR-050 | OD4-03: được sửa draft khi review đang chờ; review luôn trên snapshot bất biến; stale-review detection | **APPROVED** (spec #4 review #1) | User (spec #4 review #1) | 2026-10-24 |
 | ADR-051 | OD4-04: P0 shared block chỉ chèn/xem/pin/nâng version tường minh có preview impact; sửa block ở P1 | **APPROVED** (spec #4 review #1) | User (spec #4 review #1) | 2026-10-24 |
 | ADR-052 | OD4-05: optimistic concurrency, không merge tự động; giữ thay đổi local, xem bản server và khác biệt, áp lại thủ công | **APPROVED** (spec #4 review #1) | User (spec #4 review #1) | 2026-10-24 |
+| ADR-053 | OD4-06: Interactive Preview/Simulation P0 chạy trong iframe sandbox trên **origin riêng**, không bao giờ cùng document/execution context với Admin đã xác thực; postMessage protocol tối thiểu có kiểu | **APPROVED** (bác phương án (a) của Claude) | User (spec #4 rev 2 review) | 2026-10-24 |
+| ADR-054 | Spec #5 Answer #1: publication state machine có gate, CAS, idempotent, reconcile; rollback thủ công không rebuild; phân biệt pointer / CDN / session; audit tối thiểu; P0 manual rollback, canary/auto-rollback P1. Kịch bản PC Rev 7→8 là **SYNTHETIC** | **APPROVED AS DESIGN REQUIREMENTS** | User (spec #4 rev 2 review & spec #5 Answer #1) | 2026-10-24 |
 
 ---
 
@@ -993,6 +995,9 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
   - **UX acceptance:** task-based test 9 task với persona không biết code; KPI đề xuất chưa phải acceptance; không tuyên bố usability PASS chỉ từ developer tự test.
 - **Trạng thái:** APPROVED AS PRODUCT/UX DESIGN DIRECTION. Cơ chế PROPOSED ở spec #4. G1 NOT APPROVED.
 - **Người duyệt:** User (spec #4 Answer #2). **Ngày:** 2026-10-24.
+- **Refinement (user, review spec #4 rev 2, 2026-10-24): APPROVED.**
+  1. Builder Canvas chỉ dùng **Presentation thuần** + design-time adapter; không mount component hành vi của plugin (thay cho "renderer của khách" ở trên).
+  2. **Bốn mức sẵn sàng** thay ba mức draft, với điều kiện mỗi mức có entry criteria, blocking diagnostics và allowed actions tường minh. Mức sẵn sàng **không** được nhầm với trạng thái lưu, vòng đời review hay trạng thái của revision đã publish.
 
 ## ADR-048 — Ngôn ngữ Admin P0 (OD4-01)
 
@@ -1021,3 +1026,31 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 
 - **Quyết định (user): APPROVED.** P0 dùng optimistic concurrency, không merge tự động. Khi xung đột: giữ thay đổi chưa lưu; hiện bản server mới hơn; cho xem khác biệt theo step/field/rule; hướng dẫn áp lại thủ công; không ghi đè ngầm; không báo 保存済み khi server chưa xác nhận; không CRDT hay collaboration real-time.
 - **Người duyệt:** User (spec #4 review #1). **Ngày:** 2026-10-24.
+
+## ADR-053 — Cô lập Interactive Preview (OD4-06)
+
+- **Bối cảnh:** spec #4 rev 2 đề xuất (a) P0 chạy component hành vi của plugin trong cùng document với Admin và ghi nhận rủi ro; iframe ở P1.
+- **Quyết định (user): bác (a). P0 Interactive Preview / Simulation phải được cô lập về execution.**
+  - Edit Canvas: chỉ presentation, không hành vi của khách.
+  - Interactive Preview / Simulation: runtime khách cô lập, **một** iframe sandbox trên **origin tách biệt với Admin** (không cần iframe riêng cho từng plugin).
+  - Không chia sẻ token xác thực, cookie hay service đặc quyền của Admin; không side effect production; chỉ dữ liệu tổng hợp, mock integration, browser facet đã approve; CSP/network policy giới hạn đích; không lấy code plugin từ URL do Admin JSON chỉ định.
+  - Admin ↔ Preview qua **postMessage protocol tối thiểu có kiểu**: kiểm origin/source chặt, validate schema message, preview session identity, không truyền credential hay PII, không evaluate code từ message.
+  - Không dùng sandbox cùng origin kết hợp `allow-scripts` + `allow-same-origin` (vô hiệu hóa isolation). Nếu dùng opaque origin phải tính tới origin `null` trong kiểm message và CORS; ưu tiên origin preview riêng có policy rõ.
+  - Không cần microfrontend framework hay marketplace. PoC đơn giản hơn: được phép standalone preview trên origin riêng; **không** tự fallback sang chạy cùng document. Nếu isolation thành blocker lớn: báo trade-off và phương án để user duyệt; không mặc định dời sang P1.
+  - Verification bắt buộc: plugin đọc storage/cookie của Admin; gọi API đặc quyền của Admin; fetch ngoài allowlist; điều hướng top-level; postMessage sai dạng; runtime preview crash; preview session bị thay khi draft đổi; Preview và Published Runtime dùng cùng semantic engine. Không tuyên bố an toàn hoàn toàn chỉ nhờ iframe/CSP; server authorization vẫn bắt buộc.
+- **Ngoài ra (cùng review):** đồng bộ 10 mã diagnostic mới vào catalog spec #3; server preflight giữ authoritative; so digest **không thay thế** conformance/differential test; khôi phục trùng key phải bảo toàn tham chiếu trong rule/validator/effect và không đổi ngầm mã option; giữ bảo toàn tính năng chỉ đọc và snapshot review bất biến. Sau các sửa này spec #4 có thể ở trạng thái READY_FOR_CROSS_SPEC_REVIEW nếu không có blocker mới.
+- **Người duyệt:** User (review spec #4 rev 2). **Ngày:** 2026-10-24.
+
+## ADR-054 — Publication và rollback: yêu cầu thiết kế (spec #5 Answer #1)
+
+- **Bối cảnh:** câu hỏi mở đầu spec #5 về một sự cố publish/rollback. User không cung cấp sự cố thật; đưa **SYNTHETIC INCIDENT SCENARIO** (PC Rev 7 active → Rev 8 publish → nhánh 店頭買取 lỗi chọn cửa hàng → rollback Rev 7). Không được trình bày như evidence lịch sử.
+- **Quyết định (user): APPROVED AS DESIGN REQUIREMENTS.**
+  - **Publisher thấy:** form/site; snapshot đã duyệt; revision và release identity; release đang active; release đề xuất; trạng thái compile/validation/integrity; dependency và cảnh báo tương thích; publish readiness; lịch sử thao tác. Không release nào chưa qua gate security/integrity được thành active. Không dùng snapshot hay `releaseId` do client gửi làm bằng chứng authorization.
+  - **Publication state machine** (stage khái niệm): chọn snapshot đã duyệt → tạo Build Request tin cậy → compile + reproducibility → đăng ký release bất biến → stage + verify artifact → verify tương thích backend/runtime → activation bằng cập nhật pointer authoritative → verify serving/activation → audit + kết quả. Yêu cầu: idempotent; CAS; không activation trước khi gate pass; lỗi không để pointer trỏ vào artifact chưa sẵn sàng; retry/reconcile khi gián đoạn; không ghi đè artifact bất biến; phân biệt activation và lan truyền CDN; không hứa atomicity phân tán giữa DB, object storage, CDN nếu không có protocol chứng minh.
+  - **Rollback:** Publisher có quyền xem lịch sử, chọn release trước đủ điều kiện, xem impact/tương thích, xác nhận, thấy kết quả và audit. Không rebuild; không sửa artifact; kiểm eligibility/integrity/security; chuyển pointer an toàn đồng thời; không ghi đè một publish mới hơn mà operator chưa thấy; không tự rollback backend; không tự migrate session. Phân biệt: pointer đã đổi / CDN-browser đã nhận / session cũ vẫn chạy release cũ. Lỗi → không báo thành công giả.
+  - **Session (ADR-037):** session đang mở giữ release đã pin; khách mới theo resolver; cache gây nhất quán cuối cùng; asset cũ giữ theo retention; backend support matrix quyết định release cũ còn submit được không; security suspension có thể override grace; không tự chuyển form đang nhập sang revision khác. Release cũ không còn được hỗ trợ → rollback không tiến hành nếu không có quyết định vận hành phù hợp.
+  - **Audit P0:** ai gửi review, ai approve, ai publish; release nào active; publish/rollback bắt đầu/kết thúc; verification nào PASS/FAIL; số lỗi theo release; rollback nào và lý do. Không log PII/payload. Metrics theo `releaseId` được phép; không xây observability enterprise ở P0.
+  - **Phạm vi:** P0 = manual rollback, phân quyền theo vai trò, kiểm tương thích/security, activation an toàn đồng thời, audit, UI rõ cho operator. P1 có thể đánh giá: auto rollback theo ngưỡng, canary, progressive rollout, phân loại sự cố tự động.
+  - **Spec #5 phải thiết kế vertical slice:** Editor → lưu draft → server preflight → snapshot review → approval → Build Request → compile/verify → đăng ký release → staging → activation → form khách → submit authoritative → mock effect → rollback; gồm API contract, persistence model, authn/authz, sở hữu site/form, optimistic concurrency, idempotency, plugin support/security policy, OD2-08, OD2-09, retention, state machine, server-side validation, transaction/outbox, failure recovery, audit. **Không tự chọn `T_stale` hay `G`** trước khi trình risk/trade-off.
+  - Ưu tiên vertical slice nhỏ chạy được sau G1; không thành deployment platform tổng quát.
+- **Người duyệt:** User (spec #5 Answer #1). **Ngày:** 2026-10-24.
