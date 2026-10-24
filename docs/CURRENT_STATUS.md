@@ -1,16 +1,16 @@
 # Current Status
 
-> Cập nhật lần cuối: 2026-10-24 (phiên 3: spec #3 Answer #5 → ADR-040; Spec #3 Architecture Proposal rev 1 chờ review)
+> Cập nhật lần cuối: 2026-10-24 (phiên 3: spec #3 review #1 → ADR-041, ADR-042; SPIKE-GATE-01 đang chạy)
 
 | Mục | Giá trị |
 |---|---|
-| Phase đang chạy | **P01 Discovery/Design IN_PROGRESS**. Spec #1 rev 3.3 (rev 3 + đồng bộ plugin contract, draft/release pinning, `awaitingCapability`): CONDITIONALLY ACCEPTED FOR DESIGN CONTINUATION (review #2), **chưa duyệt hoàn toàn**. Spec #2 rev 2.3 (rev 2 + đồng bộ ADR-037, ADR-038, spec #3): review #1 = CHANGES REQUIRED — DESIGN DIRECTION ACCEPTED; chờ user review. Spec #3 (Compiler, Bundle & Release): Q&A xong (ADR-036..040); **Architecture Proposal rev 1 chờ user review**. |
+| Phase đang chạy | **P01 Discovery/Design IN_PROGRESS**. Spec #1 rev 3.3 (rev 3 + đồng bộ plugin contract, draft/release pinning, `awaitingCapability`): CONDITIONALLY ACCEPTED FOR DESIGN CONTINUATION (review #2), **chưa duyệt hoàn toàn**. Spec #2 rev 2.3 (rev 2 + đồng bộ ADR-037, ADR-038, spec #3): review #1 = CHANGES REQUIRED — DESIGN DIRECTION ACCEPTED; chờ user review. Spec #3 (Compiler, Bundle & Release) rev 1: review #1 = **CONDITIONALLY ACCEPTED FOR TECHNICAL VERIFICATION**; **SPIKE-GATE-01 đang chạy** (branch local `spike/compiler-feasibility`). |
 | Plan đang active | Không có. `writing-plans` chỉ chạy sau G1. |
 | Git | local branch `p00-discovery`. Các commit WIP của P01 xem bằng `git log` (`21baa8c` = spec #1 rev 2; commit không có nghĩa là đã duyệt). Checkpoint P00 = `0d4fe7b`. Chưa push. Push bị gate bởi G9 (ADR-007). |
 | Remote | repo GitHub cá nhân, **PUBLIC**. G9 BLOCKED; user đang xử lý. |
 | AWS | **KHÔNG GHI**, và chưa gọi AWS API nào. Chưa chọn profile (ADR-006). |
 | Môi trường | macOS local; Node 20.20.2; Python 3.9.6; Docker 29.1.3 |
-| Scope đã duyệt | G0: ADR-001..007. Nguyên tắc của spec #1: ADR-008..012, ADR-015, ADR-016. Design direction: ADR-017 (OD-01), ADR-018 (OD-14), ADR-019 (OD-02), ADR-020 (OD-04), ADR-021 (OD-07), ADR-022 (OD-12). Spec #2: ADR-023..025, ADR-027, ADR-028 (nguyên tắc), ADR-026 (APPROVED AS DESIGN DIRECTION WITH ADJUSTMENTS), ADR-029..035 (OD2-01..07, review #1). Spec #3: ADR-036 (self-contained form release), ADR-037 (session-pinned revision + stable/immutable URL), ADR-038 (CSR + Loading Shell), ADR-039 (reproducible build), ADR-040 (code splitting + prefetch), tất cả APPROVED AS DESIGN DIRECTION. ADR-013/014 + addenda vẫn PROPOSED. (không phải là duyệt architecture). **G1 NOT APPROVED. G9 BLOCKED. G10 BLOCKED.** |
+| Scope đã duyệt | G0: ADR-001..007. Nguyên tắc của spec #1: ADR-008..012, ADR-015, ADR-016. Design direction: ADR-017 (OD-01), ADR-018 (OD-14), ADR-019 (OD-02), ADR-020 (OD-04), ADR-021 (OD-07), ADR-022 (OD-12). Spec #2: ADR-023..025, ADR-027, ADR-028 (nguyên tắc), ADR-026 (APPROVED AS DESIGN DIRECTION WITH ADJUSTMENTS), ADR-029..035 (OD2-01..07, review #1). Spec #3: ADR-036 (self-contained form release), ADR-037 (session-pinned revision + stable/immutable URL), ADR-038 (CSR + Loading Shell), ADR-039 (reproducible build), ADR-040 (code splitting + prefetch), tất cả APPROVED AS DESIGN DIRECTION; ADR-041 (Vite + Rolldown: ứng viên đánh giá); ADR-042 (SPIKE-GATE-01, phạm vi giới hạn). ADR-013/014 + addenda vẫn PROPOSED. (không phải là duyệt architecture). **G1 NOT APPROVED. G9 BLOCKED. G10 BLOCKED.** |
 | URLs | không có |
 
 ## Đã xong (có evidence)
@@ -65,7 +65,7 @@
 - G9 (GitHub) và G10 (AWS): đang chờ user.
 
 ## Tiếp theo
-1. User review Spec #3 Architecture Proposal rev 1 và quyết OD3-01/OD3-02. Sau đó brainstorm spec #4 (Admin).
+1. Chạy SPIKE-GATE-01 (EXP-01..05) trên branch `spike/compiler-feasibility`, báo cáo theo mẫu ADR-042; pipeline consistency review; spec #3 rev 2 nếu cần; trình user. Sau đó brainstorm spec #4 (Admin).
 2. User review spec #2 rev 2.3 và quyết OD2-08/OD2-09 (cần trước spec #5, không chặn spec #3).
 3. User review spec #1 rev 3.3. Nếu đồng ý thì spec #1 chuyển sang READY_FOR_CROSS_REVIEW (chỉ khi user xác nhận).
 4. Sau spec #3: spec #4..#6 (Admin, API/persistence/publish, Motion). Spike đo isolation phải qua gate riêng (ADR-018).

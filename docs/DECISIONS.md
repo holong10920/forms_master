@@ -57,6 +57,8 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-038 | P0 render phía client (CSR) với Loading Shell nhẹ, trung tính với revision; measurement contract; prerender chỉ là tối ưu tương lai (spec #3 Q3-3) | **APPROVED AS DESIGN DIRECTION** (spec #3 Answer #3); release identity, bootstrap/CSP, scenario matrix PROPOSED (S3-P12..P16) | User (spec #3 Answer #3) | 2026-10-24 |
 | ADR-039 | Byte-for-byte reproducible build cho trusted release; canonical build environment; verification hai build sạch; LRM contract; attestation `index.html`; provenance; failure semantics; bootstrap external (spec #3 Q3-4) | **APPROVED AS DESIGN DIRECTION** (spec #3 Answer #4); chi tiết PROPOSED (S3-P12 rev 2, S3-P13 rev 2, S3-P17..P21) | User (spec #3 Answer #4) | 2026-10-24 |
 | ADR-040 | Hybrid code splitting với prefetch có điều kiện; chunk load failure không mất dữ liệu, không tải nhầm release; Motion-none bắt buộc (spec #3 Q3-5) | **APPROVED AS DESIGN DIRECTION** (spec #3 Answer #5); chunk plan, prefetch rule, retry PROPOSED (spec #3) | User (spec #3 Answer #5) | 2026-10-24 |
+| ADR-041 | OD3-01: Vite + Rolldown là ứng viên bundler ưu tiên để kiểm chứng; lựa chọn cuối chờ evidence | **APPROVED AS EVALUATION DIRECTION** (spec #3 review #1) | User (spec #3 review #1) | 2026-10-24 |
+| ADR-042 | OD3-02: SPIKE-GATE-01 — Compiler Feasibility Spike trước G1, phạm vi giới hạn (EXP-01..05) | **APPROVED WITH LIMITED SCOPE** (spec #3 review #1); không phải duyệt implementation | User (spec #3 review #1) | 2026-10-24 |
 
 ---
 
@@ -899,3 +901,27 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
   - Sửa: không deploy public sourcemap ở P0 (sourcemap debug là private artifact có hash/provenance riêng); không tuyên bố path independence nếu test không đổi path mà toolchain thấy.
 - **Trạng thái:** APPROVED AS DESIGN DIRECTION. Cơ chế PROPOSED ở spec #3. G1 NOT APPROVED.
 - **Người duyệt:** User (spec #3 Answer #5). **Ngày:** 2026-10-24.
+
+## ADR-041 — Bundler: Vite + Rolldown là ứng viên đánh giá (OD3-01)
+
+- **Bối cảnh:** spec #3 §9 liệt kê yêu cầu cứng với bundler; cần chọn công cụ bằng evidence.
+- **Quyết định (user): APPROVED AS EVALUATION DIRECTION.**
+  - Vite là ứng viên ưu tiên. Tài liệu Vite hiện tại dùng **Rolldown**, cấu hình qua `build.rolldownOptions` (thay `build.rollupOptions` đã deprecated). Đánh giá Vite + Rolldown trước.
+  - Pin chính xác version Vite, Rolldown, Node, plugin, toolchain. Không trộn cấu hình Rollup cũ vào Rolldown nếu không được hỗ trợ.
+  - Kiểm chứng API chunking thật, dependency graph, hành vi output.
+  - Không coi Vite là đã chọn nếu spike thất bại. Không đáp ứng yêu cầu cứng → đề xuất phương án khác kèm evidence và trade-off. Không chọn vì phổ biến.
+- **Trạng thái:** APPROVED AS EVALUATION DIRECTION; lựa chọn cuối chờ kết quả SPIKE-GATE-01.
+- **Người duyệt:** User (spec #3 review #1). **Ngày:** 2026-10-24.
+
+## ADR-042 — SPIKE-GATE-01: Compiler Feasibility Spike (OD3-02)
+
+- **Bối cảnh:** một số giả định của spec #3 (isolation, tái lập, export condition, retry `import()`, performance) chỉ xác nhận được bằng build thật. ADR-018 yêu cầu spike có gate riêng.
+- **Quyết định (user): APPROVED WITH LIMITED SCOPE.** Ngoại lệ kỹ thuật trước G1, **không** phải duyệt implementation.
+  - **Được phép:** branch local `spike/compiler-feasibility`; code thử nghiệm dùng xong bỏ; fixture Sports/PC giả lập; mock plugin và runtime tối thiểu để thử bundling; local build, Playwright, kiểm tra artifact, benchmark; file tạm; commit local trong branch spike để lưu bằng chứng tái hiện.
+  - **Không được phép:** implement production compiler K0–K14, workflow engine, Admin Builder, backend submission/persistence/publishing; thay đổi AWS hay triển khai remote; push GitHub; dùng PII khách, secret, source độc quyền của công ty; merge code spike thành implementation khi chưa có G1; mở rộng spike ra ngoài các giả thuyết cần kiểm chứng.
+  - **Tách biệt:** spike tách khỏi implementation chính thức; giữ source spike tái hiện được trên branch local hoặc khu vực experimental cô lập; mang kết quả, evidence và kết luận thiết kế về docs P01; không cherry-pick/merge code; không đánh dấu requirement production DONE vì spike PASS.
+  - **Thí nghiệm:** EXP-01 Build isolation · EXP-02 Reproducible build · EXP-03 Conditional exports · EXP-04 Dynamic import failure (Chromium, Firefox, WebKit) · EXP-05 Performance (lab-only).
+  - **Báo cáo** mỗi thí nghiệm: ID, giả thuyết, lệnh tái hiện, môi trường/toolchain, kết quả quan sát, PASS/FAIL/INCONCLUSIVE, đường dẫn evidence, giới hạn, ảnh hưởng tới spec #3, thay đổi thiết kế đề xuất. **Không sửa tiêu chí sau khi xem kết quả**; FAIL phải báo rõ.
+  - Sau spike: independent consistency review spec #3 (đối chiếu spec #1 rev 3.3, spec #2 rev 2.3); spec #3 rev 2 nếu cần; rà K0–K14 (thứ tự thực thi, stage nào chạy lại ở hai lần build, LRM trước/sau verification, artifact có bị đổi sau khi hash, attestation cover gì, file ngoài inventory, tách side effect staging với spec #5) kèm diagram và stage dependency matrix.
+- **Trạng thái:** APPROVED WITH LIMITED SCOPE. G1 NOT APPROVED, G9/G10 BLOCKED.
+- **Người duyệt:** User (spec #3 review #1). **Ngày:** 2026-10-24.

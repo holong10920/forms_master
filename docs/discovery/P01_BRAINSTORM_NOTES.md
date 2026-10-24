@@ -1729,4 +1729,33 @@ Ba lớp, chỉ lớp đầu quyết định identity:
 
 ### OPEN
 
-- User review Spec #3 Architecture Proposal rev 1 và các OD3-xx.
+- User review Spec #3 Architecture Proposal rev 1 và các OD3-xx. → đã review ở Spec #3 Review #1.
+
+## Session 3: Spec #3 Review #1 (2026-10-24) → ADR-041, ADR-042 (SPIKE-GATE-01)
+
+### CONFIRMED (user)
+
+- **Verdict: CONDITIONALLY ACCEPTED FOR TECHNICAL VERIFICATION.** Spec #3 chưa duyệt toàn bộ; vẫn cần final design review và Cross-Subsystem Review.
+- **OD3-01 → ADR-041:** Vite + Rolldown là ứng viên ưu tiên để kiểm chứng (Vite hiện dùng Rolldown, `build.rolldownOptions`). Pin version chính xác; không trộn cấu hình Rollup cũ; kiểm API chunking, dependency graph, output; không coi là đã chọn nếu spike thất bại; không chọn vì phổ biến.
+- **OD3-02 → ADR-042 SPIKE-GATE-01 (APPROVED WITH LIMITED SCOPE):** phạm vi được/không được như ADR-042. EXP-01..05 với evidence yêu cầu cụ thể:
+  - EXP-01: Sports Motion-none và PC có Store Selector; Sports không có Store Selector, không Motion; PC chỉ tải chunk ở nhánh 店頭; 宅配 không request; không design/server facet; không React trùng, không circular import trái phép. Evidence: module graph, chunk inventory, artifact hash, network trace.
+  - EXP-02: môi trường pin chuẩn; hai build sạch độc lập; byte-identical, SHA-256 khớp trên toàn bộ artifact set; inventory giống; không absolute path; không tên file/chunk id không tất định. Khác → FAIL, hash diff, nguyên nhân; không đổi sang tiêu chí "tương đương chức năng".
+  - EXP-03: plugin có browser, design, server facet (Python hoặc marker server-only): build browser chỉ resolve entrypoint được phép; build design resolve được design facet; build khách từ chối import design trái phép; browser không truy cập server facet; canary/negative fixture thật sự làm guard fail. Conditional exports không là sandbox duy nhất.
+  - EXP-04: Playwright Chromium, Firefox, WebKit; phân biệt network timeout, HTTP 404/503, module evaluation throw, retry cùng URL, recovery bằng reload, chunk của release cũ còn tồn tại và tải đúng. Ghi browser + version, số request, error object, kết quả retry, giữ dữ liệu. Không giả định retry luôn được; không tự reload khi memory có PII.
+  - EXP-05: T1, T2, T3, byte JS/CSS ban đầu, tổng JS sau toàn flow, số request, cold/warm, CPU/network throttling. LAB-ONLY; không tuyên bố Core Web Vitals PASS.
+- **Pipeline consistency review** trước khi hoàn tất spec #3: orchestrator chạy lại stage nào cho hai build; LRM tính trước hay sau verification; artifact có bị đổi sau khi hash; attestation cover gì; file ngoài inventory; stage sau đổi output stage trước mà không invalidate hash; tách side effect staging với spec #5. Cần diagram và stage dependency matrix có thứ tự thực thi.
+- **Báo cáo kết quả** theo mẫu (ID, giả thuyết, lệnh, môi trường, kết quả, PASS/FAIL/INCONCLUSIVE, evidence, giới hạn, ảnh hưởng, đề xuất). Không sửa acceptance criteria sau khi xem kết quả. Failure là kết quả có giá trị.
+- **Sau spike:** independent consistency review spec #3; spec #3 rev 2 nếu cần; không cần đạt mọi benchmark lý tưởng mới được brainstorm spec #4; risk còn mở ghi rõ và chuyển tới implementation plan/verification gate phù hợp.
+- **Governance:** cập nhật DECISIONS, notes, CURRENT_STATUS, CONTEXT_HANDOFF, PROJECT_CHECKLIST. Không đổi G1/G9/G10. Sau báo cáo spike: trình kết quả → cập nhật spec #3 theo evidence → brainstorm spec #4. Không tự bắt đầu production implementation.
+
+### Tiêu chí thí nghiệm (chốt TRƯỚC khi chạy; không sửa sau khi xem kết quả)
+
+Ghi tại commit này để có mốc thời gian trước khi spike chạy. Chi tiết lệnh và fixture ở branch `spike/compiler-feasibility`.
+
+| EXP | PASS khi | FAIL khi | INCONCLUSIVE khi |
+|---|---|---|---|
+| 01 | (a) không module/chuỗi đặc trưng Store Selector trong mọi file emit của Sports; (b) không module Motion và không `import()` tới Motion trong Sports Motion-none; (c) PC có chunk Store Selector riêng, chỉ được request khi đi 店頭; (d) luồng 宅配 không request chunk đó; (e) không module/marker design hay server trong bất kỳ build khách nào; (f) đúng một React/ReactDOM trong module graph; (g) đồ thị import tĩnh giữa chunk không vòng | bất kỳ (a)–(g) sai | không thu được module graph hoặc network trace đáng tin |
+| 02 | hai build sạch độc lập (container mới, không cache) từ cùng input cho SHA-256 giống hệt trên mọi file của artifact set, cùng inventory, không path tuyệt đối trong output | bất kỳ file nào khác byte, inventory khác, hoặc có path tuyệt đối | không có môi trường pin chuẩn (ví dụ không chạy được container) → chỉ báo kết quả native, ghi INCONCLUSIVE cho phần canonical |
+| 03 | build khách không resolve được `./design` (build fail đúng lý do); build design resolve được; server marker không vào build khách; mỗi negative fixture làm guard tương ứng fail đúng lý do và bản control pass | guard không fail với negative fixture, hoặc fail vì lý do khác, hoặc build khách resolve được design | — |
+| 04 | với mỗi engine: ghi được hành vi của 6 kịch bản; retry bậc 1 (URL có query) được phân loại đúng là hoạt động/không hoạt động; reload về đúng release giữ được dữ liệu không-PII đã lưu; chunk release cũ tải đúng | spike không phân biệt được các kịch bản, hoặc thiết kế §15.3 sai ở điểm cốt lõi (ví dụ query-retry không tạo request mới trên cả 3 engine) — ghi FAIL cho giả định đó | engine không chạy được trong môi trường |
+| 05 | thu được T1/T2/T3, byte, request, cold/warm với throttling ghi rõ cho cả hai form | — (không có ngưỡng; chỉ đo) | không đo được một mốc nào đó → ghi rõ mốc thiếu |
