@@ -300,3 +300,31 @@ MINOR đã sửa: m1 (ingestion mọi release), m2 (`REMOVE` tập rỗng, map k
 **Trạng thái sau C1c:** M-01..M-08 và SR-08 là **DESIGN_RESOLVED — chờ targeted re-review độc lập trên commit C1c** (chưa independently reviewed). Không mục nào VERIFIED.
 
 **MINOR follow-up (không chặn vertical slice, không sửa trong Closure Mode):** V5-04..V5-06 (V5-04 đã ghi `attribute_not_exists` cho `CAPSTATUS` cùng lúc với M-02), A-03..A-08, B-03 (phần còn lại), B-05..B-10, C-04..C-08; tham chiếu lịch sử ở §10.1 dòng CSR-14 và §10.3 dòng 10–11 ("`bootstrapDigest` không giảm") đã bị thay bởi M-04.
+
+### 10.7. Targeted re-review sau C1c và vòng sửa C1d
+
+> **Baseline:** commit `cc83ceb` (C1c), snapshot chỉ đọc + diff `0510369 → cc83ceb`. **Reviewer:** hai reviewer độc lập, chỉ đọc, cùng severity rubric: R1 (M-01..M-03, SR-08), R2 (M-04..M-08).
+
+**Kết luận trên `cc83ceb`:** 0 BLOCKER; **5 MAJOR unresolved** → chưa đạt G1. Ba MAJOR (R1-01, R1-02, R2-02) do chính C1c tạo ra.
+
+| Item | Verdict re-review |
+|---|---|
+| M-01 (gate không version), M-03 (ledger đơn điệu) | RESOLVED IN DESIGN + VERIFICATION_PENDING (CT-26, TM-5I03, TM-5L02) |
+| M-02 | liveness RESOLVED; phân biệt "thiếu chủ ý / thiếu do lỗi" UNRESOLVED → R1-01 |
+| M-04 | mâu thuẫn ba luật đã hết; phục hồi bootstrap trên đường release UNRESOLVED → R2-01 |
+| M-05, M-06 | RESOLVED + VERIFICATION_PENDING (TM-5F03, TM-5C01, TM-5P11) |
+| M-07 | một phần → R2-03 |
+| M-08 | một phần → R2-02 |
+| SR-08 | mâu thuẫn hai contract Preview → R1-02 |
+
+| MAJOR | Invariant bị vi phạm | Sửa C1d (user duyệt đúng 5 mục) | Section |
+|---|---|---|---|
+| R1-01 | không ghi gate mở khi ledger authoritative đã `revoked` (fail open khi đồng bộ chưa chạy/hỏng/item bị xóa) | ingestion đọc ledger tại tip branch trusted, pin `ledgerRef {commit, seq, digest}`, ghi `LEDGER#` cùng transaction (`ledgerSeq <= :seq`); không suy `active` từ projection vắng mặt; ledger không đọc được → `503 E-LEDGER-UNAVAILABLE`; reconciler duyệt theo `CAPSTATUS#`, thiếu `LEDGER#` là lỗi; IAM chặn xóa `LEDGER#`; **ranh giới lan truyền** Git → DB ghi rõ, không hứa zero-gap (kênh khẩn cấp = runtime override) | #5 §5.1, §9.3.1, §9.3.3, §9.3.5 #11, §9.7; #2 §8.1; CT-26, TM-5L02 |
+| R1-02 | hai test contract không thể cùng pass | chặn **trước** khi tạo phiên → phiên vẫn tạo, `blockedPrks`, không mount; chặn **sau** → `423` + thu hồi phiên; Admin không **tự động** tạo phiên mới; một định nghĩa "bị chặn" | #5 §7.2, §7.3; #4 §14.4, §14.7; ADR-076; TM-5V06, TM-5V07, 4Z16 |
+| R2-01 | bootstrap `revoked` vẫn chạy qua `/r/{id}/` | VERIFYING publish/rollback từ chối bootstrap `revoked` (`E-BOOTSTRAP-REVOKED`); release pin nó → security hold + `quarantined` (cơ chế sẵn có); `REL#.bootstrapDigest`; không tuyên bố JS đã tải dừng ngay | #5 §5.1, §5.4, §6.2, §6.6; #3 §14.1; TM-5P10 |
+| R2-02 | đọc snapshot chéo site; Partial Preview không chạy trước preflight đầu tiên | `GET /forms/{formId}/snapshots/{kind}/{id}`, quyền theo site của form, chỉ id có `FORMSNAP#{formId}`; envelope draft ghi blob + `FORMSNAP#`; GC giữ 7 ngày | #5 §5.1, §5.3, §7.2; #4 §14.2 |
+| R2-03 | block `vulnerable` vẫn được activate/rollback | ConditionCheck `BLOCKREV#` ở activation (5c), VERIFYING, điều kiện rollback; ≤ 10 block/form (`E-BLOCK-LIMIT`, UX Builder); `vulnerable` không chặn submission (không phải runtime revocation); action activation ≤ 38, approve ≤ 24 | #5 §5.1, §5.4, §6.2, §6.5; #3 §18.1a; #4 §8, §13.2; TM-5B01 |
+
+**Trạng thái sau C1d:** 5 MAJOR là **DESIGN_RESOLVED — chờ targeted re-review độc lập trên commit C1d** (kiểm cả contract lân cận: fail-open, producer/consumer, hai test contract, bootstrap/release, authorization chéo site). Không mục nào VERIFIED.
+
+**MINOR follow-up mới (không sửa):** R1-03..R1-06, R2-04..R2-09.

@@ -70,7 +70,7 @@
 - G9 (GitHub) và G10 (AWS): đang chờ user.
 
 ## Tiếp theo
-1. C1 (`2f514a1`) → re-review → C1b (`60fcf9d`, `0510369`); SR-04 → ADR-074 (`26c59d4`). **Closure review độc lập trên `0510369`** (V5-01 12 điểm + Batch A/B/C; report §10.6): 0 BLOCKER, **8 MAJOR** (M-01..M-08) + contract SR-08 (ADR-076, CONDITIONALLY_ACCEPTED — ENFORCEMENT/VERIFICATION_PENDING). **C1c** sửa có trọng tâm (spec #2 rev 2.14, #3 rev 2.9, #4 rev 2.8, #5 + C1c): DESIGN_RESOLVED, **chờ targeted re-review độc lập trên commit C1c**; không còn BLOCKER/MAJOR → G1 Approval Package ngắn (không tự approve). Sole writer: `forms-master-61` (ADR-077, Closure Mode). — ưu tiên trải nghiệm Business Editor và hiệu năng runtime.
+1. C1 (`2f514a1`) → re-review → C1b (`60fcf9d`, `0510369`); SR-04 → ADR-074 (`26c59d4`). **Closure review độc lập trên `0510369`** (V5-01 12 điểm + Batch A/B/C; report §10.6): 0 BLOCKER, **8 MAJOR** (M-01..M-08) + contract SR-08 (ADR-076, CONDITIONALLY_ACCEPTED — ENFORCEMENT/VERIFICATION_PENDING). **C1c** (`cc83ceb`) → targeted re-review: 0 BLOCKER, 5 MAJOR (R1-01, R1-02, R2-01, R2-02, R2-03; report §10.7) → **C1d** (spec #2 rev 2.15, #3 rev 2.10, #4 rev 2.9, #5 + C1d): DESIGN_RESOLVED, **chờ targeted re-review độc lập trên commit C1d**; không còn BLOCKER/MAJOR → G1 Approval Package ngắn (không tự approve). Sole writer: `forms-master-61` (ADR-077, Closure Mode). — ưu tiên trải nghiệm Business Editor và hiệu năng runtime.
 2. Spec #3 rev 2: final review + Cross-Spec Review (spec #1 §25). VG-01..VG-10 giữ OPEN tới khi có evidence.
 3. User review spec #2 rev 2.5 và quyết OD2-08/OD2-09 (cần trước spec #5, không chặn spec #3).
 4. User review spec #1 rev 3.3. Nếu đồng ý thì spec #1 chuyển sang READY_FOR_CROSS_REVIEW (chỉ khi user xác nhận).

@@ -1,6 +1,7 @@
 # Spec #3: Compiler, Bundle & Release Architecture (Design Proposal)
 
-> **Trạng thái: PROPOSAL, revision 2.9** (2026-10-25).
+> **Trạng thái: PROPOSAL, revision 2.10** (2026-10-25).
+> - Rev 2.10 (C1d): `E-BLOCK-LIMIT` (K5, > 10 shared block mỗi form, R2-03) trong §18.1a; luật pin bootstrap không đổi, VERIFYING của spec #5 từ chối bootstrap `revoked` (R2-01).
 > - Rev 2.9 (C1c, closure review độc lập trên `0510369`): Build Request và LRM có `formats { draftFormat, loadFormat }` (C-02); semantic fixtures là file private trong danh sách đóng, digest trong attestation (C-01); `blockRevisions` từ `BLOCKREV#` (C-03); `entry.html` dùng `POINTER.bootstrap` theo spec #5 §6.6, bỏ `bootstrapDigest`/"không giảm" (N-03/B-02).
 > - Rev 2.8 (C1b): §5.1 output preflight + `inputIds` thống nhất (N-05, CSR-10); `previousDataContract = null`; ý nghĩa `ledgerSnapshotId` / `runtimeOverrideSnapshotId`.
 > - Rev 2.7 (ADR-074, SR-04): §10.1 mới — **Admin build và Preview build** do trusted pipeline build bằng cùng toolchain; module graph allowlist, canary trong mọi entry của plugin fixture, kiểm phụ thuộc bắc cầu và `import()` không literal; mã `E-ADMIN-BUILD-*`, `E-PREVIEW-BUILD-*`; test TM-C18..C22; X2-14.
@@ -648,7 +649,7 @@ private:
 - Khối `active` trong `entry.html` chỉ dùng để **chọn release cho khách mới**; không phải bằng chứng authoritative. Backend vẫn kiểm support/security ở mọi query/submit.
 - **Vòng đời bootstrap** *(sửa sau consistency review)*:
   - Là platform asset, do trusted pipeline build bằng canonical builder, phát hành vào release store, pin bằng digest trong Build Request (§5.1) và trong LRM.
-  - Release `index.html` tham chiếu bootstrap **của chính nó** (`load.bootstrap`). *(rev 2.9, C1c N-03; thay rev 2.6)* `entry.html` (spec #5) dùng **`POINTER.bootstrap`** = bootstrap semver cao nhất, không `revoked`, có `supportedDraftFormats`/`supportedLoadFormats` bao trùm `POINTER.supportedReleases` của form (spec #5 §6.6), **không** phải bootstrap của active release; vì vậy rollback không biến draft của release còn supported thành `incompatible`, và bootstrap lỗi được thay bằng cách `revoked` nó (reconciler tính lại). Entry và release active vì vậy có thể khác bootstrap; release `index.html` vẫn dùng bootstrap của chính nó.
+  - Release `index.html` tham chiếu bootstrap **của chính nó** (`load.bootstrap`). *(rev 2.9, C1c N-03; thay rev 2.6)* `entry.html` (spec #5) dùng **`POINTER.bootstrap`** = bootstrap semver cao nhất, không `revoked`, có `supportedDraftFormats`/`supportedLoadFormats` bao trùm `POINTER.supportedReleases` của form (spec #5 §6.6), **không** phải bootstrap của active release; vì vậy rollback không biến draft của release còn supported thành `incompatible`, và bootstrap lỗi được thay bằng cách `revoked` nó (reconciler tính lại) — **chỉ cho entry**; *(rev 2.10, C1d R2-01)* release `index.html` vẫn tham chiếu bootstrap của chính nó, nên release pin bootstrap bị `revoked` phải bị security hold + `quarantined` theo spec #5 §6.6 (VERIFYING từ chối publish/rollback tới nó). Entry và release active vì vậy có thể khác bootstrap; release `index.html` vẫn dùng bootstrap của chính nó.
   - Được giữ ít nhất bằng release nào còn tham chiếu nó.
   - **Metadata draft có version (`draftFormat`)**: bootstrap mới phải đọc được mọi `draftFormat` mà một release còn supported có thể đã ghi. Thay đổi format chỉ được **thêm** trường. `draftFormat` lạ → coi là `incompatible` (thông báo + Start Over), không xóa draft.
 
@@ -897,6 +898,7 @@ Ràng buộc (P0 defaults theo ADR-058: `TTL_draft` 72 giờ, `G` 7 ngày; `T_ed
 | `E-LABEL-MISSING` | error | ✔ | field/step thiếu nhãn `ja` | spec #4 §13.2 |
 | `E-READONLY-FEATURE-BROKEN` | error | ✔ | prefill/lookup/`skipWhen`/nhóm lặp tham chiếu thứ không còn hợp lệ | spec #4 §8.1 |
 | `E-ADMIN-CAP-NOT-BUNDLED` | error (chỉ Admin) | — (compiler **không** phát) | version đã pin không có trong Admin/Preview build | spec #4 §14.4 |
+| `E-BLOCK-LIMIT` *(rev 2.10, C1d R2-03)* | error | ✔ | form có > 10 block instance (giới hạn P0, ngân sách action của spec #5 §6.5) | spec #5 §5.4, §6.5 |
 | `E-CAP-NOT-INGESTED` *(rev 2.6)* | error | ✔ | plugin version chưa ingestion runtime (spec #5 §9.3.3) | spec #5 |
 | `E-ADMIN-MOTION-NOT-BUNDLED` *(rev 2.6, chỉ Admin)* | error | — (compiler không phát) | version preset pin không có trong Preview build | spec #6 §10 |
 | `E-MOTION-PRESET-UNKNOWN` | error | ✔ | preset/version không có trong catalog | spec #6 §7.3 |
