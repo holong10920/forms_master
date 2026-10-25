@@ -1,0 +1,100 @@
+S0 T7 — Write-once filesystem store (blob + release). Date: 2026-10-25. Python 3.13.15, macOS (APFS).
+Code: python/fb_store/src/fb_store/fsstore.py, errors.py. Ports: BlobStore.put_if_absent/get_verified, ReleaseObjectStore.put_write_once/read (spec #5 §5.3, §11.1).
+Write path: key grammar (ASCII segments <= 255 bytes, key <= 1024) -> sha256(data) must equal the caller's digest -> walk each path component via
+directory fds with O_NOFOLLOW (symlinks refused, no check-then-use race); new parents and the root are synced into their parents -> existing
+object? compare (same => ALREADY_EXISTS after syncing the directory; different => E-PAYLOAD-INTEGRITY) -> temp file O_EXCL|O_NOFOLLOW ->
+write loop -> sync -> fchmod 0444 -> link(2) -> sync(dir). Sync = fsync + F_FULLFSYNC on macOS (falls back to the plain fsync only for ENOTSUP/EINVAL/ENOTTY, like SQLite). Temp file always unlinked.
+Reads: regular files only (S_ISREG), O_NONBLOCK|O_NOFOLLOW, expected size checked before reading.
+get_verified fails closed: structural schema + semantic PayloadRef checks; missing/unreadable/non-regular/oversized/mismatching blob, bad inline
+value => E-PAYLOAD-INTEGRITY. sha256 and size are always recomputed.
+Independent CP3 review (tree 07508915): MAJOR M2 (directory durability) and M3 (fail-closed) found and fixed here; 16 of the 20 new tests fail on
+the pre-fix code (verified by running them against the snapshot). Targeted re-review (tree b5c978fe): M2, M3 RESOLVED; follow-ups fixed after it:
+bounded read also when comparing an existing object and for an integral-float size (tests count bytes read: 0), F_FULLFSYNC fallback.
+Honest limits: real power loss not exercised (durability = sync call ordering + F_FULLFSYNC); a failure at the post-link directory sync
+reports an error while the object is already visible, and a retry returns ALREADY_EXISTS after syncing (tested); keys are case-sensitive in
+the grammar but APFS is case-insensitive (aliasing, review m1, open); a hard link placed inside the store is followed on read (m3, local threat
+model, open).
+
+$ uv run pytest python/fb_store -k fsstore -v
+============================= test session starts ==============================
+platform darwin -- Python 3.13.15, pytest-9.1.1, pluggy-1.7.0 -- ~/Documents/marketenterprise/forms_master/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: ~/Documents/marketenterprise/forms_master
+configfile: pyproject.toml
+plugins: socket-0.8.1
+collecting ... collected 130 items / 59 deselected / 71 selected
+
+python/fb_store/tests/test_fsstore_blob.py::test_put_then_get_verified PASSED [  1%]
+python/fb_store/tests/test_fsstore_blob.py::test_second_put_same_bytes_is_noop PASSED [  2%]
+python/fb_store/tests/test_fsstore_blob.py::test_put_rejects_digest_mismatch_and_writes_nothing PASSED [  4%]
+python/fb_store/tests/test_fsstore_blob.py::test_corrupted_blob_fails_integrity PASSED [  5%]
+python/fb_store/tests/test_fsstore_blob.py::test_truncated_blob_fails_integrity PASSED [  7%]
+python/fb_store/tests/test_fsstore_blob.py::test_wrong_size_fails_integrity PASSED [  8%]
+python/fb_store/tests/test_fsstore_blob.py::test_missing_blob_fails_integrity PASSED [  9%]
+python/fb_store/tests/test_fsstore_blob.py::test_semantically_invalid_ref_fails_integrity PASSED [ 11%]
+python/fb_store/tests/test_fsstore_blob.py::test_inline_ref_is_verified_and_returns_canonical_bytes PASSED [ 12%]
+python/fb_store/tests/test_fsstore_concurrency.py::test_threads_same_bytes_one_created PASSED [ 14%]
+python/fb_store/tests/test_fsstore_concurrency.py::test_threads_different_bytes_one_wins PASSED [ 15%]
+python/fb_store/tests/test_fsstore_concurrency.py::test_processes_same_bytes_one_created PASSED [ 16%]
+python/fb_store/tests/test_fsstore_concurrency.py::test_processes_different_bytes_one_wins PASSED [ 18%]
+python/fb_store/tests/test_fsstore_durability.py::test_new_parents_root_and_target_dir_are_synced PASSED [ 19%]
+python/fb_store/tests/test_fsstore_durability.py::test_already_exists_path_syncs_the_directory PASSED [ 21%]
+python/fb_store/tests/test_fsstore_durability.py::test_failed_directory_sync_after_link_is_repaired_by_retry PASSED [ 22%]
+python/fb_store/tests/test_fsstore_durability.py::test_mkdir_failure_leaves_nothing PASSED [ 23%]
+python/fb_store/tests/test_fsstore_durability.py::test_full_fsync_fallback_only_when_unsupported[45-False] PASSED [ 25%]
+python/fb_store/tests/test_fsstore_durability.py::test_full_fsync_fallback_only_when_unsupported[22-False] PASSED [ 26%]
+python/fb_store/tests/test_fsstore_durability.py::test_full_fsync_fallback_only_when_unsupported[5-True] PASSED [ 28%]
+python/fb_store/tests/test_fsstore_fail_closed.py::test_malformed_refs_fail_closed[size-bool] PASSED [ 29%]
+python/fb_store/tests/test_fsstore_fail_closed.py::test_malformed_refs_fail_closed[format-missing] PASSED [ 30%]
+python/fb_store/tests/test_fsstore_fail_closed.py::test_malformed_refs_fail_closed[format-raw] PASSED [ 32%]
+python/fb_store/tests/test_fsstore_fail_closed.py::test_malformed_refs_fail_closed[extra-key] PASSED [ 33%]
+python/fb_store/tests/test_fsstore_fail_closed.py::test_malformed_refs_fail_closed[list] PASSED [ 35%]
+python/fb_store/tests/test_fsstore_fail_closed.py::test_malformed_refs_fail_closed[string] PASSED [ 36%]
+python/fb_store/tests/test_fsstore_fail_closed.py::test_malformed_refs_fail_closed[none] PASSED [ 38%]
+python/fb_store/tests/test_fsstore_fail_closed.py::test_malformed_refs_fail_closed[nan] PASSED [ 39%]
+python/fb_store/tests/test_fsstore_fail_closed.py::test_malformed_refs_fail_closed[surrogate] PASSED [ 40%]
+python/fb_store/tests/test_fsstore_fail_closed.py::test_directory_at_blob_key PASSED [ 42%]
+python/fb_store/tests/test_fsstore_fail_closed.py::test_fifo_at_blob_key_does_not_block PASSED [ 43%]
+python/fb_store/tests/test_fsstore_fail_closed.py::test_unreadable_blob PASSED [ 45%]
+python/fb_store/tests/test_fsstore_fail_closed.py::test_prefix_is_a_file PASSED [ 46%]
+python/fb_store/tests/test_fsstore_fail_closed.py::test_oversized_object_is_rejected_before_reading PASSED [ 47%]
+python/fb_store/tests/test_fsstore_fail_closed.py::test_long_segment_is_an_invalid_key PASSED [ 49%]
+python/fb_store/tests/test_fsstore_fail_closed.py::test_reader_never_sees_a_partial_object PASSED [ 50%]
+python/fb_store/tests/test_fsstore_fail_closed.py::test_oversized_object_is_not_read[int] PASSED [ 52%]
+python/fb_store/tests/test_fsstore_fail_closed.py::test_oversized_object_is_not_read[integral-float] PASSED [ 53%]
+python/fb_store/tests/test_fsstore_fail_closed.py::test_reput_over_oversized_object_is_not_read PASSED [ 54%]
+python/fb_store/tests/test_fsstore_failures.py::test_failure_at_step_leaves_nothing[write] PASSED [ 56%]
+python/fb_store/tests/test_fsstore_failures.py::test_failure_at_step_leaves_nothing[fsync] PASSED [ 57%]
+python/fb_store/tests/test_fsstore_failures.py::test_failure_at_step_leaves_nothing[fchmod] PASSED [ 59%]
+python/fb_store/tests/test_fsstore_failures.py::test_failure_at_step_leaves_nothing[link] PASSED [ 60%]
+python/fb_store/tests/test_fsstore_failures.py::test_short_writes_are_completed PASSED [ 61%]
+python/fb_store/tests/test_fsstore_failures.py::test_partial_object_at_final_path_is_detected PASSED [ 63%]
+python/fb_store/tests/test_fsstore_keys.py::test_invalid_keys_are_rejected_for_write_and_read[../x] PASSED [ 64%]
+python/fb_store/tests/test_fsstore_keys.py::test_invalid_keys_are_rejected_for_write_and_read[/abs] PASSED [ 66%]
+python/fb_store/tests/test_fsstore_keys.py::test_invalid_keys_are_rejected_for_write_and_read[staging/../releases/x] PASSED [ 67%]
+python/fb_store/tests/test_fsstore_keys.py::test_invalid_keys_are_rejected_for_write_and_read[staging/./x] PASSED [ 69%]
+python/fb_store/tests/test_fsstore_keys.py::test_invalid_keys_are_rejected_for_write_and_read[staging/a\\b] PASSED [ 70%]
+python/fb_store/tests/test_fsstore_keys.py::test_invalid_keys_are_rejected_for_write_and_read[staging/.hidden] PASSED [ 71%]
+python/fb_store/tests/test_fsstore_keys.py::test_invalid_keys_are_rejected_for_write_and_read[staging//x] PASSED [ 73%]
+python/fb_store/tests/test_fsstore_keys.py::test_invalid_keys_are_rejected_for_write_and_read[staging/x/] PASSED [ 74%]
+python/fb_store/tests/test_fsstore_keys.py::test_invalid_keys_are_rejected_for_write_and_read[other/x] PASSED [ 76%]
+python/fb_store/tests/test_fsstore_keys.py::test_invalid_keys_are_rejected_for_write_and_read[staging] PASSED [ 77%]
+python/fb_store/tests/test_fsstore_keys.py::test_invalid_keys_are_rejected_for_write_and_read[] PASSED [ 78%]
+python/fb_store/tests/test_fsstore_keys.py::test_invalid_keys_are_rejected_for_write_and_read[staging/%2e%2e/x] PASSED [ 80%]
+python/fb_store/tests/test_fsstore_keys.py::test_invalid_keys_are_rejected_for_write_and_read[staging/a b] PASSED [ 81%]
+python/fb_store/tests/test_fsstore_keys.py::test_invalid_keys_are_rejected_for_write_and_read[staging/\xe9] PASSED [ 83%]
+python/fb_store/tests/test_fsstore_keys.py::test_invalid_keys_are_rejected_for_write_and_read[staging/a\x00b] PASSED [ 84%]
+python/fb_store/tests/test_fsstore_keys.py::test_invalid_keys_are_rejected_for_write_and_read[staging/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] PASSED [ 85%]
+python/fb_store/tests/test_fsstore_keys.py::test_symlinked_directory_inside_root_is_rejected PASSED [ 87%]
+python/fb_store/tests/test_fsstore_keys.py::test_symlinked_final_file_is_not_followed PASSED [ 88%]
+python/fb_store/tests/test_fsstore_keys.py::test_blob_store_only_accepts_lowercase_sha256 PASSED [ 90%]
+python/fb_store/tests/test_fsstore_keys.py::test_crash_leftover_temp_file_is_harmless PASSED [ 91%]
+python/fb_store/tests/test_fsstore_release.py::test_write_once_then_read PASSED [ 92%]
+python/fb_store/tests/test_fsstore_release.py::test_same_content_again_is_noop PASSED [ 94%]
+python/fb_store/tests/test_fsstore_release.py::test_different_content_is_integrity_error_and_original_kept PASSED [ 95%]
+python/fb_store/tests/test_fsstore_release.py::test_written_object_is_read_only PASSED [ 97%]
+python/fb_store/tests/test_fsstore_release.py::test_read_missing_key PASSED [ 98%]
+python/fb_store/tests/test_fsstore_release.py::test_empty_object_round_trips PASSED [100%]
+
+====================== 71 passed, 59 deselected in 2.86s =======================
+exit=0

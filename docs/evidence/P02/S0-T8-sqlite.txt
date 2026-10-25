@@ -1,0 +1,174 @@
+S0 T8 — SQLite local persistence foundation. Date: 2026-10-25. Python 3.13.15, SQLite 3.53.4.
+Code: python/fb_store/src/fb_store/{sqlite,migrations,clock,layout,__main__}.py. No domain tables, no repositories, no ORM (S1+ scope).
+Connection: autocommit=True, WAL, synchronous=FULL, foreign_keys=ON, busy_timeout=0 (fail fast), trusted_schema=OFF; macOS: fullfsync=ON,
+checkpoint_fullfsync=ON.
+transaction(): BEGIN IMMEDIATE ... COMMIT; any exception (incl. BaseException, COMMIT failure) => ROLLBACK + re-raise. SQLITE_BUSY/LOCKED (incl.
+extended codes) => Conflict. Limits (100 actions, 4 MB of str/bytes params, 400 KB item via check_item_size) apply to work routed through
+Tx.action / require_one / check; Tx.query is read-only and not counted; SQL literals and multi-row statements are not measured (documented).
+Tx.require_one = CAS write (works with RETURNING); Tx.check = counted condition check (SELECT must return exactly 1 row); both raise
+ConditionFailed (not retried). with_conflict_retry: Conflict only, full-jitter backoff, bounded, arguments validated.
+Migrations: NNNN_name.sql, sha256 over raw bytes, one BEGIN IMMEDIATE per file that re-reads applied state under the lock (concurrent
+runners apply each file once); transaction control, ATTACH/DETACH and unsafe PRAGMA inside a file are denied by the SQLite authorizer (mid-line, after comments, any case);
+trigger BEGIN..END allowed; edited (incl. CRLF), deleted, late, duplicate, misnamed, .SQL, non-UTF-8 or non-regular files rejected; bookkeeping
+tampering => MigrationError; non-autocommit connections rejected.
+Data dir: var/ layout 0700 dirs, 0600 database (tightened if pre-existing). FakeClock + logical expiration (expiresAt <= now).
+Independent CP3 review (tree 07508915): MAJOR M1 (migration guard bypass broke atomicity; previous evidence claim was false) fixed here.
+Targeted re-review (tree b5c978fe): M1 RESOLVED; one NEW MAJOR in a test (concurrent-runner test could deadlock on a barrier when a
+first open of a fresh DB hit Conflict on the WAL switch, ~25% of isolated runs) fixed: DB created before the threads, barrier timeout.
+Stress after the fix: 40/40 isolated runs passed, 0 hung (20 s cap each).
+Deviations from plan: Tx.require_one, Tx.check, ConditionFailed added (CAS requested by user); init_data_dir returns (layout, applied) and
+takes an optional migrations_dir.
+NOT claimed: SQLite locks the whole database, so these tests do not show DynamoDB per-item conflicts, throttling or throughput (spec #5 §11.2).
+check_item_size approximates DynamoDB sizing; it is not an exact or always-larger bound. Contract tests CT-01..26 are not implemented here.
+
+$ uv run pytest python/fb_store -k sqlite or migrations or clock or layout -v
+============================= test session starts ==============================
+platform darwin -- Python 3.13.15, pytest-9.1.1, pluggy-1.7.0 -- ~/Documents/marketenterprise/forms_master/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: ~/Documents/marketenterprise/forms_master
+configfile: pyproject.toml
+plugins: socket-0.8.1
+collecting ... collected 130 items / 73 deselected / 57 selected
+
+python/fb_store/tests/test_clock.py::test_fake_clock_advances PASSED     [  1%]
+python/fb_store/tests/test_clock.py::test_fake_clock_rejects_naive_and_backwards PASSED [  3%]
+python/fb_store/tests/test_clock.py::test_system_clock_is_aware_utc PASSED [  5%]
+python/fb_store/tests/test_clock.py::test_logical_expiration_boundary PASSED [  7%]
+python/fb_store/tests/test_layout.py::test_init_data_dir_creates_layout PASSED [  8%]
+python/fb_store/tests/test_layout.py::test_existing_open_data_dir_is_tightened PASSED [ 10%]
+python/fb_store/tests/test_layout.py::test_init_applies_migrations_once PASSED [ 12%]
+python/fb_store/tests/test_layout.py::test_cli_init_is_idempotent PASSED [ 14%]
+python/fb_store/tests/test_migrations.py::test_applies_in_order_and_is_idempotent PASSED [ 15%]
+python/fb_store/tests/test_migrations.py::test_failed_migration_is_atomic PASSED [ 17%]
+python/fb_store/tests/test_migrations.py::test_edited_applied_migration_is_rejected PASSED [ 19%]
+python/fb_store/tests/test_migrations.py::test_late_lower_version_is_rejected PASSED [ 21%]
+python/fb_store/tests/test_migrations.py::test_invalid_migration_sets_are_rejected[txstmt] PASSED [ 22%]
+python/fb_store/tests/test_migrations.py::test_invalid_migration_sets_are_rejected[badname] PASSED [ 24%]
+python/fb_store/tests/test_migrations.py::test_invalid_migration_sets_are_rejected[dup] PASSED [ 26%]
+python/fb_store/tests/test_migrations.py::test_transaction_control_anywhere_is_denied_atomically[mid-line-commit-then-error] PASSED [ 28%]
+python/fb_store/tests/test_migrations.py::test_transaction_control_anywhere_is_denied_atomically[mid-line-commit] PASSED [ 29%]
+python/fb_store/tests/test_migrations.py::test_transaction_control_anywhere_is_denied_atomically[comment-commit] PASSED [ 31%]
+python/fb_store/tests/test_migrations.py::test_transaction_control_anywhere_is_denied_atomically[lowercase] PASSED [ 33%]
+python/fb_store/tests/test_migrations.py::test_transaction_control_anywhere_is_denied_atomically[end] PASSED [ 35%]
+python/fb_store/tests/test_migrations.py::test_transaction_control_anywhere_is_denied_atomically[savepoint] PASSED [ 36%]
+python/fb_store/tests/test_migrations.py::test_transaction_control_anywhere_is_denied_atomically[rollback] PASSED [ 38%]
+python/fb_store/tests/test_migrations.py::test_trigger_and_case_end_are_allowed PASSED [ 40%]
+python/fb_store/tests/test_migrations.py::test_crlf_edit_is_a_change PASSED [ 42%]
+python/fb_store/tests/test_migrations.py::test_deleted_applied_file_is_detected PASSED [ 43%]
+python/fb_store/tests/test_migrations.py::test_uppercase_extension_is_rejected PASSED [ 45%]
+python/fb_store/tests/test_migrations.py::test_non_autocommit_connection_is_rejected PASSED [ 47%]
+python/fb_store/tests/test_migrations.py::test_interrupt_rolls_back PASSED [ 49%]
+python/fb_store/tests/test_migrations.py::test_concurrent_runners_apply_each_file_once PASSED [ 50%]
+python/fb_store/tests/test_migrations.py::test_attach_and_pragma_are_denied[attach] PASSED [ 52%]
+python/fb_store/tests/test_migrations.py::test_attach_and_pragma_are_denied[pragma-query-only] PASSED [ 54%]
+python/fb_store/tests/test_migrations.py::test_attach_and_pragma_are_denied[pragma-busy-timeout] PASSED [ 56%]
+python/fb_store/tests/test_migrations.py::test_bookkeeping_tampering_is_a_migration_error[own-bookkeeping-row] PASSED [ 57%]
+python/fb_store/tests/test_migrations.py::test_bookkeeping_tampering_is_a_migration_error[drop-bookkeeping] PASSED [ 59%]
+python/fb_store/tests/test_migrations.py::test_non_utf8_file_is_a_migration_error PASSED [ 61%]
+python/fb_store/tests/test_migrations.py::test_directory_named_like_a_migration_is_rejected PASSED [ 63%]
+python/fb_store/tests/test_sqlite_conflict.py::test_second_writer_gets_conflict_immediately PASSED [ 64%]
+python/fb_store/tests/test_sqlite_conflict.py::test_reader_is_not_blocked_by_writer PASSED [ 66%]
+python/fb_store/tests/test_sqlite_conflict.py::test_retry_then_success PASSED [ 68%]
+python/fb_store/tests/test_sqlite_conflict.py::test_retry_is_bounded PASSED [ 70%]
+python/fb_store/tests/test_sqlite_conflict.py::test_retry_arguments_are_validated[kwargs0] PASSED [ 71%]
+python/fb_store/tests/test_sqlite_conflict.py::test_retry_arguments_are_validated[kwargs1] PASSED [ 73%]
+python/fb_store/tests/test_sqlite_conflict.py::test_retry_arguments_are_validated[kwargs2] PASSED [ 75%]
+python/fb_store/tests/test_sqlite_conflict.py::test_non_conflict_errors_are_not_retried PASSED [ 77%]
+python/fb_store/tests/test_sqlite_conflict.py::test_concurrent_cas_increments_lose_no_update PASSED [ 78%]
+python/fb_store/tests/test_sqlite_tx.py::test_pragmas PASSED             [ 80%]
+python/fb_store/tests/test_sqlite_tx.py::test_commit_on_success PASSED   [ 82%]
+python/fb_store/tests/test_sqlite_tx.py::test_rollback_on_exception_leaves_nothing PASSED [ 84%]
+python/fb_store/tests/test_sqlite_tx.py::test_sql_error_mid_transaction_rolls_back PASSED [ 85%]
+python/fb_store/tests/test_sqlite_tx.py::test_action_limit PASSED        [ 87%]
+python/fb_store/tests/test_sqlite_tx.py::test_byte_limit PASSED          [ 89%]
+python/fb_store/tests/test_sqlite_tx.py::test_query_does_not_count_as_action PASSED [ 91%]
+python/fb_store/tests/test_sqlite_tx.py::test_require_one_cas_success_and_stale_version PASSED [ 92%]
+python/fb_store/tests/test_sqlite_tx.py::test_require_one_with_returning PASSED [ 94%]
+python/fb_store/tests/test_sqlite_tx.py::test_check_is_a_counted_condition PASSED [ 96%]
+python/fb_store/tests/test_sqlite_tx.py::test_macos_full_fsync PASSED    [ 98%]
+python/fb_store/tests/test_sqlite_tx.py::test_item_size PASSED           [100%]
+
+====================== 57 passed, 73 deselected in 1.92s =======================
+exit=0
+
+$ uv run python -m fb_store init --data-dir <scratch>/var-demo
+{"dataDir": "<scratch>/var-demo", "sqlite": "<scratch>/var-demo/fb.sqlite3", "appliedMigrations": []}
+exit=0
+
+$ uv run python -m fb_store init --data-dir <scratch>/var-demo
+{"dataDir": "<scratch>/var-demo", "sqlite": "<scratch>/var-demo/fb.sqlite3", "appliedMigrations": []}
+exit=0
+
+CP3 final correction — 2026-10-25:
+- Conservative read-only PRAGMA name allowlist (including SQLite internal quick_check);
+  settings and unknown PRAGMAs denied regardless of argument presence. Reference:
+  https://www.sqlite.org/pragma.html
+- Regression: ALTER ADD COLUMN on populated STRICT tables, valid/invalid CHECK, whole-file
+  rollback after ALTER, read-only PRAGMA arguments, settings unchanged on DENY, trigger,
+  checksums and concurrent apply-once. Unexpected thread exceptions are collected/asserted.
+- F_FULLFSYNC: include EOPNOTSUPP when available; EIO and ENOSPC still propagate.
+
+$ UV_CACHE_DIR=/tmp/forms-master-uv-cache uv run --locked pytest python/fb_store/tests/test_migrations.py python/fb_store/tests/test_fsstore_concurrency.py python/fb_store/tests/test_fsstore_durability.py -q
+79 passed in 3.87s
+$ pnpm py:lint
+All checks passed! 38 files already formatted
+$ pnpm py:typecheck
+Success: no issues found in 38 source files
+$ pnpm py:test
+673 passed in 6.57s
+$ pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm gen:check && pnpm schemas:lint
+PASS: format, lint (0 warnings), typecheck, 502 passed / 15 declared expected failures;
+gen:check OK (2 generated files); schemas:lint OK (1 schema files).
+All pnpm commands use project .tools/bin in PATH; uv cache uses /tmp for sandbox access.
+Self-review: one pass, no new security/correctness MAJOR identified.
+
+Additional thread-error assertion: reader thread in test_fsstore_fail_closed now records
+unexpected exceptions and must observe the published object (no silent empty-success).
+$ uv run --locked pytest python/fb_store/tests/test_fsstore_fail_closed.py python/fb_store/tests/test_sqlite_conflict.py -q
+28 passed in 1.31s
+$ uv run --locked ruff check python && uv run --locked ruff format --check python && uv run --locked mypy
+All checks passed; 38 files formatted; no issues in 38 source files.
+
+Commit gate: BLOCKED pending secret scan (not PASS or skipped as success).
+$ docker pull zricethezav/gitleaks:v8.30.1
+Initial attempt failed: Docker Hub TLS handshake timeout fetching image config.
+Retry did not produce a usable local image at checkpoint.
+$ curl -I --max-time 15 https://registry-1.docker.io/v2/
+curl: (28) Connection timed out after 15004 milliseconds
+$ docker pull node:24.22.1-bookworm-slim
+Failed: TLS handshake timeout resolving the Docker Hub manifest.
+No GitHub or AWS access. No commit, hooks bypass, reset, stash or clean.
+CP4 implementation waits for successful CP3 commit as requested.
+
+2026-10-25 continuation: user approved Homebrew Gitleaks CLI instead of Docker.
+$ uv run --locked pytest python/fb_store/tests/test_migrations.py -k 'alter_strict_table_with_existing_rows or failed_alter_rolls_back_entire_file' -q
+4 passed, 61 deselected in 0.18s. STRICT ADD COLUMN, valid CHECK and atomic rollback PASS.
+CLI installation attempts use Homebrew mirrors with checksum checks and no GitHub fallback;
+Docker Hub debugging is stopped. Secret-scan result is reported with the checkpoint.
+
+CLI unblock attempt: BLOCKED, no security-gate bypass.
+- command -v gitleaks: absent.
+- brew install gitleaks (auto-update/analytics disabled, artifact mirror, no fallback):
+  TUNA: HTTP 404 for 8.30.1 arm64_tahoe bottle.
+  USTC: manifest fetched, bottle HTTP 403.
+- Direct USTC bottle URL produced an empty file; SHA-256 does not match expected bottle.
+  Not installed or executed.
+- Default Homebrew bottle registry is GitHub Container Registry; not contacted under
+  the user's absolute GitHub access prohibition.
+- Final CP3 fixes staged within the original 30-file scope. No CP3 commit and no CP4 edits.
+
+CP3 alternative scan: PASS (2026-10-25).
+User-approved detect-secrets==1.5.0 installed via isolated uvx/PyPI; no repo dependency changes.
+Source: exactly 30 staged paths exported using git show :<path>, with per-blob SHA-256
+manifest; no working-tree source, no spikes/.
+Command in exported index snapshot:
+uvx --from detect-secrets==1.5.0 detect-secrets scan --no-verify --all-files .
+Parsed JSON: version 1.5.0, all 27 default detectors, results = {}.
+No detectors disabled, default thresholds/filters, no baseline exclusions; --no-verify
+disables network verification. Coverage: static detection only, no live credential checks.
+Supplemental staged-diff review: private-key headers, provider tokens, credential URLs,
+credential assignments, email/account/ARN/local-path identifiers. No secret findings.
+17 initial supplemental matches were diff '+' markers joined to @pytest decorators;
+verified every location as a decorator, not an email literal. Strip diff markers for scanning.
+Gitleaks is NOT PASS; Gitleaks verification remains required in T10 before S0 DONE.
+Final index is re-exported and rescanned after staging this evidence, before commit.
