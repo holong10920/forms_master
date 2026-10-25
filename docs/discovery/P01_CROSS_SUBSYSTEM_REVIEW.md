@@ -330,3 +330,9 @@ MINOR đã sửa: m1 (ingestion mọi release), m2 (`REMOVE` tập rỗng, map k
 **MINOR follow-up mới (không sửa):** R1-03..R1-06, R2-04..R2-09.
 
 **Re-review C1d (commit `4f9a9c9`, một reviewer độc lập, chỉ đọc):** 0 BLOCKER; R1-01, R2-01, R2-02, R2-03 RESOLVED IN DESIGN + VERIFICATION_PENDING (CT-26, TM-5L02, TM-5P10, TM-5B01; R2-02 chưa có test ID — MINOR F-06); phía server của R1-02 thống nhất. **1 MAJOR: F-01** — spec #4 §14.7 (b) hỏi trạng thái cho mọi PRK trong IR, kể cả `blockedPrks`, nên Admin tự hủy phiên tạo với PRK đã bị chặn (trái TM-5V06 b, 4C06, 4Z16); lặp ở ADR-076, SR-08. **C1e (user duyệt, chỉ F-01):** chỉ hỏi cho PRK không thuộc `blockedPrks`; PRK trong `blockedPrks` không bao giờ làm Admin hủy phiên; 4Z16 kiểm phiên mở lại còn sau > 30 s (spec #4 rev 2.10 §14.7, 4Z16; ADR-076; SR-08). Trạng thái: DESIGN_RESOLVED — chờ targeted re-review F-01. MINOR follow-up mới: F-03..F-07.
+
+**Re-review F-01 (commit `6312f2b`, một reviewer độc lập, chỉ đọc):** Case A (chặn trước khi tạo phiên) và Case B (chặn sau khi tạo phiên) nhất quán giữa spec #4, spec #5, ADR-076, SR-08 và 4Z16; các test có thể cùng pass (VERIFICATION_PENDING). **F-01 RESOLVED; 0 BLOCKER, 0 MAJOR.** MINOR follow-up: F01-m1 (câu §14.7 b), F01-m2 (định nghĩa `runtimeBlocked`).
+
+### 10.8. Kết thúc Architecture Closure
+
+0 BLOCKER / 0 MAJOR unresolved trên `6312f2b`. G1 Approval Package đã trình; **user duyệt G1 cho implementation local synthetic P0** (ADR-078, 2026-10-25). Không phải production readiness. MINOR còn mở (§10.6, §10.7) là backlog, xử lý trước khi implement chức năng bị ảnh hưởng.

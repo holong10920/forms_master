@@ -1,6 +1,8 @@
 # Context Handoff
 
-> Dành cho một phiên Claude mới. Đọc file này trước, sau đó đến `CURRENT_STATUS.md`. Cập nhật 2026-10-24, phiên 3 (ADR-056..061; Spec #5 rev 2 với submission admission gate; spec #1 rev 3.5, #2 rev 2.9, #3 rev 2.4, #4 rev 2.3; bắt đầu brainstorm spec #6). Commit cuối xem `git log` trên branch `p00-discovery` (local, chưa push).
+> Dành cho một phiên Claude mới. Đọc file này trước, sau đó đến `CURRENT_STATUS.md`. Cập nhật 2026-10-25: **G1 APPROVED FOR LOCAL SYNTHETIC P0 IMPLEMENTATION** (ADR-078; baseline sáu spec `6312f2b`). Phần lịch sử bên dưới giữ nguyên.
+>
+> **Bắt đầu ở đây:** P01 xong. Việc kế tiếp là `writing-plans` cho **S0 (P02)** theo ADR-078; user review plan trước khi implement. Không mở lại brainstorming kiến trúc nếu không có blocker mới. Security boundary P0: chỉ synthetic/mock. MINOR còn mở (report §10.6–§10.7) là backlog, xem trước khi implement chức năng liên quan. ADR-013/014 vẫn PROPOSED: chỉ chốt contract khi một slice cần.
 
 **Dự án:** PoC multi-site form builder.
 - Form được định nghĩa bằng JSON có versioning.
@@ -36,7 +38,7 @@
 1. Cross-Subsystem Review **đã xong** (`docs/discovery/P01_CROSS_SUBSYSTEM_REVIEW.md`). C1 → re-review (§10.4) → C1b (§10.5) → **closure review độc lập trên `0510369`** (§10.6: 8 MAJOR, sửa ở C1c `cc83ceb`) → re-review C1c (§10.7: 5 MAJOR, sửa ở C1d) → **bước tiếp theo:** targeted re-review độc lập **chỉ trên diff C1d** (snapshot commit cố định), rồi G1 Approval Package ngắn nếu không còn BLOCKER/MAJOR (không tự approve). Chế độ: **Closure Mode** + sole writer `forms-master-61` (ADR-077): chỉ sửa BLOCKER/MAJOR có bằng chứng, MINOR ghi follow-up, không brainstorming. SR-08 → ADR-076. Lưu ý: hook chặn `git commit` nếu user chưa duyệt trực tiếp lần đó; mỗi lần duyệt chỉ áp cho commit được nêu.
 2. Nếu user review spec #2 rev 2: ghi vào notes + ADR, ra rev 3. Mọi thay đổi chạm interface #1 ↔ #2 phải cập nhật spec #2 §19 và spec #1 trong cùng thay đổi. Không tự đổi OD2-08/09 thành APPROVED.
 3. Không nâng bất kỳ mục PROPOSED/OPEN nào nếu chưa có approval rõ ràng. Spec #1 chỉ chuyển sang READY_FOR_CROSS_REVIEW khi user xác nhận.
-4. Giữ G1 NOT APPROVED, G9 BLOCKED, G10 BLOCKED. Không code. Spike phải qua gate riêng (ADR-018).
+4. *(2026-10-25)* G1 APPROVED cho local synthetic P0 (ADR-078); G9 BLOCKED, G10 BLOCKED. Code chỉ theo plan S0 đã được user review. Không merge spike source chưa review.
 
 **Các quyết định đã khóa:**
 - Hướng Hybrid (ADR-002).
@@ -45,7 +47,7 @@
 - Không chọn AWS profile, và không ghi gì lên AWS (ADR-006).
 
 **Không được:**
-- implement trước G1
+- implement khi plan của slice chưa được user review (G1 đã duyệt, ADR-078)
 - push, hoặc đổi remote
 - động vào AWS
 - gọi API công ty

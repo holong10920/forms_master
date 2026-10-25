@@ -8,7 +8,7 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | Gate | Kết quả | Người duyệt | Ngày | Hồ sơ |
 |---|---|---|---|---|
 | G0 Scope | **APPROVED WITH ADJUSTMENTS** | User (holong10920) | 2026-10-23 | ADR-003..ADR-007 |
-| G1 Design | NOT APPROVED (chưa nộp). Chỉ trình sau khi đủ 6 spec và có Cross-Subsystem Integration Review (ADR-018). | — | — | ADR-018 |
+| G1 Design | **APPROVED FOR LOCAL SYNTHETIC P0 IMPLEMENTATION** (không phải production readiness). Baseline thiết kế: commit `6312f2b`. Architecture Closure: 0 BLOCKER / 0 MAJOR (independent review, report §10.6–§10.7) | User (holong10920) | 2026-10-25 | ADR-078 |
 | G9 GitHub | **BLOCKED**: user đang xử lý visibility của repo và quyền sở hữu source | — | — | ADR-007 |
 | G10 AWS | **BLOCKED**: profile/account sẽ được xác nhận trước G10 | — | — | — |
 
@@ -94,6 +94,7 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-075 | Phản hồi review C1: V5-01 cần independent design review theo 12 điểm + linearization; independent C1 closure review (Batch A/B/C, cùng rubric); tiêu chí trình G1 Approval Package | **APPROVED** (governance; không approve G1) | User (C1 review response) | 2026-10-25 |
 | ADR-076 | SR-08: code plugin đã revoke còn chạy trong iframe Preview đang mở — chấp nhận có điều kiện cho synthetic P0; Admin phản ứng khi phát hiện (invalidate session, gỡ iframe) | **CONDITIONALLY_ACCEPTED — ENFORCEMENT/VERIFICATION_PENDING** | User (C1 closure) | 2026-10-25 |
 | ADR-077 | Sole writer `forms-master-61` cho C1 Closure; Closure Mode (chỉ sửa BLOCKER/MAJOR có bằng chứng, MINOR ghi follow-up) | **APPROVED** (governance) | User (C1 closure) | 2026-10-25 |
+| ADR-078 | G1: duyệt baseline sáu spec tại `6312f2b` cho implementation local synthetic P0; đóng OD-06/OD-10/OD-13; ngoại lệ có kiểm soát cho ADR-005 (budget số chốt ở S2); ADR-013/014 vẫn PROPOSED | **APPROVED** | User (G1) | 2026-10-25 |
 
 ---
 
@@ -179,6 +180,7 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
   - Chunk và dependency graph được kiểm tra.
 - Số bundle cũ (mang tính tham khảo) **không** phải baseline chính thức.
 - Performance budget được đặt dựa trên số đo và duyệt tại G1. Không được tuyên bố cải thiện hiệu năng khi chưa có bằng chứng định lượng.
+- **Ngoại lệ G1 có kiểm soát (2026-10-25, ADR-078):** chưa chốt budget số trước khi có artifact thật. S0 định nghĩa phương pháp đo; S2 đo artifact thật và trình budget số để user chốt **trước** khi đánh dấu S2 DONE; không tự PASS khi chưa đo; Sports Motion-none bắt buộc 0 byte/import/chunk Motion; kết quả spike không phải bằng chứng hiệu năng cuối.
 - **Người duyệt:** User (G0 §3). **Ngày:** 2026-10-23.
 
 ## ADR-006 — AWS
@@ -1265,4 +1267,16 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 
 - **Quyết định (user): APPROVED.** `forms-master-61` là phiên ghi duy nhất của `forms_master` cho C1 Closure; `forms-master-e4` đã kết thúc; `forms-master-cf` bị thu hồi quyền ghi. Không tạo thêm writer. Trước mỗi thao tác ghi/commit: kiểm branch, HEAD, staged/unstaged, không có writer khác theo khả năng quan sát; không reset/stash/clean/ghi đè thay đổi của phiên khác. Reviewer chỉ đọc snapshot commit cố định. Chỉ định sole writer **không** là phê duyệt blanket cho commit.
 - **Closure Mode:** không brainstorming mới, không đổi phạm vi P0, không thêm subsystem hay phương án kiến trúc khi không có blocker; chỉ sửa BLOCKER/MAJOR có bằng chứng; MINOR không chặn vertical slice ghi follow-up; không review toàn diện lại từ đầu khi targeted re-review đủ; không hạ severity để qua G1. Phân biệt: design-resolved / independently reviewed / implementation verification pending / accepted risk / unresolved.
+- **Người duyệt:** User. **Ngày:** 2026-10-25.
+
+## ADR-078 — G1: duyệt thiết kế cho implementation local synthetic P0
+
+- **Quyết định (user): G1 APPROVED FOR LOCAL SYNTHETIC P0 IMPLEMENTATION.** Đây là phê duyệt bắt đầu implementation local, **không** phải production readiness.
+- **Baseline thiết kế:** sáu spec tại commit `6312f2b` (branch `p00-discovery`): spec #1 rev 3.x, #2 rev 2.15, #3 rev 2.10, #4 rev 2.10, #5 rev 2 + C1..C1e, #6 rev 2.2. Architecture Closure đạt 0 BLOCKER / 0 MAJOR theo independent review (report §10.6–§10.7).
+- **Đóng:** OD-06 — workflow chỉ DAG. OD-10 — phép chia và toán ngày tháng chuyển P1. OD-13 — block instance chỉ thuộc một step. (Spec #1 §21 còn ghi OPEN; ADR này là nguồn quyết định.) F-P0-13/16/18/19 vẫn thuộc P0, triển khai theo thứ tự phụ thuộc; Auth/RBAC và Audit tối thiểu phải có trước các thao tác cần phân quyền.
+- **ADR-013/014 vẫn PROPOSED:** không mặc nhiên coi toàn bộ là APPROVED; chỉ chốt contract thực sự chặn implementation của một slice cụ thể, khi cần. Không mở lại G1 hay brainstorming tổng thể nếu không có mâu thuẫn thiết kế.
+- **Performance (ngoại lệ ADR-005):** S0 định nghĩa phương pháp đo; S2 đo artifact thật và trình budget số để chốt trước khi S2 DONE; không tự PASS khi chưa đo; Sports Motion-none = 0 Motion runtime bytes/imports/chunks; spike không phải bằng chứng cuối (VG-21).
+- **Security boundary P0:** chỉ dữ liệu synthetic, mock integration; không PII khách thật, không connector thật, không effect nghiệp vụ đặc quyền, không traffic production. SR-01/03/05/06/08 giữ nguyên phạm vi và trigger. VG-17 phải PASS trước demo dựa vào ADR-063. CT-26, differential TS/Python, cô lập browser/plugin, authorization và submission test được thực thi theo implementation gate; G1 **không** có nghĩa các test này đã PASS.
+- **Tiếp theo:** `writing-plans` cho S0 (P02); plan phải được user review trước khi implement. Thứ tự slice: Business Editor → Definition → Preview → Review/Approval → Compile → Local Publish → Synthetic Submission → Mock Effect → Rollback; Sports Motion-none trước, sau đó PC và Motion. MINOR còn mở là backlog, xử lý trước khi implement chức năng bị ảnh hưởng.
+- **Governance:** G9 BLOCKED (không push), G10 BLOCKED (không AWS), không merge spike source chưa review, local commit theo hook/approval.
 - **Người duyệt:** User. **Ngày:** 2026-10-25.

@@ -9,7 +9,7 @@
 | Gate | Status | Date | Record |
 |---|---|---|---|
 | G0 Scope | **APPROVED WITH ADJUSTMENTS** | 2026-10-23 | DECISIONS.md ADR-001..007 |
-| G1 Design | TODO (chưa trình) | | |
+| G1 Design | **APPROVED FOR LOCAL SYNTHETIC P0 IMPLEMENTATION** (baseline `6312f2b`) | 2026-10-25 | DECISIONS.md ADR-078 |
 | G2–G8 | TODO | | |
 | G9 GitHub | BLOCKED (user xử lý visibility/ownership) | | ADR-007 |
 | G10 AWS | BLOCKED | | ADR-006 |
@@ -266,7 +266,7 @@
 | P01-05 | Design API/persistence/auth, publish/rollback và AWS PoC isolated architecture. | IN_PROGRESS | docs/superpowers/specs/2026-10-24-api-persistence-publishing-design.md; docs/DECISIONS.md ADR-054, ADR-055 | spec #5 rev 2 (ADR-054..060; submission admission gate) READY_FOR_CROSS_SPEC_REVIEW; AWS chỉ là thiết kế đích sau G10 |
 | P01-06 | Design Motion subsystem và reduced motion. | IN_PROGRESS | docs/superpowers/specs/2026-10-24-motion-design.md; docs/DECISIONS.md ADR-062 | spec #6 rev 2 (ADR-062, ADR-064..067), đồng bộ I6-01..06; số đo Motion ở P04/P07 |
 | P01-07 | Threat model, ADRs, milestones, acceptance matrix. | TODO | ADR-017, ADR-018; docs/superpowers/specs/2026-10-23-form-schema-workflow-design.md §25 | đã lên kế hoạch Cross-Subsystem Integration Review sau khi đủ 6 spec; threat model chưa làm |
-| P01-08 | Review docs, get explicit user approval; invoke `writing-plans` only after sign-off. | TODO | ADR-018 | G1 chỉ trình sau khi đủ 6 spec + Cross-Subsystem Review; G1 NOT APPROVED |
+| P01-08 | Review docs, get explicit user approval; invoke `writing-plans` only after sign-off. | DONE | docs/DECISIONS.md ADR-078 (G1); docs/discovery/P01_CROSS_SUBSYSTEM_REVIEW.md §10.6–§10.7; commit `6312f2b` | G1 APPROVED cho local synthetic P0; tiếp theo `writing-plans` cho S0 (P02) |
 
 ## PHASE 02 — Engineering foundation (`P02`)
 

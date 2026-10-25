@@ -76,6 +76,7 @@ Các mục spike chưa chứng minh hoặc chưa kiểm. **OPEN** cho tới khi 
 | VG-18 | Tích hợp Cognito (OIDC BFF) chạy thật; cookie PKCE `SameSite=Lax` cross-site | spec #5 §7.6 | sau G10 | OPEN |
 | VG-19 | Contract test CT-01..26 trên DynamoDB thật (emulator không đủ) | spec #5 §11.2 | sau G10 | OPEN |
 | VG-20 | *(C1c, ADR-076)* SR-08: Preview bị chặn khi capability bị revoke (TM-5V07, 4Z16) | spec #5 §7.3; spec #4 §14.7 | sau G1 | OPEN |
+| VG-21 | *(ADR-078, ngoại lệ ADR-005)* Phương pháp đo (S0) và budget số từ artifact thật (S2); Sports Motion-none = 0 Motion bytes/imports/chunks | ADR-005, ADR-078; spec #3 §17 | S0 (phương pháp), **trước S2 DONE** (budget) | OPEN |
 | — | Decision còn mở của spec #1 (OD-06, OD-10, OD-13). OD2-08/09 đã đóng (ADR-057/058) | spec #1 §21 | theo hạn từng mục | OPEN |
 
 > Cross-Subsystem Review (2026-10-24) MINOR-19: bảng này còn trích rev cũ và thiếu các gate sau G1/G10 (CT-26, ma trận TS/Python cross-version, cổng đo Motion P04, checklist ADR-053, Cognito, DynamoDB thật). **Đã cập nhật trong vòng sửa C1 (2026-10-25).**
