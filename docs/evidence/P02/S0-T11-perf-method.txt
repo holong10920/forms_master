@@ -1,0 +1,15 @@
+S0 T11 — performance method and byte tool, 2026-10-25.
+$ pnpm test
+Includes tools/perf/test/sizes.test.ts: 3 tests PASS.
+- Raw/gzip/Brotli deterministic for same input/toolchain; sorted relative paths, totals.
+- Empty file and 1000-byte file; file/directory symlinks skipped and listed, no loop.
+- Compression round-trip, gzip level 9, Brotli quality 11/size hint.
+- CLI writes versioned report with settings, runtime versions and UTC timestamp.
+
+PERF_MEASUREMENT_METHOD.md covers spec T1/T2/T3 and metrics; CDP slow4g/unthrottled
+profiles and TTFB caveat; 10 measured cold/warm runs after warm-up; inventory-separated
+byte accounting; three Motion-none conditions; lab-only envelope; user-approved S2
+budget process; five clean local build timings. No numerical budget introduced.
+VG-21 method implemented; artifact baseline and budgets still OPEN for S2.
+CLI timestamps are metadata; path/size fields are deterministic within one toolchain.
+Totals sum per-file compressed bytes, not HTTP transfer size or archive compression.

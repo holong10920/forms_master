@@ -1,0 +1,86 @@
+S0 T10 — security checks, 2026-10-25. PARTIAL / Gitleaks gate BLOCKED.
+Implementation: default-rule Gitleaks 8.30.1 CLI wrapper, redacted output, missing/wrong
+version fails; synthetic email-domain checker; global Vitest fetch guard; security doc.
+No Docker, Homebrew mirror or GitHub download retries.
+
+$ pnpm synthetic:check
+{"findings": []}
+Unit coverage: reserved domains including uppercase, non-synthetic domain exact line,
+suffix impersonation, binary/symlink fail closed, fetch of 127.0.0.1:9 rejected.
+$ pnpm secrets
+BLOCKED: Gitleaks CLI 8.30.1 is required; security gate is not PASS.
+exit=127
+Gitleaks negative/clean fixture integration test: SKIP (CLI 8.30.1 absent).
+Generated AWS-shaped fixture is created only when the real scanner can execute; no real
+credential, no secret value printed. Missing-scanner guard test PASS.
+Gitleaks NOT PASS. CP3 detect-secrets approval applies to CP3 only, not T10 or S0 DONE.
+Limit: TS guard blocks fetch, not arbitrary node:net/subprocess HTTP; Python TCP socket
+guard remains enabled. Synthetic check is email-domain coverage, not general PII detection.
+
+Full local checks after fixes:
+$ pnpm format:check && pnpm lint && pnpm typecheck && pnpm test
+Format PASS; ESLint 0 warnings; all 5 package typechecks PASS.
+Test Files 14 passed (14); Tests 513 passed | 15 expected fail | 1 skipped (529).
+15 expected failures are the pre-existing declared JSTS divergences; Gitleaks is the 1 skip.
+$ pnpm py:lint && pnpm py:typecheck && pnpm py:test
+All checks passed; 39 files formatted; mypy no issues in 39 files; 674 passed in 6.75s.
+$ pnpm gen:check && pnpm schemas:lint
+gen:check OK (2 generated files); schemas:lint OK (1 schema files).
+PATH includes project .tools/bin; uv cache redirected to /tmp for sandbox permissions.
+Self-review: one pass, no new correctness/security MAJOR identified; open gates listed above.
+
+=== User-approved alternative T10 evaluation (2026-10-25) ===
+No retry of failed download sources. Default `pnpm secrets` now uses isolated
+detect-secrets==1.5.0, all 27 default detectors, no rule disabled, --no-verify.
+Source inventory: all relevant Git-index source/config/fixtures, plus current working
+source and candidate untracked source in separate snapshots. Staged sources must be
+covered by the index manifest. No working-tree bytes substituted for index evidence.
+Exclusions (not claimed covered): docs/history/evidence, contracts/vendor, lockfiles,
+CLAUDE.md, Git-ignored files and untracked spikes. Tracked spike source would be included.
+Manifests include SHA-256 for each scanned blob.
+
+Latest workspace result: working source 143 files, index 102 files, staged sources 0.
+JSON findings: working 13, index 12; unresolved 0.
+Reviewed false positives: 12 Hex High Entropy findings are public synthetic fixture
+SHA-256 values in contracts/fixtures/{digest/sha256-hex,jcs/cases}.json. Each matched
+line is checked against a digest recomputed from raw/canonical input AND the detector
+fingerprint. The additional working-source finding is the exact fixed pnpm scan
+command in package.json, not a credential. No broad entropy or keyword exclusion.
+A tampered digest fixture remains unresolved and fails the check.
+
+Negative fixtures executed offline against the real pinned scanner: clean content PASS;
+generated AWS-shaped key, random password and generated private key all detected.
+Reports contain locations/types/classification only, never matched values.
+Synthetic fixtures PASS, Vitest fetch guard PASS, Python socket guard PASS.
+Full pnpm verify: PASS (518 TS pass, 15 declared expected failures, 1 intentional skip;
+674 Python pass; format/lint/typecheck/schema drift/boundaries PASS).
+
+Alternative T10 technical checks: PASS; accepting this as the replacement S0 security
+gate awaits explicit user confirmation. Gitleaks remains NOT VERIFIED, not PASS.
+The single skip is tools/security/test/gitleaks.test.ts: real Gitleaks integration
+requires absent CLI 8.30.1; optional old-scanner coverage only. Alternative scanner
+negative/clean tests do NOT skip. This skip predates the replacement decision.
+Limits: static heuristics can miss unknown secrets/PII; no online validation; source
+coverage as above; TS fetch guard is not process-wide network sandboxing. No S0/G2 PASS.
+
+Final coverage clarification: source exclusions are NEVER applied to staged ACMR files;
+all staged added/copied/modified/renamed files (including docs, locks, vendor) join the
+index snapshot. Deleted files contain no new staged content. Current staged count 0.
+Final workspace + clean-candidate pnpm verify both exit 0 after this coverage correction.
+
+=== Gate decision: ACCEPTED by user, 2026-10-25 ===
+Alternative scanner accepted for S0 local synthetic P0: detect-secrets==1.5.0, all 27
+default detectors; source/index/staged coverage and exclusions documented above.
+Negative fixtures PASS. Gitleaks NOT_EXECUTED. Gitleaks installation is no longer a
+mandatory T10 closure criterion in this approved P0 scope. No equivalence claim.
+T10 PASS. T12 container verification remains BLOCKED_BY_ENVIRONMENT; G2 not approved.
+
+CP4 pre-commit verification, approved scope only:
+54 staged files (53 listed CP4 files + CP4-only package.json). No CP5 scripts staged.
+Alternative scanner actual repository index: 148 files including all 54 staged paths;
+27 default detectors, unresolved 0; working-source unresolved 0. No secret values output.
+Separate CP4 index-source snapshot: frozen install + uv sync --locked + all CP4 scripts
+PASS; TS 517 pass / 15 expected fail / 1 deliberate optional Gitleaks skip; Python 674 pass.
+Format, lint, typecheck, generated drift, schema lint, TS/Python boundaries and synthetic
+checks PASS. No CP5 preflight/test/verify code present in that source snapshot.
+Final index rescanned after this evidence update. Gitleaks NOT_EXECUTED; container not PASS.

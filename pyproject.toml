@@ -44,3 +44,11 @@ python_version = "3.13"
 files = ["python"]
 explicit_package_bases = true
 mypy_path = ["python/fb_contracts/src", "python/fb_store/src"]
+
+[tool.importlinter]
+root_packages = ["fb_store", "fb_contracts"]
+
+[[tool.importlinter.contracts]]
+name = "Store depends on contracts, never the reverse"
+type = "layers"
+layers = ["fb_store", "fb_contracts"]

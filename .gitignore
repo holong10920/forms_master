@@ -41,3 +41,5 @@ var/
 # Generated output of spike experiments (spike source stays visible; D8)
 spikes/*/gen/
 spikes/*/out/
+
+.import_linter_cache/

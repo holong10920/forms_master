@@ -1,0 +1,15 @@
+Optional legacy scanner skip confirmation, 2026-10-25:
+$ pnpm exec vitest run tools/security/test/gitleaks.test.ts --reporter verbose
+
+ RUN  v5.0.5 ~/Documents/marketenterprise/forms_master
+
+ ↓ tools/security/test/gitleaks.test.ts > Gitleaks detects a generated synthetic AWS credential and accepts clean input (requires CLI 8.30.1)
+ ✓ tools/security/test/gitleaks.test.ts > missing or incompatible CLI fails the wrapper gate 11ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 1 skipped (2)
+   Start at  17:48:44
+   Duration  107ms (tests 40%, import 29%, setup 11%, transform 11%, worker 9%)
+
+
+Intentional skip: CLI 8.30.1 absent. Alternative scanner tests executed and PASS.

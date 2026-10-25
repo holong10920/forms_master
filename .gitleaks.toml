@@ -1,0 +1,15 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Dependencies, local data, and generated spike output only"
+paths = [
+  '''(^|/)node_modules/''',
+  '''^\.venv/''',
+  '''^\.tools/''',
+  '''^\.git/''',
+  '''^spikes/[^/]+/(gen|out|test-results)/''',
+  '''^var/''',
+  '''^contracts/vendor/''',
+  '''^(pnpm-lock\.yaml|uv\.lock)$''',
+]

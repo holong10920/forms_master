@@ -1,0 +1,16 @@
+S0 T12 — builder image: BLOCKED / not implemented or verified, 2026-10-25.
+Prerequisite: verified digest and locally available node:24.22.1-bookworm-slim base.
+Prior Docker pull attempts failed on TLS timeout. User forbids further Docker/mirror/
+GitHub-download debugging; no such retry was made in CP4.
+A web lookup of public Docker Hub tag metadata was inaccessible; no verified digest
+obtained. No invented digest, no floating-tag Dockerfile, no container build/test claim.
+Added docker/builder/README.md recording requirements and the concrete remaining steps.
+VG-05 remains PARTIAL from earlier work; T12 and S0 are not DONE.
+
+=== Offline continuation, 2026-10-25 ===
+$ docker image ls --filter 'reference=node:24*' --format '{{.Repository}}:{{.Tag}} {{.Digest}} {{.ID}}'
+exit=0; empty result. One cache inventory, no registry retry or further Docker call.
+Status: BLOCKED_BY_ENVIRONMENT. No verified Node 24 image/digest available.
+Offline build specification expanded in docker/builder/README.md (toolchain, env,
+workdir, umask, dependency/dev install and source-context constraints).
+Dockerfile with resolved digest, container build and container test are NOT completed.

@@ -19,11 +19,17 @@
     "py:test": "uv run pytest",
     "gen": "pnpm --filter @fb/contracts gen",
     "gen:check": "pnpm --filter @fb/contracts gen:check",
-    "schemas:lint": "pnpm --filter @fb/contracts lint:schemas"
+    "schemas:lint": "pnpm --filter @fb/contracts lint:schemas",
+    "boundaries": "depcruise packages tools --config .dependency-cruiser.cjs --output-type err",
+    "py:imports": "uv run lint-imports",
+    "secrets": "node tools/security/src/secrets.ts",
+    "synthetic:check": "node tools/security/src/synthetic-data-check.ts contracts/fixtures",
+    "secrets:gitleaks": "sh tools/security/gitleaks.sh"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@types/node": "24.19.2",
+    "dependency-cruiser": "18.7.0",
     "eslint": "10.13.0",
     "prettier": "3.9.10",
     "typescript": "6.0.3",

@@ -1,0 +1,25 @@
+S0 T9 — package boundaries, 2026-10-25. CP4 working tree, not committed.
+CP3 prerequisite committed as 090c537, alternative secret scan PASS.
+
+$ pnpm boundaries
+✔ no dependency violations found (45 modules, 92 dependencies cruised)
+$ pnpm vitest run tools/boundaries
+Test Files 1 passed (1); Tests 2 passed (2).
+Negative fixture: exactly browser-safe-no-node, no-circular, no-relative-cross-package,
+packages-not-import-tools, src-no-test-fixture-script; no unresolved dependency masking.
+Control fixture: same-package and named cross-package imports accepted, 0 violations.
+Fixture temp roots use realpath to normalize macOS /var -> /private/var before cruise.
+$ uv run --locked pytest python/fb_store/tests/test_import_contracts.py -q
+1 passed in 1.54s. Forbidden a -> b: exit 1, named contract BROKEN, exact edge asserted.
+$ uv run --locked lint-imports
+Analyzed 13 files, 15 dependencies. Contracts: 1 kept, 0 broken.
+Store depends on contracts, never the reverse KEPT.
+
+Volta fix: each workspace package has volta.extends = ../../package.json.
+$ <Volta node shim> -v (cwd = each package below)
+packages/contracts: v24.22.1
+tools/lint-fixtures: v24.22.1
+tools/boundaries: v24.22.1
+tools/security: v24.22.1
+tools/perf: v24.22.1
+Global Node defaults untouched. .tools/bin still supplies Corepack pnpm.

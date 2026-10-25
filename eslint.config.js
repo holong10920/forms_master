@@ -13,6 +13,7 @@ export default defineConfig(
       ".tools/**",
       "contracts/vendor/**",
       "tools/lint-fixtures/fixtures/**",
+      "tools/boundaries/fixtures/**",
     ],
   },
   js.configs.recommended,
@@ -20,7 +21,9 @@ export default defineConfig(
   {
     languageOptions: {
       parserOptions: {
-        projectService: { allowDefaultProject: ["*.js", "*.ts"] },
+        projectService: {
+          allowDefaultProject: ["*.js", "*.cjs", "*.ts", "tools/test-setup/no-network.ts"],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -32,7 +35,11 @@ export default defineConfig(
     },
   },
   {
-    files: ["**/*.js"],
+    files: ["**/*.js", "**/*.cjs"],
     extends: [tseslint.configs.disableTypeChecked],
+  },
+  {
+    files: ["**/*.cjs"],
+    languageOptions: { sourceType: "commonjs", globals: { module: "readonly" } },
   },
 );
