@@ -1,0 +1,82 @@
+S0 T1 — Toolchain provisioning and evaluation (VG-04, VG-05 local part)
+Date: 2026-10-25. Branch p02-s0-foundation (from c47641c). Machine: macOS, arm64.
+Paths: $HOME replaced by ~.
+
+== Node (D1, project-scoped) ==
+$ volta fetch node@24.22.1          # fetch only; global default unchanged
+$ volta list node
+runtime node@18.17.1
+runtime node@20.20.2 (default)
+runtime node@24.22.1
+$ node -v                           # inside repo (package.json "volta": {"node": "24.22.1"})
+v24.22.1
+
+== pnpm via Corepack (D2 modified) ==
+$ node <node 24.22.1 bin>/corepack --version
+0.36.0
+$ node <node 24.22.1 bin>/corepack enable --install-directory .tools/bin pnpm
+  -> .tools/bin/pnpm, .tools/bin/pnpx (symlinks to Corepack of Node 24.22.1; .tools/ is gitignored)
+$ PATH="$PWD/.tools/bin:$PATH" pnpm -v
+! Corepack is about to download https://registry.npmjs.org/pnpm/-/pnpm-12.15.0.tgz
+Downloading the pnpm 12.15.0 binary for darwin-arm64...
+12.15.0
+Result: Corepack works with pnpm 12.15.0. No standalone install needed. No Volta pnpm feature used.
+Note: pnpm 12 uses `allowBuilds` (not `onlyBuiltDependencies`) and has no `--prod=false`
+(flags: -P/--prod, -D/--dev). Relevant for T12.
+
+== Engine strict (negative) ==
+$ rm -rf node_modules; volta run --node 20.20.2 -- pnpm install
+Error: ERR_PNPM_UNSUPPORTED_ENGINE
+  × Unsupported engine for ~/Documents/marketenterprise/forms_master: wanted: {"node":">=24.22.1 <25"} (current: {"node":"20.20.2"})
+$ volta run --node 20.20.2 -- pnpm install --frozen-lockfile ; echo $?
+1
+Observation: when node_modules is already up to date, pnpm prints "Already up to date" and
+does not re-check engines (observed once under Node 20 before node_modules was removed).
+The check applies to fresh installs (clean clone), which is the CI-equivalent path.
+
+== uv / Python (D3) ==
+$ brew install uv         # Homebrew formula stable = 0.13.5
+$ uv --version
+uv 0.13.5 (Homebrew 2026-10-22 aarch64-apple-darwin)
+$ uv python find 3.13
+/opt/homebrew/opt/python@3.13/bin/python3.13
+$ uv lock && uv run python -V
+Using CPython 3.13.15 interpreter at: /opt/homebrew/opt/python@3.13/bin/python3.13
+Python 3.13.15
+System python3 (pyenv 3.11.11) unchanged.
+
+== VG-04 fixture (docs/evidence/P02/toolchain/pnpm-peer-fixture/) ==
+Fixture: workspace with @vg04/app (react 19.3.1, react-dom 19.3.1, motion 14.6.0, @vg04/lib)
+and @vg04/lib (peer react 19.3.1).
+
+npm variant, Node 20.20.2 / npm 10.8.2:
+$ npm install --no-audit --no-fund
+added 10 packages in 2s
+exit=0
+Result: the spike's arborist error (`Cannot read properties of null (reading 'edgesOut')`)
+was NOT reproduced with this fixture. Recorded as observed; the spike's exact trigger is not
+re-created here. This does not change the pnpm choice (ADR-044).
+
+pnpm variant (lib referenced as workspace:*), Node 24.22.1 / pnpm 12.15.0:
+$ pnpm install
+Packages: +8
+Done in 4.9s using pnpm v12.15.0
+exit=0
+$ rm -rf node_modules packages/*/node_modules; pnpm install --frozen-lockfile
+Done in 61ms using pnpm v12.15.0
+exit=0
+$ ls node_modules/.pnpm | grep -E '^(react|react-dom)@'
+react-dom@19.3.1_react@19.3.1
+react@19.3.1
+Result: one React (19.3.1); react-dom resolved against the same React.
+
+== VG-04 summary ==
+pnpm installs fixture: PASS. Frozen lockfile: PASS. Workspace resolve (workspace:*): PASS.
+React peer singleton: PASS. packageManager pinned ("pnpm@12.15.0"): PASS.
+npm 10.8.2 failure reproduction: NOT REPRODUCED (informational).
+VG-04 status: PASS (with the note above).
+
+== VG-05 (local part) ==
+Node 24.22.1 runs pnpm 12.15.0 and the repo toolchain (see T2/T3 evidence).
+Builder image pinned by digest: T12. A/B reproducibility, isolation and Vite/Rolldown
+compatibility need the compiler: S2. VG-05 status: PARTIAL.

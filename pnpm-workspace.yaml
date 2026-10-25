@@ -1,0 +1,9 @@
+packages:
+  - packages/*
+  - tools/*
+
+# Refuse installs on a Node version outside package.json "engines".
+engineStrict: true
+
+# Dependency lifecycle (build) scripts are denied unless listed here.
+allowBuilds: {}

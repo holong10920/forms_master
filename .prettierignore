@@ -1,0 +1,10 @@
+docs/
+spikes/
+var/
+.tools/
+python/
+contracts/vendor/
+contracts/fixtures/
+pnpm-lock.yaml
+CLAUDE.md
+MASTER_PROMPT_*

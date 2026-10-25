@@ -95,6 +95,7 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-076 | SR-08: code plugin đã revoke còn chạy trong iframe Preview đang mở — chấp nhận có điều kiện cho synthetic P0; Admin phản ứng khi phát hiện (invalidate session, gỡ iframe) | **CONDITIONALLY_ACCEPTED — ENFORCEMENT/VERIFICATION_PENDING** | User (C1 closure) | 2026-10-25 |
 | ADR-077 | Sole writer `forms-master-61` cho C1 Closure; Closure Mode (chỉ sửa BLOCKER/MAJOR có bằng chứng, MINOR ghi follow-up) | **APPROVED** (governance) | User (C1 closure) | 2026-10-25 |
 | ADR-078 | G1: duyệt baseline sáu spec tại `6312f2b` cho implementation local synthetic P0; đóng OD-06/OD-10/OD-13; ngoại lệ có kiểm soát cho ADR-005 (budget số chốt ở S2); ADR-013/014 vẫn PROPOSED | **APPROVED** | User (G1) | 2026-10-25 |
+| ADR-079 | Toolchain S0: Node 24.22.1 (pin theo project), pnpm 12.15.0 qua Corepack, TypeScript 6.0.3, Python 3.13 + uv; chốt ADR-044/045 cho P02 | **APPROVED** (D1–D5, S0 plan review) | User (S0 plan review) | 2026-10-25 |
 
 ---
 
@@ -1280,3 +1281,16 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 - **Tiếp theo:** `writing-plans` cho S0 (P02); plan phải được user review trước khi implement. Thứ tự slice: Business Editor → Definition → Preview → Review/Approval → Compile → Local Publish → Synthetic Submission → Mock Effect → Rollback; Sports Motion-none trước, sau đó PC và Motion. MINOR còn mở là backlog, xử lý trước khi implement chức năng bị ảnh hưởng.
 - **Governance:** G9 BLOCKED (không push), G10 BLOCKED (không AWS), không merge spike source chưa review, local commit theo hook/approval.
 - **Người duyệt:** User. **Ngày:** 2026-10-25.
+
+## ADR-079 — Toolchain S0 (P02)
+
+- **Bối cảnh:** ADR-044 (pnpm là hướng đánh giá), ADR-045 (Node 20 EOL; đánh giá Node 24 LTS ở P02). S0 plan `docs/superpowers/plans/2026-10-25-s0-engineering-foundation.md`, D1–D5 được user duyệt (D2 sửa: Corepack thay vì pnpm thử nghiệm của Volta).
+- **Quyết định:**
+  - Node.js **24.22.1** (LTS), pin theo project (`package.json` `volta.node`, `engines` `>=24.22.1 <25`, `.node-version`). Node mặc định toàn cục của máy không đổi (`volta fetch`, không `volta install`).
+  - pnpm **12.15.0** qua **Corepack** của Node 24.22.1 (Corepack 0.36.0), `packageManager: "pnpm@12.15.0"`, shim project-local `.tools/bin` (gitignored). Corepack chạy đúng nên không cần bản standalone. `engineStrict: true`, `allowBuilds: {}` (chặn lifecycle script của dependency).
+  - TypeScript **6.0.3**, không dùng 7.x: typescript-eslint 8.72.0 yêu cầu `typescript >=4.8.4 <6.1.0`. Xem lại khi typescript-eslint hỗ trợ TS 7.
+  - Python **3.13** (CPython 3.13.15 Homebrew) + **uv 0.13.5**, `uv.lock` commit; Python hệ thống không đổi.
+  - Thư viện contract (D5): Ajv 8.20.0 + jsonschema 4.26.0; canonicalize 5.1.0 + rfc8785 0.1.4.
+- **Evaluation (evidence `docs/evidence/P02/S0-T1-toolchain.txt`):** VG-04 PASS: pnpm cài fixture, `--frozen-lockfile`, `workspace:*`, một bản React 19.3.1. Lỗi arborist của npm 10.8.2 **không** tái hiện được với fixture này (chỉ ghi nhận). Engine-strict từ chối Node 20 khi cài mới (`ERR_PNPM_UNSUPPORTED_ENGINE`). VG-05 PARTIAL: image builder ở T12; A/B tái lập và isolation ở S2.
+- **Đánh đổi:** Volta vẫn quản Node theo project; pnpm cần thêm `.tools/bin` vào `PATH` (hướng dẫn ở README). pnpm 12 đổi tên cấu hình (`allowBuilds`) và không có `--prod=false`.
+- **Người duyệt:** User (S0 plan review, D1–D5). **Ngày:** 2026-10-25.

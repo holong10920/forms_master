@@ -28,3 +28,16 @@ test-results/
 
 # Master contract mentions internal AWS environment context: local only until user review (ADR-007)
 MASTER_PROMPT_MULTI_SITE_FORM_BUILDER_AWS_TRAINING.md
+
+# S0 (P02): local toolchain shims, data and tool caches
+.tools/
+var/
+*.sqlite3
+.pnpm-store/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Generated output of spike experiments (spike source stays visible; D8)
+spikes/*/gen/
+spikes/*/out/

@@ -1,0 +1,71 @@
+S0 T3 — Python baseline. Date: 2026-10-25. uv 0.13.5.
+State before run: .venv removed.
+
+$ uv sync --locked
+Using CPython 3.13.15 interpreter at: /opt/homebrew/opt/python@3.13/bin/python3.13
+Creating virtual environment at: .venv
+Resolved 29 packages in 14ms
+Installed 28 packages in 45ms
+ + ast-serialize==0.13.1
+ + attrs==26.1.0
+ + click==8.5.0
+ + fb-contracts==0.0.0 (from file://~/Documents/marketenterprise/forms_master/python/fb_contracts)
+ + fb-store==0.0.0 (from file://~/Documents/marketenterprise/forms_master/python/fb_store)
+ + grimp==3.17
+ + import-linter==2.15
+ + iniconfig==2.3.1
+ + jsonschema==4.26.0
+ + jsonschema-specifications==2025.9.1
+ + librt==0.16.0
+ + markdown-it-py==4.2.0
+ + mdurl==0.1.2
+ + mypy==2.4.0
+ + mypy-extensions==1.1.0
+ + packaging==26.3
+ + pathspec==1.1.1
+ + pluggy==1.7.0
+ + pygments==2.21.0
+ + pytest==9.1.1
+ + pytest-socket==0.8.1
+ + referencing==0.37.0
+ + rfc8785==0.1.4
+ + rich==15.0.0
+ + rpds-py==2026.9.1
+ + ruff==0.17.2
+ + types-jsonschema==4.26.0.20261006
+ + typing-extensions==4.16.0
+exit=0
+
+$ uv run python -V
+Python 3.13.15
+exit=0
+
+$ pnpm py:lint
+$ uv run ruff check python && uv run ruff format --check python
+All checks passed!
+5 files already formatted
+exit=0
+
+$ pnpm py:typecheck
+$ uv run mypy
+Success: no issues found in 5 source files
+exit=0
+
+$ uv run pytest -v
+============================= test session starts ==============================
+platform darwin -- Python 3.13.15, pytest-9.1.1, pluggy-1.7.0
+rootdir: ~/Documents/marketenterprise/forms_master
+configfile: pyproject.toml
+testpaths: python
+plugins: socket-0.8.1
+collected 3 items
+
+python/fb_contracts/tests/test_smoke.py .                                [ 33%]
+python/fb_store/tests/test_network_blocked.py .                          [ 66%]
+python/fb_store/tests/test_smoke.py .                                    [100%]
+
+============================== 3 passed in 0.02s ===============================
+exit=0
+
+Negative test: python/fb_store/tests/test_network_blocked.py — before --disable-socket was configured it FAILED
+with ConnectionRefusedError (a real connect attempt); after, SocketBlockedError is raised (PASS).

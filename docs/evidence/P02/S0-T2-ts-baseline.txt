@@ -1,0 +1,59 @@
+S0 T2 — TypeScript strict baseline. Date: 2026-10-25. Node v24.22.1, pnpm 12.15.0.
+State before run: node_modules removed (root and workspace packages).
+
+$ pnpm install --frozen-lockfile
+Scope: all 3 workspace projects
+✓ Lockfile passes supply-chain policies (verified 3m ago)
+Lockfile is up to date, resolution step is skipped
+Packages: +131
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 131, reused 131, downloaded 0, added 131, done
+
+devDependencies:
++ @eslint/js 10.0.1
++ @types/node 24.19.2
++ eslint 10.13.0
++ prettier 3.9.10
++ typescript 6.0.3
++ typescript-eslint 8.72.0
++ vitest 5.0.5
+
+Done in 236ms using pnpm v12.15.0
+exit=0
+
+$ pnpm format:check
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+exit=0
+
+$ pnpm lint
+$ eslint . --max-warnings=0
+exit=0
+
+$ pnpm typecheck
+$ pnpm -r --if-present typecheck
+tools/lint-fixtures typecheck$ tsc -p tsconfig.json
+packages/contracts typecheck$ tsc -p tsconfig.json
+packages/contracts typecheck: Done
+tools/lint-fixtures typecheck: Done
+exit=0
+
+$ pnpm test
+$ vitest run
+
+ RUN  v5.0.5 ~/Documents/marketenterprise/forms_master
+
+
+ Test Files  2 passed (2)
+      Tests  3 passed (3)
+   Start at  15:06:39
+   Duration  1.76s (tests 94%, import 4%, transform 2%)
+
+exit=0
+
+Negative tests (tools/lint-fixtures/test/lint-fixtures.test.ts):
+- ESLint on fixtures/eval-usage.ts reports no-eval and no-new-func.
+- tsc on a temp project with 'const n: number = xs[0]' fails with TS2322 (noUncheckedIndexedAccess).
+Deviation from plan: tools/lint-fixtures is a workspace package (own tsconfig) so its test is type-checked;
+test path tools/lint-fixtures/test/, fixture path tools/lint-fixtures/fixtures/.

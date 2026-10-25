@@ -1,0 +1,6 @@
+{
+  "name": "@vg04/lib",
+  "version": "0.0.0",
+  "private": true,
+  "peerDependencies": { "react": "19.3.1" }
+}
