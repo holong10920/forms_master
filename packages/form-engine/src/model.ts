@@ -1,4 +1,5 @@
 import type { EngineField, EngineIRV1, EngineNode } from "@fb/contracts";
+import { canonical } from "./canonical.ts";
 export type Scalar = string | number | boolean;
 export type Cell = Scalar | Scalar[];
 export interface GroupValue {
@@ -22,6 +23,11 @@ export class EngineError extends Error {
   }
 }
 export interface State {
+  readonly visited?: readonly string[];
+  readonly composing?: readonly string[];
+  readonly ports?: SessionPorts;
+  readonly readyCapabilities?: readonly string[];
+  readonly retryPending?: boolean;
   readonly retiredItems?: Readonly<Record<string, readonly string[]>>;
   readonly current: string;
   readonly stateVersion: number;
@@ -36,18 +42,44 @@ export interface State {
     fingerprint: string;
     kind: "submit" | "validation" | "capability";
     target?: string;
+    groups?: readonly string[];
+    intent?: NavigationEvent;
+    validated?: boolean;
   };
 }
-export type Event =
-  | { type: "commit"; field: string; value: unknown }
+export interface SessionPorts {
+  readonly idempotencyKey?: string;
+  readonly readyCapabilities?: readonly string[];
+  readonly capabilities?: Readonly<Record<string, readonly string[]>>;
+  readonly authoritative?: Readonly<Record<string, readonly string[]>>;
+}
+export type NavigationEvent =
   | { type: "next" | "back"; fromStep: string; stateVersion: number }
-  | { type: "jumpTo"; to: string; fromStep: string; stateVersion: number }
+  | { type: "jumpTo"; to: string; fromStep: string; stateVersion: number };
+export type NativeEvent =
+  | { type: "commit"; field: string; value: unknown }
+  | NavigationEvent
   | { type: "submitResult"; id: string; fingerprint: string; ok: boolean }
   | { type: "blur"; field: string };
+export type Event =
+  | NativeEvent
+  | { type: "compositionStart"; field: string }
+  | { type: "input"; field: string }
+  | { type: "compositionEnd"; field: string; value: unknown }
+  | {
+      type: "asyncResult";
+      kind: "validation" | "capability";
+      id: string;
+      fingerprint: string;
+      ok: boolean;
+      unavailable?: boolean;
+    };
 export interface Effect {
-  type: "submit" | "cancel";
+  type: "submit" | "cancel" | "validation" | "capability";
   id: string;
   fingerprint: string;
+  groups?: readonly string[];
+  idempotencyKey?: string;
 }
 export interface Snapshot {
   path: string[];
@@ -72,7 +104,7 @@ export const compareIds = (a: string, b: string): number => (a < b ? -1 : a > b 
 export function normalize(value: unknown, f: EngineField): Cell | undefined {
   if (value === null) throw new EngineError("E-PAYLOAD-NULL", f.id);
   if (value === undefined) return undefined;
-  if (typeof value === "string") value = value.trim();
+  if (typeof value === "string") value = canonical(value, f.type);
   if (value === "" || (Array.isArray(value) && value.length === 0)) return undefined;
   const ok =
     f.type === "number"

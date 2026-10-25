@@ -15,3 +15,18 @@ test("CLI branch demo is runnable and redacts ephemeral fields", () => {
   });
   expect(out).not.toContain("synthetic-ephemeral");
 });
+test("CLI draft demo reopens SQLite in a second process and excludes secret values", () => {
+  const out = execFileSync(
+    process.execPath,
+    [resolve(import.meta.dirname, "../src/cli.ts"), "--scenario", "restore"],
+    { encoding: "utf8", timeout: 30000 },
+  );
+  expect(JSON.parse(out) as unknown).toMatchObject({
+    scenario: "restore",
+    status: "restored",
+    step: "stp_takuhai",
+    preview: { purchaseMethod: "takuhai", packingKit: "yes" },
+    secretAbsent: true,
+  });
+  expect(out).not.toContain("synthetic-ephemeral");
+});

@@ -49,6 +49,7 @@ export function evaluate(
           return n + v;
         }, 0);
       const checks = values.map((v) => {
+        if (v === undefined) return false;
         if (typeof v !== "boolean") throw new EngineError("E-TYPE-OPERATOR");
         return v;
       });
@@ -63,7 +64,10 @@ export function evaluate(
   const x = a[0],
     y = a[1];
   const empty = (v: Value | undefined) =>
-    v === undefined || v === "" || (Array.isArray(v) && !v.length);
+    v === undefined ||
+    v === "" ||
+    (Array.isArray(v) && !v.length) ||
+    (typeof v === "object" && !Array.isArray(v) && v.order.length === 0);
   const bool = (v: Value | undefined) => {
     if (typeof v !== "boolean") throw new EngineError("E-TYPE-OPERATOR");
     return v;

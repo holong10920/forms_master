@@ -1,0 +1,168 @@
+{
+  "scenario": "pc-branch",
+  "trace": [
+    {
+      "action": "start",
+      "step": "stp_method",
+      "errors": [],
+      "payload": {}
+    },
+    {
+      "action": "next",
+      "step": "stp_method",
+      "errors": [
+        {
+          "code": "required",
+          "path": "fld_method"
+        }
+      ],
+      "payload": {}
+    },
+    {
+      "action": "commit fld_method",
+      "step": "stp_method",
+      "errors": [],
+      "payload": {
+        "purchaseMethod": "takuhai"
+      }
+    },
+    {
+      "action": "next",
+      "step": "stp_takuhai",
+      "errors": [],
+      "payload": {
+        "purchaseMethod": "takuhai"
+      }
+    },
+    {
+      "action": "commit fld_kit",
+      "step": "stp_takuhai",
+      "errors": [],
+      "payload": {
+        "purchaseMethod": "takuhai",
+        "packingKit": "yes"
+      }
+    },
+    {
+      "action": "commit fld_token",
+      "step": "stp_takuhai",
+      "errors": [],
+      "payload": {
+        "purchaseMethod": "takuhai",
+        "packingKit": "yes"
+      }
+    },
+    {
+      "action": "next",
+      "step": "stp_review",
+      "errors": [],
+      "payload": {
+        "purchaseMethod": "takuhai",
+        "packingKit": "yes"
+      }
+    },
+    {
+      "action": "back",
+      "step": "stp_takuhai",
+      "errors": [],
+      "payload": {
+        "purchaseMethod": "takuhai",
+        "packingKit": "yes"
+      }
+    },
+    {
+      "action": "back",
+      "step": "stp_method",
+      "errors": [],
+      "payload": {
+        "purchaseMethod": "takuhai"
+      }
+    },
+    {
+      "action": "commit fld_method",
+      "step": "stp_method",
+      "errors": [],
+      "payload": {
+        "purchaseMethod": "store"
+      }
+    },
+    {
+      "action": "next",
+      "step": "stp_store",
+      "errors": [],
+      "payload": {
+        "purchaseMethod": "store"
+      }
+    },
+    {
+      "action": "commit fld_store",
+      "step": "stp_store",
+      "errors": [],
+      "payload": {
+        "purchaseMethod": "store",
+        "store": "fictional-store"
+      }
+    },
+    {
+      "action": "next",
+      "step": "stp_review",
+      "errors": [],
+      "payload": {
+        "purchaseMethod": "store",
+        "store": "fictional-store"
+      }
+    },
+    {
+      "action": "back",
+      "step": "stp_store",
+      "errors": [],
+      "payload": {
+        "purchaseMethod": "store",
+        "store": "fictional-store"
+      }
+    },
+    {
+      "action": "back",
+      "step": "stp_method",
+      "errors": [],
+      "payload": {
+        "purchaseMethod": "store"
+      }
+    },
+    {
+      "action": "commit fld_method",
+      "step": "stp_method",
+      "errors": [],
+      "payload": {
+        "purchaseMethod": "takuhai"
+      }
+    },
+    {
+      "action": "next",
+      "step": "stp_takuhai",
+      "errors": [],
+      "payload": {
+        "purchaseMethod": "takuhai",
+        "packingKit": "yes"
+      }
+    }
+  ],
+  "storePreview": {
+    "purchaseMethod": "store",
+    "store": "fictional-store"
+  },
+  "roundTrip": {
+    "packingKitPreserved": true,
+    "secretCleared": true
+  },
+  "path": [
+    "stp_method",
+    "stp_takuhai",
+    "stp_review",
+    "stp_done"
+  ],
+  "preview": {
+    "purchaseMethod": "takuhai",
+    "packingKit": "yes"
+  }
+}

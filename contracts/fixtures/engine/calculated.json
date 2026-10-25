@@ -27,7 +27,7 @@
       "id": "fld_label",
       "key": "label",
       "type": "text",
-      "classification": "public",
+      "classification": "personal",
       "visibleWhen": {
         "op": "eq",
         "args": [
@@ -97,7 +97,7 @@
       "id": "fld_echo",
       "key": "echo",
       "type": "calculated",
-      "classification": "public",
+      "classification": "personal",
       "formula": {
         "op": "concat",
         "args": [

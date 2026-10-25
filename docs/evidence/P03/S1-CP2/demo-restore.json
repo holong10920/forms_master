@@ -1,0 +1,13 @@
+{
+  "scenario": "restore",
+  "saved": {
+    "version": 1
+  },
+  "status": "restored",
+  "step": "stp_takuhai",
+  "preview": {
+    "purchaseMethod": "takuhai",
+    "packingKit": "yes"
+  },
+  "secretAbsent": true
+}

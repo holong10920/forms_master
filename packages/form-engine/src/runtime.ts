@@ -9,14 +9,15 @@ import {
   normalizeGroup,
   projectGroup,
 } from "./groups.ts";
-import { fieldIssues } from "./validators.ts";
+import { fieldIssues, assertAvailable } from "./validators.ts";
 import {
   EngineError,
   field,
   normalize,
   type Cell,
   type Effect,
-  type Event,
+  type NativeEvent,
+  type SessionPorts,
   type Issue,
   type Result,
   type Snapshot,
@@ -65,6 +66,7 @@ export function snapshot(ir: EngineIRV1, state: State, submit = false): Snapshot
                 ? evaluate(f.formula, read, ir.conditions)
                 : state.values[f.id];
               const v = normalize(value, f);
+              assertAvailable(f, v, read, ir.conditions);
               if (v !== undefined) effective[f.id] = v;
             }
           } catch (error) {
@@ -161,7 +163,11 @@ export function draftValues(ir: EngineIRV1, state: State): Values {
   }
   return out;
 }
-export function createSession(ir: EngineIRV1, values: Values = {}): State {
+export function createSession(
+  ir: EngineIRV1,
+  values: Values = {},
+  ports: SessionPorts = {},
+): State {
   const clean: Record<string, Value> = {};
   for (const [id, v] of Object.entries(values)) {
     const f = field(ir, id);
@@ -178,8 +184,13 @@ export function createSession(ir: EngineIRV1, values: Values = {}): State {
     errors: [],
     status: "editing",
     retiredItems: {},
+    ports: structuredClone(ports),
+    readyCapabilities: [...(ports.readyCapabilities ?? [])],
   };
-  return { ...state, current: snapshot(ir, state).path[0] ?? state.current };
+  const current = snapshot(ir, state).path[0] ?? state.current;
+  if (ports.capabilities?.[current]?.some((id) => !state.readyCapabilities?.includes(id)))
+    throw new EngineError("E-CAPABILITY-BOOTSTRAP", current);
+  return { ...state, current, visited: [current] };
 }
 function owner(ir: EngineIRV1, id: string): string | undefined {
   return ir.steps.find((s) => (s.content ?? []).some((c) => contentId(c) === id))?.id;
@@ -221,12 +232,13 @@ function reconcile(ir: EngineIRV1, old: State, next: State): State {
   }
   throw new EngineError("E-EVALUATION-LIMIT");
 }
-export function dispatch(ir: EngineIRV1, state: State, event: Event): Result {
+export function reduce(ir: EngineIRV1, state: State, event: NativeEvent): Result {
   const noChange = { state, effects: [] };
   if (event.type === "submitResult") {
     if (
       state.status !== "pending" ||
       !state.request ||
+      state.request.kind !== "submit" ||
       event.id !== state.request.id ||
       event.fingerprint !== state.request.fingerprint
     )
@@ -240,6 +252,7 @@ export function dispatch(ir: EngineIRV1, state: State, event: Event): Result {
         current: event.ok ? end : state.current,
         stateVersion: state.stateVersion + 1,
         status: event.ok ? "complete" : "editing",
+        retryPending: !event.ok,
         errors: event.ok ? [] : [{ code: "E-VALIDATION-UNAVAILABLE", path: "" }],
       },
       effects: [],
@@ -292,11 +305,21 @@ export function dispatch(ir: EngineIRV1, state: State, event: Event): Result {
     const p = snapshot(ir, state).path;
     next = { ...next, current: p[Math.max(0, p.indexOf(state.current) - 1)] ?? state.current };
   } else if (event.type === "jumpTo") {
-    const p = snapshot(ir, state, true).path,
-      target = p.indexOf(event.to);
-    if (target < 0 || ir.steps.find((s) => s.id === event.to)?.kind === "complete") return noChange;
-    let first = event.to;
-    for (const step of p.slice(0, target))
+    const p = snapshot(ir, state, true).path;
+    let destination = event.to;
+    if (ir.steps.find((s) => s.id === destination)?.kind === "complete")
+      destination = p.at(-2) ?? state.current;
+    if (!p.includes(destination))
+      destination =
+        p.find(
+          (id) =>
+            ir.steps.find((s) => s.id === id)?.kind !== "complete" &&
+            validation(ir, { ...state, current: id }).length > 0,
+        ) ??
+        p.at(-2) ??
+        state.current;
+    let first = destination;
+    for (const step of p.slice(0, p.indexOf(destination)))
       if (validation(ir, { ...state, current: step }).length) {
         first = step;
         break;
@@ -311,6 +334,7 @@ export function dispatch(ir: EngineIRV1, state: State, event: Event): Result {
       const allErrors = validation(ir, state, true);
       if (allErrors.length) next = { ...next, errors: allErrors };
       else {
+        if (!state.ports?.idempotencyKey) throw new EngineError("E-SESSION-KEY-REQUIRED");
         const fingerprint = `${state.current}:${String(state.stateVersion)}`,
           id = `submit:${String(next.stateVersion)}`;
         next = {
@@ -318,7 +342,12 @@ export function dispatch(ir: EngineIRV1, state: State, event: Event): Result {
           status: "pending",
           request: { id, stateVersion: next.stateVersion, fingerprint, kind: "submit" },
         };
-        effects.push({ type: "submit", id, fingerprint });
+        effects.push({
+          type: "submit",
+          id,
+          fingerprint,
+          idempotencyKey: state.ports.idempotencyKey,
+        });
       }
     } else {
       const p = snapshot(ir, state).path;
@@ -330,9 +359,10 @@ export function dispatch(ir: EngineIRV1, state: State, event: Event): Result {
   return { state: reconcile(ir, state, next), effects };
 }
 export function visibleErrors(ir: EngineIRV1, state: State): Issue[] {
-  return validation(ir, state).filter(
+  const issues = validation(ir, state).filter(
     (e) => state.touched.includes(e.path) || state.attempted.includes(state.current),
   );
+  return [...new Map([...issues, ...state.errors].map((e) => [`${e.code}:${e.path}`, e])).values()];
 }
 export function transitionNotices(ir: EngineIRV1, previous: State, next: State) {
   const before = snapshot(ir, previous),
@@ -344,5 +374,8 @@ export function transitionNotices(ir: EngineIRV1, previous: State, next: State) 
       .filter((id) => before.active.has(id) !== after.active.has(id))
       .map((id) => ({ id, active: after.active.has(id) })),
     submitStatus: next.status,
+    validationShown: visibleErrors(ir, next).filter(
+      (e) => !visibleErrors(ir, previous).some((p) => p.code === e.code && p.path === e.path),
+    ),
   };
 }

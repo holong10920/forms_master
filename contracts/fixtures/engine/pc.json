@@ -53,10 +53,18 @@
     {
       "id": "fld_kit",
       "key": "packingKit",
-      "type": "text",
+      "type": "choice.radio",
       "classification": "public",
       "persist": "allowed",
-      "required": true
+      "required": true,
+      "options": [
+        {
+          "value": "yes"
+        },
+        {
+          "value": "no"
+        }
+      ]
     },
     {
       "id": "fld_token",
@@ -71,7 +79,7 @@
       "id": "fld_store",
       "key": "store",
       "type": "text",
-      "classification": "public",
+      "classification": "personal",
       "persist": "allowed",
       "required": true
     }

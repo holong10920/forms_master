@@ -66,3 +66,24 @@ CLI 8.30.1. Gitleaks NOT_EXECUTED. Alternative scanner đã được user ACCEPT
 T12 container: `BLOCKED_BY_ENVIRONMENT` khi local cache không có Node 24 với digest hợp lệ.
 Không có container build PASS, không có A/B reproducibility claim. Budget/perf artifact thuộc S2.
 G9/G10 BLOCKED: không GitHub/push, không AWS write. Không tự chuyển S0 DONE hoặc G2 PASS.
+
+## Workflow Engine local synthetic (S1)
+
+Sau setup ở trên:
+
+```sh
+pnpm engine:demo --scenario pc-branch
+pnpm engine:demo --scenario restore
+pnpm engine:parity
+pnpm verify
+```
+
+Demo đầu chạy Next/Back và đổi nhánh 宅配 → 店頭 → 宅配; preview loại field inactive.
+Demo restore ghi draft public được phép persist vào SQLite tạm, mở lại bằng tiến trình
+Python mới rồi khôi phục theo release/revision; secret không được ghi. Dữ liệu và database
+đều synthetic, thư mục tạm được xóa sau demo. Engine không gọi mạng, clock hoặc random;
+clock/identity/persistence nằm ở adapter.
+
+S1 có core rules/calculated, navigation và mock async ports; chưa có UI, plugin registry/loader
+thật, lookup/prefill merge, Compiler hoặc submission admission service.
+Xem [checkpoint S1-CP2](docs/evidence/P03/S1-CP2/RESULTS.md) cho coverage và giới hạn.

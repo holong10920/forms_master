@@ -22,7 +22,8 @@ export interface Case {
 }
 const root = resolve(import.meta.dirname, "../../..");
 export function fixtureIR(name: string): EngineIRV1 {
-  if (!["pc", "calculated", "groups"].includes(name)) throw new Error("unknown trusted fixture");
+  if (!["pc", "calculated", "groups", "canonical"].includes(name))
+    throw new Error("unknown trusted fixture");
   const value: unknown = JSON.parse(
     readFileSync(join(root, `contracts/fixtures/engine/${name}.json`), "utf8"),
   );
@@ -102,7 +103,7 @@ export function seededCases(): Case[] {
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const cases = [...goldenCases(), ...seededCases()];
   let count = 0;
-  for (const name of ["pc", "calculated", "groups"]) {
+  for (const name of ["pc", "calculated", "groups", "canonical"]) {
     const selected = cases.filter((c) => c.definition === name);
     const ir = fixtureIR(name);
     const ts = selected.map((c) => evaluateCase(ir, c));
@@ -130,6 +131,20 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
       node: process.version,
       icu: process.versions.icu,
       unicode: process.versions.unicode,
+      python: JSON.parse(
+        execFileSync(
+          "uv",
+          [
+            "run",
+            "--locked",
+            "--offline",
+            "python",
+            "-c",
+            'import json,sys,unicodedata; print(json.dumps({"version": sys.version.split()[0], "unicode": unicodedata.unidata_version}))',
+          ],
+          { cwd: root, encoding: "utf8", timeout: 30000 },
+        ),
+      ) as unknown,
     }),
   );
 }

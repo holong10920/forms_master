@@ -196,7 +196,11 @@
             "choice.radio",
             "choice.select",
             "choice.checkboxes",
-            "calculated"
+            "calculated",
+            "email",
+            "tel",
+            "postal",
+            "katakana"
           ]
         },
         "label": {
@@ -253,6 +257,9 @@
               },
               "exclusive": {
                 "type": "boolean"
+              },
+              "availableWhen": {
+                "$ref": "#/$defs/Expression"
               }
             },
             "required": ["value"],

@@ -1,5 +1,25 @@
-import type { EngineField } from "@fb/contracts";
+import type { EngineField, EngineIRV1 } from "@fb/contracts";
+import { evaluate, type Read } from "./expression.ts";
+import { EngineError } from "./model.ts";
 import type { Cell, Issue } from "./model.ts";
+export function assertAvailable(
+  f: EngineField,
+  value: Cell | undefined,
+  read: Read,
+  conditions: EngineIRV1["conditions"],
+): void {
+  if (value === undefined) return;
+  const selected = Array.isArray(value) ? value : [value];
+  if (
+    f.options?.some(
+      (o) =>
+        selected.includes(o.value) &&
+        o.availableWhen &&
+        evaluate(o.availableWhen, read, conditions) !== true,
+    )
+  )
+    throw new EngineError("E-OPTION-UNAVAILABLE", f.id);
+}
 export function fieldIssues(f: EngineField, v: Cell | undefined, required: boolean): Issue[] {
   if (required && v === undefined) return [{ code: "required", path: f.id }];
   if (v === undefined) return [];

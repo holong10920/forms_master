@@ -4,6 +4,8 @@ from collections.abc import Callable
 from math import isfinite
 from typing import Any, TypedDict, cast
 
+from fb_engine.canonical import canonical
+
 type Scalar = str | int | bool
 type Cell = Scalar | list[Scalar]
 
@@ -16,11 +18,6 @@ class GroupValue(TypedDict):
 type Value = Cell | GroupValue
 type IR = dict[str, Any]
 MAX_INTEGER = 2**53 - 1
-TRIM = (
-    "\u0009\u000a\u000b\u000c\u000d\u0020\u00a0\u1680"
-    "\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a"
-    "\u2028\u2029\u202f\u205f\u3000\ufeff"
-)
 
 
 class EngineError(Exception):
@@ -47,11 +44,13 @@ def normalize(value: Any, field: IR) -> Value | None:
     if value is None:
         raise EngineError("E-PAYLOAD-NULL", field["id"])
     if isinstance(value, str):
-        value = value.strip(TRIM)
+        value = canonical(value, field["type"])
     if value == "" or (isinstance(value, list) and not value):
         return None
     kind = field["type"]
     if kind == "number":
+        if type(value) is int and abs(value) > MAX_INTEGER:
+            raise EngineError("E-NUM-RANGE", field["id"])
         if type(value) not in (int, float) or not isfinite(value) or int(value) != value:
             raise EngineError("E-TYPE", field["id"])
         if abs(value) > MAX_INTEGER:
@@ -82,7 +81,12 @@ def normalize(value: Any, field: IR) -> Value | None:
 
 
 def empty(value: Value | None) -> bool:
-    return value is None or value == "" or (isinstance(value, list) and not value)
+    return (
+        value is None
+        or value == ""
+        or (isinstance(value, list) and not value)
+        or (isinstance(value, dict) and not value["order"])
+    )
 
 
 def boolean(value: Value | None) -> bool:
@@ -137,7 +141,7 @@ def evaluate(expr: IR, read: Callable[[str], Value | None], conditions: IR) -> V
                     if v is not None:
                         total = checked(total + number(v))
                 return total
-            booleans = [boolean(v) for v in values]
+            booleans = [False if v is None else boolean(v) for v in values]
             return (
                 sum(booleans) if op == "count" else any(booleans) if op == "any" else all(booleans)
             )
@@ -247,6 +251,7 @@ def field_order(ir: IR) -> list[IR]:
         pending.add(key)
         f = fields[key]
         expressions = [f[p] for p in ("visibleWhen", "requiredWhen", "formula") if p in f]
+        expressions.extend(o["availableWhen"] for o in f.get("options", []) if "availableWhen" in o)
         if f["type"] == "group":
             expressions += [
                 child[p]
@@ -254,6 +259,12 @@ def field_order(ir: IR) -> list[IR]:
                 for p in ("visibleWhen", "requiredWhen", "formula")
                 if p in child
             ]
+            expressions.extend(
+                o["availableWhen"]
+                for child in f["fields"]
+                for o in child.get("options", [])
+                if "availableWhen" in o
+            )
         for expr in expressions:
             for dep in sorted(references(expr, ir["conditions"])):
                 visit(dep)
@@ -320,6 +331,7 @@ def snapshot(ir: IR, state: IR, submit: bool = False) -> IR:
                         if value is not None:
                             value = normalize(value, f)
                             if value is not None:
+                                assert_available(f, value, read, ir["conditions"])
                                 effective[f["id"]] = value
                         elif f["id"] in state["values"] and "formula" not in f:
                             raise EngineError("E-PAYLOAD-NULL", f["id"])
@@ -518,6 +530,10 @@ def item_order(group: IR) -> list[IR]:
             if prop in fields[key]:
                 for dep in sorted(refs(fields[key][prop])):
                     visit(dep)
+        for option in fields[key].get("options", []):
+            if "availableWhen" in option:
+                for dep in sorted(refs(option["availableWhen"])):
+                    visit(dep)
         pending.remove(key)
         done.add(key)
         result.append(fields[key])
@@ -553,6 +569,7 @@ def effective_group(
                 if v is not None:
                     n = normalize(v, f)
                     if n is not None:
+                        assert_available(f, n, item_read, conditions)
                         row[f["id"]] = cast(Cell, n)
             except EngineError as e:
                 errors.append({"code": e.code, "path": address})
@@ -592,3 +609,120 @@ def group_issues(
                 {**e, "path": address} for e in cell_issues(f, row.get(f["id"]), required)
             )
     return errors
+
+
+def evaluate_submission(
+    ir: IR,
+    payload: object,
+    required_validators: tuple[str, ...] = (),
+    validator_results: dict[str, bool | None] | None = None,
+) -> IR:
+    """Trusted adapter supplies IR and validator authority, never the client payload."""
+    try:
+        if not isinstance(payload, dict):
+            raise EngineError("E-TYPE")
+        fields = {f["key"]: f for f in ir["nodes"]}
+        values: dict[str, Value] = {}
+        supplied: list[tuple[IR, object]] = []
+        for key, value in payload.items():
+            if key not in fields:
+                raise EngineError("UNKNOWN_FIELD")
+            f = fields[key]
+            if value is None:
+                raise EngineError("E-PAYLOAD-NULL", f["id"])
+            if f.get("submit") == "displayOnly":
+                raise EngineError("E-DISPLAY-ONLY-DATA", f["id"])
+            supplied.append((f, value))
+            if f["type"] == "calculated":
+                continue
+            if f["type"] == "group":
+                if not isinstance(value, list):
+                    raise EngineError("E-TYPE", f["id"])
+                children = {child["key"]: child for child in f["fields"]}
+                group: GroupValue = {"order": [], "items": {}}
+                for row in value:
+                    if not isinstance(row, dict) or not isinstance(row.get("itemId"), str):
+                        raise EngineError("E-TYPE", f["id"])
+                    item_id = row["itemId"]
+                    if (
+                        not item_id.startswith("itm_")
+                        or not item_id[4:]
+                        or any(
+                            not c.isascii() or not (c.isalnum() or c == "_") for c in item_id[4:]
+                        )
+                    ):
+                        raise EngineError("E-ITEM-ID", f["id"])
+                    group["order"].append(item_id)
+                    cells: dict[str, Cell] = {}
+                    for child_key, cell in row.items():
+                        if child_key == "itemId":
+                            continue
+                        address = f"{f['id']}[{item_id}]"
+                        if child_key not in children:
+                            raise EngineError("UNKNOWN_FIELD", address)
+                        child = children[child_key]
+                        address += f"/{child['id']}"
+                        if cell is None:
+                            raise EngineError("E-PAYLOAD-NULL", address)
+                        if child.get("submit") == "displayOnly":
+                            raise EngineError("E-DISPLAY-ONLY-DATA", address)
+                        if child["type"] != "calculated":
+                            try:
+                                normalized = normalize(cell, child)
+                            except EngineError as e:
+                                raise EngineError(e.code, address) from e
+                            if normalized is not None:
+                                cells[child["id"]] = cast(Cell, normalized)
+                    group["items"][item_id] = cells
+                values[f["id"]] = normalize_group(group, f)
+            else:
+                normalized = normalize(value, f)
+                if normalized is not None:
+                    values[f["id"]] = normalized
+        state: IR = {"current": ir["steps"][0]["id"], "values": values}
+        view = snapshot(ir, state, True)
+        review = next(
+            s["id"] for s in ir["steps"] if s["kind"] == "review" and s["id"] in view["path"]
+        )
+        state["current"] = review
+        for f, value in supplied:
+            if f["id"] not in view["active"]:
+                raise EngineError("E-INACTIVE-DATA-PRESENT", f["id"])
+            if f["type"] == "group":
+                for row in cast(list[IR], value):
+                    for child in f["fields"]:
+                        address = f"{f['id']}[{row['itemId']}]/{child['id']}"
+                        if child["key"] in row and address not in view["active"]:
+                            raise EngineError("E-INACTIVE-DATA-PRESENT", address)
+        errors = validation(ir, state, True)
+        for name in required_validators:
+            result = (validator_results or {}).get(name)
+            if result is not True:
+                errors.append(
+                    {
+                        "code": "E-VALIDATION-UNAVAILABLE"
+                        if result is None
+                        else "E-VALIDATION-REJECTED",
+                        "path": name,
+                    }
+                )
+        return {
+            "ok": not errors,
+            "errors": errors,
+            "payload": preview(ir, state) if not errors else {},
+        }
+    except EngineError as e:
+        return {"ok": False, "errors": [{"code": e.code, "path": e.path}], "payload": {}}
+
+
+def assert_available(
+    f: IR, value: Value, read: Callable[[str], Value | None], conditions: IR
+) -> None:
+    selected = value if isinstance(value, list) else [value]
+    if any(
+        o["value"] in selected
+        and "availableWhen" in o
+        and evaluate(o["availableWhen"], read, conditions) is not True
+        for o in f.get("options", [])
+    ):
+        raise EngineError("E-OPTION-UNAVAILABLE", f["id"])

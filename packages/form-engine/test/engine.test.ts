@@ -22,7 +22,7 @@ function definition(): FormDefinitionV1 {
 }
 function setup() {
   const ir = loadDefinition(definition());
-  let state = createSession(ir);
+  let state = createSession(ir, {}, { idempotencyKey: "synthetic-test-session" });
   return {
     ir,
     get state() {
@@ -99,8 +99,8 @@ test("off-path and complete navigation rejected, incomplete jump redirected", ()
       fromStep: e.state.current,
       stateVersion: e.state.stateVersion,
     }).state;
-  expect(jump("stp_store")).toBe(e.state);
-  expect(jump("stp_done")).toBe(e.state);
+  expect(jump("stp_store").current).toBe("stp_method");
+  expect(jump("stp_done").current).toBe("stp_method");
   expect(jump("stp_review").current).toBe("stp_method");
 });
 test.each([
@@ -244,7 +244,7 @@ test("each seeded branch trace maintains active path and inactive projection inv
     const e = setup();
     e.commit("fld_method", seed % 2 ? "store" : "takuhai");
     e.move("next");
-    e.commit(seed % 2 ? "fld_store" : "fld_kit", `synthetic_${String(seed)}`);
+    e.commit(seed % 2 ? "fld_store" : "fld_kit", seed % 2 ? `synthetic_${String(seed)}` : "yes");
     e.move("next");
     const view = snapshot(e.ir, e.state);
     expect(view.path).toContain(e.state.current);
@@ -253,3 +253,24 @@ test("each seeded branch trace maintains active path and inactive projection inv
   }
 });
 export type FixtureState = State;
+test("first matching transition wins and skipWhen removes step content from activity", () => {
+  const d = definition();
+  d.steps[0].transitions = [
+    { when: { const: true }, to: "stp_store" },
+    { when: { const: true }, to: "stp_takuhai" },
+    { default: "stp_takuhai" },
+  ];
+  let ir = loadDefinition(d);
+  expect(snapshot(ir, createSession(ir, { fld_method: "store" })).path[1]).toBe("stp_store");
+  const store = d.steps.find((s) => s.id === "stp_store");
+  if (!store) throw new Error("fixture");
+  store.skipWhen = { const: true };
+  ir = loadDefinition(d);
+  const state = {
+    ...createSession(ir, { fld_method: "store", fld_store: "synthetic" }),
+    current: "stp_review",
+  };
+  expect(snapshot(ir, state).path).not.toContain("stp_store");
+  expect(payloadPreview(ir, state)).toEqual({ purchaseMethod: "store" });
+  expect(validation(ir, state, true)).toEqual([]);
+});

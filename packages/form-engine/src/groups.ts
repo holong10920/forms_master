@@ -10,7 +10,7 @@ import {
   type Value,
   type Values,
 } from "./model.ts";
-import { fieldIssues } from "./validators.ts";
+import { fieldIssues, assertAvailable } from "./validators.ts";
 export function isGroup(value: Value | undefined): value is GroupValue {
   return value !== undefined && typeof value === "object" && !Array.isArray(value);
 }
@@ -70,7 +70,12 @@ export function itemOrder(g: EngineGroup): EngineField[] {
     const f = g.fields.find((f) => f.id === id);
     if (!f) throw new EngineError("E-REF-DANGLING", id);
     pending.add(id);
-    for (const e of [f.visibleWhen, f.requiredWhen, f.formula])
+    for (const e of [
+      f.visibleWhen,
+      f.requiredWhen,
+      f.formula,
+      ...(f.options ?? []).map((o) => o.availableWhen),
+    ])
       if (e) for (const dep of itemRefs(e).sort(compareIds)) visit(dep);
     pending.delete(id);
     done.add(id);
@@ -99,6 +104,7 @@ export function effectiveGroup(
         const cell = f.formula ? evaluate(f.formula, itemRead, conditions) : raw.items[id]?.[f.id];
         if (isGroup(cell)) throw new EngineError("E-TYPE-OPERATOR");
         const normalized = normalize(cell, f);
+        assertAvailable(f, normalized, itemRead, conditions);
         if (normalized !== undefined) row[f.id] = normalized;
       } catch (e) {
         if (!(e instanceof EngineError)) throw e;

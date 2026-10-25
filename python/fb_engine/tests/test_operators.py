@@ -17,7 +17,10 @@ CASES: list[dict[str, Any]] = json.loads(
 
 @pytest.mark.parametrize("case", CASES, ids=[c["name"] for c in CASES])
 def test_operator(case: dict[str, Any]) -> None:
-    assert evaluate(case["expression"], lambda _: None, {}) == case["expected"]
+    assert (
+        evaluate(case["expression"], lambda key: case.get("values", {}).get(key), {})
+        == case["expected"]
+    )
 
 
 def test_core_imports_are_pure() -> None:
@@ -26,13 +29,16 @@ def test_core_imports_are_pure() -> None:
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
                 assert all(
-                    n.name.split(".")[0] in {"math", "typing", "collections"} for n in node.names
+                    n.name.split(".")[0] in {"math", "typing", "collections", "re", "unicodedata"}
+                    for n in node.names
                 )
             if isinstance(node, ast.ImportFrom):
                 assert (node.module or "").split(".")[0] in {
                     "math",
                     "typing",
                     "collections",
+                    "re",
+                    "unicodedata",
                     "fb_engine",
                     "fb_contracts",
                 }

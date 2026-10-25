@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "1.0.0",
+  "kind": "form",
+  "formId": "frm_canonical",
+  "siteId": "site_demo",
+  "fields": [
+    {
+      "id": "fld_text",
+      "key": "text",
+      "type": "text",
+      "classification": "personal"
+    },
+    {
+      "id": "fld_area",
+      "key": "area",
+      "type": "textarea",
+      "classification": "personal"
+    },
+    {
+      "id": "fld_email",
+      "key": "email",
+      "type": "email",
+      "classification": "personal"
+    },
+    {
+      "id": "fld_tel",
+      "key": "tel",
+      "type": "tel",
+      "classification": "personal"
+    },
+    {
+      "id": "fld_postal",
+      "key": "postal",
+      "type": "postal",
+      "classification": "personal"
+    },
+    {
+      "id": "fld_kana",
+      "key": "kana",
+      "type": "katakana",
+      "classification": "personal"
+    },
+    {
+      "id": "fld_choice",
+      "key": "choice",
+      "type": "choice.radio",
+      "classification": "public",
+      "options": [
+        {
+          "value": " a "
+        }
+      ]
+    },
+    {
+      "id": "fld_flag",
+      "key": "flag",
+      "type": "boolean",
+      "classification": "public"
+    },
+    {
+      "id": "fld_cond",
+      "key": "conditional",
+      "type": "choice.radio",
+      "classification": "public",
+      "options": [
+        {
+          "value": "a",
+          "availableWhen": {
+            "ref": "$local:fld_flag"
+          }
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "stp_input",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_text"
+        },
+        {
+          "field": "$local:fld_area"
+        },
+        {
+          "field": "$local:fld_email"
+        },
+        {
+          "field": "$local:fld_tel"
+        },
+        {
+          "field": "$local:fld_postal"
+        },
+        {
+          "field": "$local:fld_kana"
+        },
+        {
+          "field": "$local:fld_choice"
+        },
+        {
+          "field": "$local:fld_flag"
+        },
+        {
+          "field": "$local:fld_cond"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_review"
+        }
+      ]
+    },
+    {
+      "id": "stp_review",
+      "kind": "review",
+      "transitions": [
+        {
+          "default": "stp_done"
+        }
+      ]
+    },
+    {
+      "id": "stp_done",
+      "kind": "complete"
+    }
+  ]
+}

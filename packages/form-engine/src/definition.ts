@@ -39,7 +39,12 @@ export function references(
 export function fieldExpressions(f: EngineNode): EngineExpression[] {
   return f.type === "group"
     ? [...(f.visibleWhen ? [f.visibleWhen] : []), ...f.fields.flatMap(fieldExpressions)]
-    : [f.visibleWhen, f.requiredWhen, f.formula].filter((e) => e !== undefined);
+    : [
+        f.visibleWhen,
+        f.requiredWhen,
+        f.formula,
+        ...(f.options ?? []).map((o) => o.availableWhen),
+      ].filter((e) => e !== undefined);
 }
 export function fieldOrder(ir: EngineIRV1): EngineNode[] {
   const done = new Set<string>(),
@@ -210,6 +215,11 @@ export function assertIR(ir: EngineIRV1): void {
     }
     if (f.classification === "secret" && !f.clearOnDeactivate)
       throw new EngineError("E-SECRET-CLEAR", f.id);
+    if (
+      ["text", "textarea", "email", "tel", "postal", "katakana"].includes(f.type) &&
+      f.classification === "public"
+    )
+      throw new EngineError("E-CLASS-BELOW-MIN", f.id);
     if (f.type !== "group" && (f.type === "calculated") !== (f.formula !== undefined))
       throw new EngineError("E-FORMULA", f.id);
   }
@@ -237,7 +247,11 @@ export function assertIR(ir: EngineIRV1): void {
     if (infer(c.when, ir) !== "boolean") throw new EngineError("E-TYPE-OPERATOR");
   }
   function checkExpression(f: EngineField, group?: EngineGroup) {
-    for (const e of [f.visibleWhen, f.requiredWhen])
+    for (const e of [
+      f.visibleWhen,
+      f.requiredWhen,
+      ...(f.options ?? []).map((o) => o.availableWhen),
+    ])
       if (e && infer(e, ir, group) !== "boolean") throw new EngineError("E-TYPE-OPERATOR", f.id);
     if (f.formula) {
       const kind = infer(f.formula, ir, group, true);

@@ -221,7 +221,7 @@
       "values": {
         "fld_method": "store",
         "fld_store": "fictional",
-        "fld_kit": "cached"
+        "fld_kit": "yes"
       },
       "expected": {
         "payload": {
@@ -410,6 +410,107 @@
         "error": {
           "code": "E-ITEM-ID",
           "path": "grp_products"
+        }
+      }
+    },
+    {
+      "name": "structured-canonical-v1",
+      "definition": "canonical",
+      "current": "stp_review",
+      "values": {
+        "fld_text": "\ufa30",
+        "fld_area": " x\r\ny ",
+        "fld_email": "\uff54\uff41\uff52\uff4f\uff20\uff45\uff58\uff41\uff4d\uff50\uff4c\uff45\uff0e\uff4a\uff50",
+        "fld_tel": "\uff10\uff19\uff10\uff0d\uff11\uff12\uff13\uff14-\uff15\uff16\uff17\uff18",
+        "fld_postal": "\uff11\uff12\uff13\uff0d\uff14\uff15\uff16\uff17",
+        "fld_kana": "\uff8a\uff9f\uff80\uff9e",
+        "fld_choice": " a ",
+        "fld_flag": true,
+        "fld_cond": "a"
+      },
+      "expected": {
+        "errors": [],
+        "payload": {
+          "text": "\ufa30",
+          "area": "x\ny",
+          "email": "taro@example.jp",
+          "tel": "09012345678",
+          "postal": "1234567",
+          "kana": "\u30d1\u30c0",
+          "choice": " a ",
+          "flag": true,
+          "conditional": "a"
+        }
+      }
+    },
+    {
+      "name": "unavailable-option-no-active-logic",
+      "definition": "canonical",
+      "current": "stp_review",
+      "values": {
+        "fld_flag": false,
+        "fld_cond": "a"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "E-OPTION-UNAVAILABLE",
+            "path": "fld_cond"
+          }
+        ],
+        "payload": {
+          "flag": false
+        }
+      }
+    },
+    {
+      "name": "hiragana-unmodified-by-canonical",
+      "definition": "canonical",
+      "current": "stp_review",
+      "values": {
+        "fld_kana": "\u3084\u307e\u3060"
+      },
+      "expected": {
+        "payload": {
+          "kana": "\u3084\u307e\u3060"
+        }
+      }
+    },
+    {
+      "name": "group-missing-boolean-predicate",
+      "definition": "groups",
+      "current": "stp_review",
+      "values": {
+        "fld_show": true,
+        "grp_products": {
+          "order": [
+            "itm_a"
+          ],
+          "items": {
+            "itm_a": {
+              "fld_qty": 2
+            }
+          }
+        }
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "required",
+            "path": "grp_products[itm_a]/fld_enabled"
+          }
+        ],
+        "payload": {
+          "show": true,
+          "products": [
+            {
+              "itemId": "itm_a",
+              "qty": 2
+            }
+          ],
+          "sum": 2,
+          "rows": 1,
+          "yes": 0
         }
       }
     }

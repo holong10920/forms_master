@@ -2,7 +2,6 @@ export { loadDefinition, loadIR, assertIR, fieldOrder } from "./definition.ts";
 export { evaluate } from "./expression.ts";
 export {
   createSession,
-  dispatch,
   snapshot,
   validation,
   payloadPreview,
@@ -10,6 +9,8 @@ export {
   visibleErrors,
   transitionNotices,
 } from "./runtime.ts";
+export { dispatch } from "./navigation.ts";
+export type { SessionPorts } from "./model.ts";
 export {
   EngineError,
   type State,
@@ -21,3 +22,5 @@ export {
 } from "./model.ts";
 export { addItem, removeItem, moveItems } from "./groups.ts";
 export type { GroupValue, Cell } from "./model.ts";
+export { canonical, parseNumberInput } from "./canonical.ts";
+export { restoreDraft, type DraftSnapshot } from "./restore.ts";

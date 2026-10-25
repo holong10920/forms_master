@@ -315,13 +315,10 @@
           },
           {
             "const": 2
-          },
-          {
-            "const": 1
           }
         ]
       },
-      "expected": 4
+      "expected": 5
     },
     {
       "name": "multiply",
@@ -470,6 +467,42 @@
         ]
       },
       "expected": 7
+    },
+    {
+      "name": "isEmpty-group",
+      "expression": {
+        "op": "isEmpty",
+        "args": [
+          {
+            "ref": "$local:grp_empty"
+          }
+        ]
+      },
+      "values": {
+        "grp_empty": {
+          "order": [],
+          "items": {}
+        }
+      },
+      "expected": true
+    },
+    {
+      "name": "isNotEmpty-group",
+      "expression": {
+        "op": "isNotEmpty",
+        "args": [
+          {
+            "ref": "$local:grp_empty"
+          }
+        ]
+      },
+      "values": {
+        "grp_empty": {
+          "order": [],
+          "items": {}
+        }
+      },
+      "expected": false
     }
   ]
 }

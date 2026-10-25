@@ -86,7 +86,11 @@ export interface Field {
     | "choice.radio"
     | "choice.select"
     | "choice.checkboxes"
-    | "calculated";
+    | "calculated"
+    | "email"
+    | "tel"
+    | "postal"
+    | "katakana";
   label?: {
     ja: string;
   };
@@ -104,6 +108,7 @@ export interface Field {
       ja: string;
     };
     exclusive?: boolean;
+    availableWhen?: Expression;
   }[];
   validators?: {
     use:

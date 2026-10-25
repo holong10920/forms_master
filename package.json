@@ -14,7 +14,7 @@
     "format:check": "prettier --check .",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "vitest run",
-    "py:lint": "uv run ruff check python tools/engine-demo/adapter.py && uv run ruff format --check python tools/engine-demo/adapter.py",
+    "py:lint": "uv run ruff check python tools/engine-demo && uv run ruff format --check python tools/engine-demo",
     "py:typecheck": "uv run mypy",
     "py:test": "uv run pytest",
     "gen": "pnpm --filter @fb/contracts gen",
