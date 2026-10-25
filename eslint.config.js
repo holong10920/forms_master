@@ -42,4 +42,20 @@ export default defineConfig(
     files: ["**/*.cjs"],
     languageOptions: { sourceType: "commonjs", globals: { module: "readonly" } },
   },
+  {
+    files: ["packages/contracts/src/generated/**/*.ts"],
+    rules: { "@typescript-eslint/no-empty-object-type": "off" },
+  },
+  {
+    files: ["packages/form-engine/src/**/*.ts"],
+    rules: {
+      "no-restricted-globals": ["error", "Date", "fetch", "performance"],
+      "no-restricted-properties": [
+        "error",
+        { object: "Math", property: "random" },
+        { object: "crypto", property: "getRandomValues" },
+        { object: "crypto", property: "randomUUID" },
+      ],
+    },
+  },
 );

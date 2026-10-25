@@ -1,0 +1,194 @@
+{
+  "schemaVersion": "1.0.0",
+  "kind": "form",
+  "formId": "frm_groups",
+  "siteId": "site_demo",
+  "fields": [
+    {
+      "id": "fld_show",
+      "key": "show",
+      "type": "boolean",
+      "classification": "public",
+      "persist": "allowed"
+    },
+    {
+      "id": "grp_products",
+      "key": "products",
+      "type": "group",
+      "classification": "public",
+      "persist": "allowed",
+      "maxItems": 10,
+      "visibleWhen": {
+        "op": "eq",
+        "args": [
+          {
+            "ref": "$local:fld_show"
+          },
+          {
+            "const": true
+          }
+        ]
+      },
+      "fields": [
+        {
+          "id": "fld_qty",
+          "key": "qty",
+          "type": "number",
+          "classification": "public",
+          "persist": "allowed",
+          "required": true,
+          "validators": [
+            {
+              "use": "min",
+              "params": {
+                "value": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "fld_enabled",
+          "key": "enabled",
+          "type": "boolean",
+          "classification": "public",
+          "persist": "allowed",
+          "required": true
+        },
+        {
+          "id": "fld_note",
+          "key": "note",
+          "type": "text",
+          "classification": "public",
+          "persist": "allowed",
+          "clearOnDeactivate": true,
+          "visibleWhen": {
+            "op": "eq",
+            "args": [
+              {
+                "item": "fld_enabled"
+              },
+              {
+                "const": true
+              }
+            ]
+          }
+        },
+        {
+          "id": "fld_memo",
+          "key": "memo",
+          "type": "text",
+          "classification": "public",
+          "persist": "allowed",
+          "visibleWhen": {
+            "op": "eq",
+            "args": [
+              {
+                "item": "fld_enabled"
+              },
+              {
+                "const": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "fld_sum",
+      "key": "sum",
+      "type": "calculated",
+      "classification": "public",
+      "formula": {
+        "op": "sum",
+        "args": [
+          {
+            "ref": "$local:grp_products"
+          },
+          {
+            "item": "fld_qty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fld_rows",
+      "key": "rows",
+      "type": "calculated",
+      "classification": "public",
+      "formula": {
+        "op": "count",
+        "args": [
+          {
+            "ref": "$local:grp_products"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fld_yes",
+      "key": "yes",
+      "type": "calculated",
+      "classification": "public",
+      "formula": {
+        "op": "count",
+        "args": [
+          {
+            "ref": "$local:grp_products"
+          },
+          {
+            "op": "eq",
+            "args": [
+              {
+                "item": "fld_enabled"
+              },
+              {
+                "const": true
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "steps": [
+    {
+      "id": "stp_values",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_show"
+        },
+        {
+          "group": "$local:grp_products"
+        },
+        {
+          "field": "$local:fld_sum"
+        },
+        {
+          "field": "$local:fld_rows"
+        },
+        {
+          "field": "$local:fld_yes"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_review"
+        }
+      ]
+    },
+    {
+      "id": "stp_review",
+      "kind": "review",
+      "transitions": [
+        {
+          "default": "stp_done"
+        }
+      ]
+    },
+    {
+      "id": "stp_done",
+      "kind": "complete"
+    }
+  ]
+}

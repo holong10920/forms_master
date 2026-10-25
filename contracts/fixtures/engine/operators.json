@@ -1,0 +1,475 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "name": "and",
+      "expression": {
+        "op": "and",
+        "args": [
+          {
+            "const": true
+          },
+          {
+            "const": false
+          }
+        ]
+      },
+      "expected": false
+    },
+    {
+      "name": "or",
+      "expression": {
+        "op": "or",
+        "args": [
+          {
+            "const": true
+          },
+          {
+            "const": false
+          }
+        ]
+      },
+      "expected": true
+    },
+    {
+      "name": "not",
+      "expression": {
+        "op": "not",
+        "args": [
+          {
+            "const": false
+          }
+        ]
+      },
+      "expected": true
+    },
+    {
+      "name": "eq",
+      "expression": {
+        "op": "eq",
+        "args": [
+          {
+            "const": 0
+          },
+          {
+            "const": 0
+          }
+        ]
+      },
+      "expected": true
+    },
+    {
+      "name": "neq",
+      "expression": {
+        "op": "neq",
+        "args": [
+          {
+            "const": false
+          },
+          {
+            "const": true
+          }
+        ]
+      },
+      "expected": true
+    },
+    {
+      "name": "in",
+      "expression": {
+        "op": "in",
+        "args": [
+          {
+            "const": "a"
+          },
+          {
+            "const": [
+              "a",
+              "b"
+            ]
+          }
+        ]
+      },
+      "expected": true
+    },
+    {
+      "name": "notIn",
+      "expression": {
+        "op": "notIn",
+        "args": [
+          {
+            "const": "c"
+          },
+          {
+            "const": [
+              "a"
+            ]
+          }
+        ]
+      },
+      "expected": true
+    },
+    {
+      "name": "includes",
+      "expression": {
+        "op": "includes",
+        "args": [
+          {
+            "const": [
+              "a"
+            ]
+          },
+          {
+            "const": "a"
+          }
+        ]
+      },
+      "expected": true
+    },
+    {
+      "name": "includesAny",
+      "expression": {
+        "op": "includesAny",
+        "args": [
+          {
+            "const": [
+              "a"
+            ]
+          },
+          {
+            "const": [
+              "b",
+              "a"
+            ]
+          }
+        ]
+      },
+      "expected": true
+    },
+    {
+      "name": "lt",
+      "expression": {
+        "op": "lt",
+        "args": [
+          {
+            "const": 1
+          },
+          {
+            "const": 2
+          }
+        ]
+      },
+      "expected": true
+    },
+    {
+      "name": "lte",
+      "expression": {
+        "op": "lte",
+        "args": [
+          {
+            "const": 2
+          },
+          {
+            "const": 2
+          }
+        ]
+      },
+      "expected": true
+    },
+    {
+      "name": "gt",
+      "expression": {
+        "op": "gt",
+        "args": [
+          {
+            "const": 2
+          },
+          {
+            "const": 1
+          }
+        ]
+      },
+      "expected": true
+    },
+    {
+      "name": "gte",
+      "expression": {
+        "op": "gte",
+        "args": [
+          {
+            "const": 2
+          },
+          {
+            "const": 2
+          }
+        ]
+      },
+      "expected": true
+    },
+    {
+      "name": "isEmpty",
+      "expression": {
+        "op": "isEmpty",
+        "args": [
+          {
+            "const": ""
+          }
+        ]
+      },
+      "expected": true
+    },
+    {
+      "name": "isNotEmpty",
+      "expression": {
+        "op": "isNotEmpty",
+        "args": [
+          {
+            "const": false
+          }
+        ]
+      },
+      "expected": true
+    },
+    {
+      "name": "count",
+      "expression": {
+        "op": "count",
+        "args": [
+          {
+            "const": [
+              1,
+              2
+            ]
+          }
+        ]
+      },
+      "expected": 2
+    },
+    {
+      "name": "sum",
+      "expression": {
+        "op": "sum",
+        "args": [
+          {
+            "const": [
+              1,
+              2,
+              -3
+            ]
+          }
+        ]
+      },
+      "expected": 0
+    },
+    {
+      "name": "any",
+      "expression": {
+        "op": "any",
+        "args": [
+          {
+            "const": [
+              false,
+              true
+            ]
+          }
+        ]
+      },
+      "expected": true
+    },
+    {
+      "name": "all",
+      "expression": {
+        "op": "all",
+        "args": [
+          {
+            "const": []
+          }
+        ]
+      },
+      "expected": true
+    },
+    {
+      "name": "add",
+      "expression": {
+        "op": "add",
+        "args": [
+          {
+            "const": 1
+          },
+          {
+            "const": 2
+          },
+          {
+            "const": 3
+          }
+        ]
+      },
+      "expected": 6
+    },
+    {
+      "name": "subtract",
+      "expression": {
+        "op": "subtract",
+        "args": [
+          {
+            "const": 7
+          },
+          {
+            "const": 2
+          },
+          {
+            "const": 1
+          }
+        ]
+      },
+      "expected": 4
+    },
+    {
+      "name": "multiply",
+      "expression": {
+        "op": "multiply",
+        "args": [
+          {
+            "const": 2
+          },
+          {
+            "const": 3
+          },
+          {
+            "const": -1
+          }
+        ]
+      },
+      "expected": -6
+    },
+    {
+      "name": "min",
+      "expression": {
+        "op": "min",
+        "args": [
+          {
+            "const": 3
+          },
+          {
+            "const": 1
+          },
+          {
+            "const": 2
+          }
+        ]
+      },
+      "expected": 1
+    },
+    {
+      "name": "max",
+      "expression": {
+        "op": "max",
+        "args": [
+          {
+            "const": 3
+          },
+          {
+            "const": 1
+          },
+          {
+            "const": 2
+          }
+        ]
+      },
+      "expected": 3
+    },
+    {
+      "name": "concat",
+      "expression": {
+        "op": "concat",
+        "args": [
+          {
+            "const": "a"
+          },
+          {
+            "const": "b"
+          }
+        ]
+      },
+      "expected": "ab"
+    },
+    {
+      "name": "choose",
+      "expression": {
+        "op": "choose",
+        "args": [
+          {
+            "const": false
+          },
+          {
+            "const": "a"
+          },
+          {
+            "const": "b"
+          }
+        ]
+      },
+      "expected": "b"
+    },
+    {
+      "name": "neq-missing",
+      "expression": {
+        "op": "neq",
+        "args": [
+          {
+            "ref": "$local:fld_x"
+          },
+          {
+            "const": "a"
+          }
+        ]
+      },
+      "expected": false
+    },
+    {
+      "name": "not-eq-missing",
+      "expression": {
+        "op": "not",
+        "args": [
+          {
+            "op": "eq",
+            "args": [
+              {
+                "ref": "$local:fld_x"
+              },
+              {
+                "const": "a"
+              }
+            ]
+          }
+        ]
+      },
+      "expected": true
+    },
+    {
+      "name": "choose-lazy",
+      "expression": {
+        "op": "choose",
+        "args": [
+          {
+            "const": true
+          },
+          {
+            "const": 7
+          },
+          {
+            "op": "multiply",
+            "args": [
+              {
+                "const": 9007199254740991
+              },
+              {
+                "const": 2
+              }
+            ]
+          }
+        ]
+      },
+      "expected": 7
+    }
+  ]
+}

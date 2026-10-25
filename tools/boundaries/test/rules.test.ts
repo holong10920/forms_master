@@ -20,6 +20,10 @@ async function inspect(kind: string) {
     mkdirSync(join(dir, "node_modules/@fixture"), { recursive: true });
     symlinkSync(join(dir, "packages/other"), join(dir, "node_modules/@fixture/other"));
   }
+  if (kind === "engine-violations") {
+    mkdirSync(join(dir, "node_modules/@fb"), { recursive: true });
+    symlinkSync(join(dir, "packages/form-engine"), join(dir, "node_modules/@fb/form-engine"));
+  }
   const result = await cruise(["packages"], {
     ...config.options,
     baseDir: dir,
@@ -50,4 +54,12 @@ test("control allows same-package imports and named cross-package imports", asyn
   expect(report.modules.flatMap((m) => m.dependencies).filter((d) => d.couldNotResolve)).toEqual(
     [],
   );
+});
+
+test("engine negative fixtures enforce browser purity and contracts direction", async () => {
+  const report = await inspect("engine-violations");
+  expect([...new Set(report.summary.violations.map((v) => v.rule.name))].sort()).toEqual([
+    "browser-safe-no-node",
+    "contracts-no-engine",
+  ]);
 });

@@ -1,0 +1,164 @@
+{
+  "schemaVersion": "1.0.0",
+  "kind": "form",
+  "formId": "frm_calculated",
+  "siteId": "site_demo",
+  "fields": [
+    {
+      "id": "fld_a",
+      "key": "a",
+      "type": "number",
+      "classification": "public"
+    },
+    {
+      "id": "fld_b",
+      "key": "b",
+      "type": "number",
+      "classification": "public"
+    },
+    {
+      "id": "fld_flag",
+      "key": "flag",
+      "type": "boolean",
+      "classification": "public",
+      "required": true
+    },
+    {
+      "id": "fld_label",
+      "key": "label",
+      "type": "text",
+      "classification": "public",
+      "visibleWhen": {
+        "op": "eq",
+        "args": [
+          {
+            "ref": "$local:fld_flag"
+          },
+          {
+            "const": true
+          }
+        ]
+      },
+      "validators": [
+        {
+          "use": "maxLength",
+          "params": {
+            "value": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "fld_choices",
+      "key": "choices",
+      "type": "choice.checkboxes",
+      "classification": "public",
+      "options": [
+        {
+          "value": "a"
+        },
+        {
+          "value": "b"
+        }
+      ]
+    },
+    {
+      "id": "fld_total",
+      "key": "total",
+      "type": "calculated",
+      "classification": "public",
+      "formula": {
+        "op": "multiply",
+        "args": [
+          {
+            "ref": "$local:fld_a"
+          },
+          {
+            "ref": "$local:fld_b"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fld_count",
+      "key": "count",
+      "type": "calculated",
+      "classification": "public",
+      "formula": {
+        "op": "count",
+        "args": [
+          {
+            "ref": "$local:fld_choices"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fld_echo",
+      "key": "echo",
+      "type": "calculated",
+      "classification": "public",
+      "formula": {
+        "op": "concat",
+        "args": [
+          {
+            "ref": "$local:fld_label"
+          },
+          {
+            "const": "!"
+          }
+        ]
+      }
+    }
+  ],
+  "steps": [
+    {
+      "id": "stp_values",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_a"
+        },
+        {
+          "field": "$local:fld_b"
+        },
+        {
+          "field": "$local:fld_flag"
+        },
+        {
+          "field": "$local:fld_label"
+        },
+        {
+          "field": "$local:fld_choices"
+        },
+        {
+          "field": "$local:fld_total"
+        },
+        {
+          "field": "$local:fld_count"
+        },
+        {
+          "field": "$local:fld_echo"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_review"
+        }
+      ]
+    },
+    {
+      "id": "stp_review",
+      "kind": "review",
+      "transitions": [
+        {
+          "default": "stp_done"
+        }
+      ]
+    },
+    {
+      "id": "stp_done",
+      "kind": "complete"
+    }
+  ]
+}

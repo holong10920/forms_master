@@ -5,12 +5,14 @@ requires-python = "==3.13.*"
 [manifest]
 members = [
     "fb-contracts",
+    "fb-engine",
     "fb-store",
 ]
 
 [manifest.dependency-groups]
 dev = [
     { name = "fb-contracts", editable = "python/fb_contracts" },
+    { name = "fb-engine", editable = "python/fb_engine" },
     { name = "fb-store", editable = "python/fb_store" },
     { name = "import-linter", specifier = "==2.15" },
     { name = "mypy", specifier = "==2.4.0" },
@@ -105,6 +107,17 @@ requires-dist = [
     { name = "jsonschema", specifier = "==4.26.0" },
     { name = "rfc8785", specifier = "==0.1.4" },
 ]
+
+[[package]]
+name = "fb-engine"
+version = "0.1.0"
+source = { editable = "python/fb_engine" }
+dependencies = [
+    { name = "fb-contracts" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "fb-contracts", editable = "python/fb_contracts" }]
 
 [[package]]
 name = "fb-store"

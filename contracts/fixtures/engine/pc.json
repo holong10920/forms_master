@@ -1,0 +1,145 @@
+{
+  "schemaVersion": "1.0.0",
+  "kind": "form",
+  "formId": "frm_pc_synthetic",
+  "siteId": "site_demo",
+  "locale": {
+    "default": "ja",
+    "supported": [
+      "ja"
+    ]
+  },
+  "conditions": {
+    "cnd_store": {
+      "label": {
+        "ja": "\u5e97\u982d"
+      },
+      "when": {
+        "op": "eq",
+        "args": [
+          {
+            "ref": "$local:fld_method"
+          },
+          {
+            "const": "store"
+          }
+        ]
+      }
+    }
+  },
+  "fields": [
+    {
+      "id": "fld_method",
+      "key": "purchaseMethod",
+      "type": "choice.radio",
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "takuhai",
+          "label": {
+            "ja": "\u5b85\u914d"
+          }
+        },
+        {
+          "value": "store",
+          "label": {
+            "ja": "\u5e97\u982d"
+          }
+        }
+      ]
+    },
+    {
+      "id": "fld_kit",
+      "key": "packingKit",
+      "type": "text",
+      "classification": "public",
+      "persist": "allowed",
+      "required": true
+    },
+    {
+      "id": "fld_token",
+      "key": "deliveryToken",
+      "type": "text",
+      "classification": "secret",
+      "clearOnDeactivate": true,
+      "persist": "never",
+      "submit": "displayOnly"
+    },
+    {
+      "id": "fld_store",
+      "key": "store",
+      "type": "text",
+      "classification": "public",
+      "persist": "allowed",
+      "required": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "stp_method",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_method"
+        }
+      ],
+      "transitions": [
+        {
+          "when": {
+            "cond": "cnd_store"
+          },
+          "to": "stp_store"
+        },
+        {
+          "default": "stp_takuhai"
+        }
+      ]
+    },
+    {
+      "id": "stp_takuhai",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_kit"
+        },
+        {
+          "field": "$local:fld_token"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_review"
+        }
+      ]
+    },
+    {
+      "id": "stp_store",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_store"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_review"
+        }
+      ]
+    },
+    {
+      "id": "stp_review",
+      "kind": "review",
+      "transitions": [
+        {
+          "default": "stp_done"
+        }
+      ]
+    },
+    {
+      "id": "stp_done",
+      "kind": "complete"
+    }
+  ]
+}

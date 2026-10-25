@@ -9,6 +9,7 @@ members = ["python/*"]
 dev = [
   "fb-contracts",
   "fb-store",
+  "fb-engine",
   "import-linter==2.15",
   "mypy==2.4.0",
   "pytest==9.1.1",
@@ -20,6 +21,7 @@ dev = [
 [tool.uv.sources]
 fb-contracts = { workspace = true }
 fb-store = { workspace = true }
+fb-engine = { workspace = true }
 
 [tool.pytest.ini_options]
 testpaths = ["python"]
@@ -29,7 +31,7 @@ addopts = "--import-mode=importlib --disable-socket --allow-unix-socket"
 [tool.ruff]
 target-version = "py313"
 line-length = 100
-src = ["python/fb_contracts/src", "python/fb_store/src"]
+src = ["python/fb_contracts/src", "python/fb_store/src", "python/fb_engine/src"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "RUF"]
@@ -41,14 +43,25 @@ select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "RUF"]
 [tool.mypy]
 strict = true
 python_version = "3.13"
-files = ["python"]
+files = ["python", "tools/engine-demo/adapter.py"]
 explicit_package_bases = true
-mypy_path = ["python/fb_contracts/src", "python/fb_store/src"]
+mypy_path = ["python/fb_contracts/src", "python/fb_store/src", "python/fb_engine/src"]
 
 [tool.importlinter]
-root_packages = ["fb_store", "fb_contracts"]
+root_packages = ["fb_store", "fb_contracts", "fb_engine"]
 
 [[tool.importlinter.contracts]]
 name = "Store depends on contracts, never the reverse"
 type = "layers"
 layers = ["fb_store", "fb_contracts"]
+
+[[tool.importlinter.contracts]]
+name = "Pure evaluator depends only on contracts"
+type = "layers"
+layers = ["fb_engine", "fb_contracts"]
+
+[[tool.importlinter.contracts]]
+name = "Evaluator cannot import persistence"
+type = "forbidden"
+source_modules = ["fb_engine"]
+forbidden_modules = ["fb_store"]

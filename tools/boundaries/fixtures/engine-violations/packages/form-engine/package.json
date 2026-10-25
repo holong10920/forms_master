@@ -1,0 +1,7 @@
+{
+  "name": "@fb/form-engine",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

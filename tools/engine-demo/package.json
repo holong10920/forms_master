@@ -1,0 +1,17 @@
+{
+  "name": "@fb/engine-demo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {},
+  "volta": {
+    "extends": "../../package.json"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@fb/form-engine": "workspace:*",
+    "@fb/contracts": "workspace:*"
+  }
+}

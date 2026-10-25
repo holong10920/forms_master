@@ -1,0 +1,417 @@
+{
+  "semanticVersion": "1.0.0",
+  "seed": 20261025,
+  "cases": [
+    {
+      "name": "multiply-and-false",
+      "definition": "calculated",
+      "current": "stp_review",
+      "values": {
+        "fld_a": 2,
+        "fld_b": 3,
+        "fld_flag": false
+      },
+      "expected": {
+        "payload": {
+          "a": 2,
+          "b": 3,
+          "flag": false,
+          "total": 6,
+          "count": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "name": "zero-is-present",
+      "definition": "calculated",
+      "current": "stp_review",
+      "values": {
+        "fld_a": 0,
+        "fld_b": 3,
+        "fld_flag": false
+      },
+      "expected": {
+        "payload": {
+          "a": 0,
+          "b": 3,
+          "flag": false,
+          "total": 0,
+          "count": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "name": "inactive-does-not-feed-derived",
+      "definition": "calculated",
+      "current": "stp_review",
+      "values": {
+        "fld_flag": false,
+        "fld_label": "cached"
+      },
+      "expected": {
+        "payload": {
+          "flag": false,
+          "count": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "name": "unicode-code-point",
+      "definition": "calculated",
+      "current": "stp_review",
+      "values": {
+        "fld_flag": true,
+        "fld_label": "\ud842\udfb7\ufa30"
+      },
+      "expected": {
+        "payload": {
+          "flag": true,
+          "label": "\ud842\udfb7\ufa30",
+          "echo": "\ud842\udfb7\ufa30!",
+          "count": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "name": "unicode-limit",
+      "definition": "calculated",
+      "current": "stp_review",
+      "values": {
+        "fld_flag": true,
+        "fld_label": "\ud842\udfb7ab"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "maxLength",
+            "path": "fld_label"
+          }
+        ]
+      }
+    },
+    {
+      "name": "overflow-each-operation",
+      "definition": "calculated",
+      "current": "stp_review",
+      "values": {
+        "fld_a": 9007199254740991,
+        "fld_b": 2,
+        "fld_flag": false
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "E-NUM-RANGE",
+            "path": "fld_total"
+          }
+        ]
+      }
+    },
+    {
+      "name": "client-calculated-ignored",
+      "definition": "calculated",
+      "current": "stp_review",
+      "values": {
+        "fld_a": 2,
+        "fld_b": 3,
+        "fld_total": 999,
+        "fld_flag": false
+      },
+      "expected": {
+        "payload": {
+          "a": 2,
+          "b": 3,
+          "total": 6,
+          "flag": false,
+          "count": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "name": "missing-required",
+      "definition": "calculated",
+      "current": "stp_review",
+      "values": {},
+      "expected": {
+        "payload": {
+          "count": 0
+        },
+        "errors": [
+          {
+            "code": "required",
+            "path": "fld_flag"
+          }
+        ]
+      }
+    },
+    {
+      "name": "null-rejected",
+      "definition": "calculated",
+      "current": "stp_review",
+      "values": {
+        "fld_a": null
+      },
+      "expected": {
+        "error": {
+          "code": "E-PAYLOAD-NULL",
+          "path": "fld_a"
+        }
+      }
+    },
+    {
+      "name": "no-coercion",
+      "definition": "calculated",
+      "current": "stp_review",
+      "values": {
+        "fld_a": "1"
+      },
+      "expected": {
+        "error": {
+          "code": "E-TYPE",
+          "path": "fld_a"
+        }
+      }
+    },
+    {
+      "name": "range",
+      "definition": "calculated",
+      "current": "stp_review",
+      "values": {
+        "fld_a": 9007199254740992
+      },
+      "expected": {
+        "error": {
+          "code": "E-NUM-RANGE",
+          "path": "fld_a"
+        }
+      }
+    },
+    {
+      "name": "choice-count",
+      "definition": "calculated",
+      "current": "stp_review",
+      "values": {
+        "fld_choices": [
+          "a",
+          "b"
+        ],
+        "fld_flag": false
+      },
+      "expected": {
+        "payload": {
+          "choices": [
+            "a",
+            "b"
+          ],
+          "flag": false,
+          "count": 2
+        },
+        "errors": []
+      }
+    },
+    {
+      "name": "pc-store-no-inactive",
+      "definition": "pc",
+      "current": "stp_review",
+      "values": {
+        "fld_method": "store",
+        "fld_store": "fictional",
+        "fld_kit": "cached"
+      },
+      "expected": {
+        "payload": {
+          "purchaseMethod": "store",
+          "store": "fictional"
+        },
+        "errors": []
+      }
+    },
+    {
+      "name": "ecma-trim-bom",
+      "definition": "calculated",
+      "current": "stp_review",
+      "values": {
+        "fld_flag": true,
+        "fld_label": "\ufeffa\ufeff"
+      },
+      "expected": {
+        "payload": {
+          "flag": true,
+          "label": "a",
+          "echo": "a!",
+          "count": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "name": "no-unicode-normalization",
+      "definition": "calculated",
+      "current": "stp_review",
+      "values": {
+        "fld_flag": true,
+        "fld_label": "\u304b\u3099"
+      },
+      "expected": {
+        "payload": {
+          "flag": true,
+          "label": "\u304b\u3099",
+          "echo": "\u304b\u3099!",
+          "count": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "name": "empty-group",
+      "definition": "groups",
+      "current": "stp_review",
+      "values": {
+        "fld_show": true
+      },
+      "expected": {
+        "payload": {
+          "show": true,
+          "sum": 0,
+          "rows": 0,
+          "yes": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "name": "group-projection-order",
+      "definition": "groups",
+      "current": "stp_review",
+      "values": {
+        "fld_show": true,
+        "grp_products": {
+          "order": [
+            "itm_b",
+            "itm_a"
+          ],
+          "items": {
+            "itm_a": {
+              "fld_qty": 2,
+              "fld_enabled": true,
+              "fld_note": "active"
+            },
+            "itm_b": {
+              "fld_qty": 3,
+              "fld_enabled": false,
+              "fld_note": "inactive-cache"
+            }
+          }
+        }
+      },
+      "expected": {
+        "payload": {
+          "show": true,
+          "products": [
+            {
+              "itemId": "itm_b",
+              "qty": 3,
+              "enabled": false
+            },
+            {
+              "itemId": "itm_a",
+              "qty": 2,
+              "enabled": true,
+              "note": "active"
+            }
+          ],
+          "sum": 5,
+          "rows": 2,
+          "yes": 1
+        },
+        "errors": []
+      }
+    },
+    {
+      "name": "group-inactive-not-aggregated",
+      "definition": "groups",
+      "current": "stp_review",
+      "values": {
+        "fld_show": false,
+        "grp_products": {
+          "order": [
+            "itm_a"
+          ],
+          "items": {
+            "itm_a": {
+              "fld_qty": 7,
+              "fld_enabled": true
+            }
+          }
+        }
+      },
+      "expected": {
+        "payload": {
+          "show": false,
+          "sum": 0,
+          "rows": 0,
+          "yes": 0
+        },
+        "errors": []
+      }
+    },
+    {
+      "name": "group-error-address",
+      "definition": "groups",
+      "current": "stp_review",
+      "values": {
+        "fld_show": true,
+        "grp_products": {
+          "order": [
+            "itm_b",
+            "itm_a"
+          ],
+          "items": {
+            "itm_a": {
+              "fld_qty": 2,
+              "fld_enabled": true
+            },
+            "itm_b": {
+              "fld_enabled": false
+            }
+          }
+        }
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "required",
+            "path": "grp_products[itm_b]/fld_qty"
+          }
+        ]
+      }
+    },
+    {
+      "name": "group-duplicate-id",
+      "definition": "groups",
+      "current": "stp_review",
+      "values": {
+        "grp_products": {
+          "order": [
+            "itm_a",
+            "itm_a"
+          ],
+          "items": {
+            "itm_a": {}
+          }
+        }
+      },
+      "expected": {
+        "error": {
+          "code": "E-ITEM-ID",
+          "path": "grp_products"
+        }
+      }
+    }
+  ]
+}

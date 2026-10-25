@@ -1,11 +1,17 @@
 /** @type {import('dependency-cruiser').IConfiguration} */
 module.exports = {
   forbidden: [
+    {
+      name: "contracts-no-engine",
+      severity: "error",
+      from: { path: "^packages/contracts/" },
+      to: { path: "^packages/form-engine/" },
+    },
     { name: "no-circular", severity: "error", from: {}, to: { circular: true } },
     {
       name: "browser-safe-no-node",
       severity: "error",
-      from: { path: "^packages/contracts/src/" },
+      from: { path: "^packages/(contracts|form-engine)/src/" },
       to: { dependencyTypes: ["core"] },
     },
     {

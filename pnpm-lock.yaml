@@ -207,7 +207,30 @@ importers:
         specifier: 3.9.10
         version: 3.9.10
 
+  packages/form-engine:
+    dependencies:
+      '@fb/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+
+  tools/boundaries: {}
+
+  tools/engine-demo:
+    dependencies:
+      '@fb/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@fb/form-engine':
+        specifier: workspace:*
+        version: link:../../packages/form-engine
+
   tools/lint-fixtures: {}
+
+  tools/perf: {}
+
+  tools/security: {}
+
+  tools/verify: {}
 
 packages:
 

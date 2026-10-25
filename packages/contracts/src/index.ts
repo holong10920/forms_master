@@ -13,3 +13,13 @@ export {
   type SchemaResult,
 } from "./schema.ts";
 export { checkPayloadRef, type PayloadRefV1, type SemanticError } from "./payload-ref.ts";
+
+export type { FormDefinitionV1 } from "./generated/form-definition.v1.ts";
+export type {
+  EngineIRV1,
+  Expression as EngineExpression,
+  Field as EngineField,
+  Node as EngineNode,
+  Group as EngineGroup,
+  Step as EngineStep,
+} from "./generated/engine-ir.v1.ts";

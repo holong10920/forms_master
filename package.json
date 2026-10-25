@@ -14,7 +14,7 @@
     "format:check": "prettier --check .",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "vitest run",
-    "py:lint": "uv run ruff check python && uv run ruff format --check python",
+    "py:lint": "uv run ruff check python tools/engine-demo/adapter.py && uv run ruff format --check python tools/engine-demo/adapter.py",
     "py:typecheck": "uv run mypy",
     "py:test": "uv run pytest",
     "gen": "pnpm --filter @fb/contracts gen",
@@ -26,7 +26,9 @@
     "synthetic:check": "node tools/security/src/synthetic-data-check.ts contracts/fixtures",
     "secrets:gitleaks": "sh tools/security/gitleaks.sh",
     "preflight": "node tools/verify/src/preflight.ts",
-    "verify": "pnpm preflight && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm gen:check && pnpm schemas:lint && pnpm boundaries && pnpm py:lint && pnpm py:typecheck && pnpm py:imports && pnpm py:test && pnpm synthetic:check && pnpm secrets"
+    "verify": "pnpm preflight && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm gen:check && pnpm schemas:lint && pnpm boundaries && pnpm py:lint && pnpm py:typecheck && pnpm py:imports && pnpm py:test && pnpm synthetic:check && pnpm secrets",
+    "engine:demo": "node tools/engine-demo/src/cli.ts",
+    "engine:parity": "node tools/engine-demo/src/parity.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
