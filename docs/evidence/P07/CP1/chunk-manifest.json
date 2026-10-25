@@ -1,0 +1,60 @@
+{
+  "chunkManifestFormat": 1,
+  "chunks": [
+    {
+      "dynamicImports": [],
+      "file": "assets/entry.e58319923d79.js",
+      "modules": [
+        {
+          "bytes": 110,
+          "id": "gen:entry.ts"
+        },
+        {
+          "bytes": 242,
+          "id": "platform:@fb/contracts@0.0.0/src/digest.ts"
+        },
+        {
+          "bytes": 622,
+          "id": "platform:@fb/form-engine@0.1.0/src/canonical.ts"
+        },
+        {
+          "bytes": 11023,
+          "id": "platform:@fb/form-engine@0.1.0/src/definition.ts"
+        },
+        {
+          "bytes": 4838,
+          "id": "platform:@fb/form-engine@0.1.0/src/expression.ts"
+        },
+        {
+          "bytes": 5224,
+          "id": "platform:@fb/form-engine@0.1.0/src/groups.ts"
+        },
+        {
+          "bytes": 1651,
+          "id": "platform:@fb/form-engine@0.1.0/src/model.ts"
+        },
+        {
+          "bytes": 5078,
+          "id": "platform:@fb/form-engine@0.1.0/src/navigation.ts"
+        },
+        {
+          "bytes": 10431,
+          "id": "platform:@fb/form-engine@0.1.0/src/runtime.ts"
+        },
+        {
+          "bytes": 1480,
+          "id": "platform:@fb/form-engine@0.1.0/src/validators.ts"
+        },
+        {
+          "bytes": 6725,
+          "id": "platform:@fb/static-runtime@0.1.0/src/index.ts"
+        },
+        {
+          "bytes": 0,
+          "id": "platform:@fb/static-runtime@0.1.0/src/style.css"
+        }
+      ],
+      "staticImports": []
+    }
+  ]
+}

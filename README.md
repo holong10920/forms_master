@@ -93,3 +93,20 @@ Xem [checkpoint S1-CP2](docs/evidence/P03/S1-CP2/RESULTS.md) cho coverage và gi
 店頭/宅配, terminal riêng) qua engine TS và backend evaluator Python. Store Selector là
 mock core choice cho engine fixture; plugin binding, block expansion và artifact isolation
 chưa được kiểm chứng bằng Compiler. Xem [S1 exit/G3 package](docs/evidence/P03/S1-EXIT.md).
+
+## Compiler / Static Runtime — first S2 candidate
+
+```sh
+pnpm compiler:build
+pnpm compiler:serve
+```
+
+Open the immutable `http://127.0.0.1:4173/r/dev_.../index.html` URL printed by build.
+Sports Motion-none compiles the approved core reference definition and uses the shared
+S1 engine. Public files are in `var/s2-candidates/r/<candidateId>/`; private inventory and
+module graph are outside the served tree. The server binds loopback only. Completion
+is explicitly a local simulation, with no business API or customer-data persistence.
+
+`dev_...` identifies a content-addressed local candidate, not an accepted canonical release.
+T12 builder/container verification, final LRM/FRA, plugin host, block expansion and
+publish/rollback integration are still pending. See [S2 checkpoint](docs/evidence/P07/CP1/RESULTS.md).

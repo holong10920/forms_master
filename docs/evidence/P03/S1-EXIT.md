@@ -88,3 +88,7 @@ Preview/published semantics on generated artifacts; no architecture brainstormin
 T12 verified image digest/container build and reproducibility acceptance remain pending
 before S2 acceptance. G2 is still conditional for local S1 only; S2 execution needs the
 user's go-ahead. G9/G10 remain BLOCKED; synthetic only.
+
+## User G3 closure decision (2026-10-25)
+
+Closure committed `161fef2ba5b65e4fdc6c3ac867e9449350022f19`, exactly 19 approved files; regression and exact-index scanner PASS. **G3 APPROVED / P03 DONE** by explicit user decision. Four demo runs have three distinct terminals as tabulated above. Preview/published artifact verification is assigned to S2 and is not a G3 prerequisite. User authorized local synthetic S2 code/tests; T12 remains required before S2 acceptance. Earlier candidate/pending wording above is historical evidence.

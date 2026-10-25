@@ -1,0 +1,73 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #1e293b;
+  background: #f1f5f9;
+}
+body {
+  margin: 0;
+  padding: 2rem 1rem;
+}
+main {
+  max-width: 42rem;
+  margin: auto;
+  background: white;
+  padding: 2rem;
+  border-radius: 0.75rem;
+}
+h1 {
+  font-size: 1.6rem;
+}
+.field {
+  margin: 1.25rem 0;
+}
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+input:not([type="checkbox"]),
+select,
+textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #64748b;
+  border-radius: 0.3rem;
+  font: inherit;
+}
+input[type="checkbox"] {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+textarea {
+  min-height: 6rem;
+}
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+button {
+  padding: 0.75rem 1.5rem;
+  font: inherit;
+  cursor: pointer;
+  background: #0f766e;
+  color: white;
+  border: 0;
+  border-radius: 0.3rem;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+[role="alert"] {
+  background: #fef2f2;
+  color: #991b1b;
+  padding: 1rem;
+}
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #f8fafc;
+  padding: 1rem;
+}

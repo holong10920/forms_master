@@ -1,0 +1,74 @@
+{
+  "allPassed": true,
+  "url": "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/index.html",
+  "browser": "156.0.8078.47",
+  "runs": [
+    {
+      "category": "golf",
+      "condition": "junk",
+      "completion": true,
+      "requiredVerified": true,
+      "backAndPreserveVerified": true,
+      "payload": {
+        "category": "golf",
+        "clubType": "iron",
+        "condition": "junk",
+        "damageDescription": "Synthetic damaged part",
+        "purchaseMethod": "shuccho",
+        "customerName": "Synthetic Golf Customer",
+        "consent": true
+      }
+    },
+    {
+      "category": "racket",
+      "condition": "used",
+      "completion": true,
+      "inactiveExclusionVerified": true,
+      "payload": {
+        "category": "racket",
+        "racketType": "tennis",
+        "condition": "used",
+        "purchaseMethod": "shuccho",
+        "customerName": "Synthetic Racket Customer",
+        "consent": true
+      }
+    }
+  ],
+  "pinMismatchRejected": true,
+  "integrityRejected": true,
+  "normalPageErrors": [],
+  "requests": [
+    "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/index.html",
+    "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/assets/entry.33ba83cdc600.css",
+    "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/assets/entry.e58319923d79.js",
+    "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/assets/form-ir.315f7da5bd8e150b40fac7c60a8f25e04fd09765e674a8ea85c4cc582ca38b8b.json",
+    "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/index.html",
+    "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/assets/entry.33ba83cdc600.css",
+    "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/assets/entry.e58319923d79.js",
+    "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/assets/form-ir.315f7da5bd8e150b40fac7c60a8f25e04fd09765e674a8ea85c4cc582ca38b8b.json",
+    "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/index.html",
+    "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/assets/entry.33ba83cdc600.css",
+    "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/assets/entry.e58319923d79.js",
+    "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/index.html",
+    "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/assets/entry.33ba83cdc600.css",
+    "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/assets/entry.e58319923d79.js",
+    "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/assets/form-ir.315f7da5bd8e150b40fac7c60a8f25e04fd09765e674a8ea85c4cc582ca38b8b.json",
+    "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/index.html",
+    "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/assets/entry.33ba83cdc600.css",
+    "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/assets/entry.e58319923d79.js",
+    "http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/assets/form-ir.315f7da5bd8e150b40fac7c60a8f25e04fd09765e674a8ea85c4cc582ca38b8b.json"
+  ],
+  "metrics": {
+    "marks": [
+      {
+        "name": "form:visible",
+        "startTime": 28
+      },
+      {
+        "name": "form:ready",
+        "startTime": 28
+      }
+    ],
+    "release": "dev_x6kt4acujizzs4r6rpek3fmsvp"
+  }
+}

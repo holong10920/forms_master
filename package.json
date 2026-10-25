@@ -28,7 +28,9 @@
     "preflight": "node tools/verify/src/preflight.ts",
     "verify": "pnpm preflight && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm gen:check && pnpm schemas:lint && pnpm boundaries && pnpm py:lint && pnpm py:typecheck && pnpm py:imports && pnpm py:test && pnpm synthetic:check && pnpm secrets",
     "engine:demo": "node tools/engine-demo/src/cli.ts",
-    "engine:parity": "node tools/engine-demo/src/parity.ts"
+    "engine:parity": "node tools/engine-demo/src/parity.ts",
+    "compiler:build": "node tools/compiler/src/cli.ts build",
+    "compiler:serve": "node tools/compiler/src/cli.ts serve"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

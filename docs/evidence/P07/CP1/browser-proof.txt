@@ -1,0 +1,38 @@
+async (page) => {
+  const url=page.url();
+  const requests=[];const errors=[];
+  page.on('request',r=>requests.push(r.url()));page.on('pageerror',e=>errors.push(e.message));
+  await page.route('**/*',async route=>{if(new URL(route.request().url()).origin!=='http://127.0.0.1:4173')throw new Error('external request');await route.continue();});
+  const next=()=>page.getByRole('button',{name:'次へ',exact:true}).click();
+  const step=async id=>{await page.locator('#app[data-step="'+id+'"]').waitFor();};
+  const runs=[];
+  await page.goto(url);await step('stp_category');
+  await next();if(!await page.getByRole('alert').textContent().then(s=>s.includes('required')))throw new Error('required not enforced');
+  await page.getByLabel('カテゴリ',{exact:true}).selectOption('golf');await next();await step('stp_product');
+  await page.getByLabel('ゴルフクラブ',{exact:true}).selectOption('iron');await next();await step('stp_condition');
+  await page.getByLabel('商品の状態',{exact:true}).selectOption('junk');await next();
+  if(!await page.getByRole('alert').textContent().then(s=>s.includes('required')))throw new Error('junk damage not required');
+  await page.getByLabel('故障の説明',{exact:true}).fill('Synthetic damaged part');await page.getByLabel('故障の説明',{exact:true}).press('Tab');await next();await step('stp_method');
+  await page.getByRole('button',{name:'戻る',exact:true}).click();await step('stp_condition');
+  await page.getByLabel('商品の状態',{exact:true}).selectOption('used');if(await page.locator('#fld_damage').count())throw new Error('inactive damage visible');
+  await page.getByLabel('商品の状態',{exact:true}).selectOption('junk');if(await page.locator('#fld_damage').inputValue()!=='Synthetic damaged part')throw new Error('preserved memory lost');
+  await next();await step('stp_method');await page.getByLabel('買取方法',{exact:true}).selectOption('shuccho');await next();await step('stp_customer');
+  await page.getByLabel('お名前（合成データのみ）',{exact:true}).fill('Synthetic Golf Customer');await page.getByLabel('お名前（合成データのみ）',{exact:true}).press('Tab');await page.getByLabel('確認事項に同意',{exact:true}).check();await next();await step('stp_review');
+  let payload=JSON.parse(await page.locator('pre').textContent());if(payload.damageDescription!=='Synthetic damaged part' || payload.racketType!==undefined)throw new Error('golf payload');
+  await page.getByRole('button',{name:'ローカル模擬受付',exact:true}).click();await page.getByRole('heading',{name:'ローカル模擬受付完了',exact:true}).waitFor();
+  runs.push({category:'golf',condition:'junk',completion:true,requiredVerified:true,backAndPreserveVerified:true,payload});
+  await page.goto(url);await step('stp_category');await page.getByLabel('カテゴリ',{exact:true}).selectOption('racket');await next();await step('stp_product');
+  await page.getByLabel('ラケット',{exact:true}).selectOption('tennis');if(await page.locator('#fld_club').count())throw new Error('inactive club visible');await next();await step('stp_condition');
+  await page.getByLabel('商品の状態',{exact:true}).selectOption('used');if(await page.locator('#fld_damage').count())throw new Error('inactive damage visible');await next();await step('stp_method');
+  await page.getByLabel('買取方法',{exact:true}).selectOption('shuccho');await next();await step('stp_customer');await page.getByLabel('お名前（合成データのみ）',{exact:true}).fill('Synthetic Racket Customer');await page.getByLabel('お名前（合成データのみ）',{exact:true}).press('Tab');await page.getByLabel('確認事項に同意',{exact:true}).check();await next();await step('stp_review');
+  payload=JSON.parse(await page.locator('pre').textContent());if(payload.damageDescription!==undefined || payload.clubType!==undefined || payload.racketType!=='tennis')throw new Error('inactive payload leak');
+  await page.getByRole('button',{name:'ローカル模擬受付',exact:true}).click();await page.getByRole('heading',{name:'ローカル模擬受付完了',exact:true}).waitFor();runs.push({category:'racket',condition:'used',completion:true,inactiveExclusionVerified:true,payload});
+  const normalErrors=[...errors];if(normalErrors.length)throw new Error('browser errors: '+normalErrors.join(';'));
+  await page.route('**/index.html',async route=>{const response=await route.fetch();const html=await response.text();await route.fulfill({response,body:html.replaceAll('dev_x6kt4acujizzs4r6rpek3fmsvp','dev_aaaaaaaaaaaaaaaaaaaaaaaaaa')});});await page.goto(url);await page.locator('#app[data-error="E-ARTIFACT-BOOTSTRAP"]').waitFor();if(await page.getByRole('button').count())throw new Error('pin mismatch interactive');await page.unroute('**/index.html');
+  await page.route('**/assets/form-ir.*.json',route=>route.fulfill({status:200,contentType:'application/json',body:'{}'}));await page.goto(url);await page.locator('#app[data-error="E-ARTIFACT-BOOTSTRAP"]').waitFor();
+  if(await page.getByRole('button').count())throw new Error('tampered IR remained interactive');
+  await page.unroute('**/assets/form-ir.*.json');await page.goto(url);await step('stp_category');
+  await page.screenshot({path:'output/playwright/sports-nomotion.png',fullPage:true});
+  const metrics=await page.evaluate(()=>({marks:performance.getEntriesByType('mark').map(m=>({name:m.name,startTime:Math.round(m.startTime)})),release:document.getElementById('app').dataset.release}));
+  return {allPassed:true,url,browser:page.context().browser()?.version(),runs,pinMismatchRejected:true,integrityRejected:true,normalPageErrors:normalErrors,requests,metrics};
+}

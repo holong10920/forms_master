@@ -2,6 +2,12 @@
 module.exports = {
   forbidden: [
     {
+      name: "engine-no-presentation",
+      severity: "error",
+      from: { path: "^packages/form-engine/src/" },
+      to: { path: "^packages/static-runtime/" },
+    },
+    {
       name: "contracts-no-engine",
       severity: "error",
       from: { path: "^packages/contracts/" },
@@ -11,7 +17,7 @@ module.exports = {
     {
       name: "browser-safe-no-node",
       severity: "error",
-      from: { path: "^packages/(contracts|form-engine)/src/" },
+      from: { path: "^packages/(contracts|form-engine|static-runtime)/src/" },
       to: { dependencyTypes: ["core"] },
     },
     {

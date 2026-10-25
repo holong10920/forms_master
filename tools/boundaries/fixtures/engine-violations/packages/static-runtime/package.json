@@ -1,0 +1,5 @@
+{
+  "name": "@fb/static-runtime",
+  "type": "module",
+  "exports": "./src/index.ts"
+}

@@ -43,3 +43,7 @@ spikes/*/gen/
 spikes/*/out/
 
 .import_linter_cache/
+
+# Local browser verification sessions and screenshots
+.playwright-cli/
+output/playwright/

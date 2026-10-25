@@ -2,13 +2,11 @@
 
 > Dành cho một phiên Claude mới. Đọc file này trước, sau đó đến `CURRENT_STATUS.md`. Cập nhật 2026-10-25: **G1 APPROVED FOR LOCAL SYNTHETIC P0 IMPLEMENTATION** (ADR-078; baseline sáu spec `6312f2b`). Phần lịch sử bên dưới giữ nguyên.
 >
-> **Bắt đầu ở đây (2026-10-25): P03 / S1 exit assessment, G3 PENDING.** S0 core foundation VERIFIED;
+> **Bắt đầu ở đây (2026-10-25): P03 DONE / G3 APPROVED; P07 / S2 local Compiler-Static Runtime.** S0 core foundation VERIFIED;
 > CP4 `292df4b`, CP5 source `3340956`; fresh committed clone verification PASS, không overlay.
-> **G2 CONDITIONAL GO FOR LOCAL S1 IMPLEMENTATION**, theo quyết định user; không full PASS.
+> **G2 conditional; user authorized local synthetic S2 code/tests**, T12 required before S2 acceptance; không full PASS.
 > S1 plan/D1–D3 approved; engine CP1 `9d9e104`, CP2 `2db4562` committed.
-> Reference Sports/PC acceptance closure is a separate candidate, not part of the approved
-> 45-file CP2 commit. See `docs/evidence/P03/S1-EXIT.md`; obtain closure commit and G3 approval
-> before S2. Codex SOLE WRITER; no lookup/prefill merge, no comprehensive review loop.
+> Reference Sports/PC closure committed 161fef2ba5b65e4fdc6c3ac867e9449350022f19 (19 files); user approved G3/P03 DONE and local S2 implementation. See S2 plan. Codex SOLE WRITER; no lookup/prefill merge, no comprehensive review loop.
 > T12 BLOCKED_BY_ENVIRONMENT / VERIFICATION_PENDING; offline specification accepted,
 > chưa có verified image digest/container build/test. Bắt buộc giải quyết trước S2 Compiler /
 > reproducible build acceptance. Owner/scope/exit criterion: S0-SUMMARY.md §G2 conditional exception.

@@ -1,0 +1,28 @@
+{
+  "profile": "local-clean-workdir-unthrottled",
+  "installIncluded": false,
+  "canonicalContainerVerification": "VERIFICATION_PENDING",
+  "runs": [
+    {
+      "ms": 652,
+      "candidateId": "dev_x6kt4acujizzs4r6rpek3fmsvp"
+    },
+    {
+      "ms": 526,
+      "candidateId": "dev_x6kt4acujizzs4r6rpek3fmsvp"
+    },
+    {
+      "ms": 519,
+      "candidateId": "dev_x6kt4acujizzs4r6rpek3fmsvp"
+    },
+    {
+      "ms": 458,
+      "candidateId": "dev_x6kt4acujizzs4r6rpek3fmsvp"
+    },
+    {
+      "ms": 467,
+      "candidateId": "dev_x6kt4acujizzs4r6rpek3fmsvp"
+    }
+  ],
+  "medianMs": 519
+}

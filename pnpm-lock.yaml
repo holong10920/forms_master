@@ -213,7 +213,31 @@ importers:
         specifier: workspace:*
         version: link:../contracts
 
+  packages/static-runtime:
+    dependencies:
+      '@fb/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@fb/form-engine':
+        specifier: workspace:*
+        version: link:../form-engine
+
   tools/boundaries: {}
+
+  tools/compiler:
+    dependencies:
+      '@fb/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@fb/form-engine':
+        specifier: workspace:*
+        version: link:../../packages/form-engine
+      rolldown:
+        specifier: 1.2.15
+        version: 1.2.15
+      vite:
+        specifier: 8.3.5
+        version: 8.3.5(@types/node@24.19.2)
 
   tools/engine-demo:
     dependencies:

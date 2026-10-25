@@ -23,6 +23,7 @@ async function inspect(kind: string) {
   if (kind === "engine-violations") {
     mkdirSync(join(dir, "node_modules/@fb"), { recursive: true });
     symlinkSync(join(dir, "packages/form-engine"), join(dir, "node_modules/@fb/form-engine"));
+    symlinkSync(join(dir, "packages/static-runtime"), join(dir, "node_modules/@fb/static-runtime"));
   }
   const result = await cruise(["packages"], {
     ...config.options,
@@ -61,5 +62,6 @@ test("engine negative fixtures enforce browser purity and contracts direction", 
   expect([...new Set(report.summary.violations.map((v) => v.rule.name))].sort()).toEqual([
     "browser-safe-no-node",
     "contracts-no-engine",
+    "engine-no-presentation",
   ]);
 });

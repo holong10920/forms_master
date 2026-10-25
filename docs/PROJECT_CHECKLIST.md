@@ -10,7 +10,7 @@
 |---|---|---|---|
 | G0 Scope | **APPROVED WITH ADJUSTMENTS** | 2026-10-23 | DECISIONS.md ADR-001..007 |
 | G1 Design | **APPROVED FOR LOCAL SYNTHETIC P0 IMPLEMENTATION** (baseline `6312f2b`) | 2026-10-25 | DECISIONS.md ADR-078 |
-| G2–G8 | G2 CONDITIONAL GO chỉ local S1; G3 PENDING user approval; G4–G8 TODO | 2026-10-25 | User approved controlled T12 exception; không full PASS. Owner/scope/exit criterion: docs/evidence/P02/S0-SUMMARY.md |
+| G2–G8 | G2 conditional local S2 code/test authorized; G3 APPROVED / P03 DONE; G4–G8 TODO | 2026-10-25 | User approved S2 local code/test after G3 closure 161fef2ba5b65e4fdc6c3ac867e9449350022f19; T12 pending before S2 acceptance; không full PASS. Owner/scope/exit criterion: docs/evidence/P02/S0-SUMMARY.md |
 | G9 GitHub | BLOCKED (user xử lý visibility/ownership) | | ADR-007 |
 | G10 AWS | BLOCKED | | ADR-006 |
 | G11–G12 | TODO | | |
@@ -282,11 +282,11 @@
 
 | ID | Requirement (rút gọn) | Status | Evidence | Note |
 |---|---|---|---|---|
-| P03-01 | Step graph, state/transition engine. | DONE | docs/evidence/P03/S1-CP2/RESULTS.md; S1-EXIT.md | Core/local mock scope; CP1 9d9e104, CP2 2db4562; user gate G3 still PENDING |
+| P03-01 | Step graph, state/transition engine. | DONE | docs/evidence/P03/S1-CP2/RESULTS.md; S1-EXIT.md | Core/local mock scope; CP1 9d9e104, CP2 2db4562; G3 user APPROVED at 161fef2ba5b65e4fdc6c3ac867e9449350022f19 |
 | P03-02 | Declarative conditions, typed operators, DAG dependencies. | DONE | packages/form-engine/test/operators.test.ts; tools/engine-demo/test/parity.test.ts | Finite P0 operators, combined dependency DAG, cycle/type guards; lookup/prefill excluded |
 | P03-03 | Frontend/backend schema validation, schema version fixtures. | DONE | contracts/schemas/{form-definition,engine-ir}; tools/engine-demo/test/parity.test.ts; python/fb_engine/tests/test_submission.py | Version 1 typed contract and TS/Python parity; trusted backend projection/recompute |
-| P03-04 | Unit tests: branching/back/validation/dead-end/cycles. | DONE | packages/form-engine/test; tools/engine-demo/test/references.test.ts | Branching/back, validation/default/dead-end/cycles, async guards; reference closure candidate separately verified |
-| P03-05 | Stable contract for field values, preview vs published behavior. | IN_PROGRESS | docs/evidence/P03/S1-EXIT.md | IMPLEMENTED_BUT_VERIFICATION_PENDING: core value semantics verified; actual Preview/published artifact comparison belongs to S2 integration, not claimed PASS |
+| P03-04 | Unit tests: branching/back/validation/dead-end/cycles. | DONE | packages/form-engine/test; tools/engine-demo/test/references.test.ts | Branching/back, validation/default/dead-end/cycles, async guards; reference closure committed 161fef2ba5b65e4fdc6c3ac867e9449350022f19 |
+| P03-05 | Stable contract for field values, preview vs published behavior. | DONE | docs/evidence/P03/S1-EXIT.md; G3 161fef2ba5b65e4fdc6c3ac867e9449350022f19 | G3 user approved; stable core contract verified. Actual Preview/published artifact verification explicitly assigned to S2, not G3 prerequisite. |
 
 ## PHASE 04 — Shared UI + Motion (`P04`)
 
@@ -325,11 +325,11 @@
 
 | ID | Requirement (rút gọn) | Status | Evidence | Note |
 |---|---|---|---|---|
-| P07-01 | JSON snapshot → build manifest → independent static artifacts. | TODO | | |
-| P07-02 | Compile selection per form; verify no irrelevant plugin chunks. | TODO | | |
-| P07-03 | Motion only when referenced; chunk analyzer + sizes evidence. | TODO | | |
-| P07-04 | Build determinism, failure handling, artifact naming/cache policy. | TODO | | |
-| P07-05 | Local static serve cả Sports và PC; run real E2E on generated output. | TODO | | |
+| P07-01 | JSON snapshot → build manifest → independent static artifacts. | IN_PROGRESS | docs/evidence/P07/CP1/RESULTS.md | Sports executable definition -> canonical IR -> actual static candidate PASS; full LRM/attestation pending T12 |
+| P07-02 | Compile selection per form; verify no irrelevant plugin chunks. | IN_PROGRESS | docs/evidence/P07/CP1/chunk-manifest.json; browser-proof.json | Sports closed module graph PASS; plugin resolution and PC isolation/lazy integration pending |
+| P07-03 | Motion only when referenced; chunk analyzer + sizes evidence. | IN_PROGRESS | docs/evidence/P07/CP1/artifact-sizes.json; chunk-manifest.json | Sports Motion-none zero modules/bytes/dynamic imports with browser network proof; Motion referenced form pending |
+| P07-04 | Build determinism, failure handling, artifact naming/cache policy. | IN_PROGRESS | tools/compiler/test/build.test.ts; docs/evidence/P07/CP1/local-build-times.json | Two clean output roots and five fresh Node builds match; local pin/write-once/integrity PASS; canonical container K13 pending |
+| P07-05 | Local static serve cả Sports và PC; run real E2E on generated output. | IN_PROGRESS | docs/evidence/P07/CP1/browser-proof.json | Sports actual Chromium golf/Junk and racket/used flows PASS; PC static artifact pending |
 
 ## PHASE 08 — Publishing + rollback LOCAL (`P08`)
 

@@ -1,0 +1,68 @@
+{
+  "fields": [
+    {
+      "classification": "public",
+      "id": "fld_category",
+      "key": "category",
+      "submit": "include",
+      "type": "choice.radio"
+    },
+    {
+      "classification": "public",
+      "id": "fld_club",
+      "key": "clubType",
+      "submit": "include",
+      "type": "choice.radio"
+    },
+    {
+      "classification": "public",
+      "id": "fld_racket",
+      "key": "racketType",
+      "submit": "include",
+      "type": "choice.radio"
+    },
+    {
+      "classification": "public",
+      "id": "fld_condition",
+      "key": "condition",
+      "submit": "include",
+      "type": "choice.radio"
+    },
+    {
+      "classification": "personal",
+      "id": "fld_damage",
+      "key": "damageDescription",
+      "submit": "include",
+      "type": "textarea"
+    },
+    {
+      "classification": "public",
+      "id": "fld_method",
+      "key": "purchaseMethod",
+      "submit": "include",
+      "type": "choice.radio"
+    },
+    {
+      "classification": "personal",
+      "id": "fld_customer",
+      "key": "customerName",
+      "submit": "include",
+      "type": "text"
+    },
+    {
+      "classification": "personal",
+      "id": "fld_email",
+      "key": "email",
+      "submit": "include",
+      "type": "email"
+    },
+    {
+      "classification": "public",
+      "id": "fld_consent",
+      "key": "consent",
+      "submit": "include",
+      "type": "boolean"
+    }
+  ],
+  "localDataContractFormat": 1
+}

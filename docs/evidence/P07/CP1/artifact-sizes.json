@@ -1,0 +1,44 @@
+{
+  "tool": "fb-perf-sizes",
+  "toolVersion": "0.1.0",
+  "node": "v24.22.1",
+  "zlib": "1.3.2.1-motley-285e94b",
+  "brotli": "1.2.0",
+  "settings": {
+    "gzipLevel": 9,
+    "brotliQuality": 11
+  },
+  "measuredAt": "2026-10-25T15:25:49.897Z",
+  "files": [
+    {
+      "path": "assets/entry.33ba83cdc600.css",
+      "raw": 855,
+      "gzip": 467,
+      "brotli": 334
+    },
+    {
+      "path": "assets/entry.e58319923d79.js",
+      "raw": 30002,
+      "gzip": 9783,
+      "brotli": 8678
+    },
+    {
+      "path": "assets/form-ir.315f7da5bd8e150b40fac7c60a8f25e04fd09765e674a8ea85c4cc582ca38b8b.json",
+      "raw": 2760,
+      "gzip": 718,
+      "brotli": 572
+    },
+    {
+      "path": "index.html",
+      "raw": 955,
+      "gzip": 627,
+      "brotli": 486
+    }
+  ],
+  "skippedSymlinks": [],
+  "totals": {
+    "raw": 34572,
+    "gzip": 11595,
+    "brotli": 10070
+  }
+}

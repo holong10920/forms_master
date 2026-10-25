@@ -1,0 +1,19 @@
+{
+  "name": "@fb/static-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "volta": {
+    "extends": "../../package.json"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@fb/contracts": "workspace:*",
+    "@fb/form-engine": "workspace:*"
+  }
+}

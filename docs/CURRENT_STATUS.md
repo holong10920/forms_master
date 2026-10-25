@@ -4,16 +4,24 @@
 
 | Mục | Giá trị |
 |---|---|
-| Phase đang chạy | **P03 / S1 EXIT ASSESSMENT; CP1/CP2 committed, G3 PENDING user approval. S0 core foundation VERIFIED. G2 CONDITIONAL GO FOR LOCAL S1 IMPLEMENTATION — không full PASS, không S0 DONE đầy đủ.** |
-| Plan đang active | S1 plan + D1–D3 approved. Local engine implemented; reference acceptance closure at `docs/evidence/P03/S1-EXIT.md`. No lookup/prefill merge; ADR-013/014 remain PROPOSED outside approved subsets. |
-| Git | Local branch `codex/p03-s1-workflow-engine`; S1-CP1 `9d9e104`, S1-CP2 `2db4562822344c3aa66d8a424ffa8b8873c58ea1`. CP2 committed exactly 45 approved files. Reference/G3 closure candidate separately pending commit approval. No GitHub/push. |
+| Phase đang chạy | **P03 DONE / G3 APPROVED; P07 / S2 Compiler-Static Runtime implementation. S0 core foundation VERIFIED. G2 conditional exception extended by user to local synthetic S2 coding/testing; T12 required before S2 acceptance — không full PASS, không S0 DONE đầy đủ.** |
+| Plan đang active | S2 plan: `docs/superpowers/plans/2026-10-25-s2-compiler-static-runtime.md`. G3 approved by user after verified closure 161fef2ba5b65e4fdc6c3ac867e9449350022f19. No lookup/prefill merge; ADR-013/014 remain PROPOSED outside approved subsets. |
+| Git | Local branch `codex/p03-s1-workflow-engine`; S1-CP1 `9d9e104`, S1-CP2 `2db4562822344c3aa66d8a424ffa8b8873c58ea1`. CP2 committed exactly 45 approved files. G3 closure `161fef2ba5b65e4fdc6c3ac867e9449350022f19` committed exactly 19 approved files; S2 work is a separate uncommitted scope. No GitHub/push. |
 | Remote | repo GitHub cá nhân, **PUBLIC**. G9 BLOCKED; user đang xử lý. |
 | AWS | **KHÔNG GHI**, và chưa gọi AWS API nào. Chưa chọn profile (ADR-006). |
 | Môi trường | macOS local; Node 24.22.1, pnpm 12.15.0, Python 3.13, uv 0.13.5. T12 container BLOCKED_BY_ENVIRONMENT. |
-| Scope đã duyệt | G0: ADR-001..007. Nguyên tắc của spec #1: ADR-008..012, ADR-015, ADR-016. Design direction: ADR-017 (OD-01), ADR-018 (OD-14), ADR-019 (OD-02), ADR-020 (OD-04), ADR-021 (OD-07), ADR-022 (OD-12). Spec #2: ADR-023..025, ADR-027, ADR-028 (nguyên tắc), ADR-026 (APPROVED AS DESIGN DIRECTION WITH ADJUSTMENTS), ADR-029..035 (OD2-01..07, review #1). Spec #3: ADR-036 (self-contained form release), ADR-037 (session-pinned revision + stable/immutable URL), ADR-038 (CSR + Loading Shell), ADR-039 (reproducible build), ADR-040 (code splitting + prefetch), tất cả APPROVED AS DESIGN DIRECTION; ADR-041 (Vite 8.3.5 + Rolldown 1.2.15: CONDITIONALLY APPROVED); ADR-042 (SPIKE-GATE-01, đã chạy và review); ADR-043 (prefetch WebKit, ACCEPTED FOR P0); ADR-044 (pnpm: đánh giá ở P02); ADR-045 (Node 20 EOL → Node 24 LTS ở P02). Spec #4: ADR-046 (Business-first Visual Form Builder, APPROVED AS PRODUCT DIRECTION), ADR-047 (Hybrid Workspace, APPROVED AS PRODUCT/UX DESIGN DIRECTION), ADR-048 (Admin tiếng Nhật qua message catalog), ADR-049 (điều kiện gắn đích + named condition; APPROVED WITH CONDITIONS), ADR-050 (review trên snapshot bất biến), ADR-051 (shared block P0), ADR-052 (optimistic concurrency, không merge tự động), ADR-047 refinement (APPROVED), ADR-053 (Preview cô lập trên origin riêng). Spec #5: ADR-054 (yêu cầu publication/rollback, APPROVED AS DESIGN REQUIREMENTS), ADR-055 (phương án A, APPROVED AS DESIGN DIRECTION), ADR-056 (OIDC + BFF), ADR-057 (`T_stale` 60 s có giới hạn), ADR-058 (TTL draft 72 h, `G` 7 ngày, P0 defaults), ADR-059 (retention 30 ngày), ADR-060 (field inactive → 422), ADR-061 (Inspector P0 chỉ tự sinh). Spec #6: ADR-062 (Motion Product Direction), ADR-064..067. Security: ADR-063 (G-EXEC TOCTOU, P0 synthetic). ADR-013/014 + addenda vẫn PROPOSED. (không phải là duyệt architecture). **G1 APPROVED cho local synthetic P0. T10 alternative scanner ACCEPTED. G2 CONDITIONAL GO chỉ local S1; G9/G10 BLOCKED.** |
-| URLs | không có |
+| Scope đã duyệt | G0: ADR-001..007. Nguyên tắc của spec #1: ADR-008..012, ADR-015, ADR-016. Design direction: ADR-017 (OD-01), ADR-018 (OD-14), ADR-019 (OD-02), ADR-020 (OD-04), ADR-021 (OD-07), ADR-022 (OD-12). Spec #2: ADR-023..025, ADR-027, ADR-028 (nguyên tắc), ADR-026 (APPROVED AS DESIGN DIRECTION WITH ADJUSTMENTS), ADR-029..035 (OD2-01..07, review #1). Spec #3: ADR-036 (self-contained form release), ADR-037 (session-pinned revision + stable/immutable URL), ADR-038 (CSR + Loading Shell), ADR-039 (reproducible build), ADR-040 (code splitting + prefetch), tất cả APPROVED AS DESIGN DIRECTION; ADR-041 (Vite 8.3.5 + Rolldown 1.2.15: CONDITIONALLY APPROVED); ADR-042 (SPIKE-GATE-01, đã chạy và review); ADR-043 (prefetch WebKit, ACCEPTED FOR P0); ADR-044 (pnpm: đánh giá ở P02); ADR-045 (Node 20 EOL → Node 24 LTS ở P02). Spec #4: ADR-046 (Business-first Visual Form Builder, APPROVED AS PRODUCT DIRECTION), ADR-047 (Hybrid Workspace, APPROVED AS PRODUCT/UX DESIGN DIRECTION), ADR-048 (Admin tiếng Nhật qua message catalog), ADR-049 (điều kiện gắn đích + named condition; APPROVED WITH CONDITIONS), ADR-050 (review trên snapshot bất biến), ADR-051 (shared block P0), ADR-052 (optimistic concurrency, không merge tự động), ADR-047 refinement (APPROVED), ADR-053 (Preview cô lập trên origin riêng). Spec #5: ADR-054 (yêu cầu publication/rollback, APPROVED AS DESIGN REQUIREMENTS), ADR-055 (phương án A, APPROVED AS DESIGN DIRECTION), ADR-056 (OIDC + BFF), ADR-057 (`T_stale` 60 s có giới hạn), ADR-058 (TTL draft 72 h, `G` 7 ngày, P0 defaults), ADR-059 (retention 30 ngày), ADR-060 (field inactive → 422), ADR-061 (Inspector P0 chỉ tự sinh). Spec #6: ADR-062 (Motion Product Direction), ADR-064..067. Security: ADR-063 (G-EXEC TOCTOU, P0 synthetic). ADR-013/014 + addenda vẫn PROPOSED. (không phải là duyệt architecture). **G1 APPROVED cho local synthetic P0. T10 alternative scanner ACCEPTED. G2 conditional; user authorized local synthetic S2 code/test, T12 required before S2 acceptance; G9/G10 BLOCKED.** |
+| URLs | Sports candidate: http://127.0.0.1:4173/r/dev_x6kt4acujizzs4r6rpek3fmsvp/index.html |
 
-## P02 cập nhật hiện hành — 2026-10-25
+## S2 checkpoint hiện hành — 2026-10-25
+
+Sports Motion-none static candidate chạy browser thật; evidence `docs/evidence/P07/CP1/RESULTS.md`.
+Full verify: 618 TS passed / 724 Python passed; 15 expected-fail, 1 intentional Gitleaks skip.
+Source alternative scan 0 unresolved. Shared engine only; actual module graph/network proof
+has zero Motion. Two browser flows and negative pin/IR integrity checks PASS. Numeric byte
+budgets proposed, not approved. S2 uncommitted; T12/LRM/FRA/plugin/publish integration pending.
+
+## P02 cập nhật lịch sử — 2026-10-25
 
 CP1/CP2/CP3/CP4 đã commit. T9 PASS, T10 detect-secrets==1.5.0 ACCEPTED (27 default detectors,
 negative fixtures PASS), T11 PASS và Volta fix APPROVED. Gitleaks NOT_EXECUTED, không bắt buộc
@@ -24,7 +32,7 @@ Preflight/frozen install/uv sync/pnpm verify/drift PASS. S0 core foundation VERI
 User đã duyệt G2 CONDITIONAL GO cho local S1; không full PASS và không S0 DONE đầy đủ.
 T12 BLOCKED_BY_ENVIRONMENT / VERIFICATION_PENDING. Exception owner/scope/exit criterion
 ở `docs/evidence/P02/S0-SUMMARY.md` §G2 conditional exception.
-Codex SOLE WRITER; S1 plan/D1–D3 were approved before implementation. Next: G3 approval package; no S2 implementation yet.
+Codex SOLE WRITER; S1 plan/D1–D3 were approved before implementation. G3 APPROVED / P03 DONE. Next: Sports Motion-none static artifact; S2 DONE blocked on T12 and remaining acceptance.
 
 Các mục P01 bên dưới là lịch sử, không phải next action hiện tại.
 
