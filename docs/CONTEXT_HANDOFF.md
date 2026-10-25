@@ -2,14 +2,17 @@
 
 > Dành cho một phiên Claude mới. Đọc file này trước, sau đó đến `CURRENT_STATUS.md`. Cập nhật 2026-10-25: **G1 APPROVED FOR LOCAL SYNTHETIC P0 IMPLEMENTATION** (ADR-078; baseline sáu spec `6312f2b`). Phần lịch sử bên dưới giữ nguyên.
 >
-> **Bắt đầu ở đây (2026-10-25):** P02/S0, CP4 committed `292df4b024ecbd66c7ebe786e2e6103abeafaec9`.
-> CP5 scope 16 file đã được user duyệt; commit CP5 rồi clean clone từ committed source để chạy
-> preflight/frozen install/uv sync/pnpm verify, không candidate overlay. T10 alternative scanner
-> ACCEPTED cho local synthetic P0; Gitleaks NOT_EXECUTED. T12 container BLOCKED_BY_ENVIRONMENT:
-> offline specification được chấp nhận nhưng chưa verified digest/build/test. G2 BLOCKED,
-> S0 chưa DONE. Không mở lại architecture review; G9/G10 vẫn BLOCKED. Chi tiết ở
-> `docs/evidence/P02/S0-SUMMARY.md`, `CP5-PROPOSED-SCOPE.md` và `S0-T12-G2-DECISION.md`.
-> Phần P01 bên dưới giữ làm lịch sử; ADR-013/014 vẫn PROPOSED.
+> **Bắt đầu ở đây (2026-10-25): P03 / S1 planning.** S0 core foundation VERIFIED;
+> CP4 `292df4b`, CP5 source `3340956`; fresh committed clone verification PASS, không overlay.
+> **G2 CONDITIONAL GO FOR LOCAL S1 IMPLEMENTATION**, theo quyết định user; không full PASS.
+> Chỉ lập plan `docs/superpowers/plans/2026-10-25-s1-workflow-engine.md` để user review,
+> chưa code. Codex SOLE WRITER; vertical slices, automated tests, self-review, checkpoint.
+> T12 BLOCKED_BY_ENVIRONMENT / VERIFICATION_PENDING; offline specification accepted,
+> chưa có verified image digest/container build/test. Bắt buộc giải quyết trước S2 Compiler /
+> reproducible build acceptance. Owner/scope/exit criterion: S0-SUMMARY.md §G2 conditional exception.
+> Security alternative ACCEPTED cho local synthetic P0; Gitleaks NOT_EXECUTED.
+> G9/G10 BLOCKED, synthetic only. ADR-013/014 vẫn PROPOSED, chỉ chốt contract chặn slice đầu.
+> Phần P01 bên dưới là lịch sử; không mở lại architecture brainstorming.
 
 **Dự án:** PoC multi-site form builder.
 - Form được định nghĩa bằng JSON có versioning.

@@ -867,3 +867,518 @@ $ node tools/security/src/secrets.ts
 
 
 exit=0
+
+=== FINAL: committed-source CP5 verification PASS ===
+Source commit: 33409566fdc8502744902bbdb1f2d7988ce12363
+Fresh local filesystem clone, no candidate overlay. README bootstrap used Node 24's
+resolved Corepack 0.36.0 and clone-local shims; documented /tmp caches reused, no host
+node_modules/.venv copied. pnpm preflight, frozen install, uv sync --locked, scanner
+provision and pnpm verify all exit 0. TS 518 pass / 15 expected failures / 1 deliberate
+optional Gitleaks skip; Python 674 pass. Alternative T10 accepted; Gitleaks NOT_EXECUTED.
+SHA-256 before/after for pnpm-lock.yaml, uv.lock and both generated schema files unchanged.
+Git status in committed checkout: clean. Actual raw log and drift manifest retained at
+<external-execution-dir>/committed-verification.txt and drift-manifest.json.
+T13 local technical checks PASS; GitHub CI not executed (G9), T12 still environment blocked.
+S0 acceptance PENDING and G2 BLOCKED, no exception approved.
+This final evidence/governance update follows the source commit and remains unstaged.
+
+CP5 COMMITTED SOURCE: 33409566fdc8502744902bbdb1f2d7988ce12363
+Local clone only; no overlay; no GitHub/AWS access.
+README bootstrap uses resolved Node24 Corepack, clone-local shims; documented /tmp cache alternative.
+$ ~/.volta/tools/image/node/24.22.1/bin/node ~/.volta/tools/image/node/24.22.1/bin/corepack --version
+0.36.0
+$ ~/.volta/tools/image/node/24.22.1/bin/node ~/.volta/tools/image/node/24.22.1/bin/corepack enable --install-directory <committed-checkout>/.tools/bin pnpm
+$ pnpm preflight
+Scope: all 7 workspace projects
+[WARN] The store at ~/Library/pnpm/store/v11 is not used because packages cannot be hard linked from it into this project. Using the store at /private/tmp/.pnpm-store/v11 instead. Set storeDir to choose the store.
+? Verifying lockfile against supply-chain policies (208 entries)...
+[WARN] Request took 12427ms: https://registry.npmjs.org/@rolldown%2Fbinding-linux-x64-musl
+[WARN] Request took 13953ms: https://registry.npmjs.org/@rolldown%2Fbinding-linux-x64-gnu
+[WARN] Request took 13455ms: https://registry.npmjs.org/dependency-cruiser
+✓ Lockfile passes supply-chain policies (208 entries in 24.2s)
+Lockfile is up to date, resolution step is skipped
+Packages: +184
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 184, reused 184, downloaded 0, added 184, done
+
+devDependencies:
++ @eslint/js 10.0.1
++ @types/node 24.19.2
++ dependency-cruiser 18.7.0
++ eslint 10.13.0
++ prettier 3.9.10
++ typescript 6.0.3
++ typescript-eslint 8.72.0
++ vitest 5.0.5
+
+Done in 24.3s using pnpm v12.15.0
+$ node tools/verify/src/preflight.ts
+preflight PASS: Node 24.22.1, pnpm 12.15.0
+exit=0
+$ pnpm install --frozen-lockfile --store-dir /private/tmp/.pnpm-store
+Scope: all 7 workspace projects
+? Verifying lockfile against supply-chain policies (208 entries)...
+[WARN] Request took 10702ms: https://registry.npmjs.org/@rolldown%2Fbinding-win32-x64-msvc
+[WARN] Request took 10720ms: https://registry.npmjs.org/@rolldown%2Fbinding-win32-arm64-msvc
+[WARN] Request took 13047ms: https://registry.npmjs.org/@rolldown%2Fbinding-linux-x64-musl
+[WARN] Request took 13048ms: https://registry.npmjs.org/@rolldown%2Fbinding-linux-arm-gnueabihf
+[WARN] Request took 13140ms: https://registry.npmjs.org/@rolldown%2Fbinding-linux-arm64-musl
+[WARN] Request took 13140ms: https://registry.npmjs.org/@rolldown%2Fbinding-linux-x64-gnu
+[WARN] Request took 13141ms: https://registry.npmjs.org/@rolldown%2Fbinding-freebsd-x64
+[WARN] Request took 14107ms: https://registry.npmjs.org/@rolldown%2Fbinding-linux-arm64-gnu
+[WARN] Request took 10558ms: https://registry.npmjs.org/commander
+[WARN] Request took 10561ms: https://registry.npmjs.org/color-convert
+[WARN] Request took 10589ms: https://registry.npmjs.org/chalk
+[WARN] Request took 10009ms: https://registry.npmjs.org/lightningcss-linux-arm64-gnu
+[WARN] Request took 13305ms: https://registry.npmjs.org/json5
+[WARN] Request took 21489ms: https://registry.npmjs.org/@rolldown%2Fbinding-darwin-arm64
+[WARN] Request took 12701ms: https://registry.npmjs.org/lightningcss-linux-x64-musl
+[WARN] Request took 13336ms: https://registry.npmjs.org/lightningcss-linux-arm-gnueabihf
+[WARN] Request took 13914ms: https://registry.npmjs.org/lightningcss-darwin-x64
+[WARN] Request took 13940ms: https://registry.npmjs.org/lightningcss-darwin-arm64
+[WARN] Request took 17584ms: https://registry.npmjs.org/dependency-cruiser
+[WARN] Request took 14125ms: https://registry.npmjs.org/typescript
+✓ Lockfile passes supply-chain policies (208 entries in 32s)
+Lockfile is up to date, resolution step is skipped
+Done in 32.1s using pnpm v12.15.0
+exit=0
+$ uv sync --locked
+Using CPython 3.13.15 interpreter at: /opt/homebrew/opt/python@3.13/bin/python3.13
+Creating virtual environment at: .venv
+Resolved 29 packages in 14ms
+   Building fb-contracts @ file:///private<committed-checkout>/python/fb_contracts
+   Building fb-store @ file:///private<committed-checkout>/python/fb_store
+      Built fb-contracts @ file:///private<committed-checkout>/python/fb_contracts
+      Built fb-store @ file:///private<committed-checkout>/python/fb_store
+Prepared 2 packages in 10ms
+Installed 28 packages in 38ms
+ + ast-serialize==0.13.1
+ + attrs==26.1.0
+ + click==8.5.0
+ + fb-contracts==0.0.0 (from file:///private<committed-checkout>/python/fb_contracts)
+ + fb-store==0.0.0 (from file:///private<committed-checkout>/python/fb_store)
+ + grimp==3.17
+ + import-linter==2.15
+ + iniconfig==2.3.1
+ + jsonschema==4.26.0
+ + jsonschema-specifications==2025.9.1
+ + librt==0.16.0
+ + markdown-it-py==4.2.0
+ + mdurl==0.1.2
+ + mypy==2.4.0
+ + mypy-extensions==1.1.0
+ + packaging==26.3
+ + pathspec==1.1.1
+ + pluggy==1.7.0
+ + pygments==2.21.0
+ + pytest==9.1.1
+ + pytest-socket==0.8.1
+ + referencing==0.37.0
+ + rfc8785==0.1.4
+ + rich==15.0.0
+ + rpds-py==2026.9.1
+ + ruff==0.17.2
+ + types-jsonschema==4.26.0.20261006
+ + typing-extensions==4.16.0
+exit=0
+$ uvx --from detect-secrets==1.5.0 detect-secrets scan --help
+usage: detect-secrets scan [-h] [--string [STRING]] [--only-allowlisted]
+                           [--all-files] [--baseline FILENAME]
+                           [--force-use-all-plugins] [--slim]
+                           [--list-all-plugins] [-p PLUGIN]
+                           [--base64-limit [BASE64_LIMIT]]
+                           [--hex-limit [HEX_LIMIT]]
+                           [--disable-plugin DISABLE_PLUGIN]
+                           [-n | --only-verified]
+                           [--exclude-lines EXCLUDE_LINES]
+                           [--exclude-files EXCLUDE_FILES]
+                           [--exclude-secrets EXCLUDE_SECRETS] [-f FILTER]
+                           [--disable-filter DISABLE_FILTER]
+                           [path ...]
+
+Scans a repository for secrets in code. The generated output is compatible
+with `detect-secrets-hook --baseline`.
+
+positional arguments:
+  path                  Scans the entire codebase and outputs a snapshot of
+                        currently identified secrets.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --string [STRING]     Scans an individual string, and displays configured
+                        plugins' verdict.
+  --only-allowlisted    Only scans the lines that are flagged with `allowlist
+                        secret`. This helps verify that individual exceptions
+                        are indeed non-secrets.
+
+scan options:
+  --all-files           Scan all files recursively (as compared to only
+                        scanning git tracked files).
+  --baseline FILENAME   If provided, will update existing baseline by
+                        importing settings from it.
+  --force-use-all-plugins
+                        If a baseline is provided, detect-secrets will default
+                        to loading the plugins specified by that baseline.
+                        However, this may also mean it doesn't perform the
+                        scan with the latest plugins. If this flag is
+                        provided, it will always use the latest plugins
+  --slim                Slim baselines are created with the intention of
+                        minimizing differences between commits. However, they
+                        are not compatible with the `audit` functionality, and
+                        slim baselines will need to be remade to be audited.
+
+plugin options:
+  Configure settings for each secret scanning ruleset. By default, all
+  plugins are enabled unless explicitly disabled.
+
+  --list-all-plugins    Lists all plugins that will be used for the scan.
+  -p PLUGIN, --plugin PLUGIN
+                        Specify path to custom secret detector plugin.
+  --base64-limit [BASE64_LIMIT]
+                        Sets the entropy limit for high entropy strings. Value
+                        must be between 0.0 and 8.0, defaults to 4.5.
+  --hex-limit [HEX_LIMIT]
+                        Sets the entropy limit for high entropy strings. Value
+                        must be between 0.0 and 8.0, defaults to 3.0.
+  --disable-plugin DISABLE_PLUGIN
+                        Plugin class names to disable. e.g.
+                        Base64HighEntropyString
+
+filter options:
+  Configure settings for filtering out secrets after they are flagged by the
+  engine.
+
+  -n, --no-verify       Disables additional verification of secrets via
+                        network call.
+  --only-verified       Only flags secrets that can be verified.
+  --exclude-lines EXCLUDE_LINES
+                        If lines match this regex, it will be ignored.
+  --exclude-files EXCLUDE_FILES
+                        If filenames match this regex, it will be ignored.
+  --exclude-secrets EXCLUDE_SECRETS
+                        If secrets match this regex, it will be ignored.
+  -f FILTER, --filter FILTER
+                        Specify path to custom filter. May be a python module
+                        path (e.g.
+                        detect_secrets.filters.common.is_invalid_file) or a
+                        local file path (e.g.
+                        file://path/to/file.py::function_name).
+  --disable-filter DISABLE_FILTER
+                        Specify filter to disable. e.g.
+                        detect_secrets.filters.common.is_invalid_file
+exit=0
+$ pnpm verify
+$ pnpm preflight && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm gen:check && pnpm schemas:lint && pnpm boundaries && pnpm py:lint && pnpm py:typecheck && pnpm py:imports && pnpm py:test && pnpm synthetic:check && pnpm secrets
+$ node tools/verify/src/preflight.ts
+preflight PASS: Node 24.22.1, pnpm 12.15.0
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ eslint . --max-warnings=0
+$ pnpm -r --if-present typecheck
+tools/perf typecheck$ tsc -p tsconfig.json
+tools/lint-fixtures typecheck$ tsc -p tsconfig.json
+tools/boundaries typecheck$ tsc -p tsconfig.json
+packages/contracts typecheck$ tsc -p tsconfig.json && tsc -p scripts/tsconfig.json
+tools/perf typecheck: Done
+tools/security typecheck$ tsc -p tsconfig.json
+tools/boundaries typecheck: Done
+tools/verify typecheck$ tsc -p tsconfig.json
+tools/lint-fixtures typecheck: Done
+packages/contracts typecheck: Done
+tools/verify typecheck: Done
+tools/security typecheck: Done
+$ vitest run
+
+ RUN  v5.0.5 /private<committed-checkout>
+
+
+ Test Files  16 passed (16)
+      Tests  518 passed | 15 expected fail | 1 skipped (534)
+   Start at  18:07:31
+   Duration  5.37s (tests 87%, import 8%, transform 4%, setup 1%)
+
+$ pnpm --filter @fb/contracts gen:check
+$ node scripts/gen.ts --check
+gen:check OK (2 generated files)
+$ pnpm --filter @fb/contracts lint:schemas
+$ node scripts/lint-schemas.ts
+schemas:lint OK (1 schema files)
+$ depcruise packages tools --config .dependency-cruiser.cjs --output-type err
+
+✔ no dependency violations found (50 modules, 113 dependencies cruised)
+
+$ uv run ruff check python && uv run ruff format --check python
+All checks passed!
+39 files already formatted
+$ uv run mypy
+Success: no issues found in 39 source files
+$ uv run lint-imports
+
+╔══╗─────────▶╔╗ ╔╗      ╔╗◀───┐
+╚╣╠╝◀─────┐  ╔╝╚╗║║────▶╔╝╚╗   │
+ ║║   ╔══╦══╦╩╗╔╝║║  ╔╦═╩╗╔╝╔═╦══╗
+ ║║╔══╣╔╗║╔╗║╔╣║ ║║ ╔╬╣╔╗║║ ║│║╔═╝
+╔╣╠╣║║║╚╝║╚╝║║║╚╗║╚═╝║║║║║╚╗║═╣║
+╚══╩╩╩╣╔═╩══╩╝╚═╝╚═══╩╩╝╚╩═╩╩═╩╝
+  └──▶║║                    ▲
+      ╚╝────────────────────┘
+
+
+---------
+Contracts
+---------
+
+Analyzed 13 files, 15 dependencies.
+-----------------------------------
+
+Store depends on contracts, never the reverse KEPT
+
+Contracts: 1 kept, 0 broken.
+$ uv run pytest
+============================= test session starts ==============================
+platform darwin -- Python 3.13.15, pytest-9.1.1, pluggy-1.7.0
+rootdir: /private<committed-checkout>
+configfile: pyproject.toml
+testpaths: python
+plugins: socket-0.8.1
+collected 674 items
+
+python/fb_contracts/tests/test_digest.py .........                       [  1%]
+python/fb_contracts/tests/test_jcs.py .......................            [  4%]
+python/fb_contracts/tests/test_json_pointer.py ..                        [  5%]
+python/fb_contracts/tests/test_jsts.py ................................. [  9%]
+........................................................................ [ 20%]
+........................................................................ [ 31%]
+........................................................................ [ 41%]
+........................................................................ [ 52%]
+........................................................................ [ 63%]
+............................................                             [ 69%]
+python/fb_contracts/tests/test_payload_ref.py .......                    [ 70%]
+python/fb_contracts/tests/test_schema_normalization.py ..........        [ 72%]
+python/fb_contracts/tests/test_schema_parity.py ..............           [ 74%]
+python/fb_contracts/tests/test_smoke.py .                                [ 74%]
+python/fb_store/tests/test_clock.py ....                                 [ 75%]
+python/fb_store/tests/test_fsstore_blob.py .........                     [ 76%]
+python/fb_store/tests/test_fsstore_concurrency.py ....                   [ 77%]
+python/fb_store/tests/test_fsstore_durability.py ..........              [ 78%]
+python/fb_store/tests/test_fsstore_fail_closed.py ...................    [ 81%]
+python/fb_store/tests/test_fsstore_failures.py ......                    [ 82%]
+python/fb_store/tests/test_fsstore_keys.py ....................          [ 85%]
+python/fb_store/tests/test_fsstore_release.py ......                     [ 86%]
+python/fb_store/tests/test_import_contracts.py .                         [ 86%]
+python/fb_store/tests/test_layout.py ....                                [ 86%]
+python/fb_store/tests/test_migrations.py ............................... [ 91%]
+..................................                                       [ 96%]
+python/fb_store/tests/test_network_blocked.py .                          [ 96%]
+python/fb_store/tests/test_smoke.py .                                    [ 96%]
+python/fb_store/tests/test_sqlite_conflict.py .........                  [ 98%]
+python/fb_store/tests/test_sqlite_tx.py ............                     [100%]
+
+============================= 674 passed in 6.84s ==============================
+$ node tools/security/src/synthetic-data-check.ts contracts/fixtures
+{
+  "findings": []
+}
+$ node tools/security/src/secrets.ts
+{
+  "working": {
+    "scanner": "detect-secrets==1.5.0",
+    "detectors": 27,
+    "files": 143,
+    "findings": [
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 6,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 12,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 9,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 16,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 23,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 30,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 37,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 44,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 51,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 58,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 65,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 72,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "package.json",
+        "line": 25,
+        "type": "Secret Keyword",
+        "classification": "fixed-scan-command"
+      }
+    ],
+    "unresolved": 0
+  },
+  "index": {
+    "scanner": "detect-secrets==1.5.0",
+    "detectors": 27,
+    "files": 143,
+    "findings": [
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 6,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 12,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 9,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 16,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 23,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 30,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 37,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 44,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 51,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 58,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 65,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 72,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "package.json",
+        "line": 25,
+        "type": "Secret Keyword",
+        "classification": "fixed-scan-command"
+      }
+    ],
+    "unresolved": 0
+  },
+  "stagedFiles": 0,
+  "stagedCovered": true,
+  "exclusions": [
+    "docs (governance/evidence, not source)",
+    "contracts/vendor (third party)",
+    "lockfiles",
+    "CLAUDE.md",
+    "untracked spikes and Git-ignored files"
+  ]
+}
+[Per-file manifests retained in raw external execution log.]
+
+exit=0
+LOCKFILES + GENERATED SHA-256: unchanged
+GIT STATUS: clean
+COMMITTED-SOURCE VERIFICATION: PASS
+
+=== User gate decision after verification, 2026-10-25 ===
+S0 core foundation VERIFIED. User approved G2 CONDITIONAL GO FOR LOCAL S1 IMPLEMENTATION;
+not full G2 PASS and not S0 DONE in full. Earlier BLOCKED entries above are historical
+execution-time state, not the latest decision.
+T12 remains BLOCKED_BY_ENVIRONMENT / VERIFICATION_PENDING. No verified digest or container
+build/test claim. Owner: Codex (sole writer/follow-up); decision authority: user. Scope:
+local S1 synthetic only. Exit: verified digest + builder build/version/frozen install/
+typecheck/tests on committed source in container, before S2 Compiler/reproducible build
+acceptance; S2 A/B/isolation evidence separately required. No unlimited registry debugging.
+Security alternative ACCEPTED for S0 synthetic P0; Gitleaks NOT_EXECUTED. G9/G10 BLOCKED.
+CP5 documentation closure only: these five docs/evidence paths; no implementation change.
