@@ -74,6 +74,7 @@ Sau setup ở trên:
 ```sh
 pnpm engine:demo --scenario pc-branch
 pnpm engine:demo --scenario restore
+pnpm engine:demo --scenario references
 pnpm engine:parity
 pnpm verify
 ```
@@ -87,3 +88,8 @@ clock/identity/persistence nằm ở adapter.
 S1 có core rules/calculated, navigation và mock async ports; chưa có UI, plugin registry/loader
 thật, lookup/prefill merge, Compiler hoặc submission admission service.
 Xem [checkpoint S1-CP2](docs/evidence/P03/S1-CP2/RESULTS.md) cho coverage và giới hạn.
+
+`references` chạy Sports (category + Junk validation + 出張) và PC (device conditions,
+店頭/宅配, terminal riêng) qua engine TS và backend evaluator Python. Store Selector là
+mock core choice cho engine fixture; plugin binding, block expansion và artifact isolation
+chưa được kiểm chứng bằng Compiler. Xem [S1 exit/G3 package](docs/evidence/P03/S1-EXIT.md).

@@ -2,16 +2,18 @@
 
 > Dành cho một phiên Claude mới. Đọc file này trước, sau đó đến `CURRENT_STATUS.md`. Cập nhật 2026-10-25: **G1 APPROVED FOR LOCAL SYNTHETIC P0 IMPLEMENTATION** (ADR-078; baseline sáu spec `6312f2b`). Phần lịch sử bên dưới giữ nguyên.
 >
-> **Bắt đầu ở đây (2026-10-25): P03 / S1 planning.** S0 core foundation VERIFIED;
+> **Bắt đầu ở đây (2026-10-25): P03 / S1 exit assessment, G3 PENDING.** S0 core foundation VERIFIED;
 > CP4 `292df4b`, CP5 source `3340956`; fresh committed clone verification PASS, không overlay.
 > **G2 CONDITIONAL GO FOR LOCAL S1 IMPLEMENTATION**, theo quyết định user; không full PASS.
-> Chỉ lập plan `docs/superpowers/plans/2026-10-25-s1-workflow-engine.md` để user review,
-> chưa code. Codex SOLE WRITER; vertical slices, automated tests, self-review, checkpoint.
+> S1 plan/D1–D3 approved; engine CP1 `9d9e104`, CP2 `2db4562` committed.
+> Reference Sports/PC acceptance closure is a separate candidate, not part of the approved
+> 45-file CP2 commit. See `docs/evidence/P03/S1-EXIT.md`; obtain closure commit and G3 approval
+> before S2. Codex SOLE WRITER; no lookup/prefill merge, no comprehensive review loop.
 > T12 BLOCKED_BY_ENVIRONMENT / VERIFICATION_PENDING; offline specification accepted,
 > chưa có verified image digest/container build/test. Bắt buộc giải quyết trước S2 Compiler /
 > reproducible build acceptance. Owner/scope/exit criterion: S0-SUMMARY.md §G2 conditional exception.
 > Security alternative ACCEPTED cho local synthetic P0; Gitleaks NOT_EXECUTED.
-> G9/G10 BLOCKED, synthetic only. ADR-013/014 vẫn PROPOSED, chỉ chốt contract chặn slice đầu.
+> G9/G10 BLOCKED, synthetic only. ADR-013/014 vẫn PROPOSED ngoài D1–D3 đã duyệt.
 > Phần P01 bên dưới là lịch sử; không mở lại architecture brainstorming.
 
 **Dự án:** PoC multi-site form builder.

@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { evaluateCase, fixtureIR, goldenCases, pythonCases, seededCases } from "../src/parity.ts";
-for (const name of ["pc", "calculated", "groups", "canonical"]) {
+for (const name of ["pc", "calculated", "groups", "canonical", "sports", "pc-reference"]) {
   test(`golden and seeded parity ${name}`, () => {
     const cases = [...goldenCases(), ...seededCases()].filter((c) => c.definition === name);
     const ir = fixtureIR(name);

@@ -4,9 +4,9 @@
 
 | Mục | Giá trị |
 |---|---|
-| Phase đang chạy | **P03 / S1 PLANNING; S0 core foundation VERIFIED. G2 CONDITIONAL GO FOR LOCAL S1 IMPLEMENTATION — không full PASS, không S0 DONE đầy đủ.** |
-| Plan đang active | Chuẩn bị `docs/superpowers/plans/2026-10-25-s1-workflow-engine.md`; user review trước code. Baseline G1 ADR-078; ADR-013/014 vẫn PROPOSED. |
-| Git | Local branch `p02-s0-foundation`; CP4 `292df4b024ecbd66c7ebe786e2e6103abeafaec9`; CP5 source `33409566fdc8502744902bbdb1f2d7988ce12363`, fresh committed clone verify PASS. CP5 documentation closure theo scope 5 file user duyệt. Không GitHub/push. |
+| Phase đang chạy | **P03 / S1 EXIT ASSESSMENT; CP1/CP2 committed, G3 PENDING user approval. S0 core foundation VERIFIED. G2 CONDITIONAL GO FOR LOCAL S1 IMPLEMENTATION — không full PASS, không S0 DONE đầy đủ.** |
+| Plan đang active | S1 plan + D1–D3 approved. Local engine implemented; reference acceptance closure at `docs/evidence/P03/S1-EXIT.md`. No lookup/prefill merge; ADR-013/014 remain PROPOSED outside approved subsets. |
+| Git | Local branch `codex/p03-s1-workflow-engine`; S1-CP1 `9d9e104`, S1-CP2 `2db4562822344c3aa66d8a424ffa8b8873c58ea1`. CP2 committed exactly 45 approved files. Reference/G3 closure candidate separately pending commit approval. No GitHub/push. |
 | Remote | repo GitHub cá nhân, **PUBLIC**. G9 BLOCKED; user đang xử lý. |
 | AWS | **KHÔNG GHI**, và chưa gọi AWS API nào. Chưa chọn profile (ADR-006). |
 | Môi trường | macOS local; Node 24.22.1, pnpm 12.15.0, Python 3.13, uv 0.13.5. T12 container BLOCKED_BY_ENVIRONMENT. |
@@ -24,7 +24,7 @@ Preflight/frozen install/uv sync/pnpm verify/drift PASS. S0 core foundation VERI
 User đã duyệt G2 CONDITIONAL GO cho local S1; không full PASS và không S0 DONE đầy đủ.
 T12 BLOCKED_BY_ENVIRONMENT / VERIFICATION_PENDING. Exception owner/scope/exit criterion
 ở `docs/evidence/P02/S0-SUMMARY.md` §G2 conditional exception.
-Codex SOLE WRITER; plan S1 phải được review trước code. Không thêm hạ tầng thay cho engine.
+Codex SOLE WRITER; S1 plan/D1–D3 were approved before implementation. Next: G3 approval package; no S2 implementation yet.
 
 Các mục P01 bên dưới là lịch sử, không phải next action hiện tại.
 

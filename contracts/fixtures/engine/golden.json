@@ -513,6 +513,350 @@
           "yes": 0
         }
       }
+    },
+    {
+      "name": "sports-golf-used",
+      "definition": "sports",
+      "current": "stp_review",
+      "values": {
+        "fld_category": "golf",
+        "fld_club": "iron",
+        "fld_racket": "tennis",
+        "fld_condition": "used",
+        "fld_damage": "Synthetic broken part",
+        "fld_method": "shuccho",
+        "fld_customer": "Synthetic Customer",
+        "fld_consent": true
+      },
+      "expected": {
+        "errors": [],
+        "payload": {
+          "category": "golf",
+          "clubType": "iron",
+          "condition": "used",
+          "purchaseMethod": "shuccho",
+          "customerName": "Synthetic Customer",
+          "consent": true
+        }
+      }
+    },
+    {
+      "name": "sports-golf-junk",
+      "definition": "sports",
+      "current": "stp_review",
+      "values": {
+        "fld_category": "golf",
+        "fld_club": "iron",
+        "fld_racket": "tennis",
+        "fld_condition": "junk",
+        "fld_damage": "Synthetic broken part",
+        "fld_method": "shuccho",
+        "fld_customer": "Synthetic Customer",
+        "fld_consent": true
+      },
+      "expected": {
+        "errors": [],
+        "payload": {
+          "category": "golf",
+          "clubType": "iron",
+          "condition": "junk",
+          "purchaseMethod": "shuccho",
+          "customerName": "Synthetic Customer",
+          "consent": true,
+          "damageDescription": "Synthetic broken part"
+        }
+      }
+    },
+    {
+      "name": "sports-racket-used",
+      "definition": "sports",
+      "current": "stp_review",
+      "values": {
+        "fld_category": "racket",
+        "fld_club": "iron",
+        "fld_racket": "tennis",
+        "fld_condition": "used",
+        "fld_damage": "Synthetic broken part",
+        "fld_method": "shuccho",
+        "fld_customer": "Synthetic Customer",
+        "fld_consent": true
+      },
+      "expected": {
+        "errors": [],
+        "payload": {
+          "category": "racket",
+          "racketType": "tennis",
+          "condition": "used",
+          "purchaseMethod": "shuccho",
+          "customerName": "Synthetic Customer",
+          "consent": true
+        }
+      }
+    },
+    {
+      "name": "sports-racket-junk",
+      "definition": "sports",
+      "current": "stp_review",
+      "values": {
+        "fld_category": "racket",
+        "fld_club": "iron",
+        "fld_racket": "tennis",
+        "fld_condition": "junk",
+        "fld_damage": "Synthetic broken part",
+        "fld_method": "shuccho",
+        "fld_customer": "Synthetic Customer",
+        "fld_consent": true
+      },
+      "expected": {
+        "errors": [],
+        "payload": {
+          "category": "racket",
+          "racketType": "tennis",
+          "condition": "junk",
+          "purchaseMethod": "shuccho",
+          "customerName": "Synthetic Customer",
+          "consent": true,
+          "damageDescription": "Synthetic broken part"
+        }
+      }
+    },
+    {
+      "name": "pc-reference-desktop-store",
+      "definition": "pc-reference",
+      "current": "stp_review",
+      "values": {
+        "fld_device": "desktop",
+        "fld_battery": "good",
+        "fld_defects": [
+          "screen"
+        ],
+        "fld_method": "store",
+        "fld_store": "fictional-east",
+        "fld_kit": "yes",
+        "fld_customer": "Synthetic Customer",
+        "fld_consent": true
+      },
+      "expected": {
+        "errors": [],
+        "payload": {
+          "deviceType": "desktop",
+          "purchaseMethod": "store",
+          "store": "fictional-east",
+          "customerName": "Synthetic Customer",
+          "consent": true,
+          "defects": [
+            "screen"
+          ]
+        }
+      }
+    },
+    {
+      "name": "pc-reference-desktop-takuhai",
+      "definition": "pc-reference",
+      "current": "stp_review",
+      "values": {
+        "fld_device": "desktop",
+        "fld_battery": "good",
+        "fld_defects": [
+          "screen"
+        ],
+        "fld_method": "takuhai",
+        "fld_store": "fictional-east",
+        "fld_kit": "yes",
+        "fld_customer": "Synthetic Customer",
+        "fld_consent": true
+      },
+      "expected": {
+        "errors": [],
+        "payload": {
+          "deviceType": "desktop",
+          "purchaseMethod": "takuhai",
+          "packingKit": "yes",
+          "customerName": "Synthetic Customer",
+          "consent": true,
+          "defects": [
+            "screen"
+          ]
+        }
+      }
+    },
+    {
+      "name": "pc-reference-laptop-store",
+      "definition": "pc-reference",
+      "current": "stp_review",
+      "values": {
+        "fld_device": "laptop",
+        "fld_battery": "good",
+        "fld_defects": [
+          "screen"
+        ],
+        "fld_method": "store",
+        "fld_store": "fictional-east",
+        "fld_kit": "yes",
+        "fld_customer": "Synthetic Customer",
+        "fld_consent": true
+      },
+      "expected": {
+        "errors": [],
+        "payload": {
+          "deviceType": "laptop",
+          "purchaseMethod": "store",
+          "store": "fictional-east",
+          "customerName": "Synthetic Customer",
+          "consent": true,
+          "batteryHealth": "good",
+          "defects": [
+            "screen"
+          ]
+        }
+      }
+    },
+    {
+      "name": "pc-reference-laptop-takuhai",
+      "definition": "pc-reference",
+      "current": "stp_review",
+      "values": {
+        "fld_device": "laptop",
+        "fld_battery": "good",
+        "fld_defects": [
+          "screen"
+        ],
+        "fld_method": "takuhai",
+        "fld_store": "fictional-east",
+        "fld_kit": "yes",
+        "fld_customer": "Synthetic Customer",
+        "fld_consent": true
+      },
+      "expected": {
+        "errors": [],
+        "payload": {
+          "deviceType": "laptop",
+          "purchaseMethod": "takuhai",
+          "packingKit": "yes",
+          "customerName": "Synthetic Customer",
+          "consent": true,
+          "batteryHealth": "good",
+          "defects": [
+            "screen"
+          ]
+        }
+      }
+    },
+    {
+      "name": "pc-reference-tablet-store",
+      "definition": "pc-reference",
+      "current": "stp_review",
+      "values": {
+        "fld_device": "tablet",
+        "fld_battery": "good",
+        "fld_defects": [
+          "screen"
+        ],
+        "fld_method": "store",
+        "fld_store": "fictional-east",
+        "fld_kit": "yes",
+        "fld_customer": "Synthetic Customer",
+        "fld_consent": true
+      },
+      "expected": {
+        "errors": [],
+        "payload": {
+          "deviceType": "tablet",
+          "purchaseMethod": "store",
+          "store": "fictional-east",
+          "customerName": "Synthetic Customer",
+          "consent": true,
+          "batteryHealth": "good",
+          "defects": [
+            "screen"
+          ]
+        }
+      }
+    },
+    {
+      "name": "pc-reference-tablet-takuhai",
+      "definition": "pc-reference",
+      "current": "stp_review",
+      "values": {
+        "fld_device": "tablet",
+        "fld_battery": "good",
+        "fld_defects": [
+          "screen"
+        ],
+        "fld_method": "takuhai",
+        "fld_store": "fictional-east",
+        "fld_kit": "yes",
+        "fld_customer": "Synthetic Customer",
+        "fld_consent": true
+      },
+      "expected": {
+        "errors": [],
+        "payload": {
+          "deviceType": "tablet",
+          "purchaseMethod": "takuhai",
+          "packingKit": "yes",
+          "customerName": "Synthetic Customer",
+          "consent": true,
+          "batteryHealth": "good",
+          "defects": [
+            "screen"
+          ]
+        }
+      }
+    },
+    {
+      "name": "pc-reference-peripheral-store",
+      "definition": "pc-reference",
+      "current": "stp_review",
+      "values": {
+        "fld_device": "peripheral",
+        "fld_battery": "good",
+        "fld_defects": [
+          "screen"
+        ],
+        "fld_method": "store",
+        "fld_store": "fictional-east",
+        "fld_kit": "yes",
+        "fld_customer": "Synthetic Customer",
+        "fld_consent": true
+      },
+      "expected": {
+        "errors": [],
+        "payload": {
+          "deviceType": "peripheral",
+          "purchaseMethod": "store",
+          "store": "fictional-east",
+          "customerName": "Synthetic Customer",
+          "consent": true
+        }
+      }
+    },
+    {
+      "name": "pc-reference-peripheral-takuhai",
+      "definition": "pc-reference",
+      "current": "stp_review",
+      "values": {
+        "fld_device": "peripheral",
+        "fld_battery": "good",
+        "fld_defects": [
+          "screen"
+        ],
+        "fld_method": "takuhai",
+        "fld_store": "fictional-east",
+        "fld_kit": "yes",
+        "fld_customer": "Synthetic Customer",
+        "fld_consent": true
+      },
+      "expected": {
+        "errors": [],
+        "payload": {
+          "deviceType": "peripheral",
+          "purchaseMethod": "takuhai",
+          "packingKit": "yes",
+          "customerName": "Synthetic Customer",
+          "consent": true
+        }
+      }
     }
   ]
 }

@@ -22,7 +22,7 @@ export interface Case {
 }
 const root = resolve(import.meta.dirname, "../../..");
 export function fixtureIR(name: string): EngineIRV1 {
-  if (!["pc", "calculated", "groups", "canonical"].includes(name))
+  if (!["pc", "calculated", "groups", "canonical", "sports", "pc-reference"].includes(name))
     throw new Error("unknown trusted fixture");
   const value: unknown = JSON.parse(
     readFileSync(join(root, `contracts/fixtures/engine/${name}.json`), "utf8"),
@@ -103,7 +103,7 @@ export function seededCases(): Case[] {
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const cases = [...goldenCases(), ...seededCases()];
   let count = 0;
-  for (const name of ["pc", "calculated", "groups", "canonical"]) {
+  for (const name of ["pc", "calculated", "groups", "canonical", "sports", "pc-reference"]) {
     const selected = cases.filter((c) => c.definition === name);
     const ir = fixtureIR(name);
     const ts = selected.map((c) => evaluateCase(ir, c));

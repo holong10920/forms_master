@@ -198,10 +198,46 @@ def test_concurrent_runners_apply_each_file_once(tmp_path: Path) -> None:
         t.join()
     assert not errors, errors
     assert len(results) == 4
-    assert sorted(v for r in results for v in r) == ["0001", "0002"]
+    # A failed attempt may already have committed a file. Retrying the whole runner
+    # returns only versions from the final successful call, not all prior progress.
+    reported = [v for r in results for v in r]
+    assert len(reported) == len(set(reported))
+    assert set(reported) <= {"0001", "0002"}
     check = open_database(path)
-    assert check.execute("SELECT count(*) FROM schema_migrations").fetchone()[0] == 2
-    assert check.execute("SELECT count(*) FROM b").fetchone()[0] == 1
+    try:
+        assert [
+            r[0] for r in check.execute("SELECT version FROM schema_migrations ORDER BY version")
+        ] == ["0001", "0002"]
+        assert check.execute("SELECT count(*) FROM b").fetchone()[0] == 1
+    finally:
+        check.close()
+
+
+def test_retry_after_partial_progress_keeps_durable_history(conn: sqlite3.Connection) -> None:
+    from fb_store.errors import Conflict
+    from fb_store.sqlite import with_conflict_retry
+
+    class OnceContended(FakeClock):
+        def __init__(self) -> None:
+            super().__init__(datetime(2026, 10, 25, tzinfo=UTC))
+            self.calls = 0
+
+        def now(self) -> datetime:
+            self.calls += 1
+            if self.calls == 2:
+                raise Conflict("synthetic contention after first committed file")
+            return super().now()
+
+    clock = OnceContended()
+    reported = with_conflict_retry(
+        lambda: apply_migrations(conn, FIXTURES / "ok", clock), attempts=2, base_delay_s=0
+    )
+    assert reported == ["0002"]
+    assert [
+        r[0] for r in conn.execute("SELECT version FROM schema_migrations ORDER BY version")
+    ] == ["0001", "0002"]
+    assert conn.execute("SELECT k, v FROM b").fetchall()[0]["v"] == 1
+    assert apply_migrations(conn, FIXTURES / "ok", CLOCK) == []
 
 
 @pytest.mark.parametrize(

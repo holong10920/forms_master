@@ -94,3 +94,29 @@ def test_storage_failure_keeps_input_and_previous_committed_document(tmp_path: P
     assert values == before
     assert store.load("synthetic-session")["version"] == 1
     store.close()
+
+
+@pytest.mark.parametrize("changed", ["revision", "site"])
+def test_draft_binding_rejects_revision_or_site_change(tmp_path: Path, changed: str) -> None:
+    clock = FakeClock(datetime(2026, 10, 25, tzinfo=UTC))
+    ir = trusted()
+    path = tmp_path / "pinned.sqlite"
+    store = adapter.DraftStore(path, ir, "r1", "rev1", clock)
+    values = {"fld_method": "takuhai", "fld_kit": "yes"}
+    store.save("synthetic-session", 0, "stp_takuhai", values)
+    other_ir = deepcopy(ir)
+    if changed == "site":
+        other_ir["form"]["siteId"] = "site_other_synthetic"
+    other = adapter.DraftStore(
+        path, other_ir, "r1", "rev2" if changed == "revision" else "rev1", clock
+    )
+    assert other.load("synthetic-session")["status"] == "incompatible"
+    with pytest.raises(ConditionFailed):
+        other.save("synthetic-session", 1, "stp_takuhai", values)
+    assert store.load("synthetic-session")["version"] == 1
+    other.close()
+    clock.advance(timedelta(hours=72))
+    with pytest.raises(ConditionFailed):
+        store.save("synthetic-session", 1, "stp_takuhai", values)
+    assert store.load("synthetic-session")["status"] == "expired"
+    store.close()

@@ -1,0 +1,162 @@
+{
+  "scenario": "references",
+  "runs": [
+    {
+      "definition": "sports",
+      "input": {
+        "category": "golf",
+        "condition": "junk"
+      },
+      "trace": [
+        "stp_category",
+        "stp_product",
+        "stp_condition",
+        "stp_method",
+        "stp_customer",
+        "stp_review",
+        "stp_done_shuccho"
+      ],
+      "terminal": "stp_done_shuccho",
+      "status": "complete",
+      "preview": {
+        "category": "golf",
+        "clubType": "iron",
+        "condition": "junk",
+        "damageDescription": "Synthetic broken part",
+        "purchaseMethod": "shuccho",
+        "customerName": "Synthetic Customer",
+        "consent": true
+      },
+      "backend": {
+        "ok": true,
+        "errors": [],
+        "payload": {
+          "category": "golf",
+          "clubType": "iron",
+          "condition": "junk",
+          "damageDescription": "Synthetic broken part",
+          "purchaseMethod": "shuccho",
+          "customerName": "Synthetic Customer",
+          "consent": true
+        }
+      }
+    },
+    {
+      "definition": "sports",
+      "input": {
+        "category": "racket",
+        "condition": "used"
+      },
+      "trace": [
+        "stp_category",
+        "stp_product",
+        "stp_condition",
+        "stp_method",
+        "stp_customer",
+        "stp_review",
+        "stp_done_shuccho"
+      ],
+      "terminal": "stp_done_shuccho",
+      "status": "complete",
+      "preview": {
+        "category": "racket",
+        "racketType": "tennis",
+        "condition": "used",
+        "purchaseMethod": "shuccho",
+        "customerName": "Synthetic Customer",
+        "consent": true
+      },
+      "backend": {
+        "ok": true,
+        "errors": [],
+        "payload": {
+          "category": "racket",
+          "racketType": "tennis",
+          "condition": "used",
+          "purchaseMethod": "shuccho",
+          "customerName": "Synthetic Customer",
+          "consent": true
+        }
+      }
+    },
+    {
+      "definition": "pc-reference",
+      "input": {
+        "device": "laptop",
+        "method": "store"
+      },
+      "trace": [
+        "stp_category",
+        "stp_condition",
+        "stp_method",
+        "stp_store",
+        "stp_customer",
+        "stp_review",
+        "stp_done_store"
+      ],
+      "terminal": "stp_done_store",
+      "status": "complete",
+      "preview": {
+        "deviceType": "laptop",
+        "batteryHealth": "good",
+        "defects": [
+          "screen"
+        ],
+        "purchaseMethod": "store",
+        "store": "fictional-east",
+        "customerName": "Synthetic Customer",
+        "consent": true
+      },
+      "backend": {
+        "ok": true,
+        "errors": [],
+        "payload": {
+          "deviceType": "laptop",
+          "batteryHealth": "good",
+          "defects": [
+            "screen"
+          ],
+          "purchaseMethod": "store",
+          "store": "fictional-east",
+          "customerName": "Synthetic Customer",
+          "consent": true
+        }
+      }
+    },
+    {
+      "definition": "pc-reference",
+      "input": {
+        "device": "peripheral",
+        "method": "takuhai"
+      },
+      "trace": [
+        "stp_category",
+        "stp_method",
+        "stp_takuhai",
+        "stp_customer",
+        "stp_review",
+        "stp_done_takuhai"
+      ],
+      "terminal": "stp_done_takuhai",
+      "status": "complete",
+      "preview": {
+        "deviceType": "peripheral",
+        "purchaseMethod": "takuhai",
+        "packingKit": "yes",
+        "customerName": "Synthetic Customer",
+        "consent": true
+      },
+      "backend": {
+        "ok": true,
+        "errors": [],
+        "payload": {
+          "deviceType": "peripheral",
+          "purchaseMethod": "takuhai",
+          "packingKit": "yes",
+          "customerName": "Synthetic Customer",
+          "consent": true
+        }
+      }
+    }
+  ]
+}

@@ -10,7 +10,7 @@
 |---|---|---|---|
 | G0 Scope | **APPROVED WITH ADJUSTMENTS** | 2026-10-23 | DECISIONS.md ADR-001..007 |
 | G1 Design | **APPROVED FOR LOCAL SYNTHETIC P0 IMPLEMENTATION** (baseline `6312f2b`) | 2026-10-25 | DECISIONS.md ADR-078 |
-| G2–G8 | G2 CONDITIONAL GO chỉ local S1; G3–G8 TODO | 2026-10-25 | User approved controlled T12 exception; không full PASS. Owner/scope/exit criterion: docs/evidence/P02/S0-SUMMARY.md |
+| G2–G8 | G2 CONDITIONAL GO chỉ local S1; G3 PENDING user approval; G4–G8 TODO | 2026-10-25 | User approved controlled T12 exception; không full PASS. Owner/scope/exit criterion: docs/evidence/P02/S0-SUMMARY.md |
 | G9 GitHub | BLOCKED (user xử lý visibility/ownership) | | ADR-007 |
 | G10 AWS | BLOCKED | | ADR-006 |
 | G11–G12 | TODO | | |
@@ -282,11 +282,11 @@
 
 | ID | Requirement (rút gọn) | Status | Evidence | Note |
 |---|---|---|---|---|
-| P03-01 | Step graph, state/transition engine. | IN_PROGRESS | docs/superpowers/plans/2026-10-25-s1-workflow-engine.md | Planning only; user review before code; Codex sole writer; G2 conditional local synthetic S1 |
-| P03-02 | Declarative conditions, typed operators, DAG dependencies. | TODO | | |
-| P03-03 | Frontend/backend schema validation, schema version fixtures. | TODO | | |
-| P03-04 | Unit tests: branching/back/validation/dead-end/cycles. | TODO | | |
-| P03-05 | Stable contract for field values, preview vs published behavior. | TODO | | |
+| P03-01 | Step graph, state/transition engine. | DONE | docs/evidence/P03/S1-CP2/RESULTS.md; S1-EXIT.md | Core/local mock scope; CP1 9d9e104, CP2 2db4562; user gate G3 still PENDING |
+| P03-02 | Declarative conditions, typed operators, DAG dependencies. | DONE | packages/form-engine/test/operators.test.ts; tools/engine-demo/test/parity.test.ts | Finite P0 operators, combined dependency DAG, cycle/type guards; lookup/prefill excluded |
+| P03-03 | Frontend/backend schema validation, schema version fixtures. | DONE | contracts/schemas/{form-definition,engine-ir}; tools/engine-demo/test/parity.test.ts; python/fb_engine/tests/test_submission.py | Version 1 typed contract and TS/Python parity; trusted backend projection/recompute |
+| P03-04 | Unit tests: branching/back/validation/dead-end/cycles. | DONE | packages/form-engine/test; tools/engine-demo/test/references.test.ts | Branching/back, validation/default/dead-end/cycles, async guards; reference closure candidate separately verified |
+| P03-05 | Stable contract for field values, preview vs published behavior. | IN_PROGRESS | docs/evidence/P03/S1-EXIT.md | IMPLEMENTED_BUT_VERIFICATION_PENDING: core value semantics verified; actual Preview/published artifact comparison belongs to S2 integration, not claimed PASS |
 
 ## PHASE 04 — Shared UI + Motion (`P04`)
 
