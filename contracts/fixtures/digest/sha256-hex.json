@@ -1,0 +1,45 @@
+{
+  "description": "SHA-256 and digest-format parity cases.",
+  "jcsDigests": [
+    {
+      "input": "{\"b\":[],\"a\":{}}",
+      "sha256": "aeeba1e56a144077f89e26c930dad7cf933e9383cfb8e33ddff618233b29be76"
+    }
+  ],
+  "rawDigests": [
+    {
+      "utf8": "",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "utf8": "{\"a\":{},\"b\":[]}",
+      "sha256": "aeeba1e56a144077f89e26c930dad7cf933e9383cfb8e33ddff618233b29be76"
+    }
+  ],
+  "isSha256Hex": [
+    {
+      "s": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "ok": true
+    },
+    {
+      "s": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "ok": false
+    },
+    {
+      "s": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "ok": false
+    },
+    {
+      "s": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n",
+      "ok": false
+    },
+    {
+      "s": "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+      "ok": false
+    },
+    {
+      "s": "",
+      "ok": false
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+S0 T4 — JCS (RFC 8785) + SHA-256 parity TS/Python. Date: 2026-10-25. Node v24.22.1, Python 3.13.15.
+Libraries: canonicalize 5.1.0 (TS), rfc8785 0.1.4 (Python). No JCS re-implementation; wrappers only enforce the value domain:
+|number| <= 2^53-1, finite, well-formed UTF-16 strings/keys, plain objects/arrays only, nesting <= 128 containers (added after CP2 review M2).
+Fixtures: contracts/fixtures/jcs/cases.json (16 cases: 10 canonical incl. RFC 8785 §3.2.3 sorting, appendix numbers and depth-128; 6 rejections incl. depth-129),
+contracts/fixtures/digest/sha256-hex.json (jcsDigests, rawDigests, isSha256Hex). Expected canonical strings are hand-written from RFC 8785 rules;
+sha256 = SHA-256 of their UTF-8 bytes. Each runtime parses 'input' with its own JSON parser and compares canonical BYTES and SHA-256.
+Independent review (CP2) re-derived all canonical strings with a separate RFC 8785 formatter and fuzzed 50,057 inputs: byte-identical except the depth case, now fixed.
+Targeted re-review (tree 9332d60c): M2 RESOLVED; TS value-domain bypass via non-enumerable/subclass toJSON (MINOR-3) fixed afterwards (4 new rejection tests).
+
+$ pnpm exec vitest run packages/contracts/test/jcs.test.ts packages/contracts/test/digest.test.ts --reporter=verbose
+
+ RUN  v5.0.5 ~/Documents/marketenterprise/forms_master
+
+ ✓ packages/contracts/test/digest.test.ts > sha256Hex() 5ms
+ ✓ packages/contracts/test/digest.test.ts > sha256Hex({"a":{},"b":[]}) 0ms
+ ✓ packages/contracts/test/digest.test.ts > isSha256Hex case 0 0ms
+ ✓ packages/contracts/test/digest.test.ts > isSha256Hex case 1 0ms
+ ✓ packages/contracts/test/digest.test.ts > isSha256Hex case 2 0ms
+ ✓ packages/contracts/test/digest.test.ts > isSha256Hex case 3 0ms
+ ✓ packages/contracts/test/digest.test.ts > isSha256Hex case 4 0ms
+ ✓ packages/contracts/test/digest.test.ts > isSha256Hex case 5 0ms
+ ✓ packages/contracts/test/digest.test.ts > jcsSha256Hex({"b":[],"a":{}}) 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS parity fixtures > fixture file has cases 1ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS parity fixtures > key-order-utf16 5ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS parity fixtures > rfc8785-3.2.3-sorting 1ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS parity fixtures > numbers-integral 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS parity fixtures > numbers-fractional 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS parity fixtures > nested-empty 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS parity fixtures > nested-sort-array-order 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS parity fixtures > literals 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS parity fixtures > string-escapes 1ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS parity fixtures > whitespace 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS parity fixtures > depth-128 1ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS parity fixtures > unsafe-int 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS parity fixtures > unsafe-negative-int 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS parity fixtures > unsafe-float 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS parity fixtures > lone-surrogate-value 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS parity fixtures > lone-surrogate-key 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS parity fixtures > depth-129 1ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS rejects non-JSON values > undefined 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS rejects non-JSON values > function 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS rejects non-JSON values > bigint 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS rejects non-JSON values > NaN 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS rejects non-JSON values > Infinity 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS rejects non-JSON values > Date 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS rejects non-JSON values > Map 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS rejects non-JSON values > nested undefined 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS rejects non-JSON values > sparse array 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS rejects non-JSON values > array with own toJSON 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS rejects non-JSON values > object with toJSON function 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS rejects non-JSON values > array with non-enumerable toJSON 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS rejects non-JSON values > object with non-enumerable toJSON 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS rejects non-JSON values > array subclass with toJSON 0ms
+ ✓ packages/contracts/test/jcs.test.ts > JCS rejects non-JSON values > object with symbol key 0ms
+
+ Test Files  2 passed (2)
+      Tests  41 passed (41)
+   Start at  15:56:01
+   Duration  122ms (tests 36%, import 34%, transform 20%, worker 10%)
+
+exit=0
+
+$ uv run pytest python/fb_contracts/tests/test_jcs.py python/fb_contracts/tests/test_digest.py -v
+============================= test session starts ==============================
+platform darwin -- Python 3.13.15, pytest-9.1.1, pluggy-1.7.0 -- ~/Documents/marketenterprise/forms_master/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: ~/Documents/marketenterprise/forms_master
+configfile: pyproject.toml
+plugins: socket-0.8.1
+collecting ... collected 32 items
+
+python/fb_contracts/tests/test_jcs.py::test_fixture_file_has_cases PASSED [  3%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_parity_fixture[key-order-utf16] PASSED [  6%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_parity_fixture[rfc8785-3.2.3-sorting] PASSED [  9%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_parity_fixture[numbers-integral] PASSED [ 12%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_parity_fixture[numbers-fractional] PASSED [ 15%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_parity_fixture[nested-empty] PASSED [ 18%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_parity_fixture[nested-sort-array-order] PASSED [ 21%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_parity_fixture[literals] PASSED [ 25%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_parity_fixture[string-escapes] PASSED [ 28%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_parity_fixture[whitespace] PASSED [ 31%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_parity_fixture[depth-128] PASSED [ 34%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_parity_fixture[unsafe-int] PASSED [ 37%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_parity_fixture[unsafe-negative-int] PASSED [ 40%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_parity_fixture[unsafe-float] PASSED [ 43%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_parity_fixture[lone-surrogate-value] PASSED [ 46%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_parity_fixture[lone-surrogate-key] PASSED [ 50%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_parity_fixture[depth-129] PASSED [ 53%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_rejects_non_json_values[nan] PASSED [ 56%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_rejects_non_json_values[inf] PASSED [ 59%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_rejects_non_json_values[int-key] PASSED [ 62%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_rejects_non_json_values[tuple] PASSED [ 65%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_rejects_non_json_values[set] PASSED [ 68%]
+python/fb_contracts/tests/test_jcs.py::test_jcs_rejects_non_json_values[bytes] PASSED [ 71%]
+python/fb_contracts/tests/test_digest.py::test_sha256_hex[case0] PASSED  [ 75%]
+python/fb_contracts/tests/test_digest.py::test_sha256_hex[case1] PASSED  [ 78%]
+python/fb_contracts/tests/test_digest.py::test_is_sha256_hex[case0] PASSED [ 81%]
+python/fb_contracts/tests/test_digest.py::test_is_sha256_hex[case1] PASSED [ 84%]
+python/fb_contracts/tests/test_digest.py::test_is_sha256_hex[case2] PASSED [ 87%]
+python/fb_contracts/tests/test_digest.py::test_is_sha256_hex[case3] PASSED [ 90%]
+python/fb_contracts/tests/test_digest.py::test_is_sha256_hex[case4] PASSED [ 93%]
+python/fb_contracts/tests/test_digest.py::test_is_sha256_hex[case5] PASSED [ 96%]
+python/fb_contracts/tests/test_digest.py::test_jcs_sha256_hex[case0] PASSED [100%]
+
+============================== 32 passed in 0.04s ==============================
+exit=0
+

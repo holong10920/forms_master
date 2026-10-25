@@ -1,0 +1,352 @@
+{
+  "description": "Error-normalization parity cases (not canonical schemas). Rule: drop every error at or below the instance path of a oneOf error, keeping only the outermost oneOf errors; de-duplicate; sort by UTF-16 code units of (instancePath, keyword).",
+  "cases": [
+    {
+      "name": "union-ref-root",
+      "note": "oneOf of $ref branches at the root (CP2 review M1a repro)",
+      "schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$defs": {
+          "A": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "a"
+              },
+              "v": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind",
+              "v"
+            ]
+          },
+          "B": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "b"
+              },
+              "n": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "kind",
+              "n"
+            ]
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/A"
+          },
+          {
+            "$ref": "#/$defs/B"
+          }
+        ]
+      },
+      "instance": {
+        "kind": "c"
+      },
+      "expected": [
+        {
+          "instancePath": "",
+          "keyword": "oneOf"
+        }
+      ]
+    },
+    {
+      "name": "union-ref-under-property-with-sibling-error",
+      "note": "errors outside the oneOf subtree are kept",
+      "schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$defs": {
+          "A": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "a"
+              },
+              "v": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind",
+              "v"
+            ]
+          },
+          "B": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "b"
+              },
+              "n": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "kind",
+              "n"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "v": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/A"
+              },
+              {
+                "$ref": "#/$defs/B"
+              }
+            ]
+          }
+        }
+      },
+      "instance": {
+        "v": {
+          "kind": "c"
+        }
+      },
+      "expected": [
+        {
+          "instancePath": "",
+          "keyword": "required"
+        },
+        {
+          "instancePath": "/v",
+          "keyword": "oneOf"
+        }
+      ]
+    },
+    {
+      "name": "recursive-ref-branch",
+      "note": "recursive $ref inside oneOf branches; only the outermost oneOf error remains",
+      "schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$ref": "#/$defs/node",
+        "$defs": {
+          "node": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/leaf"
+              },
+              {
+                "$ref": "#/$defs/branch"
+              }
+            ]
+          },
+          "leaf": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "leaf"
+              },
+              "v": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind",
+              "v"
+            ],
+            "additionalProperties": false
+          },
+          "branch": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "branch"
+              },
+              "kids": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/node"
+                }
+              }
+            },
+            "required": [
+              "kind",
+              "kids"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "instance": {
+        "kind": "branch",
+        "kids": [
+          {
+            "kind": "leaf",
+            "v": "x"
+          },
+          {
+            "kind": "leaf"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "instancePath": "",
+          "keyword": "oneOf"
+        }
+      ]
+    },
+    {
+      "name": "valid-recursive",
+      "note": "valid recursive instance",
+      "schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$ref": "#/$defs/node",
+        "$defs": {
+          "node": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/leaf"
+              },
+              {
+                "$ref": "#/$defs/branch"
+              }
+            ]
+          },
+          "leaf": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "leaf"
+              },
+              "v": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind",
+              "v"
+            ],
+            "additionalProperties": false
+          },
+          "branch": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "branch"
+              },
+              "kids": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/node"
+                }
+              }
+            },
+            "required": [
+              "kind",
+              "kids"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "instance": {
+        "kind": "branch",
+        "kids": [
+          {
+            "kind": "leaf",
+            "v": "x"
+          },
+          {
+            "kind": "branch",
+            "kids": []
+          }
+        ]
+      },
+      "expected": []
+    },
+    {
+      "name": "inline-oneof-and-sibling-property",
+      "note": "inline oneOf under a property plus an unrelated type error",
+      "schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "a": {
+            "type": "string"
+          },
+          "b": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          }
+        }
+      },
+      "instance": {
+        "a": 1,
+        "b": true
+      },
+      "expected": [
+        {
+          "instancePath": "/a",
+          "keyword": "type"
+        },
+        {
+          "instancePath": "/b",
+          "keyword": "oneOf"
+        }
+      ]
+    },
+    {
+      "name": "oneof-valid-under-two",
+      "note": "instance valid under more than one branch",
+      "schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "oneOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "integer"
+          }
+        ]
+      },
+      "instance": 1,
+      "expected": [
+        {
+          "instancePath": "",
+          "keyword": "oneOf"
+        }
+      ]
+    },
+    {
+      "name": "oneof-exactly-one",
+      "note": "instance valid under exactly one branch",
+      "schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "oneOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "integer"
+          }
+        ]
+      },
+      "instance": 1.5,
+      "expected": []
+    }
+  ]
+}

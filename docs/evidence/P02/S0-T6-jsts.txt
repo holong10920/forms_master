@@ -1,0 +1,49 @@
+S0 T6 — JSON-Schema-Test-Suite subset. Date: 2026-10-25.
+Source: json-schema-org/JSON-Schema-Test-Suite @ 89e83a74014617ffbe79a56d83d14d054cd11417, tests/draft2020-12, 16 keyword files, 436 tests.
+Files run: type properties required additionalProperties items enum const minItems maxItems minLength maxLength minimum maximum ref defs oneOf.
+Excluded: every other draft2020-12 file (keywords outside the spec #1 §7.7 allowlist), optional/, other drafts. NOT a full-spec conformance claim.
+SKIPS.json: empty (0 skipped on both runtimes). Each runtime also has 1 file-count test (437 = 436 + 1).
+KNOWN_DIVERGENCES.json (TS/Ajv only, 15 tests in 5 groups) run as expected failures (test.fails), not skipped — PENDING USER ACKNOWLEDGEMENT.
+Before ownProperties:true, Ajv also failed 4 required.json + 1 properties.json tests (inherited prototype properties); fixed in src/schema.ts.
+Independent review (CP2) re-fetched all 16 files + LICENSE at the commit: SHA-256 identical to the vendored copies and README.
+
+$ pnpm exec vitest run packages/contracts/test/jsts.test.ts
+
+ RUN  v5.0.5 ~/Documents/marketenterprise/forms_master
+
+
+ Test Files  1 passed (1)
+      Tests  422 passed | 15 expected fail (437)
+   Start at  15:49:00
+   Duration  1.09s (tests 94%, import 6%, transform 1%)
+
+exit=0
+
+$ uv run pytest python/fb_contracts/tests/test_jsts.py -q
+........................................................................ [ 16%]
+........................................................................ [ 32%]
+........................................................................ [ 49%]
+........................................................................ [ 65%]
+........................................................................ [ 82%]
+........................................................................ [ 98%]
+.....                                                                    [100%]
+437 passed in 0.20s
+exit=0
+
+
+== Q2 decision (user, 2026-10-25): 15 Ajv expected-fail tests APPROVED FOR S0 ==
+Conditions: keep test.fails so they stay tracked; never reported as PASS; blocked from the supported schema
+domain by schemas:lint; no new expected-fail may be added without user approval; re-evaluate on any Ajv upgrade.
+Pinned test IDs (file :: group :: test) with cause and mitigation (KNOWN_DIVERGENCES.json, Ajv 8.20.0):
+ 1-6  enum.json :: empty enum :: {string, number, null, object, array, boolean} is invalid
+      cause: Ajv throws at compile ("enum must have non-empty array"); mitigation: lint <invalid-enum> (non-empty enum required)
+ 7    properties.json :: properties whose names are Javascript object property names :: __proto__ not valid
+      cause: Ajv reads the prototype instead of an own "__proto__" data key (silent wrong result); mitigation: lint <reserved-name> ("__proto__" key anywhere)
+ 8-10 ref.json :: refs with relative uris and defs :: {invalid on inner field, invalid on outer field, valid on both fields}
+ 11-13 ref.json :: relative refs with absolute uris and defs :: {invalid on inner field, invalid on outer field, valid on both fields}
+ 14-15 ref.json :: URN ref with nested pointer ref :: {a string is valid, a non-string is invalid}
+      cause (8-15): Ajv stack overflow resolving $ref through a nested $id; mitigation: lint allows $id only at the root, $ref only local ("#...")
+Count check: the TS run above reports exactly "15 expected fail"; derived from KNOWN_DIVERGENCES.json x vendored suite = 15 IDs (listed).
+Note: KNOWN_DIVERGENCES.json pins entries 1-6 and 8-15 at group level (test: null). A suite update that adds a test to
+one of those groups would add an expected-fail; the vendored suite is pinned to one commit, and the count above is checked
+in evidence. Recommendation (not done in CP2, scope limited to evidence): pin per-test IDs in the data file at the next change.

@@ -1,0 +1,15 @@
+{
+  "description": "inline payload",
+  "instance": {
+    "inline": {
+      "k": 1
+    },
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "size": 7,
+    "format": "jcs-json"
+  },
+  "expected": {
+    "valid": true,
+    "errors": []
+  }
+}

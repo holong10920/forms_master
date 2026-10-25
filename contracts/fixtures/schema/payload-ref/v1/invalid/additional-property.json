@@ -1,0 +1,19 @@
+{
+  "description": "unknown property",
+  "instance": {
+    "blobKey": "sha256/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "size": 0,
+    "format": "jcs-json",
+    "extra": 1
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "instancePath": "",
+        "keyword": "additionalProperties"
+      }
+    ]
+  }
+}

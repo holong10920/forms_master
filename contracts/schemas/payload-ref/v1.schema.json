@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.forms-poc.invalid/payload-ref/v1.schema.json",
+  "title": "PayloadRef v1",
+  "description": "Reference to a canonical JSON payload stored inline or in the content-addressed blob store (spec #5 section 5.3). Formats of sha256 and blobKey and the inline/blobKey exclusivity are checked by the semantic layer, not by this schema.",
+  "type": "object",
+  "properties": {
+    "inline": {},
+    "blobKey": { "type": "string", "minLength": 71, "maxLength": 71 },
+    "sha256": { "type": "string", "minLength": 64, "maxLength": 64 },
+    "size": { "type": "integer", "minimum": 0 },
+    "format": { "const": "jcs-json" }
+  },
+  "required": ["sha256", "size", "format"],
+  "additionalProperties": false
+}

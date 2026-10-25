@@ -1,0 +1,111 @@
+{
+  "description": "JCS (RFC 8785) parity cases for TS and Python. 'input' is JSON text parsed by each runtime's standard parser; 'canonical' is the expected output; 'sha256' is SHA-256 of the UTF-8 bytes of 'canonical'. Nesting deeper than 128 containers is rejected on both runtimes.",
+  "cases": [
+    {
+      "name": "key-order-utf16",
+      "note": "UTF-16 code-unit order: 'a' (0x61) < U+1F600 (0xD83D...) < U+E000, unlike code-point order",
+      "input": "{\"\ue000\":1,\"\ud83d\ude00\":2,\"a\":3}",
+      "canonical": "{\"a\":3,\"\ud83d\ude00\":2,\"\ue000\":1}",
+      "sha256": "84495633024b0992798250783e7ccb01ab2875649ab22f353f14c0d6a8389fc2"
+    },
+    {
+      "name": "rfc8785-3.2.3-sorting",
+      "note": "RFC 8785 section 3.2.3 sorting example",
+      "input": "{\"\u20ac\":\"Euro Sign\",\"\\r\":\"Carriage Return\",\"\ufb33\":\"Hebrew Letter Dalet With Dagesh\",\"1\":\"One\",\"\ud83d\ude00\":\"Emoji: Grinning Face\",\"\\u0080\":\"Control\",\"\u00f6\":\"Latin Small Letter O With Diaeresis\"}",
+      "canonical": "{\"\\r\":\"Carriage Return\",\"1\":\"One\",\"\u0080\":\"Control\",\"\u00f6\":\"Latin Small Letter O With Diaeresis\",\"\u20ac\":\"Euro Sign\",\"\ud83d\ude00\":\"Emoji: Grinning Face\",\"\ufb33\":\"Hebrew Letter Dalet With Dagesh\"}",
+      "sha256": "5e321556d22018a9656991a9e94f77ec175fa193e52a2429d312f8419ec8b08c"
+    },
+    {
+      "name": "numbers-integral",
+      "note": "ES number serialization of integral values",
+      "input": "[-0,-0.0,1.0,1E2,9007199254740991,-9007199254740991]",
+      "canonical": "[0,0,1,100,9007199254740991,-9007199254740991]",
+      "sha256": "5996b681c357229a1158bde45b2abaf49fac993880f86c1cc7768da05d0c1454"
+    },
+    {
+      "name": "numbers-fractional",
+      "note": "ES shortest round-trip form; exponent below 1e-6; RFC 8785 appendix values",
+      "input": "[0.1,1.5,4.50,2e-3,1e-7,0.000001,5e-324,333333333.33333329,0.000000000000000000000000001,-1.25e-10]",
+      "canonical": "[0.1,1.5,4.5,0.002,1e-7,0.000001,5e-324,333333333.3333333,1e-27,-1.25e-10]",
+      "sha256": "a8ae0893cdaa3c23f0b0094bb539ffbcd975eb300e391cc8bb6519dfb8271259"
+    },
+    {
+      "name": "nested-empty",
+      "note": "empty containers, key order",
+      "input": "{\"b\":[],\"a\":{}}",
+      "canonical": "{\"a\":{},\"b\":[]}",
+      "sha256": "aeeba1e56a144077f89e26c930dad7cf933e9383cfb8e33ddff618233b29be76"
+    },
+    {
+      "name": "nested-sort-array-order",
+      "note": "nested objects sorted, array order preserved",
+      "input": "{\"z\":{\"b\":2,\"a\":1},\"a\":[3,1,2]}",
+      "canonical": "{\"a\":[3,1,2],\"z\":{\"a\":1,\"b\":2}}",
+      "sha256": "aa5acc11e864cec3b7c7462948bf081ba8843dbd798f17a53dbeff9c896dcc04"
+    },
+    {
+      "name": "literals",
+      "note": "literals",
+      "input": "[true,false,null]",
+      "canonical": "[true,false,null]",
+      "sha256": "4d0f18de2133118249c26acc481838d4f6bb6bc1de882d99abbd19ae9397e8df"
+    },
+    {
+      "name": "string-escapes",
+      "note": "short escapes, lowercase \\u00XX for other controls, '/' and DEL and non-ASCII literal",
+      "input": "{\"s\":\"\\u0008\\t\\n\\u000c\\r\\u0001\\u001f\\\"\\\\/\\u007f\u00e9\"}",
+      "canonical": "{\"s\":\"\\b\\t\\n\\f\\r\\u0001\\u001f\\\"\\\\/\u007f\u00e9\"}",
+      "sha256": "81c48eb955a16f5d5c52e627a10ba78cb717a43d7c23cfca00d1a4744e5fe42c"
+    },
+    {
+      "name": "whitespace",
+      "note": "insignificant whitespace removed",
+      "input": " { \"a\" : [ 1 , 2 ] } ",
+      "canonical": "{\"a\":[1,2]}",
+      "sha256": "01530d164d479cf08e26d3b1ad9bdba927120d97e2d057a6d792db778780d720"
+    },
+    {
+      "name": "depth-128",
+      "note": "128 nested containers (limit, accepted)",
+      "input": "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]",
+      "canonical": "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]",
+      "sha256": "dbaec29ce2fb52a1a372e1da31b0d434d257fe11bebee2d31c6649710e3052a6"
+    },
+    {
+      "name": "unsafe-int",
+      "note": "integer above 2^53-1",
+      "input": "9007199254740992",
+      "error": "E-JCS-UNSUPPORTED-VALUE"
+    },
+    {
+      "name": "unsafe-negative-int",
+      "note": "integer below -(2^53-1)",
+      "input": "-9007199254740992",
+      "error": "E-JCS-UNSUPPORTED-VALUE"
+    },
+    {
+      "name": "unsafe-float",
+      "note": "integral value above 2^53-1 written as float",
+      "input": "1e21",
+      "error": "E-JCS-UNSUPPORTED-VALUE"
+    },
+    {
+      "name": "lone-surrogate-value",
+      "note": "lone high surrogate in string",
+      "input": "\"\\ud800\"",
+      "error": "E-JCS-UNSUPPORTED-VALUE"
+    },
+    {
+      "name": "lone-surrogate-key",
+      "note": "lone low surrogate in key",
+      "input": "{\"\\udc00\":1}",
+      "error": "E-JCS-UNSUPPORTED-VALUE"
+    },
+    {
+      "name": "depth-129",
+      "note": "129 nested containers (over the limit)",
+      "input": "{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":[]}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}",
+      "error": "E-JCS-UNSUPPORTED-VALUE"
+    }
+  ]
+}

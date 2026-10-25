@@ -7,6 +7,17 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json && tsc -p scripts/tsconfig.json",
+    "gen": "node scripts/gen.ts",
+    "gen:check": "node scripts/gen.ts --check",
+    "lint:schemas": "node scripts/lint-schemas.ts"
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "canonicalize": "5.1.0"
+  },
+  "devDependencies": {
+    "json-schema-to-typescript": "16.0.0",
+    "prettier": "3.9.10"
   }
 }

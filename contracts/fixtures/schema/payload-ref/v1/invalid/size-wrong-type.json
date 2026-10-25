@@ -1,0 +1,18 @@
+{
+  "description": "size is a string",
+  "instance": {
+    "inline": 1,
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "size": "12",
+    "format": "jcs-json"
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "instancePath": "/size",
+        "keyword": "type"
+      }
+    ]
+  }
+}

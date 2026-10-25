@@ -1,0 +1,15 @@
+{
+  "description": "sha256 and size missing; one normalized error at the object",
+  "instance": {
+    "format": "jcs-json"
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "instancePath": "",
+        "keyword": "required"
+      }
+    ]
+  }
+}

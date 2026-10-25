@@ -1,0 +1,42 @@
+[
+  {
+    "runtime": "ts-ajv",
+    "file": "enum.json",
+    "group": "empty enum",
+    "test": null,
+    "cause": "Ajv 8.20.0 throws at compile time ('enum must have non-empty array') instead of rejecting every instance.",
+    "mitigation": "schema lint rejects empty enum in canonical schemas; Ajv fails loudly, never returns a wrong result."
+  },
+  {
+    "runtime": "ts-ajv",
+    "file": "properties.json",
+    "group": "properties whose names are Javascript object property names",
+    "test": "__proto__ not valid",
+    "cause": "Ajv 8.20.0 accepts an own '__proto__' data key that violates the property schema (it reads the prototype instead of the own value).",
+    "mitigation": "schema lint rejects '__proto__' as a property name in canonical schemas; Python backend validation is authoritative."
+  },
+  {
+    "runtime": "ts-ajv",
+    "file": "ref.json",
+    "group": "refs with relative uris and defs",
+    "test": null,
+    "cause": "Ajv 8.20.0 overflows the stack resolving $ref through a nested $id.",
+    "mitigation": "schema lint forbids $id below the root, so this pattern cannot occur in canonical schemas."
+  },
+  {
+    "runtime": "ts-ajv",
+    "file": "ref.json",
+    "group": "relative refs with absolute uris and defs",
+    "test": null,
+    "cause": "Ajv 8.20.0 overflows the stack resolving $ref through a nested $id.",
+    "mitigation": "schema lint forbids $id below the root."
+  },
+  {
+    "runtime": "ts-ajv",
+    "file": "ref.json",
+    "group": "URN ref with nested pointer ref",
+    "test": null,
+    "cause": "Ajv 8.20.0 overflows the stack resolving $ref through a nested URN $id.",
+    "mitigation": "schema lint forbids $id below the root."
+  }
+]

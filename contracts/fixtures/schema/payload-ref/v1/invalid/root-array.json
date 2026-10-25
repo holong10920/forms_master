@@ -1,0 +1,13 @@
+{
+  "description": "root is not an object",
+  "instance": [],
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "instancePath": "",
+        "keyword": "type"
+      }
+    ]
+  }
+}

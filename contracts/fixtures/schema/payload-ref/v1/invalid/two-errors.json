@@ -1,0 +1,22 @@
+{
+  "description": "two errors sorted by instancePath",
+  "instance": {
+    "inline": 1,
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "size": -1,
+    "format": "x"
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "instancePath": "/format",
+        "keyword": "const"
+      },
+      {
+        "instancePath": "/size",
+        "keyword": "minimum"
+      }
+    ]
+  }
+}

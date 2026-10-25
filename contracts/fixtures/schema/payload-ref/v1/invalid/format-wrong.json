@@ -1,0 +1,18 @@
+{
+  "description": "format const mismatch",
+  "instance": {
+    "inline": 1,
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "size": 1,
+    "format": "json"
+  },
+  "expected": {
+    "valid": false,
+    "errors": [
+      {
+        "instancePath": "/format",
+        "keyword": "const"
+      }
+    ]
+  }
+}

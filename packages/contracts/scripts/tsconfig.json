@@ -1,0 +1,7 @@
+{
+  // Dev-time scripts only. json-schema-to-typescript ships declarations that do not compile under
+  // exactOptionalPropertyTypes, so library declaration checks are skipped here (not for src/test).
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": { "skipLibCheck": true },
+  "include": ["."]
+}

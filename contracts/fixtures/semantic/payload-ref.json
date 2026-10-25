@@ -1,0 +1,87 @@
+{
+  "description": "Semantic checks of PayloadRef v1 (structurally valid inputs). Codes are S0-internal.",
+  "cases": [
+    {
+      "name": "inline-ok",
+      "ref": {
+        "inline": {
+          "k": 1
+        },
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "size": 7,
+        "format": "jcs-json"
+      },
+      "errors": []
+    },
+    {
+      "name": "blob-ok",
+      "ref": {
+        "blobKey": "sha256/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "size": 0,
+        "format": "jcs-json"
+      },
+      "errors": []
+    },
+    {
+      "name": "neither-storage",
+      "ref": {
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "size": 0,
+        "format": "jcs-json"
+      },
+      "errors": [
+        {
+          "code": "E-PAYLOADREF-STORAGE",
+          "path": ""
+        }
+      ]
+    },
+    {
+      "name": "both-storage",
+      "ref": {
+        "inline": 1,
+        "blobKey": "sha256/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "size": 1,
+        "format": "jcs-json"
+      },
+      "errors": [
+        {
+          "code": "E-PAYLOADREF-STORAGE",
+          "path": ""
+        }
+      ]
+    },
+    {
+      "name": "sha256-uppercase",
+      "ref": {
+        "inline": 1,
+        "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "size": 1,
+        "format": "jcs-json"
+      },
+      "errors": [
+        {
+          "code": "E-DIGEST-FORMAT",
+          "path": "/sha256"
+        }
+      ]
+    },
+    {
+      "name": "blobkey-mismatch",
+      "ref": {
+        "blobKey": "sha256/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "size": 1,
+        "format": "jcs-json"
+      },
+      "errors": [
+        {
+          "code": "E-PAYLOADREF-BLOBKEY",
+          "path": "/blobKey"
+        }
+      ]
+    }
+  ]
+}

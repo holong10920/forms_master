@@ -1,0 +1,13 @@
+{
+  "description": "blob payload",
+  "instance": {
+    "blobKey": "sha256/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "size": 0,
+    "format": "jcs-json"
+  },
+  "expected": {
+    "valid": true,
+    "errors": []
+  }
+}

@@ -24,7 +24,7 @@ fb-store = { workspace = true }
 [tool.pytest.ini_options]
 testpaths = ["python"]
 # Tests must never reach the network (S0 security boundary).
-addopts = "-q --import-mode=importlib --disable-socket --allow-unix-socket"
+addopts = "--import-mode=importlib --disable-socket --allow-unix-socket"
 
 [tool.ruff]
 target-version = "py313"

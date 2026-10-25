@@ -1,0 +1,164 @@
+S0 T5 — Schema pipeline (payload-ref/v1). Date: 2026-10-25.
+Dialect: JSON Schema Draft 2020-12, enforced by schemas:lint (root $schema, root-only $id/$schema, keyword allowlist, keyword value shapes,
+local-only $ref, boolean subschemas only for additionalProperties, non-empty enum, no '__proto__' key anywhere).
+Validators: Ajv 8.20.0 Ajv2020 {strict, allErrors, validateFormats:false, ownProperties:true};
+jsonschema 4.26.0 Draft202012Validator (check_schema, no format checker, empty referencing.Registry => no remote $ref retrieval).
+Normalization contract (both sides, revised after CP2 review M1 — PENDING USER APPROVAL): take (instancePath, keyword) of reported errors; drop every
+error at or below the instance path of a oneOf error except the outermost oneOf errors; de-duplicate; sort by UTF-16 code units. Raw messages not compared.
+Fixtures: 9 schema fixtures (2 valid, 7 invalid), 6 semantic PayloadRef cases, 7 normalization cases (oneOf via $ref, recursive $ref, sibling errors).
+Codegen embeds schemas with JSON.parse (CP2 review M3); gen --check also fails on orphaned generated files.
+
+$ pnpm schemas:lint
+$ pnpm --filter @fb/contracts lint:schemas
+$ node scripts/lint-schemas.ts
+schemas:lint OK (1 schema files)
+exit=0
+
+$ pnpm gen:check
+$ pnpm --filter @fb/contracts gen:check
+$ node scripts/gen.ts --check
+gen:check OK (2 generated files)
+exit=0
+
+--- drift negative: hand edit of a generated file, then an orphaned file; expect gen:check to fail each time
+$ pnpm gen:check
+$ pnpm --filter @fb/contracts gen:check
+$ node scripts/gen.ts --check
+generated file out of date: ~/Documents/marketenterprise/forms_master/packages/contracts/src/generated/payload-ref.v1.ts
+[ELIFECYCLE] Command failed with exit code 1.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+
+  × "pnpm recursive run" failed in ~/Documents/
+  │ marketenterprise/forms_master/packages/contracts
+
+[ELIFECYCLE] Command failed with exit code 1.
+exit=1
+
+$ pnpm gen:check
+$ pnpm --filter @fb/contracts gen:check
+$ node scripts/gen.ts --check
+orphaned generated file: ~/Documents/marketenterprise/forms_master/packages/contracts/src/generated/orphan.v9.ts
+[ELIFECYCLE] Command failed with exit code 1.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+
+  × "pnpm recursive run" failed in ~/Documents/
+  │ marketenterprise/forms_master/packages/contracts
+
+[ELIFECYCLE] Command failed with exit code 1.
+exit=1
+
+$ pnpm gen:check
+$ pnpm --filter @fb/contracts gen:check
+$ node scripts/gen.ts --check
+gen:check OK (2 generated files)
+exit=0
+
+$ pnpm exec vitest run packages/contracts/test/schema-lint.test.ts packages/contracts/test/schema-parity.test.ts packages/contracts/test/schema-normalization.test.ts packages/contracts/test/payload-ref.test.ts --reporter=verbose
+
+ RUN  v5.0.5 ~/Documents/marketenterprise/forms_master
+
+ ✓ packages/contracts/test/payload-ref.test.ts > semantic fixture count 1ms
+ ✓ packages/contracts/test/payload-ref.test.ts > inline-ok 0ms
+ ✓ packages/contracts/test/payload-ref.test.ts > blob-ok 0ms
+ ✓ packages/contracts/test/payload-ref.test.ts > neither-storage 0ms
+ ✓ packages/contracts/test/payload-ref.test.ts > both-storage 0ms
+ ✓ packages/contracts/test/payload-ref.test.ts > sha256-uppercase 0ms
+ ✓ packages/contracts/test/payload-ref.test.ts > blobkey-mismatch 0ms
+ ✓ packages/contracts/test/schema-lint.test.ts > schema keyword allowlist > rejects pattern 1ms
+ ✓ packages/contracts/test/schema-lint.test.ts > schema keyword allowlist > rejects format 0ms
+ ✓ packages/contracts/test/schema-lint.test.ts > schema keyword allowlist > property named pattern is not a keyword 0ms
+ ✓ packages/contracts/test/schema-lint.test.ts > schema keyword allowlist > checks nested oneOf, items, $defs and additionalProperties schemas 0ms
+ ✓ packages/contracts/test/schema-lint.test.ts > schema keyword allowlist > root $schema must be draft 2020-12 and $id must match the file path 0ms
+ ✓ packages/contracts/test/schema-lint.test.ts > schema keyword allowlist > rejects empty enum and __proto__ property names (Ajv divergences) 0ms
+ ✓ packages/contracts/test/schema-lint.test.ts > schema keyword allowlist > rejects __proto__ keys anywhere, including const values 0ms
+ ✓ packages/contracts/test/schema-lint.test.ts > schema keyword allowlist > boolean subschemas are allowed only for additionalProperties 1ms
+ ✓ packages/contracts/test/schema-lint.test.ts > schema keyword allowlist > rejects malformed keyword values and remote $ref 0ms
+ ✓ packages/contracts/test/schema-lint.test.ts > schema keyword allowlist > canonical payload-ref schema is clean 0ms
+ ✓ packages/contracts/test/schema-parity.test.ts > payload-ref/v1 schema fixtures > fixture count 1ms
+ ✓ packages/contracts/test/schema-parity.test.ts > payload-ref/v1 schema fixtures > schema/payload-ref/v1/valid/blob.json 22ms
+ ✓ packages/contracts/test/schema-parity.test.ts > payload-ref/v1 schema fixtures > schema/payload-ref/v1/valid/inline-object.json 1ms
+ ✓ packages/contracts/test/schema-parity.test.ts > payload-ref/v1 schema fixtures > schema/payload-ref/v1/invalid/additional-property.json 1ms
+ ✓ packages/contracts/test/schema-parity.test.ts > payload-ref/v1 schema fixtures > schema/payload-ref/v1/invalid/format-wrong.json 0ms
+ ✓ packages/contracts/test/schema-parity.test.ts > payload-ref/v1 schema fixtures > schema/payload-ref/v1/invalid/missing-required.json 0ms
+ ✓ packages/contracts/test/schema-parity.test.ts > payload-ref/v1 schema fixtures > schema/payload-ref/v1/invalid/root-array.json 0ms
+ ✓ packages/contracts/test/schema-parity.test.ts > payload-ref/v1 schema fixtures > schema/payload-ref/v1/invalid/size-negative.json 0ms
+ ✓ packages/contracts/test/schema-parity.test.ts > payload-ref/v1 schema fixtures > schema/payload-ref/v1/invalid/size-wrong-type.json 0ms
+ ✓ packages/contracts/test/schema-parity.test.ts > payload-ref/v1 schema fixtures > schema/payload-ref/v1/invalid/two-errors.json 0ms
+ ✓ packages/contracts/test/schema-normalization.test.ts > normalization fixture count 1ms
+ ✓ packages/contracts/test/schema-normalization.test.ts > union-ref-root 22ms
+ ✓ packages/contracts/test/schema-normalization.test.ts > union-ref-under-property-with-sibling-e… 11ms
+ ✓ packages/contracts/test/schema-normalization.test.ts > recursive-ref-branch 9ms
+ ✓ packages/contracts/test/schema-normalization.test.ts > valid-recursive 7ms
+ ✓ packages/contracts/test/schema-normalization.test.ts > inline-oneof-and-sibling-property 7ms
+ ✓ packages/contracts/test/schema-normalization.test.ts > oneof-valid-under-two 6ms
+ ✓ packages/contracts/test/schema-normalization.test.ts > oneof-exactly-one 6ms
+ ✓ packages/contracts/test/schema-normalization.test.ts > canonical schema payload-ref/v1 compiles under strict Ajv 7ms
+
+ Test Files  4 passed (4)
+      Tests  36 passed (36)
+   Start at  15:48:59
+   Duration  229ms (tests 44%, import 38%, transform 14%, worker 4%)
+
+exit=0
+
+$ uv run pytest python/fb_contracts/tests/test_schema_parity.py python/fb_contracts/tests/test_schema_normalization.py python/fb_contracts/tests/test_payload_ref.py python/fb_contracts/tests/test_json_pointer.py -v
+============================= test session starts ==============================
+platform darwin -- Python 3.13.15, pytest-9.1.1, pluggy-1.7.0 -- ~/Documents/marketenterprise/forms_master/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: ~/Documents/marketenterprise/forms_master
+configfile: pyproject.toml
+plugins: socket-0.8.1
+collecting ... collected 33 items
+
+python/fb_contracts/tests/test_schema_parity.py::test_fixture_count PASSED [  3%]
+python/fb_contracts/tests/test_schema_parity.py::test_payload_ref_schema_fixture[schema/payload-ref/v1/invalid/additional-property.json] PASSED [  6%]
+python/fb_contracts/tests/test_schema_parity.py::test_payload_ref_schema_fixture[schema/payload-ref/v1/invalid/format-wrong.json] PASSED [  9%]
+python/fb_contracts/tests/test_schema_parity.py::test_payload_ref_schema_fixture[schema/payload-ref/v1/invalid/missing-required.json] PASSED [ 12%]
+python/fb_contracts/tests/test_schema_parity.py::test_payload_ref_schema_fixture[schema/payload-ref/v1/invalid/root-array.json] PASSED [ 15%]
+python/fb_contracts/tests/test_schema_parity.py::test_payload_ref_schema_fixture[schema/payload-ref/v1/invalid/size-negative.json] PASSED [ 18%]
+python/fb_contracts/tests/test_schema_parity.py::test_payload_ref_schema_fixture[schema/payload-ref/v1/invalid/size-wrong-type.json] PASSED [ 21%]
+python/fb_contracts/tests/test_schema_parity.py::test_payload_ref_schema_fixture[schema/payload-ref/v1/invalid/two-errors.json] PASSED [ 24%]
+python/fb_contracts/tests/test_schema_parity.py::test_payload_ref_schema_fixture[schema/payload-ref/v1/valid/blob.json] PASSED [ 27%]
+python/fb_contracts/tests/test_schema_parity.py::test_payload_ref_schema_fixture[schema/payload-ref/v1/valid/inline-object.json] PASSED [ 30%]
+python/fb_contracts/tests/test_schema_parity.py::test_rejects_malformed_schema_ids[../x/v1] PASSED [ 33%]
+python/fb_contracts/tests/test_schema_parity.py::test_rejects_malformed_schema_ids[payload-ref] PASSED [ 36%]
+python/fb_contracts/tests/test_schema_parity.py::test_rejects_malformed_schema_ids[Payload-Ref/v1] PASSED [ 39%]
+python/fb_contracts/tests/test_schema_parity.py::test_rejects_malformed_schema_ids[payload-ref/v1/..] PASSED [ 42%]
+python/fb_contracts/tests/test_schema_normalization.py::test_normalization_fixture_count PASSED [ 45%]
+python/fb_contracts/tests/test_schema_normalization.py::test_normalization_parity[union-ref-root] PASSED [ 48%]
+python/fb_contracts/tests/test_schema_normalization.py::test_normalization_parity[union-ref-under-property-with-sibling-error] PASSED [ 51%]
+python/fb_contracts/tests/test_schema_normalization.py::test_normalization_parity[recursive-ref-branch] PASSED [ 54%]
+python/fb_contracts/tests/test_schema_normalization.py::test_normalization_parity[valid-recursive] PASSED [ 57%]
+python/fb_contracts/tests/test_schema_normalization.py::test_normalization_parity[inline-oneof-and-sibling-property] PASSED [ 60%]
+python/fb_contracts/tests/test_schema_normalization.py::test_normalization_parity[oneof-valid-under-two] PASSED [ 63%]
+python/fb_contracts/tests/test_schema_normalization.py::test_normalization_parity[oneof-exactly-one] PASSED [ 66%]
+python/fb_contracts/tests/test_schema_normalization.py::test_canonical_schema_compiles[payload-ref/v1] PASSED [ 69%]
+python/fb_contracts/tests/test_schema_normalization.py::test_remote_ref_is_not_fetched PASSED [ 72%]
+python/fb_contracts/tests/test_payload_ref.py::test_semantic_fixture_count PASSED [ 75%]
+python/fb_contracts/tests/test_payload_ref.py::test_payload_ref_semantics[inline-ok] PASSED [ 78%]
+python/fb_contracts/tests/test_payload_ref.py::test_payload_ref_semantics[blob-ok] PASSED [ 81%]
+python/fb_contracts/tests/test_payload_ref.py::test_payload_ref_semantics[neither-storage] PASSED [ 84%]
+python/fb_contracts/tests/test_payload_ref.py::test_payload_ref_semantics[both-storage] PASSED [ 87%]
+python/fb_contracts/tests/test_payload_ref.py::test_payload_ref_semantics[sha256-uppercase] PASSED [ 90%]
+python/fb_contracts/tests/test_payload_ref.py::test_payload_ref_semantics[blobkey-mismatch] PASSED [ 93%]
+python/fb_contracts/tests/test_json_pointer.py::test_escapes_tilde_and_slash PASSED [ 96%]
+python/fb_contracts/tests/test_json_pointer.py::test_root_is_empty_string PASSED [100%]
+
+============================== 33 passed in 0.08s ==============================
+exit=0
+
+
+== Q1 decision (user, 2026-10-25): oneOf normalization APPROVED FOR S0 PARITY DIAGNOSTICS ONLY ==
+Conditions: does not affect valid/invalid; normalized errors are NOT a complete error list; not to be used
+directly for Business Editor or customer form error UX; before S1/Admin API needs diagnostics, decide how to
+keep independent errors outside oneOf.
+
+Known limitation — an independent error is hidden when it sits at or below the path of a failing oneOf.
+Example (strict-valid schema; root required "z" is independent of the root oneOf on "kind"):
+schema:   {"$schema": "https://json-schema.org/draft/2020-12/schema", "type": "object", "properties": {"z": {"type": "string"}, "kind": {"type": "string"}}, "required": ["z"], "oneOf": [{"type": "object", "properties": {"kind": {"const": "a"}}, "required": ["kind"]}, {"type": "object", "properties": {"kind": {"const": "b"}}, "required": ["kind"]}]}
+instance: {"kind":"c"}
+TS raw (instancePath, keyword): [["/kind","const"],["/kind","const"],["","oneOf"],["","required"]]
+TS normalized: {"valid":false,"errors":[{"instancePath":"","keyword":"oneOf"}]}
+Python raw top-level (instancePath, keyword): [('', 'required'), ('', 'oneOf')]
+Python normalized: SchemaResult(valid=False, errors=[SchemaError(instance_path='', keyword='oneOf')])
+=> Both runtimes: valid=false (correct); normalized list keeps only ("", oneOf); the independent ("", required) is hidden.
