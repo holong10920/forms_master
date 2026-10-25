@@ -59,8 +59,8 @@ Các mục spike chưa chứng minh hoặc chưa kiểm. **OPEN** cho tới khi 
 | VG-01 | Compiler resolve browser facet từ **release store** theo FBK + hash (không từ workspace `node_modules`) | ADR-041, spec #2 §9.4, spec #3 §9 | trước khi chốt implementation compiler | OPEN |
 | VG-02 | **L1b** resolve allowlist trong bundler: positive fixture (contract, Motion của core, module ảo) build được; negative fixture (import tương đối design/server/`.py`/fixtures) bị từ chối đúng lý do; control pass | ADR-041, spec #2 §11.2 rev 2.4, spec #3 §9/§10 | như trên | OPEN |
 | VG-03 | Build graph + artifact isolation trên compiler thật, gồm import tương đối; conditional exports không là boundary duy nhất | ADR-041, spec #3 §19.1 (C15) | như trên | OPEN |
-| VG-04 | pnpm: tái hiện lỗi optional-peer của npm 10.8.2 bằng fixture; pnpm cài fixture thành công; resolve workspace; frozen lockfile; React peer singleton; pin `packageManager` | ADR-044 | P02 | OPEN |
-| VG-05 | Node.js 24 LTS: image pin digest; tương thích Vite/Rolldown/plugin; chạy lại tái lập (A/B) và isolation; ghi khác biệt với spike | ADR-045 | P02 | OPEN |
+| VG-04 | pnpm: tái hiện lỗi optional-peer của npm 10.8.2 bằng fixture; pnpm cài fixture thành công; resolve workspace; frozen lockfile; React peer singleton; pin `packageManager` | ADR-044 | P02 | PASS — T1 evidence; npm error không tái hiện, pnpm/frozen/singleton PASS |
+| VG-05 | Node.js 24 LTS: image pin digest; tương thích Vite/Rolldown/plugin; chạy lại tái lập (A/B) và isolation; ghi khác biệt với spike | ADR-045 | P02 | PARTIAL — host Node pin PASS; T12 BLOCKED_BY_ENVIRONMENT; A/B/isolation S2 OPEN |
 | VG-06 | Tái lập khác kiến trúc CPU (ví dụ x86_64 vs arm64) | spec #3 §12, §21 | khi có runner | OPEN |
 | VG-07 | Safari thật (không phải Playwright WebKit): prefetch reuse, retry `import()` | ADR-043, ADR-073 | **trước rollout cho khách thật** (không phải điều kiện G1); P0 dùng Playwright WebKit; không có môi trường → NOT VERIFIED, chặn rollout hoặc exception riêng | OPEN |
 | VG-08 | Phục hồi lỗi evaluate trên WebKit: UI phục hồi người dùng thấy được, giữ pinned release, không tự reload | ADR-043, spec #3 §15.3 | verification runtime | OPEN |
@@ -76,7 +76,7 @@ Các mục spike chưa chứng minh hoặc chưa kiểm. **OPEN** cho tới khi 
 | VG-18 | Tích hợp Cognito (OIDC BFF) chạy thật; cookie PKCE `SameSite=Lax` cross-site | spec #5 §7.6 | sau G10 | OPEN |
 | VG-19 | Contract test CT-01..26 trên DynamoDB thật (emulator không đủ) | spec #5 §11.2 | sau G10 | OPEN |
 | VG-20 | *(C1c, ADR-076)* SR-08: Preview bị chặn khi capability bị revoke (TM-5V07, 4Z16) | spec #5 §7.3; spec #4 §14.7 | sau G1 | OPEN |
-| VG-21 | *(ADR-078, ngoại lệ ADR-005)* Phương pháp đo (S0) và budget số từ artifact thật (S2); Sports Motion-none = 0 Motion bytes/imports/chunks | ADR-005, ADR-078; spec #3 §17 | S0 (phương pháp), **trước S2 DONE** (budget) | OPEN |
+| VG-21 | *(ADR-078, ngoại lệ ADR-005)* Phương pháp đo (S0) và budget số từ artifact thật (S2); Sports Motion-none = 0 Motion bytes/imports/chunks | ADR-005, ADR-078; spec #3 §17 | S0 (phương pháp), **trước S2 DONE** (budget) | S0 method PASS (T11); S2 baseline/budget và Motion artifact vẫn OPEN |
 | — | Decision còn mở của spec #1 (OD-06, OD-10, OD-13). OD2-08/09 đã đóng (ADR-057/058) | spec #1 §21 | theo hạn từng mục | OPEN |
 
 > Cross-Subsystem Review (2026-10-24) MINOR-19: bảng này còn trích rev cũ và thiếu các gate sau G1/G10 (CT-26, ma trận TS/Python cross-version, cổng đo Motion P04, checklist ADR-053, Cognito, DynamoDB thật). **Đã cập nhật trong vòng sửa C1 (2026-10-25).**

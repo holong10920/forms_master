@@ -1,0 +1,869 @@
+S0 T13 / CP5 PRELIMINARY — 2026-10-25. Not S0 DONE, not G2 PASS.
+Baseline: CP3 090c5375281b5a0de9c25d29f5f46d9aed8f90a7.
+Local filesystem git clone --local --no-hardlinks --no-recurse-submodules, no remote
+network operations. Overlay 271 candidate files from tracked/approved untracked scope,
+with per-file SHA-256 manifest outside the checkout. No host node_modules/.venv/data/
+ignored/internal files or spikes copied. Includes uncommitted CP4 and CP5 candidates.
+This is a clean dependency install and local clone plus manifest overlay, NOT verification
+of a committed CP4/CP5 snapshot. Required committed-checkpoint verification stays pending.
+After verify: source files match captured manifest; pnpm-lock.yaml and uv.lock unchanged
+in source and clean checkout. Generated drift check and boundaries PASS.
+Runtime: host Volta/Corepack shim supplies pinned Node/pnpm; dependencies freshly installed
+in the clean checkout. Cache reuse is permitted; no host dependency tree copied.
+
+Summary: all commands exit 0; Node 24.22.1 / pnpm 12.15.0 preflight; frozen pnpm install;
+uv sync --locked; pinned scanner provision; pnpm verify. TS 518 PASS / 15 pre-existing
+expected failures / 1 deliberate optional Gitleaks skip. Python 674 PASS.
+Alternative scanner: 27 defaults, working source 143 / index source 102, no unresolved
+findings after proof-based classification. Optional Gitleaks not verified.
+Remaining gates: user acceptance of alternative T10 security gate; T12 container
+BLOCKED_BY_ENVIRONMENT; CP4 and CP5 commit scope approvals. G9/G10 remain BLOCKED.
+
+Final source adjustment: source exclusions never apply to staged ACMR files: all staged
+files, including docs/lock/vendor, are exported from the index and scanned. Source
+coverage remains 143 working / 102 index files because current staging is empty.
+After this change, the same clean clone received a manifest-recorded source overlay
+and pnpm verify was rerun: exit 0; 518 TS pass / 15 expected fail / 1 optional skip;
+674 Python pass in 7.88s. Source checksums match in working repo and clean candidate.
+No lockfile drift. Raw command output and manifests retained under /tmp.
+
+=== Initial provisioning + verification output (path sanitized) ===
+
+$ pnpm preflight
+Scope: all 7 workspace projects
+[WARN] The store at ~/Library/pnpm/store/v11 is not used because packages cannot be hard linked from it into this project. Using the store at /private/tmp/.pnpm-store/v11 instead. Set storeDir to choose the store.
+? Verifying lockfile against supply-chain policies (208 entries)...
+Progress: resolved 184, reused 0, downloaded 1, added 0
+Progress: resolved 184, reused 0, downloaded 24, added 0
+Packages are cloned from the content-addressable store to the virtual store.
+  Content-addressable store is at: /private/tmp/.pnpm-store/v11
+  Virtual store is at:             node_modules/.pnpm
+[WARN] Tarball download average speed 35 KiB/s (size 51 KiB) is below 50 KiB/s: https://registry.npmjs.org/commander/-/commander-15.0.0.tgz (GET)
+[WARN] Tarball download average speed 47 KiB/s (size 65 KiB) is below 50 KiB/s: https://registry.npmjs.org/@typescript-eslint/scope-manager/-/scope-manager-8.72.0.tgz (GET)
+[WARN] Tarball download average speed 6 KiB/s (size 8 KiB) is below 50 KiB/s: https://registry.npmjs.org/color-convert/-/color-convert-2.0.1.tgz (GET)
+[WARN] Tarball download average speed 30 KiB/s (size 38 KiB) is below 50 KiB/s: https://registry.npmjs.org/ignore/-/ignore-7.0.12.tgz (GET)
+[WARN] Tarball download average speed 24 KiB/s (size 31 KiB) is below 50 KiB/s: https://registry.npmjs.org/expect-type/-/expect-type-1.4.0.tgz (GET)
+Downloading @rolldown/binding-darwin-arm64@1.2.15: 0.00 B/7.53 MB
+[WARN] Tarball download average speed 13 KiB/s (size 41 KiB) is below 50 KiB/s: https://registry.npmjs.org/tsconfig-paths/-/tsconfig-paths-4.2.0.tgz (GET)
+[WARN] Tarball download average speed 45 KiB/s (size 85 KiB) is below 50 KiB/s: https://registry.npmjs.org/lightningcss/-/lightningcss-1.33.0.tgz (GET)
+[WARN] Tarball download average speed 1 KiB/s (size 3 KiB) is below 50 KiB/s: https://registry.npmjs.org/@humanfs/types/-/types-0.15.0.tgz (GET)
+[WARN] Tarball download average speed 1 KiB/s (size 5 KiB) is below 50 KiB/s: https://registry.npmjs.org/json-schema-traverse/-/json-schema-traverse-0.4.1.tgz (GET)
+[WARN] Tarball download average speed 2 KiB/s (size 7 KiB) is below 50 KiB/s: https://registry.npmjs.org/tinyglobby/-/tinyglobby-0.2.17.tgz (GET)
+[WARN] Tarball download average speed 5 KiB/s (size 24 KiB) is below 50 KiB/s: https://registry.npmjs.org/keyv/-/keyv-5.6.0.tgz (GET)
+Progress: resolved 184, reused 0, downloaded 106, added 96
+[WARN] Tarball download average speed 40 KiB/s (size 65 KiB) is below 50 KiB/s: https://registry.npmjs.org/@apidevtools/json-schema-ref-parser/-/json-schema-ref-parser-11.9.3.tgz (GET)
+[WARN] Tarball download average speed 1 KiB/s (size 11 KiB) is below 50 KiB/s: https://registry.npmjs.org/flatted/-/flatted-3.4.4.tgz (GET)
+[WARN] Tarball download average speed 26 KiB/s (size 49 KiB) is below 50 KiB/s: https://registry.npmjs.org/ts-api-utils/-/ts-api-utils-2.5.0.tgz (GET)
+[WARN] Tarball download average speed 10 KiB/s (size 22 KiB) is below 50 KiB/s: https://registry.npmjs.org/magic-string/-/magic-string-1.4.3.tgz (GET)
+[WARN] Tarball download average speed 19 KiB/s (size 43 KiB) is below 50 KiB/s: https://registry.npmjs.org/@typescript-eslint/utils/-/utils-8.72.0.tgz (GET)
+[WARN] Tarball download average speed 1 KiB/s (size 4 KiB) is below 50 KiB/s: https://registry.npmjs.org/balanced-match/-/balanced-match-4.0.4.tgz (GET)
+[WARN] Tarball download average speed 11 KiB/s (size 29 KiB) is below 50 KiB/s: https://registry.npmjs.org/chai/-/chai-6.3.0.tgz (GET)
+[WARN] Tarball download average speed 4 KiB/s (size 7 KiB) is below 50 KiB/s: https://registry.npmjs.org/acorn-jsx/-/acorn-jsx-5.3.2.tgz (GET)
+[WARN] Tarball download average speed 5 KiB/s (size 19 KiB) is below 50 KiB/s: https://registry.npmjs.org/file-entry-cache/-/file-entry-cache-11.1.5.tgz (GET)
+[WARN] Tarball download average speed 3 KiB/s (size 12 KiB) is below 50 KiB/s: https://registry.npmjs.org/brace-expansion/-/brace-expansion-5.0.12.tgz (GET)
+[WARN] Tarball download average speed 49 KiB/s (size 128 KiB) is below 50 KiB/s: https://registry.npmjs.org/uri-js/-/uri-js-4.4.1.tgz (GET)
+[WARN] Tarball download average speed 6 KiB/s (size 23 KiB) is below 50 KiB/s: https://registry.npmjs.org/picomatch/-/picomatch-4.0.7.tgz (GET)
+[WARN] Tarball download average speed 16 KiB/s (size 131 KiB) is below 50 KiB/s: https://registry.npmjs.org/acorn/-/acorn-8.19.0.tgz (GET)
+[WARN] Tarball download average speed 25 KiB/s (size 76 KiB) is below 50 KiB/s: https://registry.npmjs.org/@typescript-eslint/typescript-estree/-/typescript-estree-8.72.0.tgz (GET)
+[WARN] Tarball download average speed 25 KiB/s (size 41 KiB) is below 50 KiB/s: https://registry.npmjs.org/ignore/-/ignore-7.0.14.tgz (GET)
+[WARN] Tarball download average speed 24 KiB/s (size 78 KiB) is below 50 KiB/s: https://registry.npmjs.org/@eslint-community/eslint-utils/-/eslint-utils-4.10.1.tgz (GET)
+[WARN] Tarball download average speed 12 KiB/s (size 48 KiB) is below 50 KiB/s: https://registry.npmjs.org/fast-uri/-/fast-uri-3.1.9.tgz (GET)
+[WARN] Tarball download average speed 4 KiB/s (size 18 KiB) is below 50 KiB/s: https://registry.npmjs.org/tapable/-/tapable-2.3.3.tgz (GET)
+[WARN] Tarball download average speed 4 KiB/s (size 19 KiB) is below 50 KiB/s: https://registry.npmjs.org/@typescript-eslint/types/-/types-8.72.0.tgz (GET)
+[WARN] Tarball download average speed 5 KiB/s (size 20 KiB) is below 50 KiB/s: https://registry.npmjs.org/qified/-/qified-0.10.1.tgz (GET)
+[WARN] Tarball download average speed 15 KiB/s (size 71 KiB) is below 50 KiB/s: https://registry.npmjs.org/@eslint-community/regexpp/-/regexpp-4.12.2.tgz (GET)
+[WARN] Tarball download average speed 5 KiB/s (size 27 KiB) is below 50 KiB/s: https://registry.npmjs.org/undici-types/-/undici-types-7.24.6.tgz (GET)
+[WARN] Tarball download average speed 9 KiB/s (size 28 KiB) is below 50 KiB/s: https://registry.npmjs.org/semver/-/semver-7.8.5.tgz (GET)
+[WARN] Tarball download average speed 2 KiB/s (size 9 KiB) is below 50 KiB/s: https://registry.npmjs.org/@keyv/bigmap/-/bigmap-1.3.1.tgz (GET)
+[WARN] Tarball download average speed 4 KiB/s (size 25 KiB) is below 50 KiB/s: https://registry.npmjs.org/acorn-loose/-/acorn-loose-8.5.2.tgz (GET)
+[WARN] Tarball download average speed 3 KiB/s (size 7 KiB) is below 50 KiB/s: https://registry.npmjs.org/detect-libc/-/detect-libc-2.1.2.tgz (GET)
+[WARN] Tarball download average speed 8 KiB/s (size 9 KiB) is below 50 KiB/s: https://registry.npmjs.org/obug/-/obug-3.0.0.tgz (GET)
+[WARN] Tarball download average speed 16 KiB/s (size 58 KiB) is below 50 KiB/s: https://registry.npmjs.org/es-module-lexer/-/es-module-lexer-2.3.2.tgz (GET)
+[WARN] Tarball download average speed 7 KiB/s (size 66 KiB) is below 50 KiB/s: https://registry.npmjs.org/regexp-tree/-/regexp-tree-0.1.27.tgz (GET)
+[WARN] Tarball download average speed 3 KiB/s (size 32 KiB) is below 50 KiB/s: https://registry.npmjs.org/resolve/-/resolve-1.22.13.tgz (GET)
+Downloading @rolldown/binding-darwin-arm64@1.2.15: 1.14 MB/7.53 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.15: 1.33 MB/7.53 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.15: 1.56 MB/7.53 MB
+✓ Lockfile passes supply-chain policies (208 entries in 18.8s)
+Lockfile is up to date, resolution step is skipped
+Downloading @rolldown/binding-darwin-arm64@1.2.15: 2.15 MB/7.53 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.15: 2.59 MB/7.53 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.15: 3.05 MB/7.53 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.15: 3.46 MB/7.53 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.15: 3.74 MB/7.53 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.15: 3.84 MB/7.53 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.15: 4.15 MB/7.53 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.15: 4.56 MB/7.53 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.15: 5.05 MB/7.53 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.15: 5.31 MB/7.53 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.15: 5.65 MB/7.53 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.15: 5.95 MB/7.53 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.15: 6.23 MB/7.53 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.15: 6.72 MB/7.53 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.15: 7.13 MB/7.53 MB
+Progress: resolved 184, reused 0, downloaded 184, added 160
+Packages: +184
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 184, reused 0, downloaded 184, added 184, done
+
+devDependencies:
++ @eslint/js 10.0.1
++ @types/node 24.19.2
++ dependency-cruiser 18.7.0
++ eslint 10.13.0
++ prettier 3.9.10
++ typescript 6.0.3
++ typescript-eslint 8.72.0
++ vitest 5.0.5
+
+Done in 50.1s using pnpm v12.15.0
+$ node tools/verify/src/preflight.ts
+preflight PASS: Node 24.22.1, pnpm 12.15.0
+exit=0
+$ pnpm install --frozen-lockfile --store-dir ~/Documents/marketenterprise/forms_master/node_modules/.pnpm-store
+Scope: all 7 workspace projects
+? Verifying lockfile against supply-chain policies (208 entries)...
+✓ Lockfile passes supply-chain policies (208 entries in 12.3s)
+Lockfile is up to date, resolution step is skipped
+Packages: +184
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 184, reused 184, downloaded 0, added 184, done
+
+devDependencies:
++ @eslint/js 10.0.1
++ @types/node 24.19.2
++ dependency-cruiser 18.7.0
++ eslint 10.13.0
++ prettier 3.9.10
++ typescript 6.0.3
++ typescript-eslint 8.72.0
++ vitest 5.0.5
+
+Done in 12.8s using pnpm v12.15.0
+exit=0
+$ uv sync --locked
+Using CPython 3.13.15 interpreter at: /opt/homebrew/opt/python@3.13/bin/python3.13
+Creating virtual environment at: .venv
+Resolved 29 packages in 4ms
+   Building fb-contracts @ file:///private<candidate-checkout>/python/fb_contracts
+   Building fb-store @ file:///private<candidate-checkout>/python/fb_store
+      Built fb-store @ file:///private<candidate-checkout>/python/fb_store
+      Built fb-contracts @ file:///private<candidate-checkout>/python/fb_contracts
+Downloading grimp (2.0MiB)
+Downloading pygments (1.2MiB)
+Downloading mypy (13.6MiB)
+Downloading ast-serialize (1.2MiB)
+Downloading ruff (9.0MiB)
+ Downloaded pygments
+ Downloaded ast-serialize
+ Downloaded grimp
+ Downloaded ruff
+ Downloaded mypy
+Prepared 28 packages in 33.26s
+Installed 28 packages in 46ms
+ + ast-serialize==0.13.1
+ + attrs==26.1.0
+ + click==8.5.0
+ + fb-contracts==0.0.0 (from file:///private<candidate-checkout>/python/fb_contracts)
+ + fb-store==0.0.0 (from file:///private<candidate-checkout>/python/fb_store)
+ + grimp==3.17
+ + import-linter==2.15
+ + iniconfig==2.3.1
+ + jsonschema==4.26.0
+ + jsonschema-specifications==2025.9.1
+ + librt==0.16.0
+ + markdown-it-py==4.2.0
+ + mdurl==0.1.2
+ + mypy==2.4.0
+ + mypy-extensions==1.1.0
+ + packaging==26.3
+ + pathspec==1.1.1
+ + pluggy==1.7.0
+ + pygments==2.21.0
+ + pytest==9.1.1
+ + pytest-socket==0.8.1
+ + referencing==0.37.0
+ + rfc8785==0.1.4
+ + rich==15.0.0
+ + rpds-py==2026.9.1
+ + ruff==0.17.2
+ + types-jsonschema==4.26.0.20261006
+ + typing-extensions==4.16.0
+exit=0
+$ uvx --from detect-secrets==1.5.0 detect-secrets scan --help
+usage: detect-secrets scan [-h] [--string [STRING]] [--only-allowlisted]
+                           [--all-files] [--baseline FILENAME]
+                           [--force-use-all-plugins] [--slim]
+                           [--list-all-plugins] [-p PLUGIN]
+                           [--base64-limit [BASE64_LIMIT]]
+                           [--hex-limit [HEX_LIMIT]]
+                           [--disable-plugin DISABLE_PLUGIN]
+                           [-n | --only-verified]
+                           [--exclude-lines EXCLUDE_LINES]
+                           [--exclude-files EXCLUDE_FILES]
+                           [--exclude-secrets EXCLUDE_SECRETS] [-f FILTER]
+                           [--disable-filter DISABLE_FILTER]
+                           [path ...]
+
+Scans a repository for secrets in code. The generated output is compatible
+with `detect-secrets-hook --baseline`.
+
+positional arguments:
+  path                  Scans the entire codebase and outputs a snapshot of
+                        currently identified secrets.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --string [STRING]     Scans an individual string, and displays configured
+                        plugins' verdict.
+  --only-allowlisted    Only scans the lines that are flagged with `allowlist
+                        secret`. This helps verify that individual exceptions
+                        are indeed non-secrets.
+
+scan options:
+  --all-files           Scan all files recursively (as compared to only
+                        scanning git tracked files).
+  --baseline FILENAME   If provided, will update existing baseline by
+                        importing settings from it.
+  --force-use-all-plugins
+                        If a baseline is provided, detect-secrets will default
+                        to loading the plugins specified by that baseline.
+                        However, this may also mean it doesn't perform the
+                        scan with the latest plugins. If this flag is
+                        provided, it will always use the latest plugins
+  --slim                Slim baselines are created with the intention of
+                        minimizing differences between commits. However, they
+                        are not compatible with the `audit` functionality, and
+                        slim baselines will need to be remade to be audited.
+
+plugin options:
+  Configure settings for each secret scanning ruleset. By default, all
+  plugins are enabled unless explicitly disabled.
+
+  --list-all-plugins    Lists all plugins that will be used for the scan.
+  -p PLUGIN, --plugin PLUGIN
+                        Specify path to custom secret detector plugin.
+  --base64-limit [BASE64_LIMIT]
+                        Sets the entropy limit for high entropy strings. Value
+                        must be between 0.0 and 8.0, defaults to 4.5.
+  --hex-limit [HEX_LIMIT]
+                        Sets the entropy limit for high entropy strings. Value
+                        must be between 0.0 and 8.0, defaults to 3.0.
+  --disable-plugin DISABLE_PLUGIN
+                        Plugin class names to disable. e.g.
+                        Base64HighEntropyString
+
+filter options:
+  Configure settings for filtering out secrets after they are flagged by the
+  engine.
+
+  -n, --no-verify       Disables additional verification of secrets via
+                        network call.
+  --only-verified       Only flags secrets that can be verified.
+  --exclude-lines EXCLUDE_LINES
+                        If lines match this regex, it will be ignored.
+  --exclude-files EXCLUDE_FILES
+                        If filenames match this regex, it will be ignored.
+  --exclude-secrets EXCLUDE_SECRETS
+                        If secrets match this regex, it will be ignored.
+  -f FILTER, --filter FILTER
+                        Specify path to custom filter. May be a python module
+                        path (e.g.
+                        detect_secrets.filters.common.is_invalid_file) or a
+                        local file path (e.g.
+                        file://path/to/file.py::function_name).
+  --disable-filter DISABLE_FILTER
+                        Specify filter to disable. e.g.
+                        detect_secrets.filters.common.is_invalid_file
+exit=0
+$ pnpm verify
+$ pnpm preflight && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm gen:check && pnpm schemas:lint && pnpm boundaries && pnpm py:lint && pnpm py:typecheck && pnpm py:imports && pnpm py:test && pnpm synthetic:check && pnpm secrets
+$ node tools/verify/src/preflight.ts
+preflight PASS: Node 24.22.1, pnpm 12.15.0
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ eslint . --max-warnings=0
+$ pnpm -r --if-present typecheck
+tools/perf typecheck$ tsc -p tsconfig.json
+packages/contracts typecheck$ tsc -p tsconfig.json && tsc -p scripts/tsconfig.json
+tools/lint-fixtures typecheck$ tsc -p tsconfig.json
+tools/boundaries typecheck$ tsc -p tsconfig.json
+tools/lint-fixtures typecheck: Done
+tools/security typecheck$ tsc -p tsconfig.json
+tools/perf typecheck: Done
+tools/verify typecheck$ tsc -p tsconfig.json
+tools/boundaries typecheck: Done
+packages/contracts typecheck: Done
+tools/security typecheck: Done
+tools/verify typecheck: Done
+$ vitest run
+
+ RUN  v5.0.5 /private<candidate-checkout>
+
+
+ Test Files  16 passed (16)
+      Tests  518 passed | 15 expected fail | 1 skipped (534)
+   Start at  17:48:15
+   Duration  4.81s (tests 87%, import 7%, transform 4%, setup 1%)
+
+$ pnpm --filter @fb/contracts gen:check
+$ node scripts/gen.ts --check
+gen:check OK (2 generated files)
+$ pnpm --filter @fb/contracts lint:schemas
+$ node scripts/lint-schemas.ts
+schemas:lint OK (1 schema files)
+$ depcruise packages tools --config .dependency-cruiser.cjs --output-type err
+
+✔ no dependency violations found (50 modules, 113 dependencies cruised)
+
+$ uv run ruff check python && uv run ruff format --check python
+All checks passed!
+39 files already formatted
+$ uv run mypy
+Success: no issues found in 39 source files
+$ uv run lint-imports
+
+╔══╗─────────▶╔╗ ╔╗      ╔╗◀───┐
+╚╣╠╝◀─────┐  ╔╝╚╗║║────▶╔╝╚╗   │
+ ║║   ╔══╦══╦╩╗╔╝║║  ╔╦═╩╗╔╝╔═╦══╗
+ ║║╔══╣╔╗║╔╗║╔╣║ ║║ ╔╬╣╔╗║║ ║│║╔═╝
+╔╣╠╣║║║╚╝║╚╝║║║╚╗║╚═╝║║║║║╚╗║═╣║
+╚══╩╩╩╣╔═╩══╩╝╚═╝╚═══╩╩╝╚╩═╩╩═╩╝
+  └──▶║║                    ▲
+      ╚╝────────────────────┘
+
+
+---------
+Contracts
+---------
+
+Analyzed 13 files, 15 dependencies.
+-----------------------------------
+
+Store depends on contracts, never the reverse KEPT
+
+Contracts: 1 kept, 0 broken.
+$ uv run pytest
+============================= test session starts ==============================
+platform darwin -- Python 3.13.15, pytest-9.1.1, pluggy-1.7.0
+rootdir: /private<candidate-checkout>
+configfile: pyproject.toml
+testpaths: python
+plugins: socket-0.8.1
+collected 674 items
+
+python/fb_contracts/tests/test_digest.py .........                       [  1%]
+python/fb_contracts/tests/test_jcs.py .......................            [  4%]
+python/fb_contracts/tests/test_json_pointer.py ..                        [  5%]
+python/fb_contracts/tests/test_jsts.py ................................. [  9%]
+........................................................................ [ 20%]
+........................................................................ [ 31%]
+........................................................................ [ 41%]
+........................................................................ [ 52%]
+........................................................................ [ 63%]
+............................................                             [ 69%]
+python/fb_contracts/tests/test_payload_ref.py .......                    [ 70%]
+python/fb_contracts/tests/test_schema_normalization.py ..........        [ 72%]
+python/fb_contracts/tests/test_schema_parity.py ..............           [ 74%]
+python/fb_contracts/tests/test_smoke.py .                                [ 74%]
+python/fb_store/tests/test_clock.py ....                                 [ 75%]
+python/fb_store/tests/test_fsstore_blob.py .........                     [ 76%]
+python/fb_store/tests/test_fsstore_concurrency.py ....                   [ 77%]
+python/fb_store/tests/test_fsstore_durability.py ..........              [ 78%]
+python/fb_store/tests/test_fsstore_fail_closed.py ...................    [ 81%]
+python/fb_store/tests/test_fsstore_failures.py ......                    [ 82%]
+python/fb_store/tests/test_fsstore_keys.py ....................          [ 85%]
+python/fb_store/tests/test_fsstore_release.py ......                     [ 86%]
+python/fb_store/tests/test_import_contracts.py .                         [ 86%]
+python/fb_store/tests/test_layout.py ....                                [ 86%]
+python/fb_store/tests/test_migrations.py ............................... [ 91%]
+..................................                                       [ 96%]
+python/fb_store/tests/test_network_blocked.py .                          [ 96%]
+python/fb_store/tests/test_smoke.py .                                    [ 96%]
+python/fb_store/tests/test_sqlite_conflict.py .........                  [ 98%]
+python/fb_store/tests/test_sqlite_tx.py ............                     [100%]
+
+============================= 674 passed in 6.87s ==============================
+$ node tools/security/src/synthetic-data-check.ts contracts/fixtures
+{
+  "findings": []
+}
+$ node tools/security/src/secrets.ts
+{
+  "working": {
+    "scanner": "detect-secrets==1.5.0",
+    "detectors": 27,
+    "files": 143,
+    "findings": [
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 6,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 12,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 9,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 16,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 23,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 30,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 37,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 44,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 51,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 58,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 65,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 72,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "package.json",
+        "line": 25,
+        "type": "Secret Keyword",
+        "classification": "fixed-scan-command"
+      }
+    ],
+    "unresolved": 0
+  },
+  "index": {
+    "scanner": "detect-secrets==1.5.0",
+    "detectors": 27,
+    "files": 102,
+    "findings": [
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 6,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 12,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 9,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 16,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 23,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 30,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 37,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 44,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 51,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 58,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 65,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 72,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      }
+    ],
+    "unresolved": 0
+  },
+  "stagedSourceFiles": 0,
+  "stagedCovered": true,
+  "exclusions": [
+    "docs (governance/evidence, not source)",
+    "contracts/vendor (third party)",
+    "lockfiles",
+    "CLAUDE.md",
+    "untracked spikes and Git-ignored files"
+  ]
+}
+[Per-file SHA-256 manifests retained in raw /tmp log; omitted here for concise evidence.]
+
+exit=0
+
+=== Final source pnpm verify (path sanitized) ===
+
+$ pnpm preflight && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm gen:check && pnpm schemas:lint && pnpm boundaries && pnpm py:lint && pnpm py:typecheck && pnpm py:imports && pnpm py:test && pnpm synthetic:check && pnpm secrets
+$ node tools/verify/src/preflight.ts
+preflight PASS: Node 24.22.1, pnpm 12.15.0
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ eslint . --max-warnings=0
+$ pnpm -r --if-present typecheck
+packages/contracts typecheck$ tsc -p tsconfig.json && tsc -p scripts/tsconfig.json
+tools/lint-fixtures typecheck$ tsc -p tsconfig.json
+tools/perf typecheck$ tsc -p tsconfig.json
+tools/boundaries typecheck$ tsc -p tsconfig.json
+tools/perf typecheck: Done
+tools/security typecheck$ tsc -p tsconfig.json
+tools/boundaries typecheck: Done
+tools/verify typecheck$ tsc -p tsconfig.json
+tools/lint-fixtures typecheck: Done
+packages/contracts typecheck: Done
+tools/security typecheck: Done
+tools/verify typecheck: Done
+$ vitest run
+
+ RUN  v5.0.5 /private<candidate-checkout>
+
+
+ Test Files  16 passed (16)
+      Tests  518 passed | 15 expected fail | 1 skipped (534)
+   Start at  17:50:45
+   Duration  5.74s (tests 84%, import 11%, transform 4%, setup 1%, worker 1%)
+
+$ pnpm --filter @fb/contracts gen:check
+$ node scripts/gen.ts --check
+gen:check OK (2 generated files)
+$ pnpm --filter @fb/contracts lint:schemas
+$ node scripts/lint-schemas.ts
+schemas:lint OK (1 schema files)
+$ depcruise packages tools --config .dependency-cruiser.cjs --output-type err
+
+✔ no dependency violations found (50 modules, 113 dependencies cruised)
+
+$ uv run ruff check python && uv run ruff format --check python
+All checks passed!
+39 files already formatted
+$ uv run mypy
+Success: no issues found in 39 source files
+$ uv run lint-imports
+
+╔══╗─────────▶╔╗ ╔╗      ╔╗◀───┐
+╚╣╠╝◀─────┐  ╔╝╚╗║║────▶╔╝╚╗   │
+ ║║   ╔══╦══╦╩╗╔╝║║  ╔╦═╩╗╔╝╔═╦══╗
+ ║║╔══╣╔╗║╔╗║╔╣║ ║║ ╔╬╣╔╗║║ ║│║╔═╝
+╔╣╠╣║║║╚╝║╚╝║║║╚╗║╚═╝║║║║║╚╗║═╣║
+╚══╩╩╩╣╔═╩══╩╝╚═╝╚═══╩╩╝╚╩═╩╩═╩╝
+  └──▶║║                    ▲
+      ╚╝────────────────────┘
+
+
+---------
+Contracts
+---------
+
+Analyzed 13 files, 15 dependencies.
+-----------------------------------
+
+Store depends on contracts, never the reverse KEPT
+
+Contracts: 1 kept, 0 broken.
+$ uv run pytest
+============================= test session starts ==============================
+platform darwin -- Python 3.13.15, pytest-9.1.1, pluggy-1.7.0
+rootdir: /private<candidate-checkout>
+configfile: pyproject.toml
+testpaths: python
+plugins: socket-0.8.1
+collected 674 items
+
+python/fb_contracts/tests/test_digest.py .........                       [  1%]
+python/fb_contracts/tests/test_jcs.py .......................            [  4%]
+python/fb_contracts/tests/test_json_pointer.py ..                        [  5%]
+python/fb_contracts/tests/test_jsts.py ................................. [  9%]
+........................................................................ [ 20%]
+........................................................................ [ 31%]
+........................................................................ [ 41%]
+........................................................................ [ 52%]
+........................................................................ [ 63%]
+............................................                             [ 69%]
+python/fb_contracts/tests/test_payload_ref.py .......                    [ 70%]
+python/fb_contracts/tests/test_schema_normalization.py ..........        [ 72%]
+python/fb_contracts/tests/test_schema_parity.py ..............           [ 74%]
+python/fb_contracts/tests/test_smoke.py .                                [ 74%]
+python/fb_store/tests/test_clock.py ....                                 [ 75%]
+python/fb_store/tests/test_fsstore_blob.py .........                     [ 76%]
+python/fb_store/tests/test_fsstore_concurrency.py ....                   [ 77%]
+python/fb_store/tests/test_fsstore_durability.py ..........              [ 78%]
+python/fb_store/tests/test_fsstore_fail_closed.py ...................    [ 81%]
+python/fb_store/tests/test_fsstore_failures.py ......                    [ 82%]
+python/fb_store/tests/test_fsstore_keys.py ....................          [ 85%]
+python/fb_store/tests/test_fsstore_release.py ......                     [ 86%]
+python/fb_store/tests/test_import_contracts.py .                         [ 86%]
+python/fb_store/tests/test_layout.py ....                                [ 86%]
+python/fb_store/tests/test_migrations.py ............................... [ 91%]
+..................................                                       [ 96%]
+python/fb_store/tests/test_network_blocked.py .                          [ 96%]
+python/fb_store/tests/test_smoke.py .                                    [ 96%]
+python/fb_store/tests/test_sqlite_conflict.py .........                  [ 98%]
+python/fb_store/tests/test_sqlite_tx.py ............                     [100%]
+
+============================= 674 passed in 7.88s ==============================
+$ node tools/security/src/synthetic-data-check.ts contracts/fixtures
+{
+  "findings": []
+}
+$ node tools/security/src/secrets.ts
+{
+  "working": {
+    "scanner": "detect-secrets==1.5.0",
+    "detectors": 27,
+    "files": 143,
+    "findings": [
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 6,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 12,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 9,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 16,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 23,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 30,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 37,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 44,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 51,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 58,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 65,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 72,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "package.json",
+        "line": 25,
+        "type": "Secret Keyword",
+        "classification": "fixed-scan-command"
+      }
+    ],
+    "unresolved": 0
+  },
+  "index": {
+    "scanner": "detect-secrets==1.5.0",
+    "detectors": 27,
+    "files": 102,
+    "findings": [
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 6,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 12,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 9,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 16,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 23,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 30,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 37,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 44,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 51,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 58,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 65,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 72,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      }
+    ],
+    "unresolved": 0
+  },
+  "stagedFiles": 0,
+  "stagedCovered": true,
+  "exclusions": [
+    "docs (governance/evidence, not source)",
+    "contracts/vendor (third party)",
+    "lockfiles",
+    "CLAUDE.md",
+    "untracked spikes and Git-ignored files"
+  ]
+}
+[Per-file SHA-256 manifests retained in raw /tmp log; omitted here for concise evidence.]
+
+
+exit=0

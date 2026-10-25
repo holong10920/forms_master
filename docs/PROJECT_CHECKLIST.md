@@ -10,7 +10,7 @@
 |---|---|---|---|
 | G0 Scope | **APPROVED WITH ADJUSTMENTS** | 2026-10-23 | DECISIONS.md ADR-001..007 |
 | G1 Design | **APPROVED FOR LOCAL SYNTHETIC P0 IMPLEMENTATION** (baseline `6312f2b`) | 2026-10-25 | DECISIONS.md ADR-078 |
-| G2–G8 | TODO | | |
+| G2–G8 | G2 BLOCKED; G3–G8 TODO | 2026-10-25 | T12 container verification thiếu; không tự approve G2 |
 | G9 GitHub | BLOCKED (user xử lý visibility/ownership) | | ADR-007 |
 | G10 AWS | BLOCKED | | ADR-006 |
 | G11–G12 | TODO | | |
@@ -272,11 +272,11 @@
 
 | ID | Requirement (rút gọn) | Status | Evidence | Note |
 |---|---|---|---|---|
-| P02-01 | Scaffold monorepo đã được duyệt; setup TS strict, Python tooling, lint/format/typecheck/lockfiles. | TODO | | |
-| P02-02 | Implement typed shared contracts/schemas và tests. | TODO | | |
-| P02-03 | CI pull-request checks, README, ADR index, component/package conventions. | TODO | | |
-| P02-04 | Tách module boundaries, verify no import cycles. | TODO | | |
-| P02-05 | Local dev setup chạy được với demo fixtures, không cần AWS. | TODO | | |
+| P02-01 | Scaffold monorepo đã được duyệt; setup TS strict, Python tooling, lint/format/typecheck/lockfiles. | DONE | docs/evidence/P02/S0-T1-toolchain.txt; S0-T2-ts-baseline.txt; S0-T3-py-baseline.txt | CP1; frozen lockfiles, TS strict/Python tooling PASS |
+| P02-02 | Implement typed shared contracts/schemas và tests. | DONE | docs/evidence/P02/S0-T4-jcs-parity.txt; S0-T5-schema-pipeline.txt; S0-T6-jsts.txt | CP2; generated/parity/semantic/JSTS checks PASS |
+| P02-03 | CI pull-request checks, README, ADR index, component/package conventions. | IN_PROGRESS | README.md; docs/engineering/CONVENTIONS.md; docs/evidence/P02/S0-T13-verify-clean-clone.txt | CP5 commit scope APPROVED; committed-source verify sau commit; GitHub CI blocked G9 |
+| P02-04 | Tách module boundaries, verify no import cycles. | DONE | docs/evidence/P02/S0-T9-boundaries.txt | CP4 292df4b: five TS rules + Python negative fixture PASS; repo no cycles/violations |
+| P02-05 | Local dev setup chạy được với demo fixtures, không cần AWS. | IN_PROGRESS | docs/evidence/P02/S0-T7-fsstore.txt; S0-T8-sqlite.txt | Local primitives/init and synthetic contract fixtures PASS; demo forms belong to S1/S2; T12 environment blocked |
 
 ## PHASE 03 — Workflow/form engine (`P03`)
 

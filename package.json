@@ -24,7 +24,9 @@
     "py:imports": "uv run lint-imports",
     "secrets": "node tools/security/src/secrets.ts",
     "synthetic:check": "node tools/security/src/synthetic-data-check.ts contracts/fixtures",
-    "secrets:gitleaks": "sh tools/security/gitleaks.sh"
+    "secrets:gitleaks": "sh tools/security/gitleaks.sh",
+    "preflight": "node tools/verify/src/preflight.ts",
+    "verify": "pnpm preflight && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm gen:check && pnpm schemas:lint && pnpm boundaries && pnpm py:lint && pnpm py:typecheck && pnpm py:imports && pnpm py:test && pnpm synthetic:check && pnpm secrets"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
