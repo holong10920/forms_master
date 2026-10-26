@@ -3,24 +3,34 @@ async(page)=>{
  const check=(ok,what)=>{if(!ok)throw Error('L10N: '+what);};
  const waitNotice=async text=>page.locator('#notice').filter({hasText:text}).waitFor({timeout:30000});
  const click=async name=>{const b=page.getByRole('button',{name,exact:true});await b.scrollIntoViewIfNeeded();await b.focus();await b.press('Enter');};
- const role=async name=>{await page.locator('#account').selectOption(name);const logged=page.waitForResponse(r=>r.url().endsWith('/api/list')&&r.request().method()==='POST'&&r.status()===200);await page.getByRole('button',{name:'ログイン / 切替',exact:true}).click();await logged;await waitNotice('ログイン完了');await page.locator('#identity').filter({hasText:name}).waitFor();if(await page.locator('#site').inputValue()!=='site_sports_synthetic'){const listed=page.waitForResponse(r=>r.url().endsWith('/api/list'));await page.locator('#site').selectOption('site_sports_synthetic');await listed;}};
+ // Form Studio UI: accounts in the sign-in card / user menu; save, reload and autosave in the save menu; field types in the "追加" palette; field properties in inspector tabs; translations in the "翻訳" mode; reviews and releases in the "公開" mode; review, approve and publish are confirmed in dialogs.
+ const press=async l=>{await l.scrollIntoViewIfNeeded();await l.focus();await l.press('Enter');};
+ const setSwitch=async(l,on)=>{if(await l.isChecked()!==on){await l.focus();await l.press('Space');}if(await l.isChecked()!==on)throw Error('switch state');};
+ const menu=async id=>{await page.locator('#save-state').click();await press(page.locator(id));};
+ const tab=async key=>{await page.locator(`#inspector-tabs [data-tab="${key}"]`).click();await page.locator(`#inspector-tabs [data-tab="${key}"][aria-selected="true"]`).waitFor();};
+ const addField=async type=>{await page.locator('#left-tabs [data-tab="add"]').click();await press(page.locator(`#palette [data-add-type="${type}"]`));};
+ const mode=async key=>{await page.locator(`#modes [data-mode="${key}"]`).click();await page.locator(`#modes [data-mode="${key}"][aria-selected="true"]`).waitFor();};
+ const confirm=async name=>page.locator('dialog[data-confirm][open]').getByRole('button',{name,exact:true}).click();
+ const bulkOptions=async value=>{await tab('basic');await page.locator('#inspector summary',{hasText:'まとめて編集'}).click();await fillTab(page.getByLabel('選択肢 (値|表示名、1行1件)',{exact:true}),value);};
+ const openForm=async form=>{await page.locator('#home-link').click();await press(page.locator(`#forms [data-form-id="${form}"]`));};
+ const role=async name=>{if(await page.locator('#studio').isVisible())await page.locator('#identity-btn').click();const logged=page.waitForResponse(r=>r.url().endsWith('/api/list')&&r.request().method()==='POST'&&r.status()===200);await page.locator(`[data-account="${name}"]:visible`).click();await logged;await waitNotice('ログイン完了');await page.locator('#identity').filter({hasText:name}).waitFor({state:'attached'});if(await page.locator('#site').inputValue()!=='site_sports_synthetic'){const listed=page.waitForResponse(r=>r.url().endsWith('/api/list'));await page.locator('#site').selectOption('site_sports_synthetic');await listed;}};
  const fillTab=async(locator,value)=>{await locator.fill(value);await locator.press('Tab');};
  await page.goto(origin);await page.locator('#admin-locale').selectOption('ja');
- await role('synthetic-editor');await page.locator('#autosave').uncheck();
+ await role('synthetic-editor');
  // Build a bilingual synthetic form through the no-code Admin.
- await page.locator('#new-name').fill('合成多言語フォーム');await click('フォーム作成');await page.locator('#version').filter({hasText:'v1'}).waitFor();
- const form=await page.locator('#forms').inputValue();
+ await press(page.locator('#new-form'));await page.locator('#new-name').fill('合成多言語フォーム');await click('フォーム作成');await page.locator('#version').filter({hasText:'v1'}).waitFor();await page.locator('#save-state').click();await setSwitch(page.locator('#autosave'),false);await page.keyboard.press('Escape');
+ const form=new URL(page.url()).searchParams.get('form');
  const label=()=>page.getByLabel('表示名',{exact:true}),key=()=>page.getByLabel('データキー',{exact:true});
- await page.locator('#palette').selectOption('choice.radio');await click('フィールド追加');
- await fillTab(label(),'買取方法を選択してください');await page.getByLabel('required',{exact:true}).check();await fillTab(key(),'method');
- await fillTab(page.getByLabel('選択肢 (値|表示名、1行1件)',{exact:true}),'store|店頭買取\ndelivery|宅配買取');
- await page.locator('#palette').selectOption('text');await click('フィールド追加');
- await fillTab(label(),'お名前');await page.getByLabel('required',{exact:true}).check();await fillTab(key(),'nickname');await fillTab(page.getByLabel('maxLength',{exact:true}),'10');
- await click('ステップ追加');await page.locator('#palette').selectOption('text');await click('フィールド追加');
- await fillTab(label(),'コメント');await fillTab(key(),'comment');
+ await addField('choice.radio');
+ await fillTab(label(),'買取方法を選択してください');await tab('validation');await setSwitch(page.getByLabel('必須',{exact:true}),true);await tab('advanced');await fillTab(key(),'method');
+ await bulkOptions('store|店頭買取\ndelivery|宅配買取');
+ await addField('text');
+ await fillTab(label(),'お名前');await tab('validation');await setSwitch(page.getByLabel('必須',{exact:true}),true);await fillTab(page.getByLabel('最大文字数',{exact:true}),'10');await tab('advanced');await fillTab(key(),'nickname');
+ await page.locator('#left-tabs [data-tab="outline"]').click();await click('ステップを追加');await addField('text');
+ await fillTab(label(),'コメント');await tab('advanced');await fillTab(key(),'comment');
  // Translation panel: enable vi and edit both languages independently.
  const panel=page.locator('#translations');
- await panel.getByLabel('ベトナム語 (vi-VN) を有効化',{exact:true}).check();
+ await mode('translate');await setSwitch(panel.getByLabel('ベトナム語 (vi-VN) を有効化',{exact:true}),true);
  const cell=(row,lang)=>panel.locator(`input[data-lang="${lang}"][data-row${row}]`);
  const ids=await panel.locator('input[data-lang="vi"][data-row$=":label"]').evaluateAll(xs=>xs.map(x=>x.dataset.row));
  check(ids.length===3,'three field label rows');const [method,nickname,comment]=ids.map(id=>id.split(':')[1]);
@@ -38,10 +48,10 @@ async(page)=>{
  const state=row=>cell(row,'vi').locator('xpath=ancestor::tr').locator('[data-state]').getAttribute('data-state');
  check(await state(`="field:${comment}:label"`)==='missing','missing translation status');check(await state(`="field:${method}:label"`)==='done','translated status');
  // Japanese-only edits in the Inspector keep the Vietnamese text (options reordered by value).
- await page.getByRole('button',{name:'form · stp_details',exact:true}).click();
- await page.getByRole('button',{name:'買取方法を選択してください * · choice.radio',exact:true}).click();
- await fillTab(page.getByLabel('選択肢 (値|表示名、1行1件)',{exact:true}),'store|店頭買取（合成）\ndelivery|宅配買取');
- await fillTab(label(),'買取方法を選択してください');
+ await mode('build');await page.locator('#left-tabs [data-tab="outline"]').click();await page.locator('#steps [data-focus-key="ol-step:stp_details"]').click();
+ await page.locator('#steps').getByRole('button',{name:'買取方法を選択してください * · 単一選択（ラジオ）',exact:true}).click();
+ await bulkOptions('store|店頭買取（合成）\ndelivery|宅配買取');
+ await fillTab(label(),'買取方法を選択してください');await mode('translate');
  check(await cell(`="option:${method}:store"`,'vi').inputValue()==='Bán trực tiếp tại cửa hàng','option vi kept after ja edit');
  check(await cell(`="field:${method}:label"`,'vi').inputValue()==='Vui lòng chọn phương thức thu mua','label vi kept after ja edit');
  // Auto-translation: no approved provider -> explicit unavailable state, nothing filled.
@@ -55,13 +65,13 @@ async(page)=>{
  check(await cell(`="field:${comment}:help"`,'vi').inputValue()==='Ghi chú (bản nháp)','machine draft filled empty cell');
  check(await panel.locator('[data-state="machine"]').count()===1,'machine draft marked for review');
  // Save, reload: both languages persist.
- await click('保存');await waitNotice('保存しました');await click('開く / 再読込');await waitNotice('保存済みドラフトを読み込みました');
+ await menu('#save');await waitNotice('保存しました');await menu('#load');await waitNotice('保存済みドラフトを読み込みました');await mode('translate');
  for(const [row,[ja,vi]] of Object.entries(translations)){check(await cell(row,'vi').inputValue()===vi,'reload vi '+row);if(ja!==null)check(await cell(row,'ja').inputValue()===ja,'reload ja '+row);}
  check(await cell(`="option:${method}:store"`,'ja').inputValue()==='店頭買取（合成）','reload option ja');
  check(await panel.getByLabel('ベトナム語 (vi-VN) を有効化',{exact:true}).isChecked(),'locale persisted');
  // Admin chrome ja -> vi -> ja; user content is never translated.
  await page.locator('#admin-locale').selectOption('vi');
- await page.getByRole('button',{name:'Lưu',exact:true}).waitFor();check(await page.locator('html').getAttribute('lang')==='vi-VN','admin html lang vi');
+ await page.locator('#save').filter({hasText:'Lưu ngay'}).waitFor({state:'attached'});check(await page.locator('html').getAttribute('lang')==='vi-VN','admin html lang vi');
  check(await page.locator('#form-title').inputValue()==='合成多言語フォーム','form name untouched');
  check(await panel.getByRole('button',{name:'Dịch tự động ja→vi (bản nháp)',exact:true}).count()===1,'panel chrome translated');
  await panel.scrollIntoViewIfNeeded();await page.screenshot({path:'output/playwright/l10n-admin-vi.png',fullPage:true});
@@ -70,12 +80,12 @@ async(page)=>{
  const preview=page.frameLocator('#preview-frame');await preview.locator('#app[data-locale="vi"]').waitFor();
  await preview.getByText('Vui lòng chọn phương thức thu mua',{exact:true}).waitFor();await preview.getByRole('button',{name:'日本語',exact:true}).click();
  await preview.locator('#app[data-locale="ja"]').waitFor();await preview.getByText('買取方法を選択してください',{exact:true}).waitFor();
- await page.locator('#admin-locale').selectOption('ja');await page.getByRole('button',{name:'保存',exact:true}).waitFor();
+ await page.locator('#admin-locale').selectOption('ja');await page.locator('#save').filter({hasText:'今すぐ保存'}).waitFor({state:'attached'});
  await page.locator('#preview-container').scrollIntoViewIfNeeded();await page.screenshot({path:'output/playwright/l10n-admin-ja.png',fullPage:true});
  // Review -> approve -> local publish.
- await click('レビュー依頼');await page.locator('#history').filter({hasText:/ · OPEN · /}).waitFor();
- await role('synthetic-reviewer');await page.locator('#forms').selectOption(form);await click('開く / 再読込');await waitNotice('保存済みドラフトを読み込みました');await click('承認 (Data Contract 確認)');await page.locator('#history').filter({hasText:/ · APPROVED · /}).waitFor();
- await role('synthetic-publisher');await page.locator('#forms').selectOption(form);await click('開く / 再読込');await waitNotice('保存済みドラフトを読み込みました');await click('ローカル公開');await page.locator('#history a').first().waitFor({timeout:60000});
+ await click('レビュー依頼');await page.locator('#review-dialog').waitFor();await click('レビューを依頼する');await page.locator('#history').filter({hasText:/ · OPEN · /}).waitFor();
+ await role('synthetic-reviewer');await openForm(form);await waitNotice('保存済みドラフトを読み込みました');await mode('publish');await click('承認 (Data Contract 確認)');await confirm('承認する');await page.locator('#history').filter({hasText:/ · APPROVED · /}).waitFor();
+ await role('synthetic-publisher');await openForm(form);await waitNotice('保存済みドラフトを読み込みました');await mode('publish');await click('ローカル公開');await confirm('公開する');await page.locator('#history a').first().waitFor({timeout:60000});
  const url=await page.locator('#history a').first().getAttribute('href');
  // Published customer runtime.
  const customer=await page.context().newPage();const customerErrors=[];customer.on('pageerror',e=>customerErrors.push(e.message));
