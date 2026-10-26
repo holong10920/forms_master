@@ -1,5 +1,8 @@
 # Context Handoff
 
+> 2026-10-26: L10N ja ⇄ vi (ADR-080) đã implement local synthetic, chưa commit. Xem `docs/evidence/L10N-JA-VI/RESULTS.md`
+> (phạm vi commit đề xuất, file trộn với CP2 Codex, giới hạn). Không có provider dịch tự động; không thêm khi chưa có ADR + user approval.
+
 > Current override: user authorized continuous local synthetic P0 Admin → customer → mock effect implementation.
 > See `docs/evidence/LOCAL-P0/RESULTS.md` and `PROPOSED-SCOPE.md`: runnable no-code MVP/browser E2E PASS;
 > all further source is uncommitted after CP1 `079d2864bf2a6cf240eaf58605f810fc6f94e4a2`.

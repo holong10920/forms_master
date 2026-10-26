@@ -77,6 +77,7 @@ Các mục spike chưa chứng minh hoặc chưa kiểm. **OPEN** cho tới khi 
 | VG-19 | Contract test CT-01..26 trên DynamoDB thật (emulator không đủ) | spec #5 §11.2 | sau G10 | OPEN |
 | VG-20 | *(C1c, ADR-076)* SR-08: Preview bị chặn khi capability bị revoke (TM-5V07, 4Z16) | spec #5 §7.3; spec #4 §14.7 | sau G1 | OPEN |
 | VG-21 | *(ADR-078, ngoại lệ ADR-005)* Phương pháp đo (S0) và budget số từ artifact thật (S2); Sports Motion-none = 0 Motion bytes/imports/chunks | ADR-005, ADR-078; spec #3 §17 | S0 (phương pháp), **trước S2 DONE** (budget) | S0 method PASS (T11); S2 baseline/budget và Motion artifact vẫn OPEN |
+| L10N-01 | *(ADR-080)* ja ⇄ vi: runtime/Preview/Published chuyển ngôn ngữ không reload, giữ dữ liệu, fallback ja, payload không đổi; Admin sửa song ngữ; dịch tự động không có provider | F-P1-06; ADR-048, ADR-080 | local synthetic P0 | Local PASS (`docs/evidence/L10N-JA-VI/`); provider dịch tự động OPEN |
 | — | Decision còn mở của spec #1 (OD-06, OD-10, OD-13). OD2-08/09 đã đóng (ADR-057/058) | spec #1 §21 | theo hạn từng mục | OPEN |
 
 > Cross-Subsystem Review (2026-10-24) MINOR-19: bảng này còn trích rev cũ và thiếu các gate sau G1/G10 (CT-26, ma trận TS/Python cross-version, cổng đo Motion P04, checklist ADR-053, Cognito, DynamoDB thật). **Đã cập nhật trong vòng sửa C1 (2026-10-25).**

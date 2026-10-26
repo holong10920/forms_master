@@ -1,0 +1,34 @@
+{
+ "allPassed": true,
+ "form": "frm_9b683fbafda94c62a94ae87bc250a7d6",
+ "url": "http://127.0.0.1:4173/r/dev_iqnwd3s6pnmbfrh6fh53goihma/index.html",
+ "payload": {
+  "method": "store",
+  "nickname": "Synthetic",
+  "comment": "合成メモ"
+ },
+ "step2": "stp_c051ae5877",
+ "scenarios": [
+  "ja-vi-ja",
+  "typing",
+  "mid-workflow",
+  "validation-per-locale",
+  "select-value-stable",
+  "fallback-ja",
+  "save-reload",
+  "preview-and-published",
+  "payload-unchanged"
+ ],
+ "autoTranslate": {
+  "provider": "TRANSLATION_PROVIDER_UNAVAILABLE",
+  "stubbedDraftsFillEmptyOnly": true
+ },
+ "screenshots": [
+  "l10n-admin-ja.png",
+  "l10n-admin-vi.png",
+  "l10n-customer-vi-required.png",
+  "l10n-customer-vi-fallback.png",
+  "l10n-customer-ja-review.png",
+  "l10n-customer-vi-complete.png"
+ ]
+}

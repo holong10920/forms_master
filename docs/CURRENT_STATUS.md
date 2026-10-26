@@ -13,6 +13,17 @@
 | Scope đã duyệt | G0: ADR-001..007. Nguyên tắc của spec #1: ADR-008..012, ADR-015, ADR-016. Design direction: ADR-017 (OD-01), ADR-018 (OD-14), ADR-019 (OD-02), ADR-020 (OD-04), ADR-021 (OD-07), ADR-022 (OD-12). Spec #2: ADR-023..025, ADR-027, ADR-028 (nguyên tắc), ADR-026 (APPROVED AS DESIGN DIRECTION WITH ADJUSTMENTS), ADR-029..035 (OD2-01..07, review #1). Spec #3: ADR-036 (self-contained form release), ADR-037 (session-pinned revision + stable/immutable URL), ADR-038 (CSR + Loading Shell), ADR-039 (reproducible build), ADR-040 (code splitting + prefetch), tất cả APPROVED AS DESIGN DIRECTION; ADR-041 (Vite 8.3.5 + Rolldown 1.2.15: CONDITIONALLY APPROVED); ADR-042 (SPIKE-GATE-01, đã chạy và review); ADR-043 (prefetch WebKit, ACCEPTED FOR P0); ADR-044 (pnpm: đánh giá ở P02); ADR-045 (Node 20 EOL → Node 24 LTS ở P02). Spec #4: ADR-046 (Business-first Visual Form Builder, APPROVED AS PRODUCT DIRECTION), ADR-047 (Hybrid Workspace, APPROVED AS PRODUCT/UX DESIGN DIRECTION), ADR-048 (Admin tiếng Nhật qua message catalog), ADR-049 (điều kiện gắn đích + named condition; APPROVED WITH CONDITIONS), ADR-050 (review trên snapshot bất biến), ADR-051 (shared block P0), ADR-052 (optimistic concurrency, không merge tự động), ADR-047 refinement (APPROVED), ADR-053 (Preview cô lập trên origin riêng). Spec #5: ADR-054 (yêu cầu publication/rollback, APPROVED AS DESIGN REQUIREMENTS), ADR-055 (phương án A, APPROVED AS DESIGN DIRECTION), ADR-056 (OIDC + BFF), ADR-057 (`T_stale` 60 s có giới hạn), ADR-058 (TTL draft 72 h, `G` 7 ngày, P0 defaults), ADR-059 (retention 30 ngày), ADR-060 (field inactive → 422), ADR-061 (Inspector P0 chỉ tự sinh). Spec #6: ADR-062 (Motion Product Direction), ADR-064..067. Security: ADR-063 (G-EXEC TOCTOU, P0 synthetic). ADR-013/014 + addenda vẫn PROPOSED. (không phải là duyệt architecture). **G1 APPROVED cho local synthetic P0. T10 alternative scanner ACCEPTED. G2 conditional; user authorized local synthetic S2 code/test, T12 required before S2 acceptance; G9/G10 BLOCKED.** |
 | URLs | Sports candidate: http://127.0.0.1:4173/r/dev_ctfxeqd7kkgar7pe7b5ws5csqu/index.html |
 
+## L10N ja ⇄ vi checkpoint — 2026-10-26
+
+User yêu cầu tính năng dịch Nhật ⇄ Việt (ADR-080, kéo một phần F-P1-06). Đã chạy được trên local synthetic:
+Customer Runtime/Preview/Published chuyển ja ⇄ vi không reload, Admin chrome ja ⇄ vi, panel 翻訳 sửa song ngữ.
+Dịch tự động: chỉ UI/contract, không provider → `TRANSLATION_PROVIDER_UNAVAILABLE`.
+E2E 9 kịch bản + regression Sports/PC/Admin PASS. Verify: vitest 627 PASS, 3 FAIL `alternative-scan`
+(detect-secrets không có offline, BLOCKED_BY_ENVIRONMENT); py 796 PASS.
+Sports JS gzip 12,154 B / 12,288 (headroom 134 B), 0 Motion.
+Evidence: `docs/evidence/L10N-JA-VI/RESULTS.md`. Chưa stage/commit; file trộn với CP2 Codex chưa commit.
+Host local đã khởi động lại để nạp op `translate`.
+
 ## Local P0 fast-track checkpoint — 2026-10-25
 
 User authorized continuous local P0 implementation across Admin/compiler/customer/outbox.

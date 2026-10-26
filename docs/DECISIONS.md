@@ -96,6 +96,7 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 | ADR-077 | Sole writer `forms-master-61` cho C1 Closure; Closure Mode (chỉ sửa BLOCKER/MAJOR có bằng chứng, MINOR ghi follow-up) | **APPROVED** (governance) | User (C1 closure) | 2026-10-25 |
 | ADR-078 | G1: duyệt baseline sáu spec tại `6312f2b` cho implementation local synthetic P0; đóng OD-06/OD-10/OD-13; ngoại lệ có kiểm soát cho ADR-005 (budget số chốt ở S2); ADR-013/014 vẫn PROPOSED | **APPROVED** | User (G1) | 2026-10-25 |
 | ADR-079 | Toolchain S0: Node 24.22.1 (pin theo project), pnpm 12.15.0 qua Corepack, TypeScript 6.0.3, Python 3.13 + uv; chốt ADR-044/045 cho P02 | **APPROVED** (D1–D5, S0 plan review) | User (S0 plan review) | 2026-10-25 |
+| ADR-080 | Kéo F-P1-06 (một phần) vào local P0: bản địa hoá ja ⇄ vi offline, pin trong IR; dịch tự động chỉ có UI/contract, không provider | **IMPLEMENTED (local synthetic), chờ user review** | User yêu cầu (feature request 2026-10-26) | 2026-10-26 |
 
 ---
 
@@ -1294,3 +1295,16 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 - **Evaluation (evidence `docs/evidence/P02/S0-T1-toolchain.txt`):** VG-04 PASS: pnpm cài fixture, `--frozen-lockfile`, `workspace:*`, một bản React 19.3.1. Lỗi arborist của npm 10.8.2 **không** tái hiện được với fixture này (chỉ ghi nhận). Engine-strict từ chối Node 20 khi cài mới (`ERR_PNPM_UNSUPPORTED_ENGINE`). VG-05 PARTIAL: image builder ở T12; A/B tái lập và isolation ở S2.
 - **Đánh đổi:** Volta vẫn quản Node theo project; pnpm cần thêm `.tools/bin` vào `PATH` (hướng dẫn ở README). pnpm 12 đổi tên cấu hình (`allowBuilds`) và không có `--prod=false`.
 - **Người duyệt:** User (S0 plan review, D1–D5). **Ngày:** 2026-10-25.
+
+## ADR-080 — Bản địa hoá Nhật ⇄ Việt cho local P0 (kéo một phần F-P1-06)
+
+- **Bối cảnh:** User yêu cầu (2026-10-26) tính năng dịch/chuyển ngôn ngữ ja ⇄ vi dùng được trong Admin và Customer Runtime. F-P1-06 vốn là P1. ADR-048 đã mở đường thêm ngôn ngữ cho Admin qua message catalog.
+- **Quyết định:**
+  - Text bản địa hoá có dạng `{ja, vi?}`; `locale: {default: "ja", supported: ["ja"] | ["ja","vi"]}`; `texts` override message hệ thống. Ngôn ngữ mặc định luôn là ja; schema từ chối locale khác.
+  - Compiler resolve message theo từng locale và **pin vào IR** của release. Runtime không gọi API, không mang chuỗi message riêng; thiếu bản vi thì fallback ja (`lang="ja-JP"`). Preview và Published dùng cùng IR.
+  - Runtime: bộ chọn ngôn ngữ chỉ hiện khi > 1 locale; chuyển không reload, giữ dữ liệu/step/validation; nhớ theo session (`fb.locale`), `?lang=` làm giá trị đầu. Payload, id, key, option value, rule không đổi.
+  - Admin: chrome UI chuyển ja ⇄ vi bằng lớp từ điển `web/i18n.js` (exact match + pattern). Đây là bước tạm của local P0, chưa phải message catalog hoàn chỉnh theo ADR-048. Panel 翻訳 sửa song song ja/vi.
+  - Dịch tự động: op `translate` có contract và UI, nhưng **không có provider được duyệt** nên luôn trả `TRANSLATION_PROVIDER_UNAVAILABLE`. Không gọi Google/DeepL/OpenAI hay dịch vụ ngoài. Draft máy chỉ điền ô trống, không ghi đè bản dịch tay.
+- **Evaluation:** `docs/evidence/L10N-JA-VI/RESULTS.md`. Browser E2E 9 kịch bản PASS; unit TS/Python PASS; regression Sports/PC/Admin PASS. Sports Motion-none JS gzip 12,154 B (giới hạn 12,288), 0 Motion.
+- **Đánh đổi:** headroom JS Sports chỉ còn 134 B. Label shared block, fixture Sports/PC, plugin store-selector và boot error vẫn chỉ ja (fallback). Chọn provider dịch tự động cần ADR riêng + user approval (API key, dữ liệu gửi ra ngoài).
+- **Người duyệt:** User yêu cầu tính năng; kết quả chờ user review. **Ngày:** 2026-10-26.

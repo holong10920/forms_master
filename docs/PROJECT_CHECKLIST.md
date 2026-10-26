@@ -102,7 +102,7 @@
 | F-P1-03 | Store/map selector và logic hình thức thu mua (店頭/宅配/出張) theo từng site. | TODO | | |
 | F-P1-04 | Workflow actions registry: async check, upload, draft save, typed request mapping, retry/timeout policies. | TODO | | |
 | F-P1-05 | Template library: template theo ngành hàng, duplication/safe overrides. | TODO | | |
-| F-P1-06 | I18n/multi-locale: Japanese default, dictionary, label/error localization, accessibility. | TODO | | |
+| F-P1-06 | I18n/multi-locale: Japanese default, dictionary, label/error localization, accessibility. | PARTIAL (ja ⇄ vi local synthetic, ADR-080; chưa có provider dịch tự động) | `docs/evidence/L10N-JA-VI/RESULTS.md` | E2E `l10n-browser.txt` PASS; `l10n.test.ts` 3 PASS; `test_translation.py` 3 PASS |
 | F-P1-07 | Release approval workflow: draft → review → approve → publish, compare revisions, scheduled publishing. | TODO | | |
 | F-P1-08 | Analytics funnel/drop-off/conversion/error, consent và privacy-safe events. | TODO | | |
 | F-P1-09 | Extended Motion Editor: stagger, spring, conditional sequences, micro-interactions, granular preview; preserve performance. | TODO | | |
