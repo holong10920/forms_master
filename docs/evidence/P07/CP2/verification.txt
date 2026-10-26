@@ -1,0 +1,10 @@
+pnpm verify — exit 0
+preflight PASS: Node 24.22.1, pnpm 12.15.0
+All matched files use Prettier code style!
+ Test Files  27 passed (27)
+      Tests  622 passed | 15 expected fail | 1 skipped (638)
+✔ no dependency violations found (99 modules, 269 dependencies cruised)
+All checks passed!
+Success: no issues found in 52 source files
+============================= 727 passed in 7.44s ==============================
+15 declared expected-fail; one optional Gitleaks CLI test intentionally skipped. Gitleaks NOT_EXECUTED.

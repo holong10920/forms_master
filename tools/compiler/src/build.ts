@@ -14,7 +14,10 @@ import { join, resolve, relative, dirname } from "node:path";
 import { tmpdir } from "node:os";
 import { build, type Plugin } from "vite";
 import { loadDefinition } from "@fb/form-engine";
-import { canonicalJson } from "@fb/contracts";
+import { resolveAssets } from "./resolve.ts";
+import { storeEntry, motionEntry } from "./bindings.ts";
+import { gzipSync } from "node:zlib";
+import { canonicalJson, type FormDefinitionV1 } from "@fb/contracts";
 export const root = resolve(import.meta.dirname, "../../..");
 const hash = (value: string | Uint8Array) => createHash("sha256").update(value).digest("hex");
 const json = (value: unknown) => Buffer.from(canonicalJson(value));
@@ -25,12 +28,25 @@ export interface Chunk {
   staticImports: string[];
   dynamicImports: string[];
 }
-export function audit(chunks: Chunk[], files: Map<string, Buffer>): void {
+export function audit(
+  chunks: Chunk[],
+  files: Map<string, Buffer>,
+  profile: { plugin: boolean; motion: boolean } = { plugin: false, motion: false },
+): void {
   const modules = chunks.flatMap((c) => c.modules);
-  if (modules.some((m) => /motion|store-selector/iu.test(m.id)))
+  if (modules.some((m) => /\/server\/|\/design\/|fixtures\/|\.py$/u.test(m.id)))
+    throw new Error("E-ARTIFACT-FORBIDDEN-FACET");
+  if (
+    modules.some(
+      (m) =>
+        (!profile.motion && /motion/iu.test(m.id)) ||
+        (!profile.plugin && /store-selector/iu.test(m.id)),
+    )
+  )
     throw new Error("E-ARTIFACT-MOTION-OR-STORE");
   for (const c of chunks) {
-    if (c.dynamicImports.length) throw new Error("E-ARTIFACT-UNEXPECTED-DYNAMIC-IMPORT");
+    if (c.dynamicImports.length && !profile.plugin && !profile.motion)
+      throw new Error("E-ARTIFACT-UNEXPECTED-DYNAMIC-IMPORT");
     for (const path of c.staticImports) if (!files.has(path)) throw new Error("E-ARTIFACT-IMPORT");
   }
   for (const [path, bytes] of files) {
@@ -43,7 +59,8 @@ export function audit(chunks: Chunk[], files: Map<string, Buffer>): void {
     const text = bytes.toString("utf8");
     if (path.endsWith(".map") || /sourceMappingURL|\/Users\/|\/home\/|[A-Z]:\\/u.test(text))
       throw new Error("E-ARTIFACT-SOURCE-LEAK");
-    if (/import\s*\(\s*["'][^"']*motion/iu.test(text)) throw new Error("E-ARTIFACT-MOTION");
+    if (!profile.motion && /import\s*\(\s*["'][^"']*motion/iu.test(text))
+      throw new Error("E-ARTIFACT-MOTION");
   }
 }
 const packageAllow = new Set([
@@ -53,25 +70,47 @@ const packageAllow = new Set([
   "fast-uri",
   "json-schema-traverse",
   "require-from-string",
+  "react",
+  "react-dom",
+  "scheduler",
+  "motion",
+  "motion-dom",
+  "motion-utils",
+  "framer-motion",
+  "tslib",
 ]);
 function moduleId(id: string, generated: string): string {
   if (id.startsWith("\0")) {
     const name = id.slice(1);
-    if (!["vite/preload-helper.js", "rolldown/runtime"].includes(name))
+    if (!["vite/preload-helper.js", "rolldown/runtime", "rolldown/runtime.js"].includes(name))
       throw new Error(`E-VIRTUAL-MODULE: ${name}`);
     return `virtual:${name}`;
   }
   const path = realpathSync(id.split("?")[0] ?? id);
   if (path === realpathSync(generated)) return "gen:entry.ts";
+  if (
+    dirname(path) === dirname(realpathSync(generated)) &&
+    ["store.ts", "motion.ts"].includes(path.split("/").at(-1) ?? "")
+  )
+    return `gen:${path.split("/").at(-1) ?? "entry"}`;
   const p = relative(root, path).replaceAll("\\", "/");
-  if (/^packages\/(form-engine|contracts|static-runtime)\/src\/[^]*\.(ts|css)$/u.test(p)) {
+  if (
+    /^packages\/(form-engine|contracts|static-runtime|sdk-browser|motion-presets|motion-adapter)\/src\/[^]*\.(tsx?|css)$/u.test(
+      p,
+    )
+  ) {
     const name = p.split("/")[1];
     if (!name) throw new Error("E-MODULE-ID");
-    return `platform:@fb/${name}@${(JSON.parse(readFileSync(join(root, "packages", name, "package.json"), "utf8")) as { version: string }).version}/${p.split("/").slice(2).join("/")}`;
+    return `platform:${(JSON.parse(readFileSync(join(root, "packages", name, "package.json"), "utf8")) as { name: string }).name}@${(JSON.parse(readFileSync(join(root, "packages", name, "package.json"), "utf8")) as { version: string }).version}/${p.split("/").slice(2).join("/")}`;
   }
+  if (p === "plugins/store-selector/browser/index.tsx")
+    return "rel:dev-store-selector@1.0.0/browser/index.tsx";
   if (p.startsWith("node_modules/") || path.includes("/node_modules/")) {
     let dir = dirname(path);
-    while (!existsSync(join(dir, "package.json"))) {
+    while (
+      !existsSync(join(dir, "package.json")) ||
+      !(JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) as { name?: string }).name
+    ) {
       const parent = dirname(dir);
       if (parent === dir) throw new Error("E-MODULE-ID");
       dir = parent;
@@ -101,6 +140,9 @@ function base32(hex: string): string {
   if (bits) out += symbol((n << (5 - bits)) & 31);
   return out;
 }
+export function candidateIdFor(manifest: unknown): string {
+  return `dev_${base32(hash(json(manifest))).slice(0, 26)}`;
+}
 const cssType = (path: string) =>
   path.endsWith(".js")
     ? "text/javascript"
@@ -124,12 +166,18 @@ export interface Candidate {
 }
 export async function compile(definition: unknown, outRoot: string): Promise<Candidate> {
   const ir = loadDefinition(definition);
+  const resolved = resolveAssets(root, definition as FormDefinitionV1, ir);
+  const profile = { plugin: resolved.plugin, motion: resolved.preset !== "none" };
   if (
-    ir.form.formId !== "frm_sports" ||
+    !/^frm_[a-z0-9_]{1,64}$/u.test(ir.form.formId) ||
     ir.nodes.some(
       (f) =>
         f.type === "group" ||
         ![
+          "number",
+          "tel",
+          "postal",
+          "katakana",
           "text",
           "textarea",
           "email",
@@ -137,13 +185,21 @@ export async function compile(definition: unknown, outRoot: string): Promise<Can
           "choice.radio",
           "choice.select",
           "calculated",
+          "choice.checkboxes",
+          "plugin:storeSel",
         ].includes(f.type),
     )
   )
     throw new Error("E-RUNTIME-PROFILE-UNSUPPORTED");
   const temp = mkdtempSync(join(tmpdir(), "fb-compiler-"));
   const entry = join(temp, "entry.ts");
-  writeFileSync(entry, 'import { boot } from "@fb/static-runtime"; boot();\n');
+  if (resolved.plugin) writeFileSync(join(temp, "store.ts"), storeEntry);
+  if (resolved.preset !== "none")
+    writeFileSync(join(temp, "motion.ts"), motionEntry(resolved.preset));
+  writeFileSync(
+    entry,
+    `import {boot} from "@fb/static-runtime";boot({${resolved.plugin ? 'loadStore:()=>import("./store.ts"),' : ""}${resolved.preset !== "none" ? 'loadMotion:()=>import("./motion.ts"),' : ""}});`,
+  );
   const files = new Map<string, Buffer>();
   const chunks: Chunk[] = [];
   try {
@@ -179,9 +235,17 @@ export async function compile(definition: unknown, outRoot: string): Promise<Can
       plugins: [proof],
       resolve: {
         alias: {
+          react: realpathSync(join(root, "tools/compiler/node_modules/react")),
+          "react-dom": realpathSync(join(root, "tools/compiler/node_modules/react-dom")),
           "@fb/static-runtime": join(root, "packages/static-runtime/src/index.ts"),
           "@fb/form-engine": join(root, "packages/form-engine/src/index.ts"),
           "@fb/contracts": join(root, "packages/contracts/src/index.ts"),
+          "@platform/store-selector/browser": join(
+            root,
+            "plugins/store-selector/browser/index.tsx",
+          ),
+          "@platform/motion-presets": join(root, "packages/motion-presets/src/index.ts"),
+          "@fb/motion-adapter": join(root, "packages/motion-adapter/src/index.tsx"),
         },
       },
       build: {
@@ -215,7 +279,7 @@ export async function compile(definition: unknown, outRoot: string): Promise<Can
     irPath = `assets/form-ir.${irHash}.json`;
   files.set(irPath, irBytes);
   chunks.sort((a, b) => compare(a.file, b.file));
-  audit(chunks, files);
+  audit(chunks, files, profile);
   const dataContract = {
     localDataContractFormat: 1,
     fields: ir.nodes.map((f) => ({
@@ -229,10 +293,18 @@ export async function compile(definition: unknown, outRoot: string): Promise<Can
   const graph = json({ chunkManifestFormat: 1, chunks });
   const manifest: Candidate["manifest"] = {
     localCandidateFormat: 1,
-    variant: "sports-demo-nomotion",
+    variant:
+      ir.form.formId === "frm_pc_reference"
+        ? "pc-demo"
+        : resolved.preset === "none"
+          ? "sports-demo-nomotion"
+          : "sports-demo",
     builderVerification: "VERIFICATION_PENDING",
     form: { ...ir.form, revision: `synthetic-${hash(json(definition)).slice(0, 16)}` },
     inputs: {
+      bindingsSource: `sha256:${hash(readFileSync(join(root, "tools/compiler/src/bindings.ts")))}`,
+      resolverSource: `sha256:${hash(readFileSync(join(root, "tools/compiler/src/resolve.ts")))}`,
+      capabilityLock: `sha256:${hash(resolved.lockBytes)}`,
       compilerSource: `sha256:${hash(readFileSync(new URL(import.meta.url)))}`,
       buildConfig: `sha256:${hash(json({ profile: "sports-demo-nomotion-local", vite: "8.3.5", rolldown: "1.2.15", base: "./", minify: "oxc", hashCharacters: "hex", unsafeEval: false }))}`,
       definition: `sha256:${hash(json(definition))}`,
@@ -257,9 +329,48 @@ export async function compile(definition: unknown, outRoot: string): Promise<Can
       }))
       .sort((a, b) => compare(a.path, b.path)),
   };
-  const candidateId = `dev_${base32(hash(json(manifest))).slice(0, 26)}`;
+  const candidateId = candidateIdFor(manifest);
+  const entryChunk = chunks.find((c) => c.modules.some((m) => m.id === "gen:entry.ts"));
+  if (!entryChunk) throw new Error("E-ENTRY");
+  const initial = new Set<string>();
+  const visit = (file: string): void => {
+    if (initial.has(file)) return;
+    initial.add(file);
+    for (const child of chunks.find((c) => c.file === file)?.staticImports ?? []) visit(child);
+  };
+  visit(entryChunk.file);
+  if (!profile.plugin && !profile.motion) {
+    const initialJS = [...initial].reduce(
+      (n, file) => n + gzipSync(files.get(file) ?? Buffer.alloc(0), { level: 9 }).length,
+      0,
+    );
+    if (initialJS > 12 * 1024) throw new Error("E-PERF-INITIAL-JS");
+  }
+  const closure = (start: string): string[] => {
+    const found = new Set<string>();
+    const walk = (f: string): void => {
+      if (found.has(f)) return;
+      found.add(f);
+      for (const child of chunks.find((c) => c.file === f)?.staticImports ?? []) walk(child);
+    };
+    walk(start);
+    return [...found].sort(compare);
+  };
+  const group = (name: string) => {
+    const c = chunks.find((c) => c.modules.some((m) => m.id === `gen:${name}.ts`));
+    return c ? closure(c.file) : [];
+  };
+  if (
+    [...initial].some((f) =>
+      chunks.find((c) => c.file === f)?.modules.some((m) => /motion|store-selector/iu.test(m.id)),
+    )
+  )
+    throw new Error("E-GROUP-IN-INITIAL");
   const metadata = {
     mode: "local-candidate",
+    plugin: resolved.plugin,
+    groups: { store: group("store"), motion: group("motion") },
+    assets: manifest.inventory.map((f) => ({ path: f.path, sha256: f.sha256.slice(7) })),
     releaseId: candidateId,
     formId: ir.form.formId,
     siteId: ir.form.siteId,
@@ -268,7 +379,7 @@ export async function compile(definition: unknown, outRoot: string): Promise<Can
   };
   const escape = (s: string) =>
     s.replaceAll("<", "\\u003c").replaceAll(">", "\\u003e").replaceAll("&", "\\u0026");
-  const js = manifest.inventory.filter((f) => f.path.endsWith(".js")),
+  const js = manifest.inventory.filter((f) => f.path === entryChunk.file),
     css = manifest.inventory.filter((f) => f.path.endsWith(".css"));
   if (js.length !== 1) throw new Error("E-UNEXPECTED-ENTRY-GRAPH");
   const main = js[0];
@@ -277,9 +388,16 @@ export async function compile(definition: unknown, outRoot: string): Promise<Can
     `sha256-${createHash("sha256")
       .update(files.get(path) ?? Buffer.alloc(0))
       .digest("base64")}`;
-  const html = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sports · Local Synthetic</title>${css.map((f) => `<link rel="stylesheet" href="./${f.path}" integrity="${sri(f.path)}" crossorigin="anonymous">`).join("")}</head><body><main id="app" aria-live="polite">読み込み中…</main><script type="application/json" id="release">${escape(canonicalJson(metadata))}</script><script type="module" src="./${main.path}" integrity="${sri(main.path)}" crossorigin="anonymous"></script></body></html>`;
+  const html = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${ir.form.formId === "frm_pc_reference" ? "PC" : "Sports"} · Local Synthetic</title>${css.map((f) => `<link rel="stylesheet" href="./${f.path}" integrity="${sri(f.path)}" crossorigin="anonymous">`).join("")}</head><body><main id="app" aria-live="polite">読み込み中…</main><script type="application/json" id="release">${escape(canonicalJson(metadata))}</script><script type="module" src="./${main.path}" integrity="${sri(main.path)}" crossorigin="anonymous"></script></body></html>`;
   files.set("index.html", Buffer.from(html));
-  audit(chunks, files);
+  if (!profile.plugin && !profile.motion) {
+    const size = [...initial, "index.html", ...css.map((f) => f.path)].reduce(
+      (n, file) => n + gzipSync(files.get(file) ?? Buffer.alloc(0), { level: 9 }).length,
+      0,
+    );
+    if (size > 16 * 1024) throw new Error("E-PERF-INITIAL-TOTAL");
+  }
+  audit(chunks, files, profile);
   const directory = resolve(outRoot, "r", candidateId);
   mkdirSync(dirname(directory), { recursive: true });
   if (existsSync(directory)) {
@@ -317,6 +435,11 @@ export async function compile(definition: unknown, outRoot: string): Promise<Can
     ["candidate-manifest.json", json(manifest)],
     ["chunk-manifest.json", graph],
     ["data-contract.json", json(dataContract)],
+    ["capability-lock.json", resolved.lockBytes],
+    [
+      "local-integrity.json",
+      json({ manifestDigest: hash(json(manifest)), indexHtmlDigest: hash(Buffer.from(html)) }),
+    ],
   ] as const) {
     const path = join(privateDir, name);
     if (existsSync(path) && !readFileSync(path).equals(data))

@@ -49,6 +49,82 @@
       "additionalProperties": {
         "$ref": "#/$defs/Condition"
       }
+    },
+    "dependencies": {
+      "type": "object",
+      "properties": {
+        "capabilities": {
+          "type": "object",
+          "properties": {
+            "storeSel": {
+              "type": "object",
+              "properties": {
+                "plugin": {
+                  "const": "@platform/store-selector"
+                },
+                "version": {
+                  "const": "1.0.0"
+                },
+                "capability": {
+                  "const": "storeSelector"
+                },
+                "kind": {
+                  "const": "fieldType"
+                }
+              },
+              "required": ["plugin", "version", "capability", "kind"],
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["capabilities"],
+      "additionalProperties": false
+    },
+    "motion": {
+      "type": "object",
+      "properties": {
+        "preset": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "enum": ["none", "subtle", "guided"]
+            },
+            "package": {
+              "const": "@platform/motion-presets"
+            },
+            "version": {
+              "const": "1.0.0"
+            }
+          },
+          "required": ["id", "package", "version"],
+          "additionalProperties": false
+        },
+        "categories": {
+          "type": "object",
+          "properties": {
+            "stepTransition": {
+              "enum": ["on", "off"]
+            },
+            "conditionalReveal": {
+              "enum": ["on", "off"]
+            },
+            "validationFeedback": {
+              "enum": ["on", "off"]
+            },
+            "submitFeedback": {
+              "enum": ["on", "off"]
+            }
+          },
+          "additionalProperties": false
+        },
+        "speed": {
+          "enum": ["slow", "standard", "fast"]
+        }
+      },
+      "required": ["preset"],
+      "additionalProperties": false
     }
   },
   "required": ["schemaVersion", "kind", "formId", "siteId", "fields", "steps"],
@@ -200,7 +276,8 @@
             "email",
             "tel",
             "postal",
-            "katakana"
+            "katakana",
+            "plugin:storeSel"
           ]
         },
         "label": {
@@ -298,6 +375,19 @@
             "required": ["use"],
             "additionalProperties": false
           }
+        },
+        "config": {
+          "type": "object",
+          "properties": {
+            "filterByPrefecture": {
+              "type": "boolean"
+            },
+            "placeholder": {
+              "type": "string",
+              "maxLength": 40
+            }
+          },
+          "additionalProperties": false
         }
       },
       "required": ["id", "key", "type", "classification"],

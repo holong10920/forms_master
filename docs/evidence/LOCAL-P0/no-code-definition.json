@@ -1,0 +1,108 @@
+{
+  "schemaVersion": "1.0.0",
+  "kind": "form",
+  "formId": "frm_932211156ced47d59f47fb542e08364a",
+  "siteId": "site_sports_synthetic",
+  "locale": {
+    "default": "ja",
+    "supported": [
+      "ja"
+    ]
+  },
+  "fields": [
+    {
+      "id": "fld_0268aee68a2b",
+      "key": "attendance",
+      "type": "choice.radio",
+      "label": {
+        "ja": "\u53c2\u52a0\u65b9\u6cd5"
+      },
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "yes",
+          "label": {
+            "ja": "\u306f\u3044"
+          }
+        },
+        {
+          "value": "no",
+          "label": {
+            "ja": "\u3044\u3044\u3048"
+          }
+        }
+      ]
+    },
+    {
+      "id": "fld_213cd7f348b5",
+      "key": "syntheticNickname",
+      "type": "text",
+      "label": {
+        "ja": "\u5408\u6210\u30cb\u30c3\u30af\u30cd\u30fc\u30e0 v2"
+      },
+      "classification": "personal",
+      "persist": "allowed",
+      "required": true
+    }
+  ],
+  "conditions": {},
+  "steps": [
+    {
+      "id": "stp_details",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_0268aee68a2b"
+        }
+      ],
+      "transitions": [
+        {
+          "when": {
+            "op": "eq",
+            "args": [
+              {
+                "ref": "$local:fld_0268aee68a2b"
+              },
+              {
+                "const": "no"
+              }
+            ]
+          },
+          "to": "stp_review"
+        },
+        {
+          "default": "stp_6afc106c0d"
+        }
+      ]
+    },
+    {
+      "id": "stp_6afc106c0d",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_213cd7f348b5"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_review"
+        }
+      ]
+    },
+    {
+      "id": "stp_review",
+      "kind": "review",
+      "transitions": [
+        {
+          "default": "stp_complete"
+        }
+      ]
+    },
+    {
+      "id": "stp_complete",
+      "kind": "complete"
+    }
+  ]
+}

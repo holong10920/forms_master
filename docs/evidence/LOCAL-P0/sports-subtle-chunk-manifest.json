@@ -1,0 +1,1037 @@
+{
+  "chunkManifestFormat": 1,
+  "chunks": [
+    {
+      "dynamicImports": [],
+      "file": "assets/chunk.bd23c5034933.js",
+      "modules": [
+        {
+          "bytes": 181,
+          "id": "gen:motion.ts"
+        },
+        {
+          "bytes": 1003,
+          "id": "pkg:framer-motion@14.6.0/dist/es/components/LazyMotion/index.mjs"
+        },
+        {
+          "bytes": 295,
+          "id": "pkg:framer-motion@14.6.0/dist/es/context/LayoutGroupContext.mjs"
+        },
+        {
+          "bytes": 232,
+          "id": "pkg:framer-motion@14.6.0/dist/es/context/LazyContext.mjs"
+        },
+        {
+          "bytes": 307,
+          "id": "pkg:framer-motion@14.6.0/dist/es/context/MotionConfigContext.mjs"
+        },
+        {
+          "bytes": 546,
+          "id": "pkg:framer-motion@14.6.0/dist/es/context/MotionContext/create.mjs"
+        },
+        {
+          "bytes": 227,
+          "id": "pkg:framer-motion@14.6.0/dist/es/context/MotionContext/index.mjs"
+        },
+        {
+          "bytes": 480,
+          "id": "pkg:framer-motion@14.6.0/dist/es/context/MotionContext/utils.mjs"
+        },
+        {
+          "bytes": 227,
+          "id": "pkg:framer-motion@14.6.0/dist/es/context/PresenceContext.mjs"
+        },
+        {
+          "bytes": 243,
+          "id": "pkg:framer-motion@14.6.0/dist/es/context/SwitchLayoutGroupContext.mjs"
+        },
+        {
+          "bytes": 895,
+          "id": "pkg:framer-motion@14.6.0/dist/es/gestures/focus.mjs"
+        },
+        {
+          "bytes": 783,
+          "id": "pkg:framer-motion@14.6.0/dist/es/gestures/hover.mjs"
+        },
+        {
+          "bytes": 1068,
+          "id": "pkg:framer-motion@14.6.0/dist/es/gestures/press.mjs"
+        },
+        {
+          "bytes": 1552,
+          "id": "pkg:framer-motion@14.6.0/dist/es/motion/features/animation/exit.mjs"
+        },
+        {
+          "bytes": 837,
+          "id": "pkg:framer-motion@14.6.0/dist/es/motion/features/animation/index.mjs"
+        },
+        {
+          "bytes": 259,
+          "id": "pkg:framer-motion@14.6.0/dist/es/motion/features/animations.mjs"
+        },
+        {
+          "bytes": 1151,
+          "id": "pkg:framer-motion@14.6.0/dist/es/motion/features/definitions.mjs"
+        },
+        {
+          "bytes": 319,
+          "id": "pkg:framer-motion@14.6.0/dist/es/motion/features/gestures.mjs"
+        },
+        {
+          "bytes": 410,
+          "id": "pkg:framer-motion@14.6.0/dist/es/motion/features/load-features.mjs"
+        },
+        {
+          "bytes": 1849,
+          "id": "pkg:framer-motion@14.6.0/dist/es/motion/features/viewport/index.mjs"
+        },
+        {
+          "bytes": 1208,
+          "id": "pkg:framer-motion@14.6.0/dist/es/motion/features/viewport/observers.mjs"
+        },
+        {
+          "bytes": 2796,
+          "id": "pkg:framer-motion@14.6.0/dist/es/motion/index.mjs"
+        },
+        {
+          "bytes": 227,
+          "id": "pkg:framer-motion@14.6.0/dist/es/motion/utils/symbol.mjs"
+        },
+        {
+          "bytes": 1015,
+          "id": "pkg:framer-motion@14.6.0/dist/es/motion/utils/use-motion-ref.mjs"
+        },
+        {
+          "bytes": 4164,
+          "id": "pkg:framer-motion@14.6.0/dist/es/motion/utils/use-visual-element.mjs"
+        },
+        {
+          "bytes": 2301,
+          "id": "pkg:framer-motion@14.6.0/dist/es/motion/utils/use-visual-state.mjs"
+        },
+        {
+          "bytes": 944,
+          "id": "pkg:framer-motion@14.6.0/dist/es/motion/utils/valid-prop.mjs"
+        },
+        {
+          "bytes": 872,
+          "id": "pkg:framer-motion@14.6.0/dist/es/render/components/create-proxy.mjs"
+        },
+        {
+          "bytes": 197,
+          "id": "pkg:framer-motion@14.6.0/dist/es/render/components/m/proxy.mjs"
+        },
+        {
+          "bytes": 392,
+          "id": "pkg:framer-motion@14.6.0/dist/es/render/dom/create-visual-element.mjs"
+        },
+        {
+          "bytes": 275,
+          "id": "pkg:framer-motion@14.6.0/dist/es/render/dom/features-animation.mjs"
+        },
+        {
+          "bytes": 881,
+          "id": "pkg:framer-motion@14.6.0/dist/es/render/dom/use-render.mjs"
+        },
+        {
+          "bytes": 787,
+          "id": "pkg:framer-motion@14.6.0/dist/es/render/dom/utils/filter-props.mjs"
+        },
+        {
+          "bytes": 388,
+          "id": "pkg:framer-motion@14.6.0/dist/es/render/dom/utils/is-svg-component.mjs"
+        },
+        {
+          "bytes": 327,
+          "id": "pkg:framer-motion@14.6.0/dist/es/render/html/use-html-visual-state.mjs"
+        },
+        {
+          "bytes": 1367,
+          "id": "pkg:framer-motion@14.6.0/dist/es/render/html/use-props.mjs"
+        },
+        {
+          "bytes": 265,
+          "id": "pkg:framer-motion@14.6.0/dist/es/render/html/utils/create-render-state.mjs"
+        },
+        {
+          "bytes": 439,
+          "id": "pkg:framer-motion@14.6.0/dist/es/render/svg/lowercase-elements.mjs"
+        },
+        {
+          "bytes": 692,
+          "id": "pkg:framer-motion@14.6.0/dist/es/render/svg/use-props.mjs"
+        },
+        {
+          "bytes": 292,
+          "id": "pkg:framer-motion@14.6.0/dist/es/render/svg/use-svg-visual-state.mjs"
+        },
+        {
+          "bytes": 243,
+          "id": "pkg:framer-motion@14.6.0/dist/es/render/svg/utils/create-render-state.mjs"
+        },
+        {
+          "bytes": 192,
+          "id": "pkg:framer-motion@14.6.0/dist/es/utils/is-browser.mjs"
+        },
+        {
+          "bytes": 272,
+          "id": "pkg:framer-motion@14.6.0/dist/es/utils/is-ref-object.mjs"
+        },
+        {
+          "bytes": 291,
+          "id": "pkg:framer-motion@14.6.0/dist/es/utils/use-constant.mjs"
+        },
+        {
+          "bytes": 255,
+          "id": "pkg:framer-motion@14.6.0/dist/es/utils/use-isomorphic-effect.mjs"
+        },
+        {
+          "bytes": 4089,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/AsyncMotionValueAnimation.mjs"
+        },
+        {
+          "bytes": 8381,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/JSAnimation.mjs"
+        },
+        {
+          "bytes": 3435,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/NativeAnimation.mjs"
+        },
+        {
+          "bytes": 1544,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/NativeAnimationExtended.mjs"
+        },
+        {
+          "bytes": 398,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/drivers/frame.mjs"
+        },
+        {
+          "bytes": 1822,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/generators/inertia.mjs"
+        },
+        {
+          "bytes": 1505,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/generators/keyframes.mjs"
+        },
+        {
+          "bytes": 9521,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/generators/spring.mjs"
+        },
+        {
+          "bytes": 545,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/generators/utils/calc-duration.mjs"
+        },
+        {
+          "bytes": 674,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/generators/utils/create-generator-easing.mjs"
+        },
+        {
+          "bytes": 211,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/generators/utils/is-generator.mjs"
+        },
+        {
+          "bytes": 571,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/generators/utils/velocity.mjs"
+        },
+        {
+          "bytes": 2154,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/interfaces/motion-value.mjs"
+        },
+        {
+          "bytes": 2902,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/interfaces/visual-element-target.mjs"
+        },
+        {
+          "bytes": 1370,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/interfaces/visual-element-variant.mjs"
+        },
+        {
+          "bytes": 641,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/interfaces/visual-element.mjs"
+        },
+        {
+          "bytes": 3909,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/keyframes/DOMKeyframesResolver.mjs"
+        },
+        {
+          "bytes": 4114,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/keyframes/KeyframesResolver.mjs"
+        },
+        {
+          "bytes": 508,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/keyframes/get-final.mjs"
+        },
+        {
+          "bytes": 218,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/keyframes/offsets/default.mjs"
+        },
+        {
+          "bytes": 339,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/keyframes/offsets/fill.mjs"
+        },
+        {
+          "bytes": 202,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/keyframes/offsets/time.mjs"
+        },
+        {
+          "bytes": 250,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/keyframes/utils/fill-wildcards.mjs"
+        },
+        {
+          "bytes": 304,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/keyframes/utils/is-none.mjs"
+        },
+        {
+          "bytes": 832,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/keyframes/utils/make-none-animatable.mjs"
+        },
+        {
+          "bytes": 2076,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/keyframes/utils/unit-conversion.mjs"
+        },
+        {
+          "bytes": 171,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/optimized-appear/data-id.mjs"
+        },
+        {
+          "bytes": 225,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/optimized-appear/get-appear-id.mjs"
+        },
+        {
+          "bytes": 610,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/utils/WithPromise.mjs"
+        },
+        {
+          "bytes": 586,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/utils/calc-child-stagger.mjs"
+        },
+        {
+          "bytes": 1120,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/utils/can-animate.mjs"
+        },
+        {
+          "bytes": 1033,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/utils/css-variables-conversion.mjs"
+        },
+        {
+          "bytes": 769,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/utils/default-transitions.mjs"
+        },
+        {
+          "bytes": 364,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/utils/get-value-transition.mjs"
+        },
+        {
+          "bytes": 385,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/utils/is-animatable.mjs"
+        },
+        {
+          "bytes": 756,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/utils/is-css-variable.mjs"
+        },
+        {
+          "bytes": 445,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/utils/is-transition-defined.mjs"
+        },
+        {
+          "bytes": 210,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/utils/make-animation-instant.mjs"
+        },
+        {
+          "bytes": 588,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/utils/notify-inspector.mjs"
+        },
+        {
+          "bytes": 354,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/utils/replace-transition-type.mjs"
+        },
+        {
+          "bytes": 272,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/utils/resolve-start-time.mjs"
+        },
+        {
+          "bytes": 340,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/utils/resolve-transition.mjs"
+        },
+        {
+          "bytes": 196,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/waapi/easing/cubic-bezier.mjs"
+        },
+        {
+          "bytes": 582,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/waapi/easing/map-easing.mjs"
+        },
+        {
+          "bytes": 547,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/waapi/easing/supported.mjs"
+        },
+        {
+          "bytes": 824,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/waapi/start-waapi-animation.mjs"
+        },
+        {
+          "bytes": 1145,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/waapi/supports/waapi.mjs"
+        },
+        {
+          "bytes": 16279,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/waapi/transforms/TransformAnimation.mjs"
+        },
+        {
+          "bytes": 163,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/waapi/transforms/groups.mjs"
+        },
+        {
+          "bytes": 240,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/waapi/utils/accelerated-values.mjs"
+        },
+        {
+          "bytes": 380,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/waapi/utils/apply-generator.mjs"
+        },
+        {
+          "bytes": 399,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/waapi/utils/is-browser-color.mjs"
+        },
+        {
+          "bytes": 429,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/waapi/utils/linear.mjs"
+        },
+        {
+          "bytes": 458,
+          "id": "pkg:motion-dom@14.6.0/dist/es/animation/waapi/utils/unsupported-easing.mjs"
+        },
+        {
+          "bytes": 305,
+          "id": "pkg:motion-dom@14.6.0/dist/es/events/add-dom-event.mjs"
+        },
+        {
+          "bytes": 191,
+          "id": "pkg:motion-dom@14.6.0/dist/es/events/event-info.mjs"
+        },
+        {
+          "bytes": 1888,
+          "id": "pkg:motion-dom@14.6.0/dist/es/frameloop/batcher.mjs"
+        },
+        {
+          "bytes": 165,
+          "id": "pkg:motion-dom@14.6.0/dist/es/frameloop/frame-data.mjs"
+        },
+        {
+          "bytes": 289,
+          "id": "pkg:motion-dom@14.6.0/dist/es/frameloop/frame.mjs"
+        },
+        {
+          "bytes": 211,
+          "id": "pkg:motion-dom@14.6.0/dist/es/frameloop/microtask.mjs"
+        },
+        {
+          "bytes": 218,
+          "id": "pkg:motion-dom@14.6.0/dist/es/frameloop/order.mjs"
+        },
+        {
+          "bytes": 1505,
+          "id": "pkg:motion-dom@14.6.0/dist/es/frameloop/render-step.mjs"
+        },
+        {
+          "bytes": 399,
+          "id": "pkg:motion-dom@14.6.0/dist/es/frameloop/sync-time.mjs"
+        },
+        {
+          "bytes": 215,
+          "id": "pkg:motion-dom@14.6.0/dist/es/gestures/drag/state/is-active.mjs"
+        },
+        {
+          "bytes": 1903,
+          "id": "pkg:motion-dom@14.6.0/dist/es/gestures/hover.mjs"
+        },
+        {
+          "bytes": 2057,
+          "id": "pkg:motion-dom@14.6.0/dist/es/gestures/press/index.mjs"
+        },
+        {
+          "bytes": 378,
+          "id": "pkg:motion-dom@14.6.0/dist/es/gestures/press/utils/is-keyboard-accessible.mjs"
+        },
+        {
+          "bytes": 1122,
+          "id": "pkg:motion-dom@14.6.0/dist/es/gestures/press/utils/keyboard.mjs"
+        },
+        {
+          "bytes": 151,
+          "id": "pkg:motion-dom@14.6.0/dist/es/gestures/press/utils/state.mjs"
+        },
+        {
+          "bytes": 277,
+          "id": "pkg:motion-dom@14.6.0/dist/es/gestures/utils/is-node-or-child.mjs"
+        },
+        {
+          "bytes": 287,
+          "id": "pkg:motion-dom@14.6.0/dist/es/gestures/utils/is-primary-pointer.mjs"
+        },
+        {
+          "bytes": 420,
+          "id": "pkg:motion-dom@14.6.0/dist/es/gestures/utils/setup.mjs"
+        },
+        {
+          "bytes": 607,
+          "id": "pkg:motion-dom@14.6.0/dist/es/projection/geometry/conversion.mjs"
+        },
+        {
+          "bytes": 214,
+          "id": "pkg:motion-dom@14.6.0/dist/es/projection/geometry/models.mjs"
+        },
+        {
+          "bytes": 143,
+          "id": "pkg:motion-dom@14.6.0/dist/es/projection/node/root.mjs"
+        },
+        {
+          "bytes": 137,
+          "id": "pkg:motion-dom@14.6.0/dist/es/projection/styles/scale-correction.mjs"
+        },
+        {
+          "bytes": 262,
+          "id": "pkg:motion-dom@14.6.0/dist/es/projection/utils/measure.mjs"
+        },
+        {
+          "bytes": 199,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/Feature.mjs"
+        },
+        {
+          "bytes": 10562,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/VisualElement.mjs"
+        },
+        {
+          "bytes": 868,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/dom/DOMVisualElement.mjs"
+        },
+        {
+          "bytes": 146,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/dom/is-css-var.mjs"
+        },
+        {
+          "bytes": 2299,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/dom/parse-transform.mjs"
+        },
+        {
+          "bytes": 229,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/dom/style-set.mjs"
+        },
+        {
+          "bytes": 208,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/dom/utils/camel-to-dash.mjs"
+        },
+        {
+          "bytes": 1332,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/html/HTMLVisualElement.mjs"
+        },
+        {
+          "bytes": 1111,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/html/utils/build-styles.mjs"
+        },
+        {
+          "bytes": 1596,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/html/utils/build-transform.mjs"
+        },
+        {
+          "bytes": 395,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/html/utils/render.mjs"
+        },
+        {
+          "bytes": 550,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/html/utils/scrape-motion-values.mjs"
+        },
+        {
+          "bytes": 145,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/store.mjs"
+        },
+        {
+          "bytes": 1529,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/svg/SVGVisualElement.mjs"
+        },
+        {
+          "bytes": 1251,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/svg/utils/build-attrs.mjs"
+        },
+        {
+          "bytes": 552,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/svg/utils/camel-case-attrs.mjs"
+        },
+        {
+          "bytes": 184,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/svg/utils/is-svg-tag.mjs"
+        },
+        {
+          "bytes": 491,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/svg/utils/path.mjs"
+        },
+        {
+          "bytes": 364,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/svg/utils/render.mjs"
+        },
+        {
+          "bytes": 570,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/svg/utils/scrape-motion-values.mjs"
+        },
+        {
+          "bytes": 6342,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/utils/animation-state.mjs"
+        },
+        {
+          "bytes": 225,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/utils/is-animation-controls.mjs"
+        },
+        {
+          "bytes": 427,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/utils/is-controlling-variants.mjs"
+        },
+        {
+          "bytes": 317,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/utils/is-forced-motion-value.mjs"
+        },
+        {
+          "bytes": 171,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/utils/is-keyframes-target.mjs"
+        },
+        {
+          "bytes": 188,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/utils/is-variant-label.mjs"
+        },
+        {
+          "bytes": 236,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/utils/keys-position.mjs"
+        },
+        {
+          "bytes": 451,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/utils/keys-transform.mjs"
+        },
+        {
+          "bytes": 965,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/utils/motion-values.mjs"
+        },
+        {
+          "bytes": 620,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/utils/reduced-motion/index.mjs"
+        },
+        {
+          "bytes": 207,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/utils/reduced-motion/state.mjs"
+        },
+        {
+          "bytes": 382,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/utils/resolve-dynamic-variants.mjs"
+        },
+        {
+          "bytes": 716,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/utils/resolve-variants.mjs"
+        },
+        {
+          "bytes": 694,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/utils/setters.mjs"
+        },
+        {
+          "bytes": 357,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/utils/shallow-compare.mjs"
+        },
+        {
+          "bytes": 305,
+          "id": "pkg:motion-dom@14.6.0/dist/es/render/utils/variant-props.mjs"
+        },
+        {
+          "bytes": 298,
+          "id": "pkg:motion-dom@14.6.0/dist/es/scope/active.mjs"
+        },
+        {
+          "bytes": 1537,
+          "id": "pkg:motion-dom@14.6.0/dist/es/utils/interpolate.mjs"
+        },
+        {
+          "bytes": 225,
+          "id": "pkg:motion-dom@14.6.0/dist/es/utils/is-html-element.mjs"
+        },
+        {
+          "bytes": 1174,
+          "id": "pkg:motion-dom@14.6.0/dist/es/utils/mix/color.mjs"
+        },
+        {
+          "bytes": 2447,
+          "id": "pkg:motion-dom@14.6.0/dist/es/utils/mix/complex.mjs"
+        },
+        {
+          "bytes": 158,
+          "id": "pkg:motion-dom@14.6.0/dist/es/utils/mix/immediate.mjs"
+        },
+        {
+          "bytes": 753,
+          "id": "pkg:motion-dom@14.6.0/dist/es/utils/mix/index.mjs"
+        },
+        {
+          "bytes": 179,
+          "id": "pkg:motion-dom@14.6.0/dist/es/utils/mix/number.mjs"
+        },
+        {
+          "bytes": 327,
+          "id": "pkg:motion-dom@14.6.0/dist/es/utils/mix/visibility.mjs"
+        },
+        {
+          "bytes": 641,
+          "id": "pkg:motion-dom@14.6.0/dist/es/utils/resolve-elements.mjs"
+        },
+        {
+          "bytes": 121,
+          "id": "pkg:motion-dom@14.6.0/dist/es/utils/supports/flags.mjs"
+        },
+        {
+          "bytes": 327,
+          "id": "pkg:motion-dom@14.6.0/dist/es/utils/supports/linear-easing.mjs"
+        },
+        {
+          "bytes": 237,
+          "id": "pkg:motion-dom@14.6.0/dist/es/utils/supports/memo.mjs"
+        },
+        {
+          "bytes": 224,
+          "id": "pkg:motion-dom@14.6.0/dist/es/utils/supports/scroll-timeline.mjs"
+        },
+        {
+          "bytes": 4799,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/index.mjs"
+        },
+        {
+          "bytes": 154,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/auto.mjs"
+        },
+        {
+          "bytes": 678,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/color/hex.mjs"
+        },
+        {
+          "bytes": 898,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/color/hsla-to-rgba.mjs"
+        },
+        {
+          "bytes": 489,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/color/hsla.mjs"
+        },
+        {
+          "bytes": 560,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/color/index.mjs"
+        },
+        {
+          "bytes": 553,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/color/rgba.mjs"
+        },
+        {
+          "bytes": 605,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/color/utils.mjs"
+        },
+        {
+          "bytes": 805,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/complex/filter.mjs"
+        },
+        {
+          "bytes": 2761,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/complex/index.mjs"
+        },
+        {
+          "bytes": 339,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/complex/mask.mjs"
+        },
+        {
+          "bytes": 260,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/dimensions.mjs"
+        },
+        {
+          "bytes": 142,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/int.mjs"
+        },
+        {
+          "bytes": 477,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/maps/defaults.mjs"
+        },
+        {
+          "bytes": 1200,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/maps/number.mjs"
+        },
+        {
+          "bytes": 564,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/maps/transform.mjs"
+        },
+        {
+          "bytes": 302,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/numbers/index.mjs"
+        },
+        {
+          "bytes": 695,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/numbers/units.mjs"
+        },
+        {
+          "bytes": 144,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/test.mjs"
+        },
+        {
+          "bytes": 426,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/utils/animatable-none.mjs"
+        },
+        {
+          "bytes": 241,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/utils/color-regex.mjs"
+        },
+        {
+          "bytes": 154,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/utils/float-regex.mjs"
+        },
+        {
+          "bytes": 224,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/utils/get-as-type.mjs"
+        },
+        {
+          "bytes": 150,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/utils/is-nullish.mjs"
+        },
+        {
+          "bytes": 152,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/utils/sanitize.mjs"
+        },
+        {
+          "bytes": 255,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/types/utils/single-color-regex.mjs"
+        },
+        {
+          "bytes": 172,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/utils/is-motion-value.mjs"
+        },
+        {
+          "bytes": 200,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/utils/resolve-motion-value.mjs"
+        },
+        {
+          "bytes": 501,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/will-change/add-will-change.mjs"
+        },
+        {
+          "bytes": 193,
+          "id": "pkg:motion-dom@14.6.0/dist/es/value/will-change/is.mjs"
+        },
+        {
+          "bytes": 279,
+          "id": "pkg:motion-utils@14.6.0/dist/es/array.mjs"
+        },
+        {
+          "bytes": 183,
+          "id": "pkg:motion-utils@14.6.0/dist/es/clamp.mjs"
+        },
+        {
+          "bytes": 206,
+          "id": "pkg:motion-utils@14.6.0/dist/es/easing/anticipate.mjs"
+        },
+        {
+          "bytes": 257,
+          "id": "pkg:motion-utils@14.6.0/dist/es/easing/back.mjs"
+        },
+        {
+          "bytes": 247,
+          "id": "pkg:motion-utils@14.6.0/dist/es/easing/circ.mjs"
+        },
+        {
+          "bytes": 754,
+          "id": "pkg:motion-utils@14.6.0/dist/es/easing/cubic-bezier.mjs"
+        },
+        {
+          "bytes": 260,
+          "id": "pkg:motion-utils@14.6.0/dist/es/easing/ease.mjs"
+        },
+        {
+          "bytes": 230,
+          "id": "pkg:motion-utils@14.6.0/dist/es/easing/modifiers/mirror.mjs"
+        },
+        {
+          "bytes": 190,
+          "id": "pkg:motion-utils@14.6.0/dist/es/easing/modifiers/reverse.mjs"
+        },
+        {
+          "bytes": 234,
+          "id": "pkg:motion-utils@14.6.0/dist/es/easing/utils/is-bezier-definition.mjs"
+        },
+        {
+          "bytes": 231,
+          "id": "pkg:motion-utils@14.6.0/dist/es/easing/utils/is-easing-array.mjs"
+        },
+        {
+          "bytes": 815,
+          "id": "pkg:motion-utils@14.6.0/dist/es/easing/utils/map.mjs"
+        },
+        {
+          "bytes": 137,
+          "id": "pkg:motion-utils@14.6.0/dist/es/errors.mjs"
+        },
+        {
+          "bytes": 123,
+          "id": "pkg:motion-utils@14.6.0/dist/es/global-config.mjs"
+        },
+        {
+          "bytes": 171,
+          "id": "pkg:motion-utils@14.6.0/dist/es/is-numerical-string.mjs"
+        },
+        {
+          "bytes": 161,
+          "id": "pkg:motion-utils@14.6.0/dist/es/is-object.mjs"
+        },
+        {
+          "bytes": 155,
+          "id": "pkg:motion-utils@14.6.0/dist/es/is-zero-value-string.mjs"
+        },
+        {
+          "bytes": 234,
+          "id": "pkg:motion-utils@14.6.0/dist/es/memo.mjs"
+        },
+        {
+          "bytes": 137,
+          "id": "pkg:motion-utils@14.6.0/dist/es/noop.mjs"
+        },
+        {
+          "bytes": 164,
+          "id": "pkg:motion-utils@14.6.0/dist/es/pipe.mjs"
+        },
+        {
+          "bytes": 227,
+          "id": "pkg:motion-utils@14.6.0/dist/es/progress.mjs"
+        },
+        {
+          "bytes": 752,
+          "id": "pkg:motion-utils@14.6.0/dist/es/subscription-manager.mjs"
+        },
+        {
+          "bytes": 272,
+          "id": "pkg:motion-utils@14.6.0/dist/es/time-conversion.mjs"
+        },
+        {
+          "bytes": 234,
+          "id": "pkg:motion-utils@14.6.0/dist/es/velocity-per-second.mjs"
+        },
+        {
+          "bytes": 213,
+          "id": "pkg:motion@14.6.0/dist/es/react.mjs"
+        },
+        {
+          "bytes": 529585,
+          "id": "pkg:react-dom@19.3.1/cjs/react-dom-client.production.js"
+        },
+        {
+          "bytes": 6299,
+          "id": "pkg:react-dom@19.3.1/cjs/react-dom.production.js"
+        },
+        {
+          "bytes": 502,
+          "id": "pkg:react-dom@19.3.1/client.js"
+        },
+        {
+          "bytes": 497,
+          "id": "pkg:react-dom@19.3.1/index.js"
+        },
+        {
+          "bytes": 785,
+          "id": "pkg:react@19.3.1/cjs/react-jsx-runtime.production.js"
+        },
+        {
+          "bytes": 16011,
+          "id": "pkg:react@19.3.1/cjs/react.production.js"
+        },
+        {
+          "bytes": 188,
+          "id": "pkg:react@19.3.1/index.js"
+        },
+        {
+          "bytes": 212,
+          "id": "pkg:react@19.3.1/jsx-runtime.js"
+        },
+        {
+          "bytes": 9080,
+          "id": "pkg:scheduler@0.28.0/cjs/scheduler.production.js"
+        },
+        {
+          "bytes": 204,
+          "id": "pkg:scheduler@0.28.0/index.js"
+        },
+        {
+          "bytes": 1226,
+          "id": "platform:@fb/motion-adapter@1.0.0/src/index.tsx"
+        },
+        {
+          "bytes": 387,
+          "id": "platform:@platform/motion-presets@1.0.0/src/index.ts"
+        },
+        {
+          "bytes": 1155,
+          "id": "virtual:rolldown/runtime.js"
+        }
+      ],
+      "staticImports": []
+    },
+    {
+      "dynamicImports": [
+        "assets/chunk.bd23c5034933.js"
+      ],
+      "file": "assets/entry.e3e0866d626e.js",
+      "modules": [
+        {
+          "bytes": 221,
+          "id": "gen:entry.ts"
+        },
+        {
+          "bytes": 242,
+          "id": "platform:@fb/contracts@0.0.0/src/digest.ts"
+        },
+        {
+          "bytes": 1061,
+          "id": "platform:@fb/form-engine@0.1.0/src/canonical.ts"
+        },
+        {
+          "bytes": 11175,
+          "id": "platform:@fb/form-engine@0.1.0/src/definition.ts"
+        },
+        {
+          "bytes": 4838,
+          "id": "platform:@fb/form-engine@0.1.0/src/expression.ts"
+        },
+        {
+          "bytes": 5224,
+          "id": "platform:@fb/form-engine@0.1.0/src/groups.ts"
+        },
+        {
+          "bytes": 1651,
+          "id": "platform:@fb/form-engine@0.1.0/src/model.ts"
+        },
+        {
+          "bytes": 5078,
+          "id": "platform:@fb/form-engine@0.1.0/src/navigation.ts"
+        },
+        {
+          "bytes": 10891,
+          "id": "platform:@fb/form-engine@0.1.0/src/runtime.ts"
+        },
+        {
+          "bytes": 1480,
+          "id": "platform:@fb/form-engine@0.1.0/src/validators.ts"
+        },
+        {
+          "bytes": 12860,
+          "id": "platform:@fb/static-runtime@0.1.0/src/index.ts"
+        },
+        {
+          "bytes": 519,
+          "id": "platform:@fb/static-runtime@0.1.0/src/ports.ts"
+        },
+        {
+          "bytes": 0,
+          "id": "platform:@fb/static-runtime@0.1.0/src/style.css"
+        },
+        {
+          "bytes": 3235,
+          "id": "virtual:vite/preload-helper.js"
+        }
+      ],
+      "staticImports": []
+    }
+  ]
+}

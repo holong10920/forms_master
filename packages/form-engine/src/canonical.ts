@@ -1,6 +1,6 @@
 // Version 1 structured-field canonicalization, spec #1 §7.6.5. No free-text NFKC.
 export function canonical(value: string, kind: string): string {
-  if (kind.startsWith("choice.")) return value;
+  if (kind.startsWith("choice.") || kind.startsWith("plugin:")) return value;
   let text = value.trim();
   if (kind === "textarea") text = text.replaceAll("\r\n", "\n");
   if (kind === "email")

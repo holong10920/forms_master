@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Form Studio · Synthetic Local P0</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Form Studio</h1>
+      <p>Local synthetic P0 · 実データを入力しないでください</p>
+      <label
+        >Mock IdP
+        <select id="account">
+          <option>synthetic-editor</option>
+          <option>synthetic-reviewer</option>
+          <option>synthetic-publisher</option>
+          <option>synthetic-other</option>
+          <option>synthetic-security</option>
+        </select></label
+      ><button id="login">ログイン / 切替</button><button id="logout">ログアウト</button
+      ><span id="identity"></span>
+    </header>
+    <main id="studio" hidden>
+      <nav>
+        <label
+          >サイト
+          <select id="site"></select></label
+        ><label
+          >フォーム
+          <select id="forms"></select></label
+        ><button id="load">開く / 再読込</button
+        ><label>新規フォーム名 <input id="new-name" placeholder="イベント申込" /></label
+        ><button id="create">フォーム作成</button>
+      </nav>
+      <div class="toolbar">
+        <button id="save">保存</button><button id="validate">診断</button
+        ><button id="preview">プレビュー</button><button id="review">レビュー依頼</button
+        ><button id="delete">未公開ドラフト削除</button><span id="version"></span>
+      </div>
+      <p id="notice" role="status"></p>
+      <p id="diagnostics" role="alert"></p>
+      <div class="workspace">
+        <aside>
+          <h2>フィールド</h2>
+          <label
+            >種類
+            <select id="palette"></select></label
+          ><button id="add-field">フィールド追加</button><button id="add-step">ステップ追加</button>
+          <div id="steps"></div>
+        </aside>
+        <section>
+          <h2>Canvas</h2>
+          <div id="canvas"></div>
+        </section>
+        <aside>
+          <h2>Inspector</h2>
+          <form id="inspector"></form>
+        </aside>
+      </div>
+      <section>
+        <h2>分岐ルール</h2>
+        <div id="branches"></div>
+      </section>
+      <section>
+        <h2>レビュー / 公開履歴</h2>
+        <div id="history"></div>
+      </section>
+      <section>
+        <h2>隔離プレビュー</h2>
+        <iframe
+          id="preview-frame"
+          title="Interactive isolated preview"
+          sandbox="allow-scripts allow-same-origin"
+          src="about:blank"
+        ></iframe>
+      </section>
+    </main>
+    <script type="module" src="/admin.js"></script>
+  </body>
+</html>

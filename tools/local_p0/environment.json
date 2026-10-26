@@ -1,0 +1,5 @@
+{
+  "dataMode": "synthetic",
+  "connectors": ["mock-store-directory", "effect-mock-log"],
+  "allowedEffects": ["@platform/effect-mock-log#recordSubmission"]
+}

@@ -1,0 +1,13 @@
+{
+  "allPassed": true,
+  "invalidDecimalBlocked": true,
+  "integerPayloadTyped": true,
+  "cookie": {
+    "name": "__Host-session",
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Strict",
+    "domain": "localhost"
+  },
+  "browser": "156.0.8078.47"
+}

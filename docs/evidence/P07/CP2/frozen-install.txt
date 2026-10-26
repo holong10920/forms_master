@@ -1,0 +1,20 @@
+Scope: all 15 workspace projects
+✓ Lockfile passes supply-chain policies (verified 29m ago)
+Lockfile is up to date, resolution step is skipped
+Packages: +195
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 195, reused 195, downloaded 0, added 195, done
+
+devDependencies:
++ @eslint/js 10.0.1
++ @types/node 24.19.2
++ dependency-cruiser 18.7.0
++ eslint 10.13.0
++ prettier 3.9.10
++ typescript 6.0.3
++ typescript-eslint 8.72.0
++ vitest 5.0.5
+
+Done in 156ms using pnpm v12.15.0
+
+exit 0; sandbox fallback store first lacked offline tarball; user-cache execution reused all 195 packages, downloaded 0.

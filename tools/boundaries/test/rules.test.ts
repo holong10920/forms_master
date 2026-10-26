@@ -1,4 +1,12 @@
-import { cpSync, mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync } from "node:fs";
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+} from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -25,13 +33,16 @@ async function inspect(kind: string) {
     symlinkSync(join(dir, "packages/form-engine"), join(dir, "node_modules/@fb/form-engine"));
     symlinkSync(join(dir, "packages/static-runtime"), join(dir, "node_modules/@fb/static-runtime"));
   }
-  const result = await cruise(["packages"], {
-    ...config.options,
-    baseDir: dir,
-    ruleSet: { forbidden: config.forbidden ?? [] },
-    validate: true,
-    outputType: "json",
-  });
+  const result = await cruise(
+    ["packages", ...(existsSync(join(dir, "plugins")) ? ["plugins"] : [])],
+    {
+      ...config.options,
+      baseDir: dir,
+      ruleSet: { forbidden: config.forbidden ?? [] },
+      validate: true,
+      outputType: "json",
+    },
+  );
   return typeof result.output === "string"
     ? (JSON.parse(result.output) as ICruiseResult)
     : result.output;
@@ -63,5 +74,15 @@ test("engine negative fixtures enforce browser purity and contracts direction", 
     "browser-safe-no-node",
     "contracts-no-engine",
     "engine-no-presentation",
+  ]);
+});
+
+test("plugin/Motion negative fixtures reject host state, server facet and Node imports", async () => {
+  const report = await inspect("plugin-violations");
+  expect([...new Set(report.summary.violations.map((v) => v.rule.name))].sort()).toEqual([
+    "browser-safe-no-node",
+    "motion-no-engine-or-tools",
+    "no-relative-cross-package",
+    "plugin-browser-no-host-or-server",
   ]);
 });

@@ -1,0 +1,25 @@
+{
+  "name": "@fb/motion-adapter",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "volta": {
+    "extends": "../../package.json"
+  },
+  "exports": {
+    ".": "./src/index.tsx"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "motion": "14.6.0",
+    "@platform/motion-presets": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0"
+  }
+}

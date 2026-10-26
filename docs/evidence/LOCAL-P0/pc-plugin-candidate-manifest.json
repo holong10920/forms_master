@@ -1,0 +1,68 @@
+{
+  "builderVerification": "VERIFICATION_PENDING",
+  "form": {
+    "formId": "frm_pc_reference",
+    "revision": "synthetic-930bed4122e81dde",
+    "schemaVersion": "1.0.0",
+    "siteId": "site_pc_synthetic"
+  },
+  "inputs": {
+    "bindingsSource": "sha256:7cf4bd332a8bca64207e66a05b462ef45700583a76b8614a551e55f521e96d77",
+    "buildConfig": "sha256:f2cf83703c9de6d832cde7edecc2464ed581a277ba5a742755c9b4b31504f441",
+    "capabilityLock": "sha256:5920add1290383c4b4bb1419429de670e216b3fc84e9bb3e4f2d002273a6ccf5",
+    "chunkManifest": "sha256:ea01d8854a12b137bb827a7bc3f6093ac5b22b5d5860c3e196e14d131b7f68ee",
+    "compilerSource": "sha256:d58000bc6f57bef83c5438f5319cde5b5a6c9ace7b607240f4d683a4ac47449a",
+    "dataContract": "sha256:617ddce842817529d3eab551f545950a1c111b9e22ac2948b3070b9507e90c66",
+    "definition": "sha256:930bed4122e81dde525ed065b8b95712c8e33917ee08235acbd75c53d9a421a7",
+    "ir": "sha256:4c0a1b41297fc77d9b1ae9d37355c09dae645694d731e746f8cd9250e83f1e86",
+    "lockfile": "sha256:934eecd52384d3ef558d0d5f9ab8980f78a6bdbc042581d28c51ac339c4e0789",
+    "resolverSource": "sha256:c8f63bad61fc9fc74e39794b996bb590482aa784da955a5e661c6fd0ad8c47bb"
+  },
+  "inventory": [
+    {
+      "contentType": "text/javascript",
+      "path": "assets/chunk.475b32a23e17.js",
+      "sha256": "sha256:ef38edce913bf0e395dd3d019282429e40556679e5fef10fbf5a302227768d7e",
+      "size": 85620
+    },
+    {
+      "contentType": "text/javascript",
+      "path": "assets/chunk.7701aeeb2589.js",
+      "sha256": "sha256:e49422c3c37de9169631f5a0da5bde5df5083667a507a0dc0a5497d20098f380",
+      "size": 880
+    },
+    {
+      "contentType": "text/javascript",
+      "path": "assets/chunk.8ec1e97fe68a.js",
+      "sha256": "sha256:24d80d830c712c1076d5555d63ce6fe844b8be3f609bc0139a9c9d2132f0a0a4",
+      "size": 218918
+    },
+    {
+      "contentType": "text/javascript",
+      "path": "assets/entry.32d51db4e69c.js",
+      "sha256": "sha256:bd65b9247864cecd607a6681ab81560f03ba63f3bd9b9515714e6301e2d86780",
+      "size": 36841
+    },
+    {
+      "contentType": "text/css",
+      "path": "assets/entry.33ba83cdc600.css",
+      "sha256": "sha256:fa442e7db6b26007e8a98af91e9cb77e34b1ed3ec5f624b71f7d7ff1edcc3908",
+      "size": 855
+    },
+    {
+      "contentType": "application/json",
+      "path": "assets/form-ir.4c0a1b41297fc77d9b1ae9d37355c09dae645694d731e746f8cd9250e83f1e86.json",
+      "sha256": "sha256:4c0a1b41297fc77d9b1ae9d37355c09dae645694d731e746f8cd9250e83f1e86",
+      "size": 3929
+    }
+  ],
+  "localCandidateFormat": 1,
+  "toolchain": {
+    "compiler": "0.1.0",
+    "node": "24.22.1",
+    "rolldown": "1.2.15",
+    "runtime": "0.1.0",
+    "vite": "8.3.5"
+  },
+  "variant": "pc-demo"
+}

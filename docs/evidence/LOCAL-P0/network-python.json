@@ -1,0 +1,22 @@
+[
+  {
+    "role": "form-api",
+    "externalDeniedByKernel": true,
+    "localAllowed": true
+  },
+  {
+    "role": "preview-api",
+    "externalDeniedByKernel": true,
+    "localAllowed": true
+  },
+  {
+    "role": "outbox-worker",
+    "externalDeniedByKernel": true,
+    "localAllowed": true
+  },
+  {
+    "role": "adapter-runtime",
+    "externalDeniedByKernel": true,
+    "localAllowed": true
+  }
+]

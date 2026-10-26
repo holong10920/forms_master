@@ -1,0 +1,366 @@
+{
+  "schemaVersion": "1.0.0",
+  "kind": "form",
+  "formId": "frm_pc_reference",
+  "siteId": "site_pc_synthetic",
+  "locale": {
+    "default": "ja",
+    "supported": [
+      "ja"
+    ]
+  },
+  "fields": [
+    {
+      "id": "fld_device",
+      "key": "deviceType",
+      "type": "choice.radio",
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "desktop"
+        },
+        {
+          "value": "laptop"
+        },
+        {
+          "value": "tablet"
+        },
+        {
+          "value": "peripheral"
+        }
+      ]
+    },
+    {
+      "id": "fld_battery",
+      "key": "batteryHealth",
+      "type": "choice.radio",
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "good"
+        },
+        {
+          "value": "poor"
+        }
+      ],
+      "visibleWhen": {
+        "cond": "cnd_portable"
+      },
+      "requiredWhen": {
+        "cond": "cnd_portable"
+      }
+    },
+    {
+      "id": "fld_defects",
+      "key": "defects",
+      "type": "choice.checkboxes",
+      "classification": "public",
+      "persist": "allowed",
+      "options": [
+        {
+          "value": "none",
+          "exclusive": true
+        },
+        {
+          "value": "screen"
+        }
+      ],
+      "validators": [
+        {
+          "use": "exclusiveOption"
+        }
+      ]
+    },
+    {
+      "id": "fld_defect_count",
+      "key": "defectCount",
+      "type": "calculated",
+      "classification": "public",
+      "submit": "displayOnly",
+      "formula": {
+        "op": "count",
+        "args": [
+          {
+            "ref": "$local:fld_defects"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fld_method",
+      "key": "purchaseMethod",
+      "type": "choice.radio",
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "store"
+        },
+        {
+          "value": "takuhai"
+        }
+      ]
+    },
+    {
+      "id": "fld_store",
+      "key": "store",
+      "type": "plugin:storeSel",
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "config": {
+        "filterByPrefecture": false,
+        "placeholder": "店舗を選択してください"
+      }
+    },
+    {
+      "id": "fld_kit",
+      "key": "packingKit",
+      "type": "choice.radio",
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "yes"
+        },
+        {
+          "value": "no"
+        }
+      ]
+    },
+    {
+      "id": "fld_customer",
+      "key": "customerName",
+      "type": "text",
+      "classification": "personal",
+      "persist": "never",
+      "required": true,
+      "validators": [
+        {
+          "use": "maxLength",
+          "params": {
+            "value": 60
+          }
+        }
+      ]
+    },
+    {
+      "id": "fld_email",
+      "key": "email",
+      "type": "email",
+      "classification": "personal",
+      "persist": "never"
+    },
+    {
+      "id": "fld_consent",
+      "key": "consent",
+      "type": "boolean",
+      "classification": "public",
+      "persist": "never",
+      "required": true,
+      "validators": [
+        {
+          "use": "mustBeTrue"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "stp_category",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_device"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_condition"
+        }
+      ]
+    },
+    {
+      "id": "stp_condition",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_battery"
+        },
+        {
+          "field": "$local:fld_defects"
+        },
+        {
+          "field": "$local:fld_defect_count"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_method"
+        }
+      ],
+      "skipWhen": {
+        "op": "eq",
+        "args": [
+          {
+            "ref": "$local:fld_device"
+          },
+          {
+            "const": "peripheral"
+          }
+        ]
+      }
+    },
+    {
+      "id": "stp_method",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_method"
+        }
+      ],
+      "transitions": [
+        {
+          "when": {
+            "cond": "cnd_store"
+          },
+          "to": "stp_store"
+        },
+        {
+          "default": "stp_takuhai"
+        }
+      ]
+    },
+    {
+      "id": "stp_store",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_store"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_customer"
+        }
+      ]
+    },
+    {
+      "id": "stp_takuhai",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_kit"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_customer"
+        }
+      ]
+    },
+    {
+      "id": "stp_customer",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_customer"
+        },
+        {
+          "field": "$local:fld_email"
+        },
+        {
+          "field": "$local:fld_consent"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_review"
+        }
+      ]
+    },
+    {
+      "id": "stp_review",
+      "kind": "review",
+      "transitions": [
+        {
+          "when": {
+            "cond": "cnd_store"
+          },
+          "to": "stp_done_store"
+        },
+        {
+          "default": "stp_done_takuhai"
+        }
+      ]
+    },
+    {
+      "id": "stp_done_store",
+      "kind": "complete"
+    },
+    {
+      "id": "stp_done_takuhai",
+      "kind": "complete"
+    }
+  ],
+  "conditions": {
+    "cnd_portable": {
+      "label": {
+        "ja": "portable"
+      },
+      "when": {
+        "op": "in",
+        "args": [
+          {
+            "ref": "$local:fld_device"
+          },
+          {
+            "const": [
+              "laptop",
+              "tablet"
+            ]
+          }
+        ]
+      }
+    },
+    "cnd_store": {
+      "label": {
+        "ja": "store"
+      },
+      "when": {
+        "op": "eq",
+        "args": [
+          {
+            "ref": "$local:fld_method"
+          },
+          {
+            "const": "store"
+          }
+        ]
+      }
+    }
+  },
+  "dependencies": {
+    "capabilities": {
+      "storeSel": {
+        "plugin": "@platform/store-selector",
+        "version": "1.0.0",
+        "capability": "storeSelector",
+        "kind": "fieldType"
+      }
+    }
+  },
+  "motion": {
+    "preset": {
+      "id": "guided",
+      "package": "@platform/motion-presets",
+      "version": "1.0.0"
+    }
+  }
+}

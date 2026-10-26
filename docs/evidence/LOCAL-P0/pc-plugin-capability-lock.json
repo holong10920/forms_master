@@ -1,0 +1,33 @@
+{
+  "bindings": [
+    {
+      "key": {
+        "capability": "storeSelector",
+        "facet": "browser",
+        "plugin": "@platform/store-selector",
+        "version": "1.0.0"
+      },
+      "sourceDigest": "sha256:f507786cb5414d90871b3c77b7e1bb3b0c494a3231729f84e0682a44635c70b4"
+    },
+    {
+      "key": {
+        "capability": "storeList",
+        "facet": "server",
+        "plugin": "@platform/store-selector",
+        "version": "1.0.0"
+      },
+      "sourceDigest": "sha256:701cd7b89b4a1490cc9f6e8c964cdbd98608aa9e0209276cf8b899d00dd00e2b"
+    },
+    {
+      "key": {
+        "capability": "storeIdValid",
+        "facet": "server",
+        "plugin": "@platform/store-selector",
+        "version": "1.0.0"
+      },
+      "sourceDigest": "sha256:701cd7b89b4a1490cc9f6e8c964cdbd98608aa9e0209276cf8b899d00dd00e2b"
+    }
+  ],
+  "localWorkspaceIdentity": "dev:@platform/store-selector@1.0.0+ws.f507786cb541",
+  "manifestDigest": "sha256:587d16f3cc9cee84e237eb1ecca5962cb62c3f6fe50ee97d8feb0dcb57e259e3"
+}

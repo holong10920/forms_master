@@ -1,0 +1,269 @@
+[
+  {
+    "name": "sports",
+    "candidateId": "dev_5phun2ikn3s4yhgbkfslcawu53",
+    "url": "http://127.0.0.1:4173/r/dev_5phun2ikn3s4yhgbkfslcawu53/index.html",
+    "initialResources": [
+      {
+        "path": "assets/entry.2b2f6434f050.js",
+        "raw": 34832,
+        "gzip": 11443,
+        "brotli": 10151
+      },
+      {
+        "path": "assets/entry.33ba83cdc600.css",
+        "raw": 855,
+        "gzip": 467,
+        "brotli": 334
+      },
+      {
+        "path": "index.html",
+        "raw": 1420,
+        "gzip": 781,
+        "brotli": 612
+      }
+    ],
+    "initialJSGzip": 11443,
+    "initialHTMLCSSJSGzip": 12691,
+    "IR": {
+      "path": "assets/form-ir.315f7da5bd8e150b40fac7c60a8f25e04fd09765e674a8ea85c4cc582ca38b8b.json",
+      "raw": 2760,
+      "gzip": 718,
+      "brotli": 572
+    },
+    "allFiles": {
+      "tool": "fb-perf-sizes",
+      "toolVersion": "0.1.0",
+      "node": "v24.22.1",
+      "zlib": "1.3.2.1-motley-285e94b",
+      "brotli": "1.2.0",
+      "settings": {
+        "gzipLevel": 9,
+        "brotliQuality": 11
+      },
+      "measuredAt": "2026-10-25T16:51:26.961Z",
+      "files": [
+        {
+          "path": "assets/entry.2b2f6434f050.js",
+          "raw": 34832,
+          "gzip": 11443,
+          "brotli": 10151
+        },
+        {
+          "path": "assets/entry.33ba83cdc600.css",
+          "raw": 855,
+          "gzip": 467,
+          "brotli": 334
+        },
+        {
+          "path": "assets/form-ir.315f7da5bd8e150b40fac7c60a8f25e04fd09765e674a8ea85c4cc582ca38b8b.json",
+          "raw": 2760,
+          "gzip": 718,
+          "brotli": 572
+        },
+        {
+          "path": "index.html",
+          "raw": 1420,
+          "gzip": 781,
+          "brotli": 612
+        }
+      ],
+      "skippedSymlinks": [],
+      "totals": {
+        "raw": 39867,
+        "gzip": 13409,
+        "brotli": 11669
+      }
+    },
+    "motionModules": 0,
+    "storeModules": 0,
+    "fonts": [],
+    "images": []
+  },
+  {
+    "name": "sports-subtle",
+    "candidateId": "dev_xvpzzy6yk3js664citsenm5ous",
+    "url": "http://127.0.0.1:4173/r/dev_xvpzzy6yk3js664citsenm5ous/index.html",
+    "initialResources": [
+      {
+        "path": "assets/entry.33ba83cdc600.css",
+        "raw": 855,
+        "gzip": 467,
+        "brotli": 334
+      },
+      {
+        "path": "assets/entry.e3e0866d626e.js",
+        "raw": 36571,
+        "gzip": 12139,
+        "brotli": 10753
+      },
+      {
+        "path": "index.html",
+        "raw": 1566,
+        "gzip": 850,
+        "brotli": 680
+      }
+    ],
+    "initialJSGzip": 12139,
+    "initialHTMLCSSJSGzip": 13456,
+    "IR": {
+      "path": "assets/form-ir.bb6ff3087bebe157e648d61009f39aa7fb6b69cde93d6c1472075aa47ec1d4ae.json",
+      "raw": 3118,
+      "gzip": 909,
+      "brotli": 736
+    },
+    "allFiles": {
+      "tool": "fb-perf-sizes",
+      "toolVersion": "0.1.0",
+      "node": "v24.22.1",
+      "zlib": "1.3.2.1-motley-285e94b",
+      "brotli": "1.2.0",
+      "settings": {
+        "gzipLevel": 9,
+        "brotliQuality": 11
+      },
+      "measuredAt": "2026-10-25T16:51:27.067Z",
+      "files": [
+        {
+          "path": "assets/chunk.bd23c5034933.js",
+          "raw": 304721,
+          "gzip": 97105,
+          "brotli": 84926
+        },
+        {
+          "path": "assets/entry.33ba83cdc600.css",
+          "raw": 855,
+          "gzip": 467,
+          "brotli": 334
+        },
+        {
+          "path": "assets/entry.e3e0866d626e.js",
+          "raw": 36571,
+          "gzip": 12139,
+          "brotli": 10753
+        },
+        {
+          "path": "assets/form-ir.bb6ff3087bebe157e648d61009f39aa7fb6b69cde93d6c1472075aa47ec1d4ae.json",
+          "raw": 3118,
+          "gzip": 909,
+          "brotli": 736
+        },
+        {
+          "path": "index.html",
+          "raw": 1566,
+          "gzip": 850,
+          "brotli": 680
+        }
+      ],
+      "skippedSymlinks": [],
+      "totals": {
+        "raw": 346831,
+        "gzip": 111470,
+        "brotli": 97429
+      }
+    },
+    "motionModules": 229,
+    "storeModules": 0,
+    "fonts": [],
+    "images": []
+  },
+  {
+    "name": "pc-plugin",
+    "candidateId": "dev_j4qauvr3ej7eq5z6lakjkqcwck",
+    "url": "http://127.0.0.1:4173/r/dev_j4qauvr3ej7eq5z6lakjkqcwck/index.html",
+    "initialResources": [
+      {
+        "path": "assets/entry.32d51db4e69c.js",
+        "raw": 36841,
+        "gzip": 12284,
+        "brotli": 10859
+      },
+      {
+        "path": "assets/entry.33ba83cdc600.css",
+        "raw": 855,
+        "gzip": 467,
+        "brotli": 334
+      },
+      {
+        "path": "index.html",
+        "raw": 1887,
+        "gzip": 968,
+        "brotli": 794
+      }
+    ],
+    "initialJSGzip": 12284,
+    "initialHTMLCSSJSGzip": 13719,
+    "IR": {
+      "path": "assets/form-ir.4c0a1b41297fc77d9b1ae9d37355c09dae645694d731e746f8cd9250e83f1e86.json",
+      "raw": 3929,
+      "gzip": 1249,
+      "brotli": 1019
+    },
+    "allFiles": {
+      "tool": "fb-perf-sizes",
+      "toolVersion": "0.1.0",
+      "node": "v24.22.1",
+      "zlib": "1.3.2.1-motley-285e94b",
+      "brotli": "1.2.0",
+      "settings": {
+        "gzipLevel": 9,
+        "brotliQuality": 11
+      },
+      "measuredAt": "2026-10-25T16:51:27.589Z",
+      "files": [
+        {
+          "path": "assets/chunk.475b32a23e17.js",
+          "raw": 85620,
+          "gzip": 29979,
+          "brotli": 27477
+        },
+        {
+          "path": "assets/chunk.7701aeeb2589.js",
+          "raw": 880,
+          "gzip": 519,
+          "brotli": 446
+        },
+        {
+          "path": "assets/chunk.8ec1e97fe68a.js",
+          "raw": 218918,
+          "gzip": 67484,
+          "brotli": 58150
+        },
+        {
+          "path": "assets/entry.32d51db4e69c.js",
+          "raw": 36841,
+          "gzip": 12284,
+          "brotli": 10859
+        },
+        {
+          "path": "assets/entry.33ba83cdc600.css",
+          "raw": 855,
+          "gzip": 467,
+          "brotli": 334
+        },
+        {
+          "path": "assets/form-ir.4c0a1b41297fc77d9b1ae9d37355c09dae645694d731e746f8cd9250e83f1e86.json",
+          "raw": 3929,
+          "gzip": 1249,
+          "brotli": 1019
+        },
+        {
+          "path": "index.html",
+          "raw": 1887,
+          "gzip": 968,
+          "brotli": 794
+        }
+      ],
+      "skippedSymlinks": [],
+      "totals": {
+        "raw": 348930,
+        "gzip": 112950,
+        "brotli": 99079
+      }
+    },
+    "motionModules": 229,
+    "storeModules": 1,
+    "fonts": [],
+    "images": []
+  }
+]

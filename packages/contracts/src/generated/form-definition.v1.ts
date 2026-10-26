@@ -74,6 +74,30 @@ export interface FormDefinitionV1 {
   conditions?: {
     [k: string]: Condition;
   };
+  dependencies?: {
+    capabilities: {
+      storeSel?: {
+        plugin: "@platform/store-selector";
+        version: "1.0.0";
+        capability: "storeSelector";
+        kind: "fieldType";
+      };
+    };
+  };
+  motion?: {
+    preset: {
+      id: "none" | "subtle" | "guided";
+      package: "@platform/motion-presets";
+      version: "1.0.0";
+    };
+    categories?: {
+      stepTransition?: "on" | "off";
+      conditionalReveal?: "on" | "off";
+      validationFeedback?: "on" | "off";
+      submitFeedback?: "on" | "off";
+    };
+    speed?: "slow" | "standard" | "fast";
+  };
 }
 export interface Field {
   id: string;
@@ -90,7 +114,8 @@ export interface Field {
     | "email"
     | "tel"
     | "postal"
-    | "katakana";
+    | "katakana"
+    | "plugin:storeSel";
   label?: {
     ja: string;
   };
@@ -125,6 +150,10 @@ export interface Field {
       value?: number;
     };
   }[];
+  config?: {
+    filterByPrefecture?: boolean;
+    placeholder?: string;
+  };
 }
 export interface Group {
   id: string;

@@ -1,0 +1,159 @@
+{
+  "allPassed": true,
+  "browser": "156.0.8078.47",
+  "runs": [
+    {
+      "name": "sports",
+      "reduced": false,
+      "completed": true,
+      "payload": {
+        "category": "golf",
+        "clubType": "iron",
+        "condition": "junk",
+        "damageDescription": "Synthetic damage",
+        "purchaseMethod": "shuccho",
+        "customerName": "Synthetic Browser Customer",
+        "consent": true
+      },
+      "motionRequests": [],
+      "requests": [
+        "http://127.0.0.1:4173/r/dev_ctfxeqd7kkgar7pe7b5ws5csqu/index.html",
+        "http://127.0.0.1:4173/r/dev_ctfxeqd7kkgar7pe7b5ws5csqu/assets/entry.33ba83cdc600.css",
+        "http://127.0.0.1:4173/r/dev_ctfxeqd7kkgar7pe7b5ws5csqu/assets/entry.4b6c5fead2d8.js",
+        "http://127.0.0.1:4173/r/dev_ctfxeqd7kkgar7pe7b5ws5csqu/assets/form-ir.315f7da5bd8e150b40fac7c60a8f25e04fd09765e674a8ea85c4cc582ca38b8b.json",
+        "http://127.0.0.1:4173/r/dev_ctfxeqd7kkgar7pe7b5ws5csqu/api/submit"
+      ]
+    },
+    {
+      "name": "sports-subtle",
+      "reduced": false,
+      "completed": true,
+      "payload": {
+        "category": "golf",
+        "clubType": "iron",
+        "condition": "junk",
+        "damageDescription": "Synthetic damage",
+        "purchaseMethod": "shuccho",
+        "customerName": "Synthetic Browser Customer",
+        "consent": true
+      },
+      "motionRequests": [
+        "http://127.0.0.1:4173/r/dev_zuubq7acqk6han4weplex5coxp/assets/chunk.bd23c5034933.js",
+        "http://127.0.0.1:4173/r/dev_zuubq7acqk6han4weplex5coxp/assets/chunk.bd23c5034933.js"
+      ],
+      "requests": [
+        "http://127.0.0.1:4173/r/dev_zuubq7acqk6han4weplex5coxp/index.html",
+        "http://127.0.0.1:4173/r/dev_zuubq7acqk6han4weplex5coxp/assets/entry.33ba83cdc600.css",
+        "http://127.0.0.1:4173/r/dev_zuubq7acqk6han4weplex5coxp/assets/entry.b282df51f46b.js",
+        "http://127.0.0.1:4173/r/dev_zuubq7acqk6han4weplex5coxp/assets/form-ir.bb6ff3087bebe157e648d61009f39aa7fb6b69cde93d6c1472075aa47ec1d4ae.json",
+        "http://127.0.0.1:4173/r/dev_zuubq7acqk6han4weplex5coxp/assets/chunk.bd23c5034933.js",
+        "http://127.0.0.1:4173/r/dev_zuubq7acqk6han4weplex5coxp/assets/chunk.bd23c5034933.js",
+        "http://127.0.0.1:4173/r/dev_zuubq7acqk6han4weplex5coxp/api/submit"
+      ]
+    },
+    {
+      "name": "sports-subtle",
+      "reduced": true,
+      "completed": true,
+      "payload": {
+        "category": "golf",
+        "clubType": "iron",
+        "condition": "junk",
+        "damageDescription": "Synthetic damage",
+        "purchaseMethod": "shuccho",
+        "customerName": "Synthetic Browser Customer",
+        "consent": true
+      },
+      "motionRequests": [],
+      "requests": [
+        "http://127.0.0.1:4173/r/dev_zuubq7acqk6han4weplex5coxp/index.html",
+        "http://127.0.0.1:4173/r/dev_zuubq7acqk6han4weplex5coxp/assets/entry.33ba83cdc600.css",
+        "http://127.0.0.1:4173/r/dev_zuubq7acqk6han4weplex5coxp/assets/entry.b282df51f46b.js",
+        "http://127.0.0.1:4173/r/dev_zuubq7acqk6han4weplex5coxp/assets/form-ir.bb6ff3087bebe157e648d61009f39aa7fb6b69cde93d6c1472075aa47ec1d4ae.json",
+        "http://127.0.0.1:4173/r/dev_zuubq7acqk6han4weplex5coxp/api/submit"
+      ]
+    },
+    {
+      "name": "pc-plugin",
+      "method": "takuhai",
+      "completed": true,
+      "payload": {
+        "deviceType": "laptop",
+        "batteryHealth": "good",
+        "defects": [
+          "screen"
+        ],
+        "purchaseMethod": "takuhai",
+        "packingKit": "yes",
+        "customerName": "Synthetic Browser Customer",
+        "consent": true
+      },
+      "storeRequests": [],
+      "requests": [
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/index.html",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/assets/entry.33ba83cdc600.css",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/assets/entry.9d9214e3bb81.js",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/assets/form-ir.4c0a1b41297fc77d9b1ae9d37355c09dae645694d731e746f8cd9250e83f1e86.json",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/assets/chunk.475b32a23e17.js",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/assets/chunk.8ec1e97fe68a.js",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/assets/chunk.475b32a23e17.js",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/assets/chunk.8ec1e97fe68a.js",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/api/submit"
+      ]
+    },
+    {
+      "name": "pc-plugin",
+      "method": "store",
+      "completed": true,
+      "payload": {
+        "deviceType": "laptop",
+        "batteryHealth": "good",
+        "defects": [
+          "screen"
+        ],
+        "purchaseMethod": "store",
+        "store": "ST-1001",
+        "customerName": "Synthetic Browser Customer",
+        "consent": true
+      },
+      "storeRequests": [
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/assets/chunk.7701aeeb2589.js",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/assets/chunk.7701aeeb2589.js",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/api/store-list"
+      ],
+      "requests": [
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/index.html",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/assets/entry.33ba83cdc600.css",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/assets/entry.9d9214e3bb81.js",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/assets/form-ir.4c0a1b41297fc77d9b1ae9d37355c09dae645694d731e746f8cd9250e83f1e86.json",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/assets/chunk.475b32a23e17.js",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/assets/chunk.8ec1e97fe68a.js",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/assets/chunk.475b32a23e17.js",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/assets/chunk.8ec1e97fe68a.js",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/assets/chunk.7701aeeb2589.js",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/assets/chunk.8ec1e97fe68a.js",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/assets/chunk.7701aeeb2589.js",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/api/store-list",
+        "http://127.0.0.1:4173/r/dev_wsgiigw5akq5supbliez3gzbb7/api/submit"
+      ]
+    }
+  ],
+  "capabilityFailureVerified": true,
+  "authoritativeRejectRetryVerified": true,
+  "crossSiteRejected": {
+    "status": 422,
+    "body": {
+      "ok": false,
+      "errors": [
+        {
+          "code": "storeNotAvailable",
+          "path": "fld_store"
+        }
+      ],
+      "payload": {}
+    }
+  },
+  "rollbackVerified": true,
+  "pinnedOldRevisionVerified": true,
+  "normalPageErrors": []
+}

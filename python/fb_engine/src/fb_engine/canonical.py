@@ -11,7 +11,7 @@ TRIM = (
 
 
 def canonical(value: str, kind: str) -> str:
-    if kind.startswith("choice."):
+    if kind.startswith("choice.") or kind.startswith("plugin:"):
         return value
     text = value.strip(TRIM)
     if kind == "textarea":

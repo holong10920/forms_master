@@ -214,3 +214,28 @@ test("validation notices show attempted and async errors without field values", 
     path: "stp_method",
   });
 });
+test("authoritative rejection returns to field, preserves other values and allows correction with new key", () => {
+  const e = setup();
+  e.send({ type: "commit", field: "fld_method", value: "store" });
+  e.move("next");
+  e.send({ type: "commit", field: "fld_store", value: "fictional" });
+  e.move("next");
+  e.move("next");
+  const req = e.state.request;
+  if (!req) throw new Error("request");
+  const key = e.state.ports?.idempotencyKey;
+  e.send({
+    type: "submitResult",
+    id: req.id,
+    fingerprint: req.fingerprint,
+    ok: false,
+    rejected: true,
+    issues: [{ code: "storeNotAvailable", path: "fld_store" }],
+  });
+  expect(e.state.current).toBe("stp_store");
+  expect(e.state.retryPending).toBe(false);
+  expect(e.state.values.fld_method).toBe("store");
+  expect(e.state.ports?.idempotencyKey).not.toBe(key);
+  e.send({ type: "commit", field: "fld_store", value: "corrected" });
+  expect(e.state.values.fld_store).toBe("corrected");
+});

@@ -1,0 +1,283 @@
+{
+  "schemaVersion": "1.0.0",
+  "kind": "form",
+  "formId": "frm_sports",
+  "siteId": "site_sports_synthetic",
+  "locale": {
+    "default": "ja",
+    "supported": [
+      "ja"
+    ]
+  },
+  "fields": [
+    {
+      "id": "fld_category",
+      "key": "category",
+      "type": "choice.radio",
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "golf"
+        },
+        {
+          "value": "racket"
+        }
+      ]
+    },
+    {
+      "id": "fld_club",
+      "key": "clubType",
+      "type": "choice.radio",
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "driver"
+        },
+        {
+          "value": "iron"
+        }
+      ],
+      "visibleWhen": {
+        "op": "eq",
+        "args": [
+          {
+            "ref": "$local:fld_category"
+          },
+          {
+            "const": "golf"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fld_racket",
+      "key": "racketType",
+      "type": "choice.radio",
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "tennis"
+        },
+        {
+          "value": "badminton"
+        }
+      ],
+      "visibleWhen": {
+        "op": "eq",
+        "args": [
+          {
+            "ref": "$local:fld_category"
+          },
+          {
+            "const": "racket"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fld_condition",
+      "key": "condition",
+      "type": "choice.radio",
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "used"
+        },
+        {
+          "value": "junk"
+        }
+      ]
+    },
+    {
+      "id": "fld_damage",
+      "key": "damageDescription",
+      "type": "textarea",
+      "classification": "personal",
+      "persist": "never",
+      "visibleWhen": {
+        "op": "eq",
+        "args": [
+          {
+            "ref": "$local:fld_condition"
+          },
+          {
+            "const": "junk"
+          }
+        ]
+      },
+      "requiredWhen": {
+        "op": "eq",
+        "args": [
+          {
+            "ref": "$local:fld_condition"
+          },
+          {
+            "const": "junk"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fld_method",
+      "key": "purchaseMethod",
+      "type": "choice.radio",
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "shuccho"
+        }
+      ]
+    },
+    {
+      "id": "fld_customer",
+      "key": "customerName",
+      "type": "text",
+      "classification": "personal",
+      "persist": "never",
+      "required": true,
+      "validators": [
+        {
+          "use": "maxLength",
+          "params": {
+            "value": 60
+          }
+        }
+      ]
+    },
+    {
+      "id": "fld_email",
+      "key": "email",
+      "type": "email",
+      "classification": "personal",
+      "persist": "never"
+    },
+    {
+      "id": "fld_consent",
+      "key": "consent",
+      "type": "boolean",
+      "classification": "public",
+      "persist": "never",
+      "required": true,
+      "validators": [
+        {
+          "use": "mustBeTrue"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "stp_category",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_category"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_product"
+        }
+      ]
+    },
+    {
+      "id": "stp_product",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_club"
+        },
+        {
+          "field": "$local:fld_racket"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_condition"
+        }
+      ]
+    },
+    {
+      "id": "stp_condition",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_condition"
+        },
+        {
+          "field": "$local:fld_damage"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_method"
+        }
+      ]
+    },
+    {
+      "id": "stp_method",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_method"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_customer"
+        }
+      ]
+    },
+    {
+      "id": "stp_customer",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_customer"
+        },
+        {
+          "field": "$local:fld_email"
+        },
+        {
+          "field": "$local:fld_consent"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_review"
+        }
+      ]
+    },
+    {
+      "id": "stp_review",
+      "kind": "review",
+      "transitions": [
+        {
+          "default": "stp_done_shuccho"
+        }
+      ]
+    },
+    {
+      "id": "stp_done_shuccho",
+      "kind": "complete"
+    }
+  ],
+  "conditions": {},
+  "motion": {
+    "preset": {
+      "id": "subtle",
+      "package": "@platform/motion-presets",
+      "version": "1.0.0"
+    }
+  }
+}

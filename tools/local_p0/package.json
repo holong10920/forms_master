@@ -1,0 +1,12 @@
+{
+  "name": "@fb/local-p0",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "volta": {
+    "extends": "../../package.json"
+  }
+}

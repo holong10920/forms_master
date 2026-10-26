@@ -1,5 +1,11 @@
 # Context Handoff
 
+> Current override: user authorized continuous local synthetic P0 Admin → customer → mock effect implementation.
+> See `docs/evidence/LOCAL-P0/RESULTS.md` and `PROPOSED-SCOPE.md`: runnable no-code MVP/browser E2E PASS;
+> all further source is uncommitted after CP1 `079d2864bf2a6cf240eaf58605f810fc6f94e4a2`.
+> Full P0 not DONE; remaining functional/canonical/matrix gaps are explicit. No GitHub/AWS.
+> Single writer. At next Git mutation, obtain the required explicit checkpoint approval; no hook bypass.
+
 > Dành cho một phiên Claude mới. Đọc file này trước, sau đó đến `CURRENT_STATUS.md`. Cập nhật 2026-10-25: **G1 APPROVED FOR LOCAL SYNTHETIC P0 IMPLEMENTATION** (ADR-078; baseline sáu spec `6312f2b`). Phần lịch sử bên dưới giữ nguyên.
 >
 > **Bắt đầu ở đây (2026-10-25): P03 DONE / G3 APPROVED; P07 / S2 local Compiler-Static Runtime.** S0 core foundation VERIFIED;

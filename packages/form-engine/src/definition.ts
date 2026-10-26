@@ -213,6 +213,8 @@ export function assertIR(ir: EngineIRV1): void {
       ids.add(f.id);
       keys.add(f.key);
     }
+    if (f.type === "plugin:storeSel" && ir.capabilities.storeSel?.capability !== "storeSelector")
+      throw new EngineError("E-CAPABILITY-UNDECLARED", f.id);
     if (f.classification === "secret" && !f.clearOnDeactivate)
       throw new EngineError("E-SECRET-CLEAR", f.id);
     if (
@@ -362,7 +364,12 @@ export function loadDefinition(value: unknown): EngineIRV1 {
     nodes: d.fields,
     steps: d.steps,
     conditions: d.conditions ?? {},
-    capabilities: {},
+    capabilities: Object.fromEntries(
+      Object.entries(d.dependencies?.capabilities ?? {}).map(([alias, ref]) => [
+        alias,
+        { plugin: ref.plugin, version: ref.version, capability: ref.capability },
+      ]),
+    ),
     effects: [],
   };
   assertIR(ir);

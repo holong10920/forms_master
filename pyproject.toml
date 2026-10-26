@@ -25,6 +25,7 @@ fb-engine = { workspace = true }
 
 [tool.pytest.ini_options]
 testpaths = ["python"]
+pythonpath = ["."]
 # Tests must never reach the network (S0 security boundary).
 addopts = "--import-mode=importlib --disable-socket --allow-unix-socket"
 
@@ -43,7 +44,7 @@ select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "RUF"]
 [tool.mypy]
 strict = true
 python_version = "3.13"
-files = ["python", "tools/engine-demo"]
+files = ["python", "tools/engine-demo", "tools/compiler", "plugins/store-selector/server", "tools/local_p0"]
 explicit_package_bases = true
 mypy_path = ["python/fb_contracts/src", "python/fb_store/src", "python/fb_engine/src"]
 

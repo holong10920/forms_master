@@ -73,11 +73,31 @@ export interface EngineIRV1 {
   conditions: {
     [k: string]: Condition;
   };
-  capabilities: {};
+  capabilities: {
+    [k: string]: {
+      plugin: string;
+      version: string;
+      capability: string;
+    };
+  };
   /**
    * @maxItems 0
    */
   effects: [];
+  motion?: {
+    presetRef: {
+      package: "@platform/motion-presets";
+      version: "1.0.0";
+      digest: string;
+    };
+    recipesByCategory: {
+      [k: string]: string;
+    };
+    durationsMs: {
+      [k: string]: number;
+    };
+    reduced: "none";
+  };
 }
 export interface Field {
   id: string;
@@ -94,7 +114,8 @@ export interface Field {
     | "email"
     | "tel"
     | "postal"
-    | "katakana";
+    | "katakana"
+    | "plugin:storeSel";
   label?: {
     ja: string;
   };
@@ -129,6 +150,10 @@ export interface Field {
       value?: number;
     };
   }[];
+  config?: {
+    filterByPrefecture?: boolean;
+    placeholder?: string;
+  };
 }
 export interface Group {
   id: string;

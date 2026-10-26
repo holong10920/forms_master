@@ -31,3 +31,13 @@ and be verified before S2 acceptance. No fabricated digest or registry debugging
 Runtime parses compiler-produced IR after SHA-256 and identity checks and calls `assertIR`;
 structural validation happens in the compiler. It does not dynamically compile Ajv schemas in
 the customer browser (strict CSP, no unsafe-eval). Unsupported definition features fail closed.
+
+## CP2 local extension — user approved after CP1
+
+PC reference + trusted storeSel browser/server facet resolution, guided Motion, Sports subtle,
+Motion-none negative isolation; no second engine. Then immutable local candidate publication,
+CAS active pointer and two-revision rollback using S0 store ports. Browser and negative tests,
+actual graph/hash/plugin pinning and sizes at checkpoint. CP1 committed `079d2864bf2a6cf240eaf58605f810fc6f94e4a2`.
+Approved Sports-none P0 ceilings: JS gzip <=12 KiB; HTML+CSS+JS gzip <=16 KiB;
+zero Motion across entire graph. IR/font/image reported separately. Canonical K13 required
+for full performance/S2 acceptance. CP2 evidence and remaining gaps: `docs/evidence/P07/CP2/RESULTS.md`.

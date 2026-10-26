@@ -1,0 +1,7 @@
+{
+  "submission": "synthetic_fe2eae59894e47827e61c0cf",
+  "outbox": "DONE",
+  "effect": "synthetic_fe2eae59894e47827e61c0cf",
+  "connector": "effect-mock-log",
+  "externalBusinessWrites": 0
+}

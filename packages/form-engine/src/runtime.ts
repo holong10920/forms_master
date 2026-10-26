@@ -246,14 +246,30 @@ export function reduce(ir: EngineIRV1, state: State, event: NativeEvent): Result
     const rest = { ...state };
     delete rest.request;
     const end = snapshot(ir, state, true).path.at(-1) ?? state.current;
+    const rejection = event.rejected
+      ? event.issues?.filter((e) => snapshot(ir, state, true).active.has(e.path))
+      : undefined;
+    const returnStep = rejection?.[0] ? owner(ir, rejection[0].path) : undefined;
     return {
       state: {
         ...rest,
-        current: event.ok ? end : state.current,
+        current: event.ok ? end : (returnStep ?? state.current),
         stateVersion: state.stateVersion + 1,
         status: event.ok ? "complete" : "editing",
-        retryPending: !event.ok,
-        errors: event.ok ? [] : [{ code: "E-VALIDATION-UNAVAILABLE", path: "" }],
+        retryPending: !event.ok && !event.rejected,
+        ...(event.rejected && state.ports?.idempotencyKey
+          ? {
+              ports: {
+                ...state.ports,
+                idempotencyKey: `${state.ports.idempotencyKey}:rejected:${String(state.stateVersion + 1)}`,
+              },
+            }
+          : {}),
+        errors: event.ok
+          ? []
+          : rejection?.length
+            ? rejection
+            : [{ code: "E-VALIDATION-UNAVAILABLE", path: "" }],
       },
       effects: [],
     };

@@ -1,0 +1,22 @@
+{
+  "first": {
+    "candidateId": "dev_ctfxeqd7kkgar7pe7b5ws5csqu",
+    "version": 19,
+    "mode": "local-synthetic-candidate"
+  },
+  "second": {
+    "candidateId": "dev_qctpubwkeuofeth3mxrjkcwfk4",
+    "version": 20,
+    "mode": "local-synthetic-candidate"
+  },
+  "rollback": {
+    "candidateId": "dev_ctfxeqd7kkgar7pe7b5ws5csqu",
+    "version": 21,
+    "mode": "local-synthetic-candidate"
+  },
+  "active": {
+    "candidateId": "dev_ctfxeqd7kkgar7pe7b5ws5csqu",
+    "version": 21
+  },
+  "alias": "http://127.0.0.1:4173/forms/site_sports_synthetic/frm_sports/"
+}

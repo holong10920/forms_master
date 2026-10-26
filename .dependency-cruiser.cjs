@@ -2,6 +2,18 @@
 module.exports = {
   forbidden: [
     {
+      name: "motion-no-engine-or-tools",
+      severity: "error",
+      from: { path: "^packages/motion-adapter/src/" },
+      to: { path: "^(packages/(form-engine|static-runtime)/|tools/|plugins/)" },
+    },
+    {
+      name: "plugin-browser-no-host-or-server",
+      severity: "error",
+      from: { path: "^plugins/[^/]+/browser/" },
+      to: { path: "(^packages/(form-engine|static-runtime)/|^tools/|/server/)" },
+    },
+    {
       name: "engine-no-presentation",
       severity: "error",
       from: { path: "^packages/form-engine/src/" },
@@ -17,7 +29,9 @@ module.exports = {
     {
       name: "browser-safe-no-node",
       severity: "error",
-      from: { path: "^packages/(contracts|form-engine|static-runtime)/src/" },
+      from: {
+        path: "^(packages/(contracts|form-engine|static-runtime|sdk-browser|motion-adapter|motion-presets)/src/|plugins/[^/]+/browser/)",
+      },
       to: { dependencyTypes: ["core"] },
     },
     {

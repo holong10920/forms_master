@@ -46,9 +46,22 @@
     },
     "capabilities": {
       "type": "object",
-      "properties": {},
-      "required": [],
-      "additionalProperties": false
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "plugin": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "capability": {
+            "type": "string"
+          }
+        },
+        "required": ["plugin", "version", "capability"],
+        "additionalProperties": false
+      }
     },
     "effects": {
       "type": "array",
@@ -59,6 +72,44 @@
         "required": [],
         "additionalProperties": false
       }
+    },
+    "motion": {
+      "type": "object",
+      "properties": {
+        "presetRef": {
+          "type": "object",
+          "properties": {
+            "package": {
+              "const": "@platform/motion-presets"
+            },
+            "version": {
+              "const": "1.0.0"
+            },
+            "digest": {
+              "type": "string"
+            }
+          },
+          "required": ["package", "version", "digest"],
+          "additionalProperties": false
+        },
+        "recipesByCategory": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "durationsMs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
+        },
+        "reduced": {
+          "const": "none"
+        }
+      },
+      "required": ["presetRef", "recipesByCategory", "durationsMs", "reduced"],
+      "additionalProperties": false
     }
   },
   "required": [
@@ -219,7 +270,8 @@
             "email",
             "tel",
             "postal",
-            "katakana"
+            "katakana",
+            "plugin:storeSel"
           ]
         },
         "label": {
@@ -317,6 +369,19 @@
             "required": ["use"],
             "additionalProperties": false
           }
+        },
+        "config": {
+          "type": "object",
+          "properties": {
+            "filterByPrefecture": {
+              "type": "boolean"
+            },
+            "placeholder": {
+              "type": "string",
+              "maxLength": 40
+            }
+          },
+          "additionalProperties": false
         }
       },
       "required": ["id", "key", "type", "classification"],

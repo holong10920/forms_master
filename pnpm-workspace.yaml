@@ -1,6 +1,7 @@
 packages:
   - packages/*
   - tools/*
+  - plugins/*
 
 # Refuse installs on a Node version outside package.json "engines".
 engineStrict: true

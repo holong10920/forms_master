@@ -58,4 +58,41 @@ export default defineConfig(
       ],
     },
   },
+  {
+    files: ["plugins/*/browser/**/*.{ts,tsx}", "packages/motion-adapter/src/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-globals": [
+        "error",
+        "fetch",
+        "XMLHttpRequest",
+        "WebSocket",
+        "localStorage",
+        "sessionStorage",
+        "document",
+        "location",
+      ],
+      "no-restricted-properties": ["error", { object: "Math", property: "random" }],
+    },
+  },
+  {
+    files: ["tools/local_p0/web/*.js"],
+    languageOptions: {
+      parserOptions: { projectService: false },
+      globals: Object.fromEntries(
+        [
+          "window",
+          "document",
+          "fetch",
+          "location",
+          "history",
+          "parent",
+          "Option",
+          "Headers",
+          "URL",
+          "DOMParser",
+          "crypto",
+        ].map((k) => [k, "readonly"]),
+      ),
+    },
+  },
 );

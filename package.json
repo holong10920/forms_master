@@ -14,13 +14,13 @@
     "format:check": "prettier --check .",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "vitest run",
-    "py:lint": "uv run ruff check python tools/engine-demo && uv run ruff format --check python tools/engine-demo",
+    "py:lint": "uv run ruff check python tools/engine-demo tools/compiler plugins/store-selector/server tools/local_p0 && uv run ruff format --check python tools/engine-demo tools/compiler plugins/store-selector/server tools/local_p0",
     "py:typecheck": "uv run mypy",
     "py:test": "uv run pytest",
     "gen": "pnpm --filter @fb/contracts gen",
     "gen:check": "pnpm --filter @fb/contracts gen:check",
     "schemas:lint": "pnpm --filter @fb/contracts lint:schemas",
-    "boundaries": "depcruise packages tools --config .dependency-cruiser.cjs --output-type err",
+    "boundaries": "depcruise packages tools plugins --config .dependency-cruiser.cjs --output-type err",
     "py:imports": "uv run lint-imports",
     "secrets": "node tools/security/src/secrets.ts",
     "synthetic:check": "node tools/security/src/synthetic-data-check.ts contracts/fixtures",
@@ -30,7 +30,9 @@
     "engine:demo": "node tools/engine-demo/src/cli.ts",
     "engine:parity": "node tools/engine-demo/src/parity.ts",
     "compiler:build": "node tools/compiler/src/cli.ts build",
-    "compiler:serve": "node tools/compiler/src/cli.ts serve"
+    "compiler:serve": "node tools/compiler/src/cli.ts serve",
+    "compiler:publish-demo": "node tools/compiler/src/cli.ts publish-demo",
+    "local:p0": "sh tools/local_p0/start.sh"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

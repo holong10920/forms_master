@@ -59,7 +59,14 @@ export type NavigationEvent =
 export type NativeEvent =
   | { type: "commit"; field: string; value: unknown }
   | NavigationEvent
-  | { type: "submitResult"; id: string; fingerprint: string; ok: boolean }
+  | {
+      type: "submitResult";
+      id: string;
+      fingerprint: string;
+      ok: boolean;
+      rejected?: boolean;
+      issues?: readonly Issue[];
+    }
   | { type: "blur"; field: string };
 export type Event =
   | NativeEvent

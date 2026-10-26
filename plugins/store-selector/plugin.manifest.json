@@ -1,0 +1,183 @@
+{
+  "$schema": "urn:forms-poc:schema:plugin-manifest:1",
+  "plugin": "@platform/store-selector",
+  "version": "1.0.0",
+  "title": {
+    "ja": "店舗選択"
+  },
+  "owners": ["platform-maintainers"],
+  "compat": {
+    "browserHostApi": ">=1.0.0 <2.0.0",
+    "serverHostApi": ">=1.0.0 <2.0.0",
+    "designHostApi": ">=1.0.0 <2.0.0",
+    "formSchema": ">=1.0.0 <2.0.0"
+  },
+  "pluginDependencies": [],
+  "facets": {
+    "browser": {
+      "packageExport": "./browser"
+    },
+    "server": {
+      "pythonPackage": "store_selector_server",
+      "pythonRequirements": []
+    }
+  },
+  "capabilities": [
+    {
+      "id": "storeSelector",
+      "kind": "fieldType",
+      "title": {
+        "ja": "店舗を選ぶ"
+      },
+      "bindings": {
+        "browser": "StoreSelectorField"
+      },
+      "presentation": {
+        "primitive": "select",
+        "placeholderFrom": "/placeholder",
+        "sampleOptionsFrom": {
+          "capability": "storeList",
+          "label": "/name"
+        }
+      },
+      "configSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "filterByPrefecture": {
+            "type": "boolean",
+            "default": true,
+            "title": "都道府県で絞り込む"
+          },
+          "placeholder": {
+            "type": "string",
+            "maxLength": 40,
+            "title": "未選択時の表示",
+            "description": "店舗が選ばれていないときに表示する文章です。"
+          }
+        }
+      },
+      "valueSchema": {
+        "type": "string",
+        "pattern": "^ST-[0-9]{4}$"
+      },
+      "inputs": {
+        "prefecture": {
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8
+          },
+          "accepts": "public",
+          "required": false
+        }
+      },
+      "dataPolicy": {
+        "valueFloor": "public"
+      },
+      "verification": {
+        "policy": "authoritativeCheck",
+        "check": "storeIdValid"
+      },
+      "requires": {
+        "options": "storeList"
+      }
+    },
+    {
+      "id": "storeList",
+      "kind": "dataSource",
+      "title": {
+        "ja": "店舗一覧"
+      },
+      "bindings": {
+        "server": "query_store_list"
+      },
+      "inputs": {
+        "prefecture": {
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8
+          },
+          "accepts": "public",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "type": "array",
+        "maxItems": 200,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "name"],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^ST-[0-9]{4}$"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "prefecture": {
+              "type": "string",
+              "maxLength": 8
+            }
+          }
+        }
+      },
+      "dataPolicy": {
+        "outputFloor": "public"
+      },
+      "permissions": {
+        "connectors": ["mock-store-directory"],
+        "sideEffects": "none",
+        "storage": "none"
+      },
+      "timeoutMs": 3000,
+      "fallback": "unavailable",
+      "fixtures": "fixtures/storeList",
+      "previewFixtures": "fixtures/storeList/preview"
+    },
+    {
+      "id": "storeIdValid",
+      "kind": "serverValidator",
+      "title": {
+        "ja": "店舗の確認"
+      },
+      "bindings": {
+        "server": "validate_store_id"
+      },
+      "valueSchema": {
+        "type": "string",
+        "pattern": "^ST-[0-9]{4}$"
+      },
+      "inputs": {
+        "prefecture": {
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8
+          },
+          "accepts": "public",
+          "required": false
+        }
+      },
+      "authority": "authoritative",
+      "allowsDeferToSubmit": true,
+      "permissions": {
+        "connectors": ["mock-store-directory"],
+        "sideEffects": "idempotentRead",
+        "storage": "none"
+      },
+      "timeoutMs": 3000,
+      "messages": {
+        "storeNotAvailable": {
+          "ja": "選択した店舗は現在ご利用いただけません。別の店舗をお選びください。"
+        }
+      },
+      "fixtures": "fixtures/storeIdValid"
+    }
+  ]
+}
