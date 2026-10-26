@@ -1,5 +1,15 @@
 # Context Handoff
 
+> **2026-10-26 — nhánh làm việc hiện tại: `main`, duy nhất tree `forms_master`.**
+> User đã cho phép ngoại lệ AGENTS.md một lần để hợp nhất, publish GitHub và dọn
+> `forms_master-ux`. Code hai nhánh đã được giữ trong lịch sử `03b2782`;
+> không tiếp tục viết trên `codex/p03-s1-workflow-engine` hay tree UX.
+> Runtime riêng của tree UX đã sao lưu và đối chiếu 3.406 file tại
+> `var/worktree-backups/forms_master-ux-20261026-03b2782.tar.gz` (gitignored, mode 0600).
+> Ngoại lệ chỉ áp dụng lượt đồng bộ/dọn tree này; không phải quyền Git/GitHub thường trực.
+> Các ghi chú nhánh/tree bên dưới là lịch sử. T12/K13 và G10 không đổi.
+
+
 
 > **2026-10-26 — bàn giao UX mới nhất:** làm tiếp chỉ tại `forms_master` trên
 > `codex/p03-s1-workflow-engine`. User đã yêu cầu commit hai tree và hợp nhất local:
