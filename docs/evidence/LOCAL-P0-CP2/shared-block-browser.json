@@ -1,0 +1,12 @@
+{
+  "allPassed": true,
+  "form": "frm_658705519d8e4ca098adbdbc2f054f6f",
+  "url1": "http://127.0.0.1:4173/r/dev_pfbduqc2qkmz4lt5htofnjp2sm/index.html",
+  "url2": "http://127.0.0.1:4173/r/dev_x5pubpxydeyv2qrcsrl5ergcgp/index.html",
+  "twoInstances": true,
+  "namespacePayload": true,
+  "backendReceipt": "synthetic_eb91aee6ff5a17cf4f311ad0",
+  "oneInstanceUpgrade": true,
+  "dataContractAckRequired": true,
+  "browser": "156.0.8078.47"
+}

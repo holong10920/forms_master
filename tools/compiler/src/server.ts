@@ -11,7 +11,7 @@ const candidateRoot = join(root, "var/s2-candidates"),
   publishedRoot = join(root, "var/s2-publication/objects/releases");
 const hash = (bytes: Buffer) => createHash("sha256").update(bytes).digest("hex");
 export function findCandidate(id: string, publishedOnly = false): string {
-  if (!/^dev_[a-z2-7]{26}$/u.test(id)) throw new Error("E-PATH");
+  if (!/^(?:dev|rel)_[a-z2-7]{26}$/u.test(id)) throw new Error("E-PATH");
   if (publishedOnly && !existsSync(join(publishedRoot, id))) throw new Error("E-NOT-PUBLISHED");
   return existsSync(join(publishedRoot, id))
     ? join(publishedRoot, id)
@@ -72,7 +72,7 @@ export function startServer(options: { publishedOnly?: boolean } = {}) {
       }
       return;
     }
-    const api = /^\/r\/(dev_[a-z2-7]{26})\/api\/(store-list|submit)$/u.exec(path);
+    const api = /^\/r\/((?:dev|rel)_[a-z2-7]{26})\/api\/(store-list|submit)$/u.exec(path);
     if (api) {
       res.setHeader("Content-Type", "application/json");
       res.setHeader("Cache-Control", "no-store");
@@ -135,7 +135,9 @@ export function startServer(options: { publishedOnly?: boolean } = {}) {
     }
     try {
       const match =
-        /^\/r\/(dev_[a-z2-7]{26})\/(index\.html|assets\/[a-z0-9.-]+\.(?:js|css|json))$/u.exec(path);
+        /^\/r\/((?:dev|rel)_[a-z2-7]{26})\/(index\.html|assets\/[a-z0-9.-]+\.(?:js|css|json))$/u.exec(
+          path,
+        );
       if (!match?.[1] || !match[2]) throw new Error("path");
       const raw = checkedFile(match[1], match[2], options.publishedOnly);
       const type = path.endsWith(".html")

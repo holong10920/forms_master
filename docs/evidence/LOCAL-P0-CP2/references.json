@@ -1,0 +1,29 @@
+{
+  "references": [
+    {
+      "name": "sports",
+      "url": "http://127.0.0.1:4173/r/dev_mgq3l2x2ihl5j4kds7bmevlwif/index.html",
+      "candidateId": "dev_mgq3l2x2ihl5j4kds7bmevlwif",
+      "version": 31,
+      "operation": "op_a03905f4ef6debe1032dfb1a"
+    },
+    {
+      "name": "sports-subtle",
+      "url": "http://127.0.0.1:4173/r/dev_uopqttccecdw5rb3kbxsfxomnd/index.html",
+      "candidateId": "dev_uopqttccecdw5rb3kbxsfxomnd",
+      "version": 32,
+      "operation": "op_4ffec3575f14f7d174dfc046"
+    },
+    {
+      "name": "pc-plugin",
+      "url": "http://127.0.0.1:4173/r/dev_c233xoshbli3hqvay5hggowap7/index.html",
+      "candidateId": "dev_c233xoshbli3hqvay5hggowap7",
+      "version": 4,
+      "operation": "op_e2954fbb37036662da70e6d0"
+    }
+  ],
+  "sportsActive": {
+    "candidateId": "dev_mgq3l2x2ihl5j4kds7bmevlwif",
+    "version": 33
+  }
+}

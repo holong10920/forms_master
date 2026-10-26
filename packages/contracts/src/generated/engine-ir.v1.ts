@@ -98,6 +98,38 @@ export interface EngineIRV1 {
     };
     reduced: "none";
   };
+  locale?: {
+    default: "ja";
+    /**
+     * @minItems 1
+     * @maxItems 2
+     */
+    supported: ["ja" | "vi"] | ["ja" | "vi", "ja" | "vi"];
+  };
+  texts?: {
+    formTitle?: LocalizedOverride;
+    formDescription?: LocalizedOverride;
+    next?: LocalizedOverride;
+    back?: LocalizedOverride;
+    submit?: LocalizedOverride;
+    selectPrompt?: LocalizedOverride;
+    reviewTitle?: LocalizedOverride;
+    payloadTitle?: LocalizedOverride;
+    errorSummary?: LocalizedOverride;
+    completeTitle?: LocalizedOverride;
+    completeBody?: LocalizedOverride;
+    invalidNumber?: LocalizedOverride;
+    required?: LocalizedOverride;
+    mustBeTrue?: LocalizedOverride;
+    minLength?: LocalizedOverride;
+    maxLength?: LocalizedOverride;
+    min?: LocalizedOverride;
+    max?: LocalizedOverride;
+    minItems?: LocalizedOverride;
+    maxItems?: LocalizedOverride;
+    exclusiveOption?: LocalizedOverride;
+    syntheticNotice?: LocalizedOverride;
+  };
 }
 export interface Field {
   id: string;
@@ -118,6 +150,7 @@ export interface Field {
     | "plugin:storeSel";
   label?: {
     ja: string;
+    vi?: string;
   };
   classification: "public" | "personal" | "secret";
   persist?: "allowed" | "never";
@@ -131,6 +164,7 @@ export interface Field {
     value: string;
     label?: {
       ja: string;
+      vi?: string;
     };
     exclusive?: boolean;
     availableWhen?: Expression;
@@ -154,6 +188,18 @@ export interface Field {
     filterByPrefecture?: boolean;
     placeholder?: string;
   };
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  outputPath?: [string, string];
+  sourceIdentity?: string;
+  placeholder?: LocalizedOverride;
+  help?: LocalizedOverride;
+}
+export interface LocalizedOverride {
+  ja?: string;
+  vi?: string;
 }
 export interface Group {
   id: string;
@@ -161,6 +207,7 @@ export interface Group {
   type: "group";
   label?: {
     ja: string;
+    vi?: string;
   };
   classification: "public" | "personal" | "secret";
   persist?: "allowed" | "never";
@@ -180,6 +227,7 @@ export interface Step {
   kind: "form" | "review" | "complete";
   title?: {
     ja: string;
+    vi?: string;
   };
   content?: (
     | {
@@ -195,6 +243,7 @@ export interface Step {
 export interface Condition {
   label: {
     ja: string;
+    vi?: string;
   };
   when: Expression;
 }

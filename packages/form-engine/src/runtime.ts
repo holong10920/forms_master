@@ -25,7 +25,7 @@ import {
   type Value,
   type Values,
 } from "./model.ts";
-export type Payload = Record<string, Cell | Record<string, Cell>[]>;
+export type Payload = Record<string, Cell | Record<string, Cell>[] | Record<string, Cell>>;
 function readNode(value: unknown, node: EngineNode): Value | undefined {
   return node.type === "group" ? normalizeGroup(value, node) : normalize(value, node);
 }
@@ -120,7 +120,13 @@ export function payloadPreview(ir: EngineIRV1, state: State): Payload {
     if (!view.active.has(f.id) || f.submit === "displayOnly" || v === undefined) continue;
     if (f.type === "group") {
       if (isGroup(v) && v.order.length) out[f.key] = projectGroup(f, v);
-    } else if (!isGroup(v)) out[f.key] = v;
+    } else if (!isGroup(v)) {
+      if (f.outputPath) {
+        const [root, key] = f.outputPath;
+        if (!Object.hasOwn(out, root)) out[root] = {};
+        (out[root] as Record<string, Cell>)[key] = v;
+      } else out[f.key] = v;
+    }
   }
   return out;
 }

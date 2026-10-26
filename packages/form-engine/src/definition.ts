@@ -225,6 +225,30 @@ export function assertIR(ir: EngineIRV1): void {
     if (f.type !== "group" && (f.type === "calculated") !== (f.formula !== undefined))
       throw new EngineError("E-FORMULA", f.id);
   }
+  const outputRoots = new Map<string, "object" | "leaf">(),
+    outputPaths = new Set<string>();
+  for (const f of ir.nodes) {
+    if (f.type !== "group" && f.outputPath) {
+      if (
+        f.outputPath.some(
+          (p) =>
+            !/^[a-zA-Z][a-zA-Z0-9_]*$/u.test(p) ||
+            ["constructor", "prototype", "__proto__"].includes(p),
+        ) ||
+        !/^inst_[a-zA-Z0-9_]+:fld_[a-zA-Z0-9_]+$/u.test(f.sourceIdentity ?? "")
+      )
+        throw new EngineError("E-OUTPUT-PATH", f.id);
+      const [root, key] = f.outputPath,
+        path = root + "." + key;
+      if (outputRoots.get(root) === "leaf" || outputPaths.has(path))
+        throw new EngineError("E-OUTPUT-COLLISION", f.id);
+      outputRoots.set(root, "object");
+      outputPaths.add(path);
+    } else {
+      if (outputRoots.has(f.key)) throw new EngineError("E-OUTPUT-COLLISION", f.id);
+      outputRoots.set(f.key, "leaf");
+    }
+  }
   for (const f of ir.nodes) {
     checkField(f);
     if (f.type === "group") {
@@ -357,12 +381,28 @@ export function loadDefinition(value: unknown): EngineIRV1 {
   if (!validateSchema("form-definition/v1", value).valid)
     throw new EngineError("E-DEFINITION-SCHEMA");
   const d = value as FormDefinitionV1;
+  if (d.blockInstances?.length) throw new EngineError("E-BLOCK-UNRESOLVED");
+  if (d.locale && !d.locale.supported.includes(d.locale.default)) throw new EngineError("E-LOCALE");
+  // Only multi-locale forms carry locale data; ja-only IR stays byte-identical (T-04 fallback).
+  const multiLocale = d.locale?.supported.includes("vi") === true;
+  const lowerStep = (s: FormDefinitionV1["steps"][number]): EngineIRV1["steps"][number] => {
+    const { content, ...rest } = s;
+    return content
+      ? {
+          ...rest,
+          content: content.map((c) => {
+            if ("block" in c) throw new EngineError("E-BLOCK-UNRESOLVED");
+            return c;
+          }),
+        }
+      : rest;
+  };
   const ir: EngineIRV1 = {
     irFormat: 1,
     engineIrRange: ">=1.0.0 <2.0.0",
     form: { schemaVersion: d.schemaVersion, formId: d.formId, siteId: d.siteId },
     nodes: d.fields,
-    steps: d.steps,
+    steps: [lowerStep(d.steps[0]), ...d.steps.slice(1).map(lowerStep)],
     conditions: d.conditions ?? {},
     capabilities: Object.fromEntries(
       Object.entries(d.dependencies?.capabilities ?? {}).map(([alias, ref]) => [
@@ -371,6 +411,8 @@ export function loadDefinition(value: unknown): EngineIRV1 {
       ]),
     ),
     effects: [],
+    ...(multiLocale ? { locale: { default: "ja", supported: ["ja", "vi"] } } : {}),
+    ...(d.texts ? { texts: d.texts } : {}),
   };
   assertIR(ir);
   return structuredClone(ir);

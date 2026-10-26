@@ -1,0 +1,14 @@
+{
+  "allPassed": true,
+  "form": "frm_1a7ac0b46a4b4ac4aed1d3fcb89704ab",
+  "namedCondition": "cnd_3ad8491718b74d5585c8900fc3f82484",
+  "oneLevelAnd": true,
+  "typedInteger": true,
+  "requiredWhen": true,
+  "saveReload": true,
+  "payload": {
+    "mode": "yes",
+    "count": 11,
+    "note": "Synthetic required note"
+  }
+}

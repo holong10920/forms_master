@@ -24,3 +24,5 @@ export { addItem, removeItem, moveItems } from "./groups.ts";
 export type { GroupValue, Cell } from "./model.ts";
 export { canonical, parseNumberInput } from "./canonical.ts";
 export { restoreDraft, type DraftSnapshot } from "./restore.ts";
+
+export { projectPreview } from "./preview.ts";

@@ -1,0 +1,20 @@
+{
+  "allPassed": true,
+  "form": "frm_6fd18fd756554596aceed7aadf3c7e75",
+  "url1": "http://127.0.0.1:4173/r/rel_idd46masws7dka2ved6vibdo2m/index.html",
+  "url2": "http://127.0.0.1:4173/r/rel_wcruw6htobhrogbc2g3d7mmuog/index.html",
+  "receipt": "synthetic_ee72643b08feb79e82ab7471",
+  "previewOrigin": "http://127.0.0.1:4175",
+  "selfApprovalDenied": true,
+  "crossSiteDenied": true,
+  "idempotency": true,
+  "rollback": true,
+  "pinnedRevision2": true,
+  "adminPluginRuntimeRequests": 0,
+  "browser": "156.0.8078.47",
+  "screenshots": [
+    "local-p0-admin-preview.png",
+    "local-p0-customer-complete.png",
+    "local-p0-rollback.png"
+  ]
+}

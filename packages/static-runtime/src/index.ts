@@ -1,3 +1,4 @@
+declare const __FB_PREVIEW__: boolean;
 import "./style.css";
 import { verifiedLoad, type Bindings, type Asset } from "./ports.ts";
 import type { StoreModule, StoreOption, MotionModule } from "@platform/sdk-browser";
@@ -13,9 +14,10 @@ import {
   type Cell,
   type Event,
 } from "@fb/form-engine";
-import { sha256Hex, type EngineIRV1 } from "@fb/contracts";
+import { sha256Hex, type EngineField, type EngineIRV1 } from "@fb/contracts";
 interface Pin {
   mode: string;
+  partial?: { stops: string[]; blockedFields: string[]; diagnostics: { code: string }[] };
   plugin?: boolean;
   assets?: Asset[];
   groups?: { store: string[]; motion: string[] };
@@ -25,45 +27,8 @@ interface Pin {
   revision: string;
   ir: { path: string; sha256: string };
 }
-const titles: Record<string, string> = {
-  fld_category: "カテゴリ",
-  fld_club: "ゴルフクラブ",
-  fld_racket: "ラケット",
-  fld_condition: "商品の状態",
-  fld_damage: "故障の説明",
-  fld_method: "買取方法",
-  fld_customer: "お名前（合成データのみ）",
-  fld_email: "メール（合成データのみ）",
-  fld_consent: "確認事項に同意",
-  fld_device: "機種カテゴリ",
-  fld_battery: "バッテリー状態",
-  fld_defects: "不具合",
-  fld_store: "店舗",
-  fld_kit: "梱包キット",
-};
-const labels: Record<string, string> = {
-  golf: "ゴルフ",
-  racket: "ラケット",
-  driver: "ドライバー",
-  iron: "アイアン",
-  tennis: "テニス",
-  badminton: "バドミントン",
-  used: "中古",
-  junk: "Junk / 故障あり",
-  shuccho: "出張",
-  store: "店頭",
-  takuhai: "宅配",
-  desktop: "デスクトップ",
-  laptop: "ノート",
-  tablet: "タブレット",
-  peripheral: "周辺機器",
-  good: "良好",
-  poor: "劣化あり",
-  none: "なし",
-  screen: "画面割れ",
-  yes: "必要",
-  no: "不要",
-};
+type Text = { ja?: string; vi?: string } | undefined;
+type Locale = "ja" | "vi";
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, text?: string) {
   const node = document.createElement(tag);
   if (text !== undefined) node.textContent = text;
@@ -75,8 +40,12 @@ export async function start(bindings: Bindings = {}): Promise<void> {
   if (!host || !metadata?.textContent) throw new EngineError("E-BOOTSTRAP");
   const pin = JSON.parse(metadata.textContent) as Pin;
   if (
-    pin.mode !== "local-candidate" ||
-    !/^dev_[a-z2-7]{26}$/u.test(pin.releaseId) ||
+    !(
+      pin.mode === "local-candidate" ||
+      pin.mode === "canonical-release" ||
+      (__FB_PREVIEW__ && pin.mode === "partial-preview")
+    ) ||
+    !/^(dev|rel)_[a-z2-7]{26}$/u.test(pin.releaseId) ||
     !/^assets\/form-ir\.[a-f0-9]{64}\.json$/u.test(pin.ir.path)
   )
     throw new EngineError("E-RELEASE-PIN");
@@ -93,6 +62,27 @@ export async function start(bindings: Bindings = {}): Promise<void> {
   if (ir.form.formId !== pin.formId || ir.form.siteId !== pin.siteId)
     throw new EngineError("E-RELEASE-PIN");
   assertIR(ir);
+  const locales: Locale[] = ir.locale?.supported ?? ["ja"];
+  const pick = (v?: string | null) => locales.find((l) => l === v?.slice(0, 2));
+  const remember = (value?: Locale) => {
+    try {
+      if (value) sessionStorage.setItem("fb.locale", value);
+      return sessionStorage.getItem("fb.locale");
+    } catch {
+      return null; // Storage may be blocked; the choice then lasts only for this page.
+    }
+  };
+  let locale = pick(remember()) ?? pick(new URLSearchParams(location.search).get("lang")) ?? "ja";
+  const texts = (ir.texts ?? {}) as Record<string, Text>;
+  // Active locale first, then ja (default locale), then the built-in ja fallback.
+  const text = (t: Text, fallback: string) => t?.[locale] || t?.ja || fallback;
+  const tr = <T extends HTMLElement>(node: T, t: Text, fallback: string): T => {
+    node.textContent = text(t, fallback);
+    if (locale !== "ja" && !t?.[locale]) node.lang = "ja-JP";
+    return node;
+  };
+  // Messages are compiled into the pinned IR (tools/compiler/src/l10n.ts); the key is a last resort.
+  const msg = (key: string) => text(texts[key], key);
   const capabilitySteps = Object.fromEntries(
     ir.steps
       .filter((s) =>
@@ -198,46 +188,103 @@ export async function start(bindings: Bindings = {}): Promise<void> {
     }
     send({ type, fromStep: state.current, stateVersion: state.stateVersion });
   };
-  function render() {
+  function switchLocale(next: Locale) {
+    const active = document.activeElement;
+    // Commit an in-progress edit before the view is rebuilt (some browsers keep focus on click).
+    if (active && viewRoot.contains(active) && !active.closest(".locale"))
+      active.dispatchEvent(new Event("change"));
+    remember((locale = next));
+    render(true);
+    viewRoot.querySelector<HTMLElement>(`[data-locale="${next}"]`)?.focus();
+  }
+  function render(localeOnly = false) {
     if (!host) return;
     disposeStore?.();
     disposeStore = undefined;
     viewRoot.replaceChildren();
     host.dataset.step = state.current;
     host.dataset.release = pin.releaseId;
+    host.dataset.locale = locale;
+    if (__FB_PREVIEW__ && pin.partial) {
+      viewRoot.append(
+        el("p", "一部プレビュー：未設定の経路 " + String(pin.partial.stops.length) + "件"),
+      );
+      if (pin.partial.stops.includes(state.current)) {
+        viewRoot.append(el("h2", "この先の経路はまだ設定されていません（プレビューのみ）"));
+        const previous = el("button", "前のステップに戻る");
+        previous.addEventListener("click", () => {
+          nav("back");
+        });
+        viewRoot.append(previous);
+        return;
+      }
+    }
+    document.documentElement.lang = locale === "vi" ? "vi-VN" : "ja-JP";
+    if (locales.length > 1) {
+      const bar = el("div");
+      bar.className = "locale";
+      bar.setAttribute("role", "group");
+      bar.setAttribute("aria-label", "Language");
+      for (const l of locales) {
+        const b = el("button", l === "vi" ? "Tiếng Việt" : "日本語");
+        b.type = "button";
+        b.lang = l === "vi" ? "vi-VN" : "ja-JP";
+        b.dataset.locale = l;
+        b.setAttribute("aria-pressed", String(l === locale));
+        b.addEventListener("click", () => {
+          switchLocale(l);
+        });
+        bar.append(b);
+      }
+      viewRoot.append(bar);
+    }
+    for (const key of ["formTitle", "formDescription"])
+      if (text(texts[key], "")) {
+        const p = tr(el("p"), texts[key], "");
+        p.className = key;
+        viewRoot.append(p);
+      }
     viewRoot.append(
       el(
         "p",
-        `${ir.form.formId === "frm_sports" ? "Sports" : ir.form.formId === "frm_pc_reference" ? "PC" : ir.form.formId} · 合成データのみ`,
+        `${ir.form.formId === "frm_sports" ? "Sports" : ir.form.formId === "frm_pc_reference" ? "PC" : ir.form.formId} · ${msg("syntheticNotice")}`,
       ),
     );
     if (state.status === "complete") {
       viewRoot.append(
-        el("h1", "ローカル模擬受付完了"),
-        el("p", "実際の申込・外部送信は行っていません。"),
+        tr(el("h1"), texts.completeTitle, "completeTitle"),
+        tr(el("p"), texts.completeBody, "completeBody"),
       );
       return;
     }
     const step = ir.steps.find((s) => s.id === state.current);
     if (!step) throw new EngineError("E-STEP");
     viewRoot.append(
-      el(
-        "h1",
-        step.kind === "review" ? "入力内容の確認" : (step.title?.ja ?? step.id.replace("stp_", "")),
-      ),
+      step.kind === "review"
+        ? tr(el("h1"), texts.reviewTitle, "reviewTitle")
+        : tr(el("h1"), step.title, step.id.replace("stp_", "")),
     );
     const errors = visibleErrors(ir, state);
     if (errors.length) {
       const summary = el("div");
       summary.setAttribute("role", "alert");
-      summary.append(el("p", "入力内容を確認してください。"));
-      for (const issue of errors)
-        summary.append(el("p", `${titles[issue.path] ?? issue.path}: ${issue.code}`));
+      summary.append(tr(el("p"), texts.errorSummary, "errorSummary"));
+      for (const issue of errors) {
+        const f = ir.nodes.find((n) => n.id === issue.path);
+        const limit = (f as EngineField | undefined)?.validators?.find((v) => v.use === issue.code)
+          ?.params?.value;
+        summary.append(
+          el(
+            "p",
+            `${text(f?.label, issue.path)}: ${msg(issue.code).replace("{n}", String(limit ?? ""))}`,
+          ),
+        );
+      }
       viewRoot.append(summary);
     }
     if (step.kind === "review") {
       viewRoot.append(
-        el("h2", "送信プレビュー（合成データ）"),
+        tr(el("h2"), texts.payloadTitle, "payloadTitle"),
         el("pre", JSON.stringify(payloadPreview(ir, state), null, 2)),
       );
     } else {
@@ -248,10 +295,14 @@ export async function start(bindings: Bindings = {}): Promise<void> {
           !(step.content ?? []).some((c) => "field" in c && c.field === `$local:${f.id}`)
         )
           continue;
+        if (__FB_PREVIEW__ && pin.partial?.blockedFields.includes(f.id)) {
+          viewRoot.append(el("p", "この部品は利用停止中です · " + f.key));
+          continue;
+        }
         if (f.type === "group") throw new EngineError("E-RUNTIME-UNSUPPORTED", f.id);
         const wrap = el("div");
         wrap.className = "field";
-        const label = el("label", f.label?.ja ?? titles[f.id] ?? f.key);
+        const label = tr(el("label"), f.label, f.key);
         label.htmlFor = f.id;
         wrap.append(label);
         if (f.type === "plugin:storeSel") {
@@ -291,11 +342,9 @@ export async function start(bindings: Bindings = {}): Promise<void> {
         let input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
         if (f.options) {
           const select = el("select");
-          select.append(new Option("選択してください", ""));
+          select.append(new Option(msg("selectPrompt"), ""));
           for (const option of f.options)
-            select.append(
-              new Option(option.label?.ja ?? labels[option.value] ?? option.value, option.value),
-            );
+            select.append(new Option(text(option.label, option.value), option.value));
           if (f.type === "choice.checkboxes") {
             select.multiple = true;
             for (const option of select.options)
@@ -323,6 +372,8 @@ export async function start(bindings: Bindings = {}): Promise<void> {
         }
         input.id = f.id;
         input.name = f.key;
+        if (f.placeholder && !(input instanceof HTMLSelectElement))
+          input.placeholder = text(f.placeholder, "");
         input.setAttribute("aria-required", String(!!f.required || !!f.requiredWhen));
         if (errors.some((e) => e.path === f.id)) input.setAttribute("aria-invalid", "true");
         const numericValue = (): number | undefined => {
@@ -330,7 +381,7 @@ export async function start(bindings: Bindings = {}): Promise<void> {
           try {
             return parseNumberInput(input.value);
           } catch {
-            input.setCustomValidity("安全な整数を入力してください");
+            input.setCustomValidity(msg("invalidNumber"));
             return undefined;
           }
         };
@@ -363,19 +414,33 @@ export async function start(bindings: Bindings = {}): Promise<void> {
           state = dispatch(ir, state, { type: "blur", field: f.id }).state;
         });
         wrap.append(input);
+        if (text(f.help, "")) {
+          const help = tr(el("p"), f.help, "");
+          help.className = "help";
+          help.id = `${f.id}-help`;
+          input.setAttribute("aria-describedby", help.id);
+          wrap.append(help);
+        }
         viewRoot.append(wrap);
       }
     }
     const actions = el("div");
     actions.className = "actions";
-    const back = el("button", "戻る");
+    const back = tr(el("button"), texts.back, "back");
     back.type = "button";
     back.disabled = state.current === snapshot(ir, state).path[0] || state.status === "pending";
     back.addEventListener("click", () => {
       nav("back");
     });
     actions.append(back);
-    const next = el("button", step.kind === "review" ? "ローカル模擬受付" : "次へ");
+    if (__FB_PREVIEW__ && pin.partial && step.kind === "review") {
+      viewRoot.append(actions, el("p", "一部プレビューでは送信できません"));
+      return;
+    }
+    const next =
+      step.kind === "review"
+        ? tr(el("button"), texts.submit, "submit")
+        : tr(el("button"), texts.next, "next");
     next.type = "button";
     next.disabled = state.status === "pending";
     next.addEventListener("click", () => {
@@ -425,6 +490,7 @@ export async function start(bindings: Bindings = {}): Promise<void> {
     });
     actions.append(next);
     viewRoot.append(actions);
+    if (localeOnly) return;
     const active = [...snapshot(ir, state).active].sort().join(",");
     const kind =
       state.current !== previousStep

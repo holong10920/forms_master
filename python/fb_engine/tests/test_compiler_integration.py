@@ -129,3 +129,121 @@ def test_publish_two_revisions_rollback_cas_owner_and_immutability(
         assert store.active("site_sports_synthetic", "frm_sports")["candidateId"] == a.name
     finally:
         store.close()
+
+
+def test_control_publication_is_atomic_pinned_and_idempotent(
+    built: dict[str, Any], tmp_path: Path
+) -> None:
+    from tools.local_p0.control import Control, Fault, digest
+
+    c = Control(tmp_path / "control", Path(built["sports"]["directory"]).parent)
+    try:
+        definition = json.loads((ROOT / "contracts/fixtures/engine/sports.json").read_text())
+        site, form = definition["siteId"], definition["formId"]
+        c.save("synthetic-editor", site, form, 0, definition)
+        rid = c.review("synthetic-editor", site, form, 1)["id"]
+        c.approve("synthetic-reviewer", rid, True)
+        op = c.begin_publication("synthetic-publisher", rid)
+        cid = built["sports"]["candidateId"]
+        op = c.publication_built("synthetic-publisher", op["id"], op["fence"], cid)
+        result = c.activate(
+            "synthetic-publisher", rid, cid, digest(definition), op["id"], op["fence"]
+        )
+        assert result["version"] == 1 and c.publisher.active(site, form)["candidateId"] == cid
+        assert c.operation("synthetic-publisher", op["id"])["state"] == "ACTIVATED"
+        assert c.review_row("synthetic-reviewer", rid)["state"] == "PUBLISHED"
+        assert (
+            c.activate("synthetic-publisher", rid, cid, digest(definition), op["id"], op["fence"])
+            == result
+        )
+        assert c.publisher.active(site, form)["version"] == 1
+        with pytest.raises(Fault, match="OPERATION_SCOPE"):
+            c.activate("synthetic-publisher", rid, cid, "wrong-snapshot", op["id"], op["fence"])
+    finally:
+        c.close()
+
+
+def test_control_cancel_during_copy_fences_activation(
+    built: dict[str, Any], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from tools.local_p0.control import Control, Fault, digest
+
+    c = Control(tmp_path / "control", Path(built["sports"]["directory"]).parent)
+    try:
+        definition = json.loads((ROOT / "contracts/fixtures/engine/sports.json").read_text())
+        site, form = definition["siteId"], definition["formId"]
+        c.save("synthetic-editor", site, form, 0, definition)
+        rid = c.review("synthetic-editor", site, form, 1)["id"]
+        c.approve("synthetic-reviewer", rid, True)
+        op = c.begin_publication("synthetic-publisher", rid)
+        cid = built["sports"]["candidateId"]
+        op = c.publication_built("synthetic-publisher", op["id"], op["fence"], cid)
+        real = c.publisher.objects.put_write_once
+        cancelled = False
+
+        def copy(key: str, raw: bytes, checksum: str) -> Any:
+            nonlocal cancelled
+            result = real(key, raw, checksum)
+            if not cancelled:
+                cancelled = True
+                c.finish_failed("synthetic-publisher", op["id"], "CANCELLED_BY_USER", True)
+            return result
+
+        monkeypatch.setattr(c.publisher.objects, "put_write_once", copy)
+        with pytest.raises(Fault, match="OPERATION_FENCED"):
+            c.activate("synthetic-publisher", rid, cid, digest(definition), op["id"], op["fence"])
+        assert not c.publisher.active(site, form)
+        assert c.operation("synthetic-publisher", op["id"])["state"] == "CANCELLED"
+        assert c.review_row("synthetic-reviewer", rid)["state"] == "APPROVED"
+    finally:
+        c.close()
+
+
+def test_review_preview_checks_pinned_lock_not_mutated_draft(
+    built: dict[str, Any], tmp_path: Path
+) -> None:
+    from tools.local_p0.control import Control, Fault, digest
+    from tools.local_p0.rpc import run
+
+    c = Control(tmp_path / "control", Path(built["pc-plugin"]["directory"]).parent)
+    try:
+        d = json.loads((ROOT / "contracts/fixtures/engine/pc-plugin.json").read_text())
+        site, form = d["siteId"], d["formId"]
+        c.save("synthetic-editor", site, form, 0, d)
+        rid = c.review("synthetic-editor", site, form, 1)["id"]
+        later = json.loads(json.dumps(d))
+        later.pop("dependencies")
+        store = next(f for f in later["fields"] if f["id"] == "fld_store")
+        store["type"] = "text"
+        store["classification"] = "personal"
+        c.save("synthetic-editor", site, form, 1, later)
+        s = c.login("synthetic-reviewer")
+        preview = run(
+            c,
+            "preview.register",
+            {
+                "site": site,
+                "form": form,
+                "id": rid,
+                "version": 1,
+                "candidateId": built["pc-plugin"]["candidateId"],
+                "snapshotHash": digest(d),
+            },
+            s["token"],
+            s["csrf"],
+        )
+        assert run(c, "preview.status", preview, s["token"], s["csrf"]) == {"active": True}
+        other = c.login("synthetic-publisher")
+        with pytest.raises(Fault, match="PREVIEW_SESSION_EXPIRED"):
+            run(c, "preview.status", preview, other["token"], other["csrf"])
+        c.change_policy("synthetic-security", site, c.policy()["version"], "override", True)
+        with pytest.raises(Fault, match="E-CAPABILITY-BLOCKED"):
+            run(c, "preview.check", {}, preview["previewSessionId"], "")
+        assert run(c, "preview.status", preview, s["token"], s["csrf"]) == {
+            "active": False,
+            "code": "E-CAPABILITY-BLOCKED",
+        }
+        with pytest.raises(Fault, match="PREVIEW_SESSION_EXPIRED"):
+            run(c, "preview.check", {}, preview["previewSessionId"], "")
+    finally:
+        c.close()

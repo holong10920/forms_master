@@ -1,3 +1,6 @@
+import { resolveTheme } from "./themes.ts";
+import { localize } from "./l10n.ts";
+import { expandBlocks, bindBlocks } from "./blocks.ts";
 import { createHash } from "node:crypto";
 import {
   readFileSync,
@@ -13,7 +16,7 @@ import {
 import { join, resolve, relative, dirname } from "node:path";
 import { tmpdir } from "node:os";
 import { build, type Plugin } from "vite";
-import { loadDefinition } from "@fb/form-engine";
+import { loadDefinition, assertIR } from "@fb/form-engine";
 import { resolveAssets } from "./resolve.ts";
 import { storeEntry, motionEntry } from "./bindings.ts";
 import { gzipSync } from "node:zlib";
@@ -141,7 +144,7 @@ function base32(hex: string): string {
   return out;
 }
 export function candidateIdFor(manifest: unknown): string {
-  return `dev_${base32(hash(json(manifest))).slice(0, 26)}`;
+  return `${manifest && typeof manifest === "object" && "lrmFormat" in manifest ? "rel" : "dev"}_${base32(hash(json(manifest))).slice(0, 26)}`;
 }
 const cssType = (path: string) =>
   path.endsWith(".js")
@@ -154,9 +157,11 @@ export interface Candidate {
   directory: string;
   urlPath: string;
   manifest: {
-    localCandidateFormat: number;
-    variant: string;
-    builderVerification: string;
+    localCandidateFormat?: number;
+    lrmFormat?: number;
+    formats?: { draftFormat: number; loadFormat: number };
+    variant?: string;
+    builderVerification?: string;
     form: { formId: string; siteId: string; revision: string; schemaVersion: string };
     inputs: Record<string, string>;
     toolchain: Record<string, string>;
@@ -164,8 +169,23 @@ export interface Candidate {
   };
   chunks: Chunk[];
 }
-export async function compile(definition: unknown, outRoot: string): Promise<Candidate> {
-  const ir = loadDefinition(definition);
+export interface PreviewOptions {
+  sourceDigest: string;
+  stops: string[];
+  blockedFields: string[];
+  diagnostics: { code: string; gate: string; step?: string }[];
+}
+export async function compile(
+  definition: unknown,
+  outRoot: string,
+  preview?: PreviewOptions,
+): Promise<Candidate> {
+  const expanded = expandBlocks(definition);
+  const theme = resolveTheme(expanded.definition.siteId, expanded.definition.themeRef);
+  const ir = loadDefinition(expanded.definition);
+  bindBlocks(ir, expanded.bindings);
+  assertIR(ir);
+  localize(ir);
   const resolved = resolveAssets(root, definition as FormDefinitionV1, ir);
   const profile = { plugin: resolved.plugin, motion: resolved.preset !== "none" };
   if (
@@ -227,6 +247,7 @@ export async function compile(definition: unknown, outRoot: string): Promise<Can
     };
     const result = await build({
       configFile: false,
+      define: { __FB_PREVIEW__: preview ? "true" : "false" },
       envFile: false,
       root: temp,
       publicDir: false,
@@ -278,6 +299,8 @@ export async function compile(definition: unknown, outRoot: string): Promise<Can
     irHash = hash(irBytes),
     irPath = `assets/form-ir.${irHash}.json`;
   files.set(irPath, irBytes);
+  const themeBytes = Buffer.from(theme.css);
+  files.set(`assets/theme.${hash(themeBytes)}.css`, themeBytes);
   chunks.sort((a, b) => compare(a.file, b.file));
   audit(chunks, files, profile);
   const dataContract = {
@@ -285,6 +308,8 @@ export async function compile(definition: unknown, outRoot: string): Promise<Can
     fields: ir.nodes.map((f) => ({
       id: f.id,
       key: f.key,
+      path: f.type !== "group" ? (f.outputPath ?? [f.key]) : [f.key],
+      identity: f.type !== "group" ? (f.sourceIdentity ?? f.id) : f.id,
       type: f.type,
       classification: f.classification,
       submit: f.submit ?? "include",
@@ -302,12 +327,18 @@ export async function compile(definition: unknown, outRoot: string): Promise<Can
     builderVerification: "VERIFICATION_PENDING",
     form: { ...ir.form, revision: `synthetic-${hash(json(definition)).slice(0, 16)}` },
     inputs: {
+      ...(preview ? { previewProjection: `sha256:${hash(json(preview))}` } : {}),
+      theme: `sha256:${hash(themeBytes)}`,
+      themeResolver: `sha256:${hash(readFileSync(join(root, "tools/compiler/src/themes.ts")))}`,
+      blockLock: `sha256:${hash(json(expanded.lock))}`,
+      localization: `sha256:${hash(readFileSync(join(root, "tools/compiler/src/l10n.ts")))}`,
+      blockResolver: `sha256:${hash(readFileSync(join(root, "tools/compiler/src/blocks.ts")))}`,
       bindingsSource: `sha256:${hash(readFileSync(join(root, "tools/compiler/src/bindings.ts")))}`,
       resolverSource: `sha256:${hash(readFileSync(join(root, "tools/compiler/src/resolve.ts")))}`,
       capabilityLock: `sha256:${hash(resolved.lockBytes)}`,
       compilerSource: `sha256:${hash(readFileSync(new URL(import.meta.url)))}`,
       buildConfig: `sha256:${hash(json({ profile: "sports-demo-nomotion-local", vite: "8.3.5", rolldown: "1.2.15", base: "./", minify: "oxc", hashCharacters: "hex", unsafeEval: false }))}`,
-      definition: `sha256:${hash(json(definition))}`,
+      definition: preview ? `sha256:${preview.sourceDigest}` : `sha256:${hash(json(definition))}`,
       ir: `sha256:${irHash}`,
       dataContract: `sha256:${hash(json(dataContract))}`,
       chunkManifest: `sha256:${hash(graph)}`,
@@ -339,7 +370,7 @@ export async function compile(definition: unknown, outRoot: string): Promise<Can
     for (const child of chunks.find((c) => c.file === file)?.staticImports ?? []) visit(child);
   };
   visit(entryChunk.file);
-  if (!profile.plugin && !profile.motion) {
+  if (!profile.plugin && !profile.motion && !preview) {
     const initialJS = [...initial].reduce(
       (n, file) => n + gzipSync(files.get(file) ?? Buffer.alloc(0), { level: 9 }).length,
       0,
@@ -367,7 +398,8 @@ export async function compile(definition: unknown, outRoot: string): Promise<Can
   )
     throw new Error("E-GROUP-IN-INITIAL");
   const metadata = {
-    mode: "local-candidate",
+    mode: preview ? "partial-preview" : "local-candidate",
+    ...(preview ? { partial: preview } : {}),
     plugin: resolved.plugin,
     groups: { store: group("store"), motion: group("motion") },
     assets: manifest.inventory.map((f) => ({ path: f.path, sha256: f.sha256.slice(7) })),
@@ -390,7 +422,7 @@ export async function compile(definition: unknown, outRoot: string): Promise<Can
       .digest("base64")}`;
   const html = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${ir.form.formId === "frm_pc_reference" ? "PC" : "Sports"} · Local Synthetic</title>${css.map((f) => `<link rel="stylesheet" href="./${f.path}" integrity="${sri(f.path)}" crossorigin="anonymous">`).join("")}</head><body><main id="app" aria-live="polite">読み込み中…</main><script type="application/json" id="release">${escape(canonicalJson(metadata))}</script><script type="module" src="./${main.path}" integrity="${sri(main.path)}" crossorigin="anonymous"></script></body></html>`;
   files.set("index.html", Buffer.from(html));
-  if (!profile.plugin && !profile.motion) {
+  if (!profile.plugin && !profile.motion && !preview) {
     const size = [...initial, "index.html", ...css.map((f) => f.path)].reduce(
       (n, file) => n + gzipSync(files.get(file) ?? Buffer.alloc(0), { level: 9 }).length,
       0,
@@ -436,6 +468,7 @@ export async function compile(definition: unknown, outRoot: string): Promise<Can
     ["chunk-manifest.json", graph],
     ["data-contract.json", json(dataContract)],
     ["capability-lock.json", resolved.lockBytes],
+    ["block-lock.json", json(expanded.lock)],
     [
       "local-integrity.json",
       json({ manifestDigest: hash(json(manifest)), indexHtmlDigest: hash(Buffer.from(html)) }),

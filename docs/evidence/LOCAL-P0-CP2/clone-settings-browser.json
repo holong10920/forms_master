@@ -1,0 +1,13 @@
+{
+  "allPassed": true,
+  "source": "http://127.0.0.1:4173/r/dev_x5pubpxydeyv2qrcsrl5ergcgp/index.html",
+  "form": "frm_bd618cb8700e47da9c35c7b90ad6cb92",
+  "clone": true,
+  "remappedStepsEditable": true,
+  "pinnedTheme": true,
+  "previewBackground": "rgb(255, 255, 255)",
+  "motionSubtle": true,
+  "speed": "slow",
+  "blockExportRule": true,
+  "saveReload": true
+}

@@ -20,7 +20,8 @@ export interface Finding {
   file: string;
   line: number;
   type: string;
-  classification: "unreviewed" | "recomputed-fixture-digest" | "fixed-scan-command";
+  classification:
+    "unreviewed" | "recomputed-fixture-digest" | "fixed-scan-command" | "public-rfc7636-vector";
 }
 export interface ScanReport {
   scanner: string;
@@ -115,6 +116,14 @@ function fixtureDigests(root: string, file: string): Set<string> {
         if (value !== c.canonical) throw new Error("fixture canonical mismatch");
         computed.add(hash("sha256", value));
       }
+  } else if (file === "contracts/fixtures/blocks/registry.json") {
+    const registry = JSON.parse(readFileSync(join(root, file), "utf8")) as Record<string, string>;
+    for (const pin of Object.keys(registry)) {
+      if (!/^blk_customer_info@r[12]$/u.test(pin)) continue;
+      computed.add(
+        hash("sha256", readFileSync(join(root, "contracts/fixtures/blocks", pin + ".json"))),
+      );
+    }
   } else if (file === "contracts/fixtures/digest/sha256-hex.json") {
     const fixture = JSON.parse(readFileSync(join(root, file), "utf8")) as {
       rawDigests: { utf8: string }[];
@@ -126,6 +135,12 @@ function fixtureDigests(root: string, file: string): Set<string> {
   }
   return computed;
 }
+// Public test data, not credentials: RFC 7636 Appendix B, checked against the RFC Editor text.
+// https://www.rfc-editor.org/rfc/rfc7636.html#appendix-B
+const PUBLIC_PKCE_VECTORS = [
+  "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+  "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+];
 export function scanDirectory(root: string, offline = false): ScanReport {
   const env = {
     ...process.env,
@@ -165,7 +180,11 @@ export function scanDirectory(root: string, offline = false): ScanReport {
     for (const finding of matches) {
       let classification: Finding["classification"] = "unreviewed";
       const line = lines[finding.line_number - 1] ?? "";
-      const digest = /^\s*"sha256": "([a-f0-9]{64})",?\s*$/.exec(line)?.[1];
+      const digest = (
+        file === "contracts/fixtures/blocks/registry.json"
+          ? /^\s*"blk_customer_info@r[12]": "([a-f0-9]{64})",?\s*$/
+          : /^\s*"sha256": "([a-f0-9]{64})",?\s*$/
+      ).exec(line)?.[1];
       if (
         finding.type === "Hex High Entropy String" &&
         digest &&
@@ -181,6 +200,15 @@ export function scanDirectory(root: string, offline = false): ScanReport {
         hash("sha1", command) === finding.hashed_secret
       )
         classification = "fixed-scan-command";
+      if (
+        ["tools/local_p0/test/oidc.test.ts", "tools/security/src/scan.ts"].includes(file) &&
+        finding.type === "Base64 High Entropy String" &&
+        PUBLIC_PKCE_VECTORS.some(
+          (value) =>
+            line.includes(JSON.stringify(value)) && hash("sha1", value) === finding.hashed_secret,
+        )
+      )
+        classification = "public-rfc7636-vector";
       findings.push({ file, line: finding.line_number, type: finding.type, classification });
     }
   }

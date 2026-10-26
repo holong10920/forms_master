@@ -1,0 +1,128 @@
+[
+  {
+    "name": "sports",
+    "candidateId": "rel_w4fuidge7q34tu3xwmivd2cc2d",
+    "url": "http://127.0.0.1:4173/r/rel_w4fuidge7q34tu3xwmivd2cc2d/index.html",
+    "builderVerification": "VERIFICATION_PENDING",
+    "hostVerification": "PASS",
+    "resources": [
+      {
+        "path": "assets/bootstrap.b44f7c1c75642bfe86a3c4935f318fcdbe03076ba77626a3b53385275f7f5727.js",
+        "rawBytes": 188,
+        "gzipBytes": 154
+      },
+      {
+        "path": "assets/entry.21f135d0a9ba.js",
+        "rawBytes": 35997,
+        "gzipBytes": 11459
+      },
+      {
+        "path": "index.html",
+        "rawBytes": 2140,
+        "gzipBytes": 1016
+      },
+      {
+        "path": "assets/entry.c9ed9d8ab25e.css",
+        "rawBytes": 1257,
+        "gzipBytes": 609
+      },
+      {
+        "path": "assets/theme.cad1d23ddcef8ee1aa044b8d6630246a9abfe6214e7ea74a0b2f858c039d4a86.css",
+        "rawBytes": 80,
+        "gzipBytes": 82
+      }
+    ],
+    "initialJSGzipBytes": 11613,
+    "initialTotalGzipBytes": 13320,
+    "irGzipBytes": 1466,
+    "fontImageBytes": 0,
+    "motionModules": 0,
+    "storeModules": 0,
+    "canonicalK13": "VERIFICATION_PENDING",
+    "measurement": "Node gzip level 9; emitted artifact initial graph; host only"
+  },
+  {
+    "name": "sports-subtle",
+    "candidateId": "rel_pfjwsj2ma3eljl2ijvjord2hvf",
+    "url": "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/index.html",
+    "builderVerification": "VERIFICATION_PENDING",
+    "hostVerification": "PASS",
+    "resources": [
+      {
+        "path": "assets/bootstrap.b44f7c1c75642bfe86a3c4935f318fcdbe03076ba77626a3b53385275f7f5727.js",
+        "rawBytes": 188,
+        "gzipBytes": 154
+      },
+      {
+        "path": "assets/entry.3691b9f205d9.js",
+        "rawBytes": 37736,
+        "gzipBytes": 12143
+      },
+      {
+        "path": "index.html",
+        "rawBytes": 2286,
+        "gzipBytes": 1077
+      },
+      {
+        "path": "assets/entry.c9ed9d8ab25e.css",
+        "rawBytes": 1257,
+        "gzipBytes": 609
+      },
+      {
+        "path": "assets/theme.cad1d23ddcef8ee1aa044b8d6630246a9abfe6214e7ea74a0b2f858c039d4a86.css",
+        "rawBytes": 80,
+        "gzipBytes": 82
+      }
+    ],
+    "initialJSGzipBytes": 12297,
+    "initialTotalGzipBytes": 14065,
+    "irGzipBytes": 1670,
+    "fontImageBytes": 0,
+    "motionModules": 229,
+    "storeModules": 0,
+    "canonicalK13": "VERIFICATION_PENDING",
+    "measurement": "Node gzip level 9; emitted artifact initial graph; host only"
+  },
+  {
+    "name": "pc-plugin",
+    "candidateId": "rel_ayic5cin2i4bsabicpnzewvuw5",
+    "url": "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/index.html",
+    "builderVerification": "VERIFICATION_PENDING",
+    "hostVerification": "PASS",
+    "resources": [
+      {
+        "path": "assets/bootstrap.b44f7c1c75642bfe86a3c4935f318fcdbe03076ba77626a3b53385275f7f5727.js",
+        "rawBytes": 188,
+        "gzipBytes": 154
+      },
+      {
+        "path": "assets/entry.8f09f4c4c1b3.js",
+        "rawBytes": 38006,
+        "gzipBytes": 12288
+      },
+      {
+        "path": "index.html",
+        "rawBytes": 2607,
+        "gzipBytes": 1183
+      },
+      {
+        "path": "assets/entry.c9ed9d8ab25e.css",
+        "rawBytes": 1257,
+        "gzipBytes": 609
+      },
+      {
+        "path": "assets/theme.8ac0a72a3f3c71d9c03c2f0665b6c55672a9bffec6be60f624feb58cb84ee4cd.css",
+        "rawBytes": 80,
+        "gzipBytes": 81
+      }
+    ],
+    "initialJSGzipBytes": 12442,
+    "initialTotalGzipBytes": 14315,
+    "irGzipBytes": 1994,
+    "fontImageBytes": 0,
+    "motionModules": 229,
+    "storeModules": 1,
+    "canonicalK13": "VERIFICATION_PENDING",
+    "measurement": "Node gzip level 9; emitted artifact initial graph; host only"
+  }
+]

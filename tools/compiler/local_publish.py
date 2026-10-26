@@ -35,6 +35,8 @@ class LocalPublisher:
     def publish(self, path: Path, expected: int, actor_uid: int) -> dict[str, Any]:
         self.authorize(actor_uid)
         manifest, _, _ = candidate(path)
+        if "previewProjection" in manifest["inputs"]:
+            raise ValueError("PREVIEW_ONLY")
         private = path.parent.parent / "private" / path.name
         integrity = json.loads((private / "local-integrity.json").read_text())
         if (
@@ -43,7 +45,10 @@ class LocalPublisher:
         ):
             raise ValueError("E-INDEX-INTEGRITY")
         # Keep the local dev namespace separate. A canonical REL activation still needs K13.
-        if not path.name.startswith("dev_") or manifest["localCandidateFormat"] != 1:
+        if not (
+            (path.name.startswith("dev_") and manifest.get("localCandidateFormat") == 1)
+            or (path.name.startswith("rel_") and manifest.get("lrmFormat") == 1)
+        ):
             raise ValueError("E-NOT-LOCAL-CANDIDATE")
         for name in [a["path"] for a in manifest["inventory"]] + ["index.html"]:
             raw = (path / name).read_bytes()
@@ -56,7 +61,13 @@ class LocalPublisher:
                 "data-contract.json",
                 "chunk-manifest.json",
                 "capability-lock.json",
+                "block-lock.json",
                 "local-integrity.json",
+                "lrm.json",
+                "chunk-plan.json",
+                "semantic-fixtures.json",
+                "attestation.json",
+                "provenance.json",
             }:
                 raise ValueError("E-UNEXPECTED-PRIVATE-FILE")
             raw = p.read_bytes()

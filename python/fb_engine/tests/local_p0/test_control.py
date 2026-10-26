@@ -52,7 +52,9 @@ def test_review_snapshot_is_immutable_and_role_separated(control: Control) -> No
     d: dict[str, Any] = {"siteId": SITE, "formId": "frm_test", "fields": [], "steps": []}
     c.save(EDITOR, SITE, "frm_test", 0, d)
     r = c.review(EDITOR, SITE, "frm_test", 1)
-    d["fields"] = [{"key": "changed"}]
+    d["fields"] = [
+        {"id": "fld_changed", "key": "changed", "type": "text", "classification": "personal"}
+    ]
     c.save(EDITOR, SITE, "frm_test", 1, d)
     assert c.review_row("synthetic-reviewer", r["id"])["definition"]["fields"] == []
     with pytest.raises(Fault, match="FORBIDDEN"):
@@ -71,8 +73,7 @@ def test_idempotency_outbox_and_effect_gate(control: Control) -> None:
     with pytest.raises(Fault, match="IDEMPOTENCY_KEY_REUSED"):
         c.submit("dev_test", {**request, "payload": {}}, {})
     c.conn.execute("UPDATE gates SET blockers='[\"hold\"]' WHERE key=?", ("fbk:" + EFFECT,))
-    with pytest.raises(Fault):
-        c.worker()
+    assert c.worker() == {"mockEffects": 0, "blocked": 1}
     assert c.conn.execute("SELECT COUNT(*) FROM mock_effects").fetchone()[0] == 0
     c.conn.execute("UPDATE gates SET blockers='[]' WHERE key=?", ("fbk:" + EFFECT,))
     assert c.worker() == {"mockEffects": 1}
@@ -159,8 +160,7 @@ def test_ct26_sqlite_admission_before_revoke_then_effect_blocked(control: Contro
     seed(c)
     c.submit("dev_test", {"payload": {}, "idempotencyKey": "before"}, {})
     c.change_policy(SECURITY, SITE, 1, "override", True)
-    with pytest.raises(Fault):
-        c.worker()
+    assert c.worker() == {"mockEffects": 0, "blocked": 1}
     assert c.conn.execute("SELECT COUNT(*) FROM submissions").fetchone()[0] == 1
     assert c.conn.execute("SELECT COUNT(*) FROM mock_effects").fetchone()[0] == 0
 
@@ -275,3 +275,23 @@ def test_override_before_ingestion_is_404(control: Control) -> None:
     with pytest.raises(Fault) as e:
         control.change_policy(SECURITY, SITE, 1, "override", True)
     assert e.value.status == 404
+
+
+def test_held_form_does_not_starve_other_form_effects(control: Control) -> None:
+    c = control
+    seed(c)
+    c.submit("dev_test", {"payload": {}, "idempotencyKey": "synthetic-A"}, {})
+    with c.atomic():
+        c.conn.execute("INSERT INTO gates VALUES ('form:site_sports_synthetic:frm_B','[]')")
+        c.conn.execute("INSERT INTO gates VALUES ('release:dev_B','[]')")
+        c.conn.execute(
+            "INSERT INTO managed_releases VALUES (?,?,?,?,?,0)",
+            ("dev_B", SITE, "frm_B", "review_B", json.dumps([*FBKS, EFFECT])),
+        )
+    c.submit("dev_B", {"payload": {}, "idempotencyKey": "synthetic-B"}, {})
+    c.conn.execute(
+        "UPDATE gates SET blockers='[\"form#suspended\"]' WHERE key=?",
+        ("form:" + SITE + ":frm_test",),
+    )
+    assert c.worker() == {"mockEffects": 1, "blocked": 1}
+    assert c.conn.execute("SELECT COUNT(*) FROM mock_effects").fetchone()[0] == 1

@@ -24,10 +24,9 @@ def candidate(path: Path) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any
     )
     raw = (metadata / "candidate-manifest.json").read_bytes()
     manifest: dict[str, Any] = json.loads(raw)
-    ident = (
-        "dev_"
-        + base64.b32encode(hashlib.sha256(canonical_json(manifest)).digest()).decode().lower()[:26]
-    )
+    ident = ("rel_" if manifest.get("lrmFormat") == 1 else "dev_") + base64.b32encode(
+        hashlib.sha256(canonical_json(manifest)).digest()
+    ).decode().lower()[:26]
     if ident != path.name:
         raise ValueError("E-CANDIDATE-INTEGRITY")
     for asset in manifest["inventory"]:
@@ -53,12 +52,54 @@ def candidate(path: Path) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any
             != "sha256:" + hashlib.sha256((metadata / filename).read_bytes()).hexdigest()
         ):
             raise ValueError("E-PRIVATE-INTEGRITY")
+    if "blockLock" in manifest["inputs"] and (
+        manifest["inputs"]["blockLock"]
+        != "sha256:" + hashlib.sha256((metadata / "block-lock.json").read_bytes()).hexdigest()
+    ):
+        raise ValueError("E-BLOCK-LOCK-INTEGRITY")
     seal = json.loads((metadata / "local-integrity.json").read_text())
     if (
         seal["manifestDigest"] != hashlib.sha256(canonical_json(manifest)).hexdigest()
         or seal["indexHtmlDigest"] != hashlib.sha256((path / "index.html").read_bytes()).hexdigest()
     ):
         raise ValueError("E-INDEX-INTEGRITY")
+    if manifest.get("lrmFormat") == 1:
+        if (metadata / "lrm.json").read_bytes() != canonical_json(manifest):
+            raise ValueError("E-LRM-INTEGRITY")
+        attestation = json.loads((metadata / "attestation.json").read_bytes())
+        required = {
+            "lrmDigest": "sha256:" + hashlib.sha256(canonical_json(manifest)).hexdigest(),
+            "indexHtmlSha256": hashlib.sha256((path / "index.html").read_bytes()).hexdigest(),
+            "provenanceDigest": "sha256:"
+            + hashlib.sha256((metadata / "provenance.json").read_bytes()).hexdigest(),
+            "semanticFixturesDigest": "sha256:"
+            + hashlib.sha256((metadata / "semantic-fixtures.json").read_bytes()).hexdigest(),
+        }
+        artifacts = [
+            {"path": a["path"], "sha256": a["sha256"].removeprefix("sha256:")}
+            for a in manifest["inventory"]
+        ]
+        artifacts.append({"path": "index.html", "sha256": required["indexHtmlSha256"]})
+        artifacts.sort(key=lambda a: a["path"])
+        required["artifactSetDigest"] = (
+            "sha256:" + hashlib.sha256(canonical_json(artifacts)).hexdigest()
+        )
+        if attestation.get("releaseId") != path.name or any(
+            attestation.get(k) != v for k, v in required.items()
+        ):
+            raise ValueError("E-ATTESTATION-INTEGRITY")
+        if (
+            manifest["inputs"]["chunkPlan"]
+            != "sha256:" + hashlib.sha256((metadata / "chunk-plan.json").read_bytes()).hexdigest()
+        ):
+            raise ValueError("E-CHUNK-PLAN-INTEGRITY")
+        from fb_engine.core import evaluate_case
+
+        fixtures = json.loads((metadata / "semantic-fixtures.json").read_bytes())
+        if fixtures["irDigest"] != manifest["inputs"]["ir"] or any(
+            evaluate_case(ir, case) != case["expected"] for case in fixtures["cases"]
+        ):
+            raise ValueError("E-SEMANTIC-CONFORMANCE")
     return manifest, ir, lock
 
 

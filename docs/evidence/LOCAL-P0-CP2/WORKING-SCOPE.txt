@@ -1,0 +1,79 @@
+Uncommitted scope; latest user policy prohibits stage/commit.
+ M contracts/schemas/engine-ir/v1.schema.json
+ M contracts/schemas/form-definition/v1.schema.json
+ M packages/contracts/src/generated/engine-ir.v1.ts
+ M packages/contracts/src/generated/form-definition.v1.ts
+ M packages/contracts/src/generated/schemas.ts
+ M packages/form-engine/src/definition.ts
+ M packages/form-engine/src/runtime.ts
+ M packages/static-runtime/src/index.ts
+ M packages/static-runtime/src/style.css
+ M python/fb_engine/src/fb_engine/core.py
+ M python/fb_engine/tests/local_p0/test_control.py
+ M python/fb_engine/tests/test_compiler_integration.py
+ M tools/compiler/local_publish.py
+ M tools/compiler/server_adapter.py
+ M tools/compiler/src/build.ts
+ M tools/compiler/src/resolve.ts
+ M tools/local_p0/control.py
+ M tools/local_p0/host.ts
+ M tools/local_p0/rpc.py
+ M tools/local_p0/test/browser-flow.txt
+ M tools/local_p0/test/numeric-browser.txt
+ M tools/local_p0/test/reference-browser.txt
+ M tools/local_p0/web/admin.js
+ M tools/local_p0/web/index.html
+ M tools/local_p0/web/style.css
+ M tools/security/src/scan.ts
+ M tools/security/test/alternative-scan.test.ts
+?? contracts/fixtures/blocks/blk_customer_info@r1.json
+?? contracts/fixtures/blocks/blk_customer_info@r2.json
+?? contracts/fixtures/blocks/registry.json
+?? docs/evidence/LOCAL-P0-CP2/693969a-index-secret-scan.json
+?? docs/evidence/LOCAL-P0-CP2/RESULTS.md
+?? docs/evidence/LOCAL-P0-CP2/WORKING-SCOPE.txt
+?? docs/evidence/LOCAL-P0-CP2/alternative-scanner-negative-tests.txt
+?? docs/evidence/LOCAL-P0-CP2/autosave-browser.json
+?? docs/evidence/LOCAL-P0-CP2/clone-settings-browser.json
+?? docs/evidence/LOCAL-P0-CP2/ct26.txt
+?? docs/evidence/LOCAL-P0-CP2/local-p0-admin-preview.png
+?? docs/evidence/LOCAL-P0-CP2/local-p0-admin-viewport.png
+?? docs/evidence/LOCAL-P0-CP2/local-p0-cas-conflict.png
+?? docs/evidence/LOCAL-P0-CP2/local-p0-clone-settings.png
+?? docs/evidence/LOCAL-P0-CP2/local-p0-customer-complete.png
+?? docs/evidence/LOCAL-P0-CP2/local-p0-named-rules.png
+?? docs/evidence/LOCAL-P0-CP2/local-p0-preview-form.png
+?? docs/evidence/LOCAL-P0-CP2/local-p0-preview-revoked.png
+?? docs/evidence/LOCAL-P0-CP2/local-p0-preview-viewport.png
+?? docs/evidence/LOCAL-P0-CP2/local-p0-rollback.png
+?? docs/evidence/LOCAL-P0-CP2/local-p0-shared-blocks.png
+?? docs/evidence/LOCAL-P0-CP2/mock-effect.json
+?? docs/evidence/LOCAL-P0-CP2/named-rules-browser.json
+?? docs/evidence/LOCAL-P0-CP2/no-code-browser.json
+?? docs/evidence/LOCAL-P0-CP2/performance.json
+?? docs/evidence/LOCAL-P0-CP2/preview-revocation-browser.json
+?? docs/evidence/LOCAL-P0-CP2/reference-browser.json
+?? docs/evidence/LOCAL-P0-CP2/references.json
+?? docs/evidence/LOCAL-P0-CP2/security-http.json
+?? docs/evidence/LOCAL-P0-CP2/shared-block-browser.json
+?? docs/evidence/LOCAL-P0-CP2/source-secret-scan.json
+?? docs/evidence/LOCAL-P0-CP2/verification-summary.json
+?? docs/evidence/LOCAL-P0-CP2/verification.txt
+?? docs/evidence/LOCAL-P0-CP2/viewport-screenshots.json
+?? python/fb_engine/tests/local_p0/test_contracts.py
+?? python/fb_engine/tests/local_p0/test_ct26.py
+?? python/fb_engine/tests/local_p0/test_form_clone.py
+?? python/fb_engine/tests/local_p0/test_key_contract_ack.py
+?? python/fb_engine/tests/local_p0/test_operations.py
+?? python/fb_engine/tests/local_p0/test_review_lifecycle.py
+?? tools/compiler/src/blocks.ts
+?? tools/compiler/src/themes.ts
+?? tools/compiler/test/blocks.test.ts
+?? tools/compiler/test/themes.test.ts
+?? tools/local_p0/blocks.py
+?? tools/local_p0/clone.py
+?? tools/local_p0/test/autosave-browser.txt
+?? tools/local_p0/test/clone-settings-browser.txt
+?? tools/local_p0/test/preview-revocation-browser.txt
+?? tools/local_p0/test/rules-browser.txt
+?? tools/local_p0/test/shared-block-browser.txt

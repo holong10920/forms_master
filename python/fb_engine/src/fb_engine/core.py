@@ -439,7 +439,11 @@ def preview(ir: IR, state: IR) -> IR:
                     for key in v["order"]
                 ]
         else:
-            result[f["key"]] = v
+            if "outputPath" in f:
+                root, key = f["outputPath"]
+                result.setdefault(root, {})[key] = v
+            else:
+                result[f["key"]] = v
     return result
 
 
@@ -621,6 +625,25 @@ def evaluate_submission(
     try:
         if not isinstance(payload, dict):
             raise EngineError("E-TYPE")
+        if any("outputPath" in f for f in ir["nodes"]):
+            local = {f["key"] for f in ir["nodes"] if "outputPath" not in f}
+            mapped = {tuple(f["outputPath"]): f["key"] for f in ir["nodes"] if "outputPath" in f}
+            aliases = {p[0] for p in mapped}
+            flat: IR = {}
+            for root, value in payload.items():
+                if root in local:
+                    flat[root] = value
+                elif root in aliases:
+                    if not isinstance(value, dict):
+                        raise EngineError("E-TYPE", root)
+                    for key, cell in value.items():
+                        target = mapped.get((root, key))
+                        if target is None:
+                            raise EngineError("UNKNOWN_FIELD", root)
+                        flat[target] = cell
+                else:
+                    raise EngineError("UNKNOWN_FIELD", root)
+            payload = flat
         fields = {f["key"]: f for f in ir["nodes"]}
         values: dict[str, Value] = {}
         supplied: list[tuple[IR, object]] = []

@@ -28,6 +28,12 @@ window.addEventListener("message", async (event) => {
     const doc = new DOMParser().parseFromString(await r.text(), "text/html");
     const release = doc.querySelector("#release");
     const pin = JSON.parse(release.textContent);
+    if (/^(ja|vi)$/.test(event.data.locale ?? ""))
+      try {
+        window.sessionStorage.setItem("fb.locale", event.data.locale);
+      } catch {
+        // Storage blocked: the runtime starts in Japanese and its own switcher still works.
+      }
     history.replaceState(null, "", `/r/${pin.releaseId}/index.html`);
     const metadata = document.createElement("script");
     metadata.type = "application/json";

@@ -1,0 +1,13 @@
+{
+  "allPassed": true,
+  "provider": "local mock; not Cognito",
+  "authorizationCode": true,
+  "pkceS256": true,
+  "noBrowserTokenExchange": true,
+  "callbackReplayRejected": true,
+  "secureHttpOnlyStrictCookie": true,
+  "viewerRead": true,
+  "viewerWriteDenied": true,
+  "crossSiteDenied": true,
+  "logoutUnauthorized": true
+}

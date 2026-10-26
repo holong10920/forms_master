@@ -5,7 +5,7 @@ import { canonicalJson, type FormDefinitionV1, type EngineIRV1 } from "@fb/contr
 import { subtle, guided } from "@platform/motion-presets";
 export const digest = (x: string | Uint8Array) => createHash("sha256").update(x).digest("hex");
 export function resolveAssets(root: string, d: FormDefinitionV1, ir: EngineIRV1) {
-  const declared = d.dependencies?.capabilities.storeSel;
+  const declared = d.dependencies?.capabilities?.storeSel;
   const plugin = ir.nodes.some((f) => f.type === "plugin:storeSel");
   if (plugin !== !!declared) throw new Error("E-CAPABILITY-UNDECLARED");
   const manifestPath = join(root, "plugins/store-selector/plugin.manifest.json");

@@ -1,7 +1,7 @@
 :root {
   font-family: system-ui, sans-serif;
-  color: #1e293b;
-  background: #f1f5f9;
+  color: var(--form-foreground, #1e293b);
+  background: var(--form-background, #f1f5f9);
 }
 body {
   margin: 0;
@@ -51,7 +51,7 @@ button {
   padding: 0.75rem 1.5rem;
   font: inherit;
   cursor: pointer;
-  background: #0f766e;
+  background: var(--form-accent, #0f766e);
   color: white;
   border: 0;
   border-radius: 0.3rem;
@@ -70,4 +70,28 @@ pre {
   overflow-wrap: anywhere;
   background: #f8fafc;
   padding: 1rem;
+}
+.locale {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+.locale button {
+  padding: 0.4rem 0.9rem;
+  background: transparent;
+  color: var(--form-accent, #0f766e);
+  border: 1px solid currentColor;
+}
+.locale button[aria-pressed="true"] {
+  background: var(--form-accent, #0f766e);
+  color: white;
+}
+.formTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.help {
+  margin: 0.4rem 0 0;
+  color: #475569;
+  font-size: 0.9rem;
 }

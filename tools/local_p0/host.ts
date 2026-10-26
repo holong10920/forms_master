@@ -1,3 +1,8 @@
+import { compileRelease } from "../compiler/src/release.ts";
+import { LocalOidc, loadKeys } from "./oidc.ts";
+import { themes } from "../compiler/src/themes.ts";
+import { systemTexts } from "../compiler/src/l10n.ts";
+import { expandBlocks, blockCatalog } from "../compiler/src/blocks.ts";
 import { syntheticOnly } from "./guard.ts";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { readFileSync } from "node:fs";
@@ -9,6 +14,7 @@ import { compile, root } from "../compiler/src/build.ts";
 import { checkedFile, startServer } from "../compiler/src/server.ts";
 import { canonicalJson } from "../../packages/contracts/src/jcs.ts";
 import { loadDefinition } from "../../packages/form-engine/src/definition.ts";
+import { projectPreview } from "../../packages/form-engine/src/preview.ts";
 const exec = promisify(execFile);
 const ADMIN = "http://localhost:4174",
   PREVIEW = "http://127.0.0.1:4175";
@@ -19,6 +25,7 @@ interface Reply {
 async function rpc(op: string, body: unknown = {}, token = "", csrf = ""): Promise<Reply> {
   const child = exec("uv", ["run", "--locked", "--offline", "python", "-m", "tools.local_p0.rpc"], {
     cwd: root,
+    env: { ...process.env, FB_OIDC_REQUIRED: "1" },
     timeout: 15000,
     maxBuffer: 4 * 1024 * 1024,
   });
@@ -52,13 +59,25 @@ function headers(res: ServerResponse, preview = false) {
   res.setHeader("Cache-Control", "no-store");
 }
 const allowed = new Set([
+  "contract",
+  "translate",
   "review.get",
   "list",
   "get",
   "save",
+  "clone",
   "delete",
   "review",
   "approve",
+  "publication.get",
+  "publication.cancel",
+  "policy.ledger",
+  "deployment.get",
+  "deployment.change",
+  "hold.get",
+  "hold.change",
+  "reject",
+  "recheck",
   "history",
   "rollback",
   "policy.get",
@@ -66,6 +85,7 @@ const allowed = new Set([
   "policy.repair",
   "logout",
   "preview",
+  "preview.status",
   "validate",
   "publish",
 ]);
@@ -75,6 +95,28 @@ async function admin(req: IncomingMessage, res: ServerResponse) {
   const path = new URL(req.url ?? "/", ADMIN).pathname;
   const token =
     /(?:^|; )__Host-session=([a-zA-Z0-9_-]+)/u.exec(req.headers.cookie ?? "")?.[1] ?? "";
+  if (path === "/auth/callback" && req.method === "GET") {
+    const stateCookie =
+      /(?:^|; )__Host-oidc-state=([a-zA-Z0-9_-]+)/u.exec(req.headers.cookie ?? "")?.[1] ?? "";
+    try {
+      const result = await oidc.callback(new URL(req.url ?? "/", ADMIN), stateCookie);
+      res.setHeader("Set-Cookie", [
+        `__Host-session=${result.token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800`,
+        "__Host-oidc-state=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0",
+      ]);
+      const target = new URL(result.target, ADMIN);
+      target.searchParams.set("login", "complete");
+      res.writeHead(303, { Location: target.pathname + target.search });
+      res.end();
+      return;
+    } catch {
+      res.setHeader(
+        "Set-Cookie",
+        "__Host-oidc-state=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0",
+      );
+      return send(res, 401, { code: "OIDC_CALLBACK_REJECTED" });
+    }
+  }
   if (path === "/api/session" && req.method === "GET") {
     const r = await rpc("session", {}, token);
     return send(res, r.status, r.body);
@@ -91,6 +133,24 @@ async function admin(req: IncomingMessage, res: ServerResponse) {
         : r.body,
     );
   }
+  if (path === "/api/catalog" && req.method === "GET") {
+    const r = await rpc("catalog", {}, token);
+    if (r.status !== 200) return send(res, r.status, r.body);
+    const statuses = r.body.statuses as {
+      pin: string;
+      digest: string;
+      state: string;
+      version: number;
+    }[];
+    return send(res, 200, {
+      themes,
+      texts: systemTexts,
+      blocks: blockCatalog().map((b) => {
+        const state = statuses.find((s) => s.pin === b.pin && s.digest === b.digest);
+        return { ...b, state: state?.state ?? "unknown", version: state?.version ?? 0 };
+      }),
+    });
+  }
   if (path.startsWith("/api/") && req.method === "POST") {
     if (req.headers.origin !== ADMIN || req.headers["sec-fetch-site"] !== "same-origin")
       return send(res, 403, { code: "ORIGIN" });
@@ -98,27 +158,44 @@ async function admin(req: IncomingMessage, res: ServerResponse) {
     const op = path.slice(5);
     const csrf = String(req.headers["x-csrf-token"] ?? "");
     if (op === "login") {
-      const r = await rpc("login", { user: b.user }, token);
-      if (r.status === 200) {
-        res.setHeader(
-          "Set-Cookie",
-          `__Host-session=${String(r.body.token)}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800`,
-        );
-        delete r.body.token;
-      }
-      return send(res, r.status, r.body);
+      const result = await oidc.begin(b.user, token, b.target);
+      res.setHeader(
+        "Set-Cookie",
+        `__Host-oidc-state=${result.state}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=300`,
+      );
+      return send(res, 200, { authorizeUrl: result.authorizeUrl });
     }
     if (!allowed.has(op)) return send(res, 404, { code: "NOT_FOUND" });
-    if (["preview", "validate", "review", "publish"].includes(op)) {
+    if (["preview", "validate", "review", "publish", "recheck"].includes(op)) {
       const draft = await rpc(
-        op === "publish" || (op === "preview" && b.id) ? "review.get" : "get",
+        op === "publish" || op === "recheck" || (op === "preview" && b.id) ? "review.get" : "get",
         b,
         token,
         csrf,
       );
       if (draft.status !== 200) return send(res, draft.status, draft.body);
+      let previewOptions: import("../compiler/src/build.ts").PreviewOptions | undefined;
+      let compileDefinition = draft.body.definition;
+      if (op === "preview" && !b.id) {
+        const policy = await rpc("preview.policy", b, token, csrf);
+        if (policy.status !== 200) return send(res, policy.status, policy.body);
+        const projected = projectPreview(
+          draft.body
+            .definition as import("../../packages/contracts/src/generated/form-definition.v1.ts").FormDefinitionV1,
+          policy.body.blocked === true,
+        );
+        if (projected.stops.length || projected.blockedFields.length) {
+          compileDefinition = projected.definition;
+          previewOptions = {
+            sourceDigest: sha(draft.body.definition),
+            stops: projected.stops,
+            blockedFields: projected.blockedFields,
+            diagnostics: projected.diagnostics,
+          };
+        }
+      }
       try {
-        loadDefinition(draft.body.definition);
+        loadDefinition(expandBlocks(compileDefinition).definition);
       } catch (e) {
         return send(res, 422, {
           code: "DEFINITION_INVALID",
@@ -126,47 +203,117 @@ async function admin(req: IncomingMessage, res: ServerResponse) {
         });
       }
       if (op === "validate") return send(res, 200, { diagnostics: [] });
-      if (op === "review") {
-        if (draft.body.version !== b.version) return send(res, 409, { code: "VERSION_CONFLICT" });
-        const r = await rpc("review", b, token, csrf);
-        return send(res, r.status, r.body);
-      }
+      if (op === "review" && draft.body.version !== b.version)
+        return send(res, 409, { code: "VERSION_CONFLICT" });
       // Verify permission before spending build resources, then recheck scope/CAS at commit.
       const permission = await rpc("session", {}, token);
       const sites = permission.body.sites as { id: string; roles: string[] }[] | undefined;
-      const wanted = op === "publish" ? "publisher" : b.id ? "reviewer" : "editor";
-      const site = op === "publish" || b.id ? draft.body.site : b.site;
+      const wanted =
+        op === "publish" ? "publisher" : b.id || op === "recheck" ? "reviewer" : "editor";
+      const site = op === "publish" || op === "recheck" || b.id ? draft.body.site : b.site;
       if (!sites?.some((s) => s.id === site && s.roles.includes(wanted)))
         return send(res, 403, { code: "FORBIDDEN" });
-      const c = await compile(draft.body.definition, join(root, "var/s2-candidates"));
-      const r = await rpc(
-        op === "publish" ? "activate" : "preview.register",
-        {
-          ...b,
-          version: draft.body.version,
-          candidateId: c.candidateId,
-          snapshotHash: sha(draft.body.definition),
-        },
-        token,
-        csrf,
-      );
-      return send(res, r.status, {
-        ...r.body,
-        ...(r.status === 200 && op === "publish"
-          ? { url: `http://127.0.0.1:4173/r/${c.candidateId}/index.html` }
-          : {}),
-      });
+      let operation: Record<string, unknown> | undefined;
+      if (op === "publish") {
+        const started = await rpc("publication.begin", { id: b.id }, token, csrf);
+        if (started.status !== 200) return send(res, started.status, started.body);
+        operation = started.body;
+        if (operation.state === "ACTIVATED")
+          return send(res, 200, {
+            ...operation,
+            url: `http://127.0.0.1:4173/r/${String(operation.candidateId)}/index.html`,
+          });
+      }
+      try {
+        const c =
+          op === "publish"
+            ? await compileRelease(compileDefinition, join(root, "var/s2-candidates"))
+            : await compile(compileDefinition, join(root, "var/s2-candidates"), previewOptions);
+        if (operation) {
+          const built = await rpc(
+            "publication.built",
+            { operation: operation.id, fence: operation.fence, candidateId: c.candidateId },
+            token,
+            csrf,
+          );
+          if (built.status !== 200) {
+            await rpc(
+              "publication.fail",
+              {
+                operation: operation.id,
+                fence: operation.fence,
+                code: typeof built.body.code === "string" ? built.body.code : "BUILD_FAILED",
+              },
+              token,
+              csrf,
+            );
+            return send(res, built.status, built.body);
+          }
+          operation = built.body;
+        }
+        const r = await rpc(
+          op === "publish"
+            ? "activate"
+            : op === "review"
+              ? "review"
+              : op === "recheck"
+                ? "recheck"
+                : "preview.register",
+          {
+            ...b,
+            partial: !!previewOptions,
+            version: draft.body.version,
+            candidateId: c.candidateId,
+            snapshotHash: sha(draft.body.definition),
+            ...(operation ? { operation: operation.id, fence: operation.fence } : {}),
+          },
+          token,
+          csrf,
+        );
+        if (operation && r.status !== 200)
+          await rpc(
+            "publication.fail",
+            {
+              operation: operation.id,
+              fence: operation.fence,
+              code: typeof r.body.code === "string" ? r.body.code : "VERIFICATION_FAILED",
+            },
+            token,
+            csrf,
+          );
+        return send(res, r.status, {
+          ...r.body,
+          ...(previewOptions ? { diagnostics: previewOptions.diagnostics, mode: "partial" } : {}),
+          ...(r.status === 200 && op === "publish"
+            ? { url: `http://127.0.0.1:4173/r/${c.candidateId}/index.html` }
+            : {}),
+        });
+      } catch (e) {
+        if (operation)
+          await rpc(
+            "publication.fail",
+            { operation: operation.id, fence: operation.fence, code: "BUILD_FAILED" },
+            token,
+            csrf,
+          );
+        return send(res, 422, {
+          code: "BUILD_FAILED",
+          diagnostics: [e instanceof Error ? e.message : "E-BUILD"],
+        });
+      }
     }
     const r = await rpc(op, b, token, csrf);
-    if (op === "logout" && r.status === 200)
+    if (op === "logout" && r.status === 200) {
       res.setHeader(
         "Set-Cookie",
         "__Host-session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0",
       );
+      await oidc.endSession();
+    }
     return send(res, r.status, r.body);
   }
   const file = path === "/" ? "index.html" : path.slice(1);
-  if (req.method !== "GET" || !["index.html", "admin.js", "style.css"].includes(file))
+  if (req.method !== "GET" || !["index.html", "admin.js", "i18n.js", "style.css"].includes(file))
     return send(res, 404, { code: "NOT_FOUND" });
   res.setHeader(
     "Content-Type",
@@ -217,6 +364,8 @@ async function preview(req: IncomingMessage, res: ServerResponse) {
         ? "submit"
         : null;
   if (!action) return send(res, 404, { code: "NOT_FOUND" });
+  if (action === "submit" && auth.body.partial === true)
+    return send(res, 403, { code: "PREVIEW_ONLY" });
   const child = exec(
     "uv",
     [
@@ -253,6 +402,8 @@ function serve(
 }
 syntheticOnly();
 if (process.env.FB_NETWORK_SANDBOX !== "required") throw Error("E-USE-GUARDED-LAUNCHER");
+const oidc = new LocalOidc(loadKeys(join(root, "var/s2-publication/auth")), rpc);
+oidc.provider();
 serve(4174, "localhost", admin);
 serve(4175, "127.0.0.1", preview);
 startServer({ publishedOnly: true });

@@ -1,0 +1,101 @@
+[
+  {
+    "name": "sports",
+    "candidateId": "dev_mgq3l2x2ihl5j4kds7bmevlwif",
+    "url": "http://127.0.0.1:4173/r/dev_mgq3l2x2ihl5j4kds7bmevlwif/index.html",
+    "builderVerification": "VERIFICATION_PENDING",
+    "resources": [
+      {
+        "path": "assets/entry.e65d0be534e1.js",
+        "rawBytes": 35480,
+        "gzipBytes": 11597
+      },
+      {
+        "path": "index.html",
+        "rawBytes": 1791,
+        "gzipBytes": 886
+      },
+      {
+        "path": "assets/entry.7a511db750a8.css",
+        "rawBytes": 920,
+        "gzipBytes": 499
+      },
+      {
+        "path": "assets/theme.cad1d23ddcef8ee1aa044b8d6630246a9abfe6214e7ea74a0b2f858c039d4a86.css",
+        "rawBytes": 80,
+        "gzipBytes": 81
+      }
+    ],
+    "initialJSGzipBytes": 11597,
+    "initialTotalGzipBytes": 13063,
+    "motionModules": 0,
+    "fontImageBytes": 0,
+    "scope": "emitted artifacts; local measurement; canonical K13 VERIFICATION_PENDING"
+  },
+  {
+    "name": "sports-subtle",
+    "candidateId": "dev_uopqttccecdw5rb3kbxsfxomnd",
+    "url": "http://127.0.0.1:4173/r/dev_uopqttccecdw5rb3kbxsfxomnd/index.html",
+    "builderVerification": "VERIFICATION_PENDING",
+    "resources": [
+      {
+        "path": "assets/entry.2261f2782e38.js",
+        "rawBytes": 37219,
+        "gzipBytes": 12296
+      },
+      {
+        "path": "index.html",
+        "rawBytes": 1937,
+        "gzipBytes": 956
+      },
+      {
+        "path": "assets/entry.7a511db750a8.css",
+        "rawBytes": 920,
+        "gzipBytes": 499
+      },
+      {
+        "path": "assets/theme.cad1d23ddcef8ee1aa044b8d6630246a9abfe6214e7ea74a0b2f858c039d4a86.css",
+        "rawBytes": 80,
+        "gzipBytes": 81
+      }
+    ],
+    "initialJSGzipBytes": 12296,
+    "initialTotalGzipBytes": 13832,
+    "motionModules": 229,
+    "fontImageBytes": 0,
+    "scope": "emitted artifacts; local measurement; canonical K13 VERIFICATION_PENDING"
+  },
+  {
+    "name": "pc-plugin",
+    "candidateId": "dev_c233xoshbli3hqvay5hggowap7",
+    "url": "http://127.0.0.1:4173/r/dev_c233xoshbli3hqvay5hggowap7/index.html",
+    "builderVerification": "VERIFICATION_PENDING",
+    "resources": [
+      {
+        "path": "assets/entry.9ebe2c129685.js",
+        "rawBytes": 37489,
+        "gzipBytes": 12444
+      },
+      {
+        "path": "index.html",
+        "rawBytes": 2258,
+        "gzipBytes": 1060
+      },
+      {
+        "path": "assets/entry.7a511db750a8.css",
+        "rawBytes": 920,
+        "gzipBytes": 499
+      },
+      {
+        "path": "assets/theme.8ac0a72a3f3c71d9c03c2f0665b6c55672a9bffec6be60f624feb58cb84ee4cd.css",
+        "rawBytes": 80,
+        "gzipBytes": 80
+      }
+    ],
+    "initialJSGzipBytes": 12444,
+    "initialTotalGzipBytes": 14083,
+    "motionModules": 229,
+    "fontImageBytes": 0,
+    "scope": "emitted artifacts; local measurement; canonical K13 VERIFICATION_PENDING"
+  }
+]

@@ -1,0 +1,937 @@
+$ pnpm preflight && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm gen:check && pnpm schemas:lint && pnpm boundaries && pnpm py:lint && pnpm py:typecheck && pnpm py:imports && pnpm py:test && pnpm synthetic:check && pnpm secrets
+$ node tools/verify/src/preflight.ts
+preflight PASS: Node 24.22.1, pnpm 12.15.0
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ eslint . --max-warnings=0
+$ pnpm -r --if-present typecheck
+packages/motion-presets typecheck$ tsc -p tsconfig.json
+packages/contracts typecheck$ tsc -p tsconfig.json && tsc -p scripts/tsconfig.json
+packages/sdk-browser typecheck$ tsc -p tsconfig.json
+tools/boundaries typecheck$ tsc -p tsconfig.json
+packages/motion-presets typecheck: Done
+tools/lint-fixtures typecheck$ tsc -p tsconfig.json
+tools/boundaries typecheck: Done
+tools/local_p0 typecheck$ tsc -p tsconfig.json
+packages/sdk-browser typecheck: Done
+tools/perf typecheck$ tsc -p tsconfig.json
+packages/contracts typecheck: Done
+tools/security typecheck$ tsc -p tsconfig.json
+tools/lint-fixtures typecheck: Done
+tools/verify typecheck$ tsc -p tsconfig.json
+tools/perf typecheck: Done
+packages/motion-adapter typecheck$ tsc -p tsconfig.json
+tools/local_p0 typecheck: Done
+plugins/store-selector typecheck$ tsc -p tsconfig.json
+tools/security typecheck: Done
+packages/form-engine typecheck$ tsc -p tsconfig.json
+tools/verify typecheck: Done
+plugins/store-selector typecheck: Done
+packages/motion-adapter typecheck: Done
+packages/form-engine typecheck: Done
+tools/engine-demo typecheck$ tsc -p tsconfig.json
+tools/compiler typecheck$ tsc -p tsconfig.json
+packages/static-runtime typecheck$ tsc -p tsconfig.json
+tools/engine-demo typecheck: Done
+packages/static-runtime typecheck: Done
+tools/compiler typecheck: Done
+$ vitest run
+
+ RUN  v5.0.5 /Users/hongocbaolong/Documents/marketenterprise/forms_master
+
+
+ Test Files  33 passed (33)
+      Tests  638 passed | 15 expected fail | 1 skipped (654)
+   Start at  13:27:19
+   Duration  9.43s (tests 92%, import 6%, transform 1%)
+
+$ pnpm --filter @fb/contracts gen:check
+$ node scripts/gen.ts --check
+gen:check OK (4 generated files)
+$ pnpm --filter @fb/contracts lint:schemas
+$ node scripts/lint-schemas.ts
+schemas:lint OK (3 schema files)
+$ depcruise packages tools plugins --config .dependency-cruiser.cjs --output-type err
+
+✔ no dependency violations found (119 modules, 352 dependencies cruised)
+
+$ uv run ruff check python tools/engine-demo tools/compiler plugins/store-selector/server tools/local_p0 && uv run ruff format --check python tools/engine-demo tools/compiler plugins/store-selector/server tools/local_p0
+All checks passed!
+73 files already formatted
+$ uv run mypy
+Success: no issues found in 72 source files
+$ uv run lint-imports
+
+╔══╗─────────▶╔╗ ╔╗      ╔╗◀───┐
+╚╣╠╝◀─────┐  ╔╝╚╗║║────▶╔╝╚╗   │
+ ║║   ╔══╦══╦╩╗╔╝║║  ╔╦═╩╗╔╝╔═╦══╗
+ ║║╔══╣╔╗║╔╗║╔╣║ ║║ ╔╬╣╔╗║║ ║│║╔═╝
+╔╣╠╣║║║╚╝║╚╝║║║╚╗║╚═╝║║║║║╚╗║═╣║
+╚══╩╩╩╣╔═╩══╩╝╚═╝╚═══╩╩╝╚╩═╩╩═╩╝
+  └──▶║║                    ▲ 
+      ╚╝────────────────────┘
+
+
+---------
+Contracts
+---------
+
+Analyzed 16 files, 16 dependencies.
+-----------------------------------
+
+Store depends on contracts, never the reverse KEPT
+Pure evaluator depends only on contracts KEPT
+Evaluator cannot import persistence KEPT
+
+Contracts: 3 kept, 0 broken.
+$ uv run pytest
+============================= test session starts ==============================
+platform darwin -- Python 3.13.15, pytest-9.1.1, pluggy-1.7.0
+rootdir: /Users/hongocbaolong/Documents/marketenterprise/forms_master
+configfile: pyproject.toml
+testpaths: python
+plugins: socket-0.8.1
+collected 798 items
+
+python/fb_contracts/tests/test_digest.py .........                       [  1%]
+python/fb_contracts/tests/test_jcs.py .......................            [  4%]
+python/fb_contracts/tests/test_json_pointer.py ..                        [  4%]
+python/fb_contracts/tests/test_jsts.py ................................. [  8%]
+........................................................................ [ 17%]
+........................................................................ [ 26%]
+........................................................................ [ 35%]
+........................................................................ [ 44%]
+........................................................................ [ 53%]
+............................................                             [ 59%]
+python/fb_contracts/tests/test_payload_ref.py .......                    [ 59%]
+python/fb_contracts/tests/test_schema_normalization.py ............      [ 61%]
+python/fb_contracts/tests/test_schema_parity.py ..............           [ 63%]
+python/fb_contracts/tests/test_smoke.py .                                [ 63%]
+python/fb_engine/tests/local_p0/test_contracts.py ....                   [ 63%]
+python/fb_engine/tests/local_p0/test_control.py ......................   [ 66%]
+python/fb_engine/tests/local_p0/test_ct26.py .......................     [ 69%]
+python/fb_engine/tests/local_p0/test_form_clone.py ..                    [ 69%]
+python/fb_engine/tests/local_p0/test_key_contract_ack.py .               [ 69%]
+python/fb_engine/tests/local_p0/test_oidc.py ..                          [ 70%]
+python/fb_engine/tests/local_p0/test_operations.py ......                [ 70%]
+python/fb_engine/tests/local_p0/test_review_lifecycle.py .....           [ 71%]
+python/fb_engine/tests/local_p0/test_translation.py ...                  [ 71%]
+python/fb_engine/tests/test_compiler_integration.py ......               [ 72%]
+python/fb_engine/tests/test_local_drafts.py ....                         [ 73%]
+python/fb_engine/tests/test_operators.py ............................... [ 76%]
+.                                                                        [ 77%]
+python/fb_engine/tests/test_submission.py ...........                    [ 78%]
+python/fb_store/tests/test_clock.py ....                                 [ 78%]
+python/fb_store/tests/test_fsstore_blob.py .........                     [ 80%]
+python/fb_store/tests/test_fsstore_concurrency.py ....                   [ 80%]
+python/fb_store/tests/test_fsstore_durability.py ..........              [ 81%]
+python/fb_store/tests/test_fsstore_fail_closed.py ...................    [ 84%]
+python/fb_store/tests/test_fsstore_failures.py ......                    [ 84%]
+python/fb_store/tests/test_fsstore_keys.py ....................          [ 87%]
+python/fb_store/tests/test_fsstore_release.py ......                     [ 88%]
+python/fb_store/tests/test_import_contracts.py .                         [ 88%]
+python/fb_store/tests/test_layout.py ....                                [ 88%]
+python/fb_store/tests/test_migrations.py ............................... [ 92%]
+...................................                                      [ 97%]
+python/fb_store/tests/test_network_blocked.py .                          [ 97%]
+python/fb_store/tests/test_smoke.py .                                    [ 97%]
+python/fb_store/tests/test_sqlite_conflict.py .........                  [ 98%]
+python/fb_store/tests/test_sqlite_tx.py ............                     [100%]
+
+============================= 798 passed in 25.63s =============================
+$ node tools/security/src/synthetic-data-check.ts contracts/fixtures
+{
+  "findings": []
+}
+$ node tools/security/src/secrets.ts
+{
+  "working": {
+    "scanner": "detect-secrets==1.5.0",
+    "detectors": 27,
+    "files": 302,
+    "findings": [
+      {
+        "file": "contracts/fixtures/blocks/registry.json",
+        "line": 2,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/blocks/registry.json",
+        "line": 3,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 6,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 12,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 9,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 16,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 23,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 30,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 37,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 44,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 51,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 58,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 65,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 72,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "package.json",
+        "line": 25,
+        "type": "Secret Keyword",
+        "classification": "fixed-scan-command"
+      },
+      {
+        "file": "tools/local_p0/test/oidc.test.ts",
+        "line": 23,
+        "type": "Base64 High Entropy String",
+        "classification": "public-rfc7636-vector"
+      },
+      {
+        "file": "tools/local_p0/test/oidc.test.ts",
+        "line": 24,
+        "type": "Base64 High Entropy String",
+        "classification": "public-rfc7636-vector"
+      },
+      {
+        "file": "tools/security/src/scan.ts",
+        "line": 141,
+        "type": "Base64 High Entropy String",
+        "classification": "public-rfc7636-vector"
+      },
+      {
+        "file": "tools/security/src/scan.ts",
+        "line": 142,
+        "type": "Base64 High Entropy String",
+        "classification": "public-rfc7636-vector"
+      }
+    ],
+    "unresolved": 0
+  },
+  "index": {
+    "scanner": "detect-secrets==1.5.0",
+    "detectors": 27,
+    "files": 263,
+    "findings": [
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 6,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 12,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 9,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 16,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 23,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 30,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 37,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 44,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 51,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 58,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 65,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 72,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "package.json",
+        "line": 25,
+        "type": "Secret Keyword",
+        "classification": "fixed-scan-command"
+      }
+    ],
+    "unresolved": 0
+  },
+  "stagedFiles": 0,
+  "stagedCovered": true,
+  "manifests": {
+    "working": {
+      ".dependency-cruiser.cjs": "2748310b4f00bd9c6863589710aaa4f5e24404244f657acb7437d255e02bc41f",
+      ".gitignore": "09bfd82d74aa90b00c88de02b8d46d559db34f599d4af121f884c655f6d50ac5",
+      ".gitleaks.toml": "8abe94e281f817d0d42ad531afa844617d3e05087bebefb0e00bef69ba6e1b1b",
+      ".node-version": "d9f318747a126ce2247661af67852b185def7789492eabfad7bba322be087c33",
+      ".prettierignore": "c91983865ae3c2842527288f76ed40af9d1437ec9cdb2b0bf5b4ce3c8a5ebd20",
+      ".python-version": "02e735b3dfe1c32833eb550b7ff8ffa17f5f2bc3fa1e7bae61a8f5a3883ce398",
+      "README.md": "6e05ba269076683340571a17ef6d0825ac9661475f3e9635f1586fe688b2c82b",
+      "contracts/fixtures/blocks/blk_customer_info@r1.json": "35f73aa33f1ee15bd9c2ae287a4bc958c231c3472ba9b232146f0774ce4e987a",
+      "contracts/fixtures/blocks/blk_customer_info@r2.json": "38dd6ff83bb700cfffbefcd9410226ffed1e531819a6de3fdc90306731e881b2",
+      "contracts/fixtures/blocks/registry.json": "e9d20e62a447e2378e27aa95c1e4c94651d885e69fc9424d636fea07fbfc6dec",
+      "contracts/fixtures/digest/sha256-hex.json": "0ba8cc669a0470047714e78382d053bccb83f56197c3952279badca4e2ff81ab",
+      "contracts/fixtures/engine/calculated.json": "f6a8ce21cba757c5f90c0e0a863d636ae038f46ef60905f88578f7edae54e8bb",
+      "contracts/fixtures/engine/canonical.json": "82e57a12a1fa0305537cfa694f7e8abc83e91b5ea3023a321e88d71572e492d2",
+      "contracts/fixtures/engine/golden.json": "7aa9d4bdcabe1d33321c62f15431473cceeca4fe7ff9f771dd826db96cd1992e",
+      "contracts/fixtures/engine/groups.json": "6ae98df9bcd5140ccee69b3ee2983f76ad1371f3fba0a7da58870c78613b2419",
+      "contracts/fixtures/engine/operators.json": "894d048173dbb4579442fe5efab74cde3f6f848ff43c4766acad975536f94b7d",
+      "contracts/fixtures/engine/pc-plugin.json": "84d83701b217cadf2c5bdfcf3763fee44e6c59d192d0ba966f36aade19d817ce",
+      "contracts/fixtures/engine/pc-reference.json": "7007dacfc049f921d96f1e97817048e9813e725d804c082c5d0c3471df0b0536",
+      "contracts/fixtures/engine/pc.json": "b30cdbafe1ff528ecc3a3d6d38fbbdd6e40c78de3e9bf59444120f5a2f8fe974",
+      "contracts/fixtures/engine/sports-subtle.json": "1fdc8ae7b184be66115811b40c6c316c2934a23413a3f09a3de7d63ac6a41126",
+      "contracts/fixtures/engine/sports.json": "70435d6a9e343dbdc7023b0f53312ec5a7c77d6ec21a72dbfb4d5f8b647fc5da",
+      "contracts/fixtures/jcs/cases.json": "7a105f2d2290ce1373070bced16e295ff4e52e75db3e39701b8f9a6acaf06b82",
+      "contracts/fixtures/schema-normalization/cases.json": "d5506125cf3364a525b3f4bbd78f3431d6aa550a8c7486ce76d90be7f138ddc4",
+      "contracts/fixtures/schema/payload-ref/v1/invalid/additional-property.json": "f6b74ac11ce27b44abbaebf8450211f9026b6bb04183985a7c26929f80aa6bbf",
+      "contracts/fixtures/schema/payload-ref/v1/invalid/format-wrong.json": "218e324daf48ba9fa3802ba60352ba0ac6d1d8ca09c5dab831f08aa82728dd4f",
+      "contracts/fixtures/schema/payload-ref/v1/invalid/missing-required.json": "7ca608a4b743a85a91cde161a01945653b1b5a1c6bedcedb5fdc211da0248a64",
+      "contracts/fixtures/schema/payload-ref/v1/invalid/root-array.json": "48efb6bd0b0421201b4df0aca240e26d9c414d1ae99a038deb6ca25fc085f744",
+      "contracts/fixtures/schema/payload-ref/v1/invalid/size-negative.json": "00abaa96e811dbe7af41c48b1b9d26f29809c14c919167726db9e18fd2ef60a0",
+      "contracts/fixtures/schema/payload-ref/v1/invalid/size-wrong-type.json": "7dfd9f11478340ca5da3ebf5acde8c20ccd9079c38fe571d751b55e283ce2c3d",
+      "contracts/fixtures/schema/payload-ref/v1/invalid/two-errors.json": "1f0c1bb7f4836ebd157f1c632016ecdb95ade00c192a40da60026466755d61d1",
+      "contracts/fixtures/schema/payload-ref/v1/valid/blob.json": "1c9f102a06df5a014351bb35b1a08c8117c29c901ba8c53eb94385e6d46da7a8",
+      "contracts/fixtures/schema/payload-ref/v1/valid/inline-object.json": "a307ca531594c0ad0ba2abfa7777ec827ebe32043d4d8b010348898993b0f61b",
+      "contracts/fixtures/semantic/payload-ref.json": "9cbbc98fabc2fd660debff98beb573b6059e67d0d45c8145c48873bf6a7ed2ff",
+      "contracts/schemas/engine-ir/v1.schema.json": "42b0993dd9fcf78e52709950445234bc63c8e53e4d23f3886d99706812a605cd",
+      "contracts/schemas/form-definition/v1.schema.json": "79f90dabc90d14f2268b96a4e871bae15e005a84c0328030c466888bd38ea763",
+      "contracts/schemas/payload-ref/v1.schema.json": "dae63a92fbd0a6287d20672bc32af7a424057c6c4ab593bf74c0a88747195cb6",
+      "docker/builder/README.md": "0d2ee350d6f2148f7cd35af53f546f786d3d59f78d0b1518c0ca686637f2da6c",
+      "eslint.config.js": "6f65ae244c1ca1794875605b2ffe237893cb12ad3a01f4e10b825401ec30450d",
+      "package.json": "c02292f216eacd7bea193eda183bceaa2a580344ce4f453f89b096b4c897ed9a",
+      "packages/contracts/package.json": "a57d2e7821bca38123df41e7ae904a5e984f925ac9cff14f2b3cee2d02bb2a32",
+      "packages/contracts/scripts/gen.ts": "954b30376d6fd47fef007dd13e375d4a32f166fe7f8046dbc0d90806580729c9",
+      "packages/contracts/scripts/lint-schemas.ts": "e6733c63bca251fcc797b66389748360bdda04b1e324d4e7f118d71a4dae4f7a",
+      "packages/contracts/scripts/schema-files.ts": "1d6584a3e581074dd1bff7af4e7b604bd9d24bb1d7ad906b519e21d87e71d7f4",
+      "packages/contracts/scripts/tsconfig.json": "0b5ea654f2517259ba26c7187f41c105502f1c4500d33e1d1759da48c69e275e",
+      "packages/contracts/src/digest.ts": "3dc4aca17a9939969be88d4587b17776623e25475708776137f5150946b94f62",
+      "packages/contracts/src/generated/engine-ir.v1.ts": "4b3eae3ca6fafe514d753df31c8d46c51d6f4294ceb74228097af374583cb9b0",
+      "packages/contracts/src/generated/form-definition.v1.ts": "7d6f20dbcf80afbfb37fddd07dd52856172ebdd66cef7b3716a2fb3813df33f1",
+      "packages/contracts/src/generated/payload-ref.v1.ts": "0fd8b4a1eb374e1f1e54a0b7fab5fac383511274014cc270e8a45b343cd95c98",
+      "packages/contracts/src/generated/schemas.ts": "93935aea5934f560f331d5b5c50b25908ba06cb5d8a7c9cb03e89d0280e877f2",
+      "packages/contracts/src/index.ts": "df9869de7c2d3f09aa5ca5a72e54489ba6a706c03a64176bdd104d43578d79ac",
+      "packages/contracts/src/jcs.ts": "1e212e26269a3eee3cc14376786bb174600e0887263e1219a6d15bdeacbee6f2",
+      "packages/contracts/src/payload-ref.ts": "f3fe9945bfe68ebbbed0c42363753ef5cb39f5bfbaea46e2bf76dad83e24da2c",
+      "packages/contracts/src/schema.ts": "34b8369d52290ae5b11578a525f1a34314623eb3ed582f77d6f63985ced008d3",
+      "packages/contracts/test/digest.test.ts": "bef2ea28f9082c3ba2bb503bc437b975f327bb212682b7cf7e767e0dd1d6146b",
+      "packages/contracts/test/fixtures.ts": "930e3584dc4d051cc9f52376aa8236abcd183a878ecc6ac95f6b2b59e14c1c1c",
+      "packages/contracts/test/jcs.test.ts": "8539d0020ea348afe2648b427d7de2b93911863cee171f5b13d26bf2bc5b2bb0",
+      "packages/contracts/test/jsts.test.ts": "7c5dec1d1e5072cd623c98d0dc74034525fbb0524cece4653634a708692bb426",
+      "packages/contracts/test/payload-ref.test.ts": "5e4bf2bb0eb80cd3988cefe74445bbb910932177dcad9b89409ea8f0a3b0484f",
+      "packages/contracts/test/schema-lint.test.ts": "6757f0f2a150a385474410b646259fe34ee0e5e2fce8ae3b4c6e870b5837469b",
+      "packages/contracts/test/schema-normalization.test.ts": "a7f5d79be01261de25be01cc368496f18a0c639bfe32455f34654d4c974fca52",
+      "packages/contracts/test/schema-parity.test.ts": "3a4c7c3195e0b1ac77377c19a167d4fb9b5efe6a79e0e5c94958d8e3f6b9944c",
+      "packages/contracts/test/smoke.test.ts": "b7142c2fd9508f0ec356162ad1c784b3d931f792cfa37423d117408e8e994208",
+      "packages/contracts/tsconfig.json": "fea9cfcb057785994121b5c0768b9912cbcae898ce8c2c6c3ff57dd78ae99ee5",
+      "packages/form-engine/package.json": "7e62b7b9b2115a5861a8a64c3ee6c1f707908791fe85a639556d647016423511",
+      "packages/form-engine/src/canonical.ts": "4157e80ca0649e49b807aefcc19efaf800c5555b15883d495bfa539cccb4dd9c",
+      "packages/form-engine/src/definition.ts": "b0a1870b1e6d1abef9ad22b1084697cd019fe2c3054875427bfa03c2ad6d4e26",
+      "packages/form-engine/src/expression.ts": "46faf85aaf4107fbb17e69500231fe057156b1d4648487d036b78492b90e6650",
+      "packages/form-engine/src/groups.ts": "a72bdbd3b00d7c5d90a7282c0a0346bbefda9f9a1613b8d72310719d176ef4da",
+      "packages/form-engine/src/index.ts": "d011f7a7165feca532217a0ed63564d38edbcbe8735da6837cf1121f8a3e994a",
+      "packages/form-engine/src/model.ts": "88b1ea7d65e5a044f6113a3c5d8f2b419213231b8e6773e62b7392940c9aecfc",
+      "packages/form-engine/src/navigation.ts": "5bc18d9d40a3fa0c4bf928e35e72fb5f0f5e30731c3207545f85e90a3c8a9447",
+      "packages/form-engine/src/preview.ts": "e8c515c26999a660d047ebda5a78ef9ef482028264e0668e2653eeeb4d1e0010",
+      "packages/form-engine/src/restore.ts": "3e27467fde951329984262a489861ca1cec252de69b1b477bde937bf9f9e483b",
+      "packages/form-engine/src/runtime.ts": "224cb9a21399f5b8364fde2a35b2db2d7e89ec6d5f21bcbbc9ebb557f3a224fd",
+      "packages/form-engine/src/validators.ts": "2121baa343f3ee317ae85b726dcf9ac3b7a28fe03b1eed4510ec64fb85c13b14",
+      "packages/form-engine/test/engine.test.ts": "0b6571fa449aa64fa77f6a331c45ad158d4ffb895f65df1ccc6493fe8b150e25",
+      "packages/form-engine/test/groups.test.ts": "cec14cb0c3956d78778875563c80db295339a47de38797c8fee7de3b49aef86d",
+      "packages/form-engine/test/navigation.test.ts": "f155498473d6e1bc5b41be7683df3a69350be5961d32408ba348168a234ec458",
+      "packages/form-engine/test/operators.test.ts": "4c9c0c13654cc57f25bc00c30c5ff5cb6446331df6ea831501186c38945334cc",
+      "packages/form-engine/test/preview.test.ts": "4c565e49a3d6478e380cfdb902c2bac7e0ade3e67459cc9902fd3507fc286ace",
+      "packages/form-engine/test/purity.test.ts": "4a0a5070d53340c7cc57a16306ee8c29968ddf0fe4590674c15ea82b88b02a9d",
+      "packages/form-engine/test/restore.test.ts": "69da7040e767c787c47ea6a19a6f8a55a1c8e03d7cfdd78aac748edef32332c8",
+      "packages/form-engine/tsconfig.json": "fea9cfcb057785994121b5c0768b9912cbcae898ce8c2c6c3ff57dd78ae99ee5",
+      "packages/motion-adapter/package.json": "b7d4010225b8297f75f0173ddcb814bce67d08fa1a7950fd0132eafbb5070a7b",
+      "packages/motion-adapter/src/index.tsx": "7662f7fa0a4207777f85c54480b16b20ad40a1db6d1d01a910455a94b49b6331",
+      "packages/motion-adapter/tsconfig.json": "9a5c5846dd460b63512f55e36607d0a8e909189e90a57f35109134de5b6bba50",
+      "packages/motion-presets/package.json": "ea965fd8c77dc609a25cf32edb11d3515aa36ea28cf997a065c7d0edbf23726e",
+      "packages/motion-presets/src/index.ts": "b42b467ffa3c64e4b094d8285a10b59a486a4e8f4b25c328e92f06831363ffdb",
+      "packages/motion-presets/tsconfig.json": "9a5c5846dd460b63512f55e36607d0a8e909189e90a57f35109134de5b6bba50",
+      "packages/sdk-browser/package.json": "d8f398ff7303b0aaaac565828b6caa17996c7e6eaedb3e961179ab7a655e1d6c",
+      "packages/sdk-browser/src/index.ts": "a8b9ec24cd5933d2b000c17e77637e620f8d230f1e0cb77d2e6754e80c9ee60b",
+      "packages/sdk-browser/tsconfig.json": "9a5c5846dd460b63512f55e36607d0a8e909189e90a57f35109134de5b6bba50",
+      "packages/static-runtime/package.json": "96104bb253fe97dd9e4c2a136a64585c797b6b77b23789196ae068ca0e3932a4",
+      "packages/static-runtime/src/assets.d.ts": "35d26ea66c86da9701e4f4b467913481ffeae910761cea34c775c5dacb7f8eaa",
+      "packages/static-runtime/src/index.ts": "b43196a5d3f406406b9ab3a75a4873d154b7d12eb1740a717fe89edbd2fc04ae",
+      "packages/static-runtime/src/ports.ts": "6437ae9886f9cc5b987b01a053ae6d1cd67195e8dabcca6336362e5dea5ccdfc",
+      "packages/static-runtime/src/style.css": "9bd4a723dc4731247ad215b31de982dc710f26603329ee09a4e88233ec4008e6",
+      "packages/static-runtime/tsconfig.json": "a2c9d111afbf0904ad59fa3f6c16196292e37c146fa3b73cd70affd8ef01ce21",
+      "plugins/store-selector/browser/index.tsx": "f507786cb5414d90871b3c77b7e1bb3b0c494a3231729f84e0682a44635c70b4",
+      "plugins/store-selector/package.json": "909cb4ef22384f0a2ed568e632c93775922f8578dad658f33cf8e0fdb17d86b2",
+      "plugins/store-selector/plugin.manifest.json": "587d16f3cc9cee84e237eb1ecca5962cb62c3f6fe50ee97d8feb0dcb57e259e3",
+      "plugins/store-selector/server/store_selector_server.py": "701cd7b89b4a1490cc9f6e8c964cdbd98608aa9e0209276cf8b899d00dd00e2b",
+      "plugins/store-selector/tsconfig.json": "d6539fad1f5b6ac924c43fd0fafc77f144bdffb5716d12960665684a17f80495",
+      "pnpm-workspace.yaml": "d501e25a22d5dff10bcfa5f73805f17334aa0876625e5d83f2775c2ee739dca9",
+      "prettier.config.js": "bb971cbb7a0623cb1ac6eb89a1a76ea292ccf207e1176e9037c4e7ffe14707c4",
+      "pyproject.toml": "5d14b9c23cab239bac628543625866e223c84af267acc37fa294ebbc15c8a84d",
+      "python/fb_contracts/pyproject.toml": "01adefb6f1bba69c54394c4610fa69f161d56c38690f83649844e9b1146b1f54",
+      "python/fb_contracts/src/fb_contracts/__init__.py": "3aef5f050a989038a7e7c2ad2b0dcdd776f983febcecf90a06e3b1932c1ae969",
+      "python/fb_contracts/src/fb_contracts/digest.py": "688c8eebf5ebcc608118995dbdfe218fb787eab0fb2c7eb0f37c25c402064ab1",
+      "python/fb_contracts/src/fb_contracts/jcs.py": "283ef04c55684e537dd58d79f932e51d72111c90c7bba92e161ac59aa39fe849",
+      "python/fb_contracts/src/fb_contracts/payload_ref.py": "f09091936d70c944b0425f792afa56c07ff9268d97e6eb72f1676c7327fe7753",
+      "python/fb_contracts/src/fb_contracts/py.typed": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "python/fb_contracts/src/fb_contracts/schema.py": "aa443a07b49fa9633cf2e94506361a242117ae82b0c792eeb3a5a8ba87de4a17",
+      "python/fb_contracts/tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "python/fb_contracts/tests/fixtures.py": "9bed4e527e3664d764088d5695ee22720440ccc9d3e6241204e40e387010e780",
+      "python/fb_contracts/tests/test_digest.py": "2509043b7bcbb68956d81623ced65da5d5b0978099b301beffd95a3546ced7e1",
+      "python/fb_contracts/tests/test_jcs.py": "1506a71ae6c861d001665ef47afc3bd32f34ae2c1873e0bade9f5e913ec686f1",
+      "python/fb_contracts/tests/test_json_pointer.py": "91a7aeb8787bf5bb9b76338a4880a0eb2b81766b6c731250bbc22d0cf2f0eafc",
+      "python/fb_contracts/tests/test_jsts.py": "db595a5dca0ac2ffbf546f7c399889c8cea2be4323d8123b2f8b6b93ad310361",
+      "python/fb_contracts/tests/test_payload_ref.py": "e427d0e728d4027547fe75c3267fe4ac2cf9f1f2d53f3c063e72146cbe7a0f33",
+      "python/fb_contracts/tests/test_schema_normalization.py": "bc5235fa5c117c2b04e9e9271241cee25453a96cffa36fa693401202e3f490a8",
+      "python/fb_contracts/tests/test_schema_parity.py": "82788e0082f3d2d174692767ac761f4a50e74f9998d8d2550847b6ad7f6d961b",
+      "python/fb_contracts/tests/test_smoke.py": "3cd1e0ac3be1e69a25a26779d2766c958c54a1be3018b77581cd426018ed6b9a",
+      "python/fb_engine/pyproject.toml": "0b28f1f5248ec3da5cfb62122cbff7f0909852f54831a4d69199e5bab204cb1b",
+      "python/fb_engine/src/fb_engine/__init__.py": "eec427aeb951c92b3ad8337f658e54dae64d6983e45d47b709c082a5e94e2f97",
+      "python/fb_engine/src/fb_engine/canonical.py": "0b997f764bd98e041d981858fb8b504f2fc21f5cd56c79f911af7b03045fc854",
+      "python/fb_engine/src/fb_engine/core.py": "06cb9f73c7a171143972331b7a37f807bd63c79bc8dd5831e153806a7a83a0c3",
+      "python/fb_engine/src/fb_engine/py.typed": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "python/fb_engine/tests/local_p0/test_contracts.py": "af7fc5fac0502fca5ae3d8beec5746f56985184b43f5418e9ac58893c082f633",
+      "python/fb_engine/tests/local_p0/test_control.py": "0ffb374ef53525270621afe8fd9c6c0819e5bce891daa99504337ac1bebe24d0",
+      "python/fb_engine/tests/local_p0/test_ct26.py": "0a1220f9f6f11f76ee5662f7a53f9fe2aeaa6ea4460e66d36f174a14a09cf3d7",
+      "python/fb_engine/tests/local_p0/test_form_clone.py": "799cc8ce3ba3dd7ebf0a14bfbff677f55fbefb18ee6a4692a4f419b9718c1e3c",
+      "python/fb_engine/tests/local_p0/test_key_contract_ack.py": "e1ac2f253039fd9450cdd9dde4288f8cdfaa97220019152c341987f29a50f055",
+      "python/fb_engine/tests/local_p0/test_oidc.py": "4d3a6a99ca041e4d107455b0c0449d27207c8e1824be54be649a3439301b389f",
+      "python/fb_engine/tests/local_p0/test_operations.py": "65350ccb01eaacf09468b52fe38697c72dd8db50d65bbb4defb53e0e7459440e",
+      "python/fb_engine/tests/local_p0/test_review_lifecycle.py": "0d3f975353802d743117c731ff5de171b713ab93cea4e8493c1bce8c54693f80",
+      "python/fb_engine/tests/local_p0/test_translation.py": "fbfd3f5c86639a6a2d2ced65942812984e9558b005921f8d1b46c94df20cb863",
+      "python/fb_engine/tests/test_compiler_integration.py": "d65e4b58dc3e52327c6b98784dc665a00a62011b03de49956193a4e4aba1c498",
+      "python/fb_engine/tests/test_local_drafts.py": "2abd07cd4a7bc252f37baff646eb18dcf87a26e10084065cfa97c87975463fcb",
+      "python/fb_engine/tests/test_operators.py": "241721c6d0c2e3937453fe53c74f3c09094d63b17790d732b1cfe35f803f722d",
+      "python/fb_engine/tests/test_submission.py": "a134d533a3fa88f415717c4165b1efb04a6c93f3160a103a4216f2769dd5a05d",
+      "python/fb_store/pyproject.toml": "fe71a947ceac52d9bbfc73342fb12072aa6623b01ba1a9322f04db59b4583581",
+      "python/fb_store/src/fb_store/__init__.py": "94634ea4f09b6d481dda931cac570056970ed81f6e2d2927644bb4dcfda6e06b",
+      "python/fb_store/src/fb_store/__main__.py": "9c94b74266adaea6f02f4f05919d83590457328e813d48120aa7404890779328",
+      "python/fb_store/src/fb_store/clock.py": "a10fe6f562e236b91e41b1b10143cd7ea120166ea88bad8b1abde368708492b9",
+      "python/fb_store/src/fb_store/errors.py": "333ccec858b3b29a02c7900f71e5da79ed4d14fddc8b5cdfb5f3b37e540e3c97",
+      "python/fb_store/src/fb_store/fsstore.py": "d4257af08d1cc88eeffe7dd69b13bd081cbd1d21ee0ea1d7310b5022531f1062",
+      "python/fb_store/src/fb_store/layout.py": "5e1775ed5ec2b46f283571da9e21b5f543866b1a56c2888ff33807fb763cb61f",
+      "python/fb_store/src/fb_store/migrations.py": "a01b5cb661e117d3d1a0215ed4734681a2ef59818e658b61ec04cfcd1560d29c",
+      "python/fb_store/src/fb_store/migrations/.keep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "python/fb_store/src/fb_store/py.typed": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "python/fb_store/src/fb_store/sqlite.py": "ea7c0d9bbe34b6f53f18d1320a1efb3da3c7db5f938d1f31617962f2eac19620",
+      "python/fb_store/tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "python/fb_store/tests/migrations_fixture/badname/1_t.sql": "741bf0d04b678b1d8370e7b4f9403cb8c9db8f86d1358ab17e75594172b90337",
+      "python/fb_store/tests/migrations_fixture/broken/0001_broken.sql": "c3999047ca5651d9906a53a48539037c7c27465a7544b8c37d35dc416ab2a186",
+      "python/fb_store/tests/migrations_fixture/dup/0001_a.sql": "61ce4158f0f120638c52e42a39b9eeb6b59b6df468ad056440ab396f8db681be",
+      "python/fb_store/tests/migrations_fixture/dup/0001_b.sql": "52a0231f131e8708c663ea22e589e5f8b08412ff4a559dc54f3999d22775d3d4",
+      "python/fb_store/tests/migrations_fixture/ok/0001_create_a.sql": "ff8a79ec061f9d4548316b1e50add3736cf37fff1e445d7a31987577b8cfbc49",
+      "python/fb_store/tests/migrations_fixture/ok/0002_create_b.sql": "daaa1ead0c9e9cc69cf396b965d0634760c4c66595422e0a1b5bd857a4fefd8a",
+      "python/fb_store/tests/migrations_fixture/txstmt/0001_own_tx.sql": "147f2a7b4b05df884fdef75a226002098abc78c83fa412b3381158697cea1c2b",
+      "python/fb_store/tests/test_clock.py": "c25eea21645c429cba37393d9fc3b8d0948fb5a85c58d3f3aa3ba3f3d740a520",
+      "python/fb_store/tests/test_fsstore_blob.py": "088cb32bb6514fcc41d2da1205523ef14a803e999e57ab3c6b0abf0ea618f439",
+      "python/fb_store/tests/test_fsstore_concurrency.py": "ac98963c9148879ae77fe359bd6527405692825ef3b2386e51c15b596609ec98",
+      "python/fb_store/tests/test_fsstore_durability.py": "c294270252e4da6e0fcac12b1a11a3795c5573a0e3fbd3be0f129643f968f663",
+      "python/fb_store/tests/test_fsstore_fail_closed.py": "bdb0d547fedeaf8dcc0dc0797d622fb192e1c74390fc4dfecdccde1f17083ce9",
+      "python/fb_store/tests/test_fsstore_failures.py": "1a7d463bf121a23cae526cc8e4ada178fc939d1a151dab5b6483efc3e92a6a1b",
+      "python/fb_store/tests/test_fsstore_keys.py": "3121ad6593c1b73d09b59b941389e7ed8769fcdc09bfd050ba7cea8aa7372dfc",
+      "python/fb_store/tests/test_fsstore_release.py": "6ef4d512c9e350d290ea8ceea281efb603f3dc95b471d7fd038d8ed951250d9a",
+      "python/fb_store/tests/test_import_contracts.py": "deba0f9a5f37f72b3cc9a726eda3da0138bcad4b1545dd970e832413894582f0",
+      "python/fb_store/tests/test_layout.py": "36d11e7dbc50ad55cb3a5967a8d10309b60198a55bc385afc59801ddcc252726",
+      "python/fb_store/tests/test_migrations.py": "8cae22d1de8b83f6cd0ecbf8b2bc5d13562ba7bfc9f353a0d14fb78fe10e8e6e",
+      "python/fb_store/tests/test_network_blocked.py": "f8f6ecf772a6727568c0d28440e7499d046c8e61ea9c873e942a80177af5c10f",
+      "python/fb_store/tests/test_smoke.py": "172ae33fb68f3038c4b91e68e5ca78ca5e464520c20913db355522957e043244",
+      "python/fb_store/tests/test_sqlite_conflict.py": "6eeb449acc0d63d0a49b35a826505e372c25182ff22b2cc31fb67b70e6a22286",
+      "python/fb_store/tests/test_sqlite_tx.py": "cca22bdb01dd32d4e6b6d52d890be194768f41bc3c6e6c4285bd1c4cd06d22a3",
+      "tools/boundaries/fixtures/control/packages/contracts/scripts/named.ts": "4304c9f77a87640df181f0a3bd613b083c683c420de26ef25a907c3960ceba51",
+      "tools/boundaries/fixtures/control/packages/contracts/src/helper.ts": "969a5498f0d3727682e17d0ed5ed8b18bfb6382a339f3afe042a2642b19c1df6",
+      "tools/boundaries/fixtures/control/packages/contracts/src/index.ts": "c6368835220b29b4f1883a2044c91e5f40f19070297f82f9bb3ee56fc41e2b6d",
+      "tools/boundaries/fixtures/control/packages/other/package.json": "48fdfd8230a8a4d46c9ed471537175c0dcc4ecacc1e363654c4cadf1e6a3d8ca",
+      "tools/boundaries/fixtures/control/packages/other/src/index.ts": "fb87cfe3d565c10bf5a7bb203d519dd777474f174c9c5fb42d144fb044d6b09d",
+      "tools/boundaries/fixtures/engine-violations/packages/contracts/src/index.ts": "a03d6b992a9893619b992580e7341f4e664b547b45dc0d5717f6d7ea1618edf2",
+      "tools/boundaries/fixtures/engine-violations/packages/form-engine/package.json": "6282238049525e7026c0f04187b931c7c0a3ff0b2dc47467501603d45beaf98f",
+      "tools/boundaries/fixtures/engine-violations/packages/form-engine/src/index.ts": "c091ff551e95aeb45493569d25c44b356f19a016f25edcf9586bf67df1625d9e",
+      "tools/boundaries/fixtures/engine-violations/packages/static-runtime/package.json": "638e8645a7ef3869df7c9977eb4b153762439eeb2956f12b6fa834e50bf790e7",
+      "tools/boundaries/fixtures/engine-violations/packages/static-runtime/src/index.ts": "99fae82f21a05e637032eb16e54715d201066876a4f8df8a557dc812ba4d3a1a",
+      "tools/boundaries/fixtures/plugin-violations/packages/form-engine/src/index.ts": "ddf066ee341c060cca67ed6faa462602690b490d98c6fecdf607c447754e14bb",
+      "tools/boundaries/fixtures/plugin-violations/packages/motion-adapter/src/index.ts": "e4e1daa3bed1a09083d87cc9ac0ebdd23f3d5598503b8796b05d1ed0e16e5c96",
+      "tools/boundaries/fixtures/plugin-violations/plugins/store-selector/browser/index.ts": "0cb4b2b30d96e50818167dc4f00d6eafcf0549ba870c015b056d2e705563ff52",
+      "tools/boundaries/fixtures/plugin-violations/plugins/store-selector/server/index.ts": "ddf066ee341c060cca67ed6faa462602690b490d98c6fecdf607c447754e14bb",
+      "tools/boundaries/fixtures/violations/packages/contracts/scripts/cross.ts": "b3944693a792865f953e511d8af121da899a5f532c42936d79dd6be2ea33123e",
+      "tools/boundaries/fixtures/violations/packages/contracts/scripts/tool.ts": "d239396bee6d04e9e69c8904a29ad1c824b7ad083dab4324f2b6fb2c9e256620",
+      "tools/boundaries/fixtures/violations/packages/contracts/src/cycle-a.ts": "2a4e0505070dcddb2bb52c081e12cd68e79165766e6ca3e70ba0c40b32a18e7b",
+      "tools/boundaries/fixtures/violations/packages/contracts/src/cycle-b.ts": "bfc8f860edcb7feceafb4e08b6729da988ea3cba522dd267e837212ebdce5e12",
+      "tools/boundaries/fixtures/violations/packages/contracts/src/design.ts": "8cbc6484254fbb58af5e0d5f32012f4895f572b646607a17f9881901509031bc",
+      "tools/boundaries/fixtures/violations/packages/contracts/src/node.ts": "495eee5ed074f607574953ec4a9a61f9dd474fb49ffccf8805e3a1538c776a97",
+      "tools/boundaries/fixtures/violations/packages/contracts/test/helper.ts": "df119b46cf438cf58c31b3c2e64410f13d29e18ecf7679e36d1d0595b9b9a5af",
+      "tools/boundaries/fixtures/violations/packages/other/src/index.ts": "fb87cfe3d565c10bf5a7bb203d519dd777474f174c9c5fb42d144fb044d6b09d",
+      "tools/boundaries/fixtures/violations/tools/util/index.ts": "3ae222ca804a83ca4b2aa23e96c4e57f94e4c604faa6c1decefbbbe0112ddf20",
+      "tools/boundaries/package.json": "08e7e718cc4e36333c45648a29cde591f7543a2b2b0cced61336abf3cd4d3c2c",
+      "tools/boundaries/test/rules.test.ts": "1e57b1981597443a9c7f74d1e7f54711f60aab248ab5d30d55d9c4395fce9d25",
+      "tools/boundaries/tsconfig.json": "fea9cfcb057785994121b5c0768b9912cbcae898ce8c2c6c3ff57dd78ae99ee5",
+      "tools/compiler/__init__.py": "afeed568d5761bb04e2fa529942ceab9493ba03a4caee0b23c070224dd7a5c20",
+      "tools/compiler/local_publish.py": "7845abd2fde66537bb3f3d4fba74b44c79f6a0de15b864db819b4becf87bb547",
+      "tools/compiler/migrations/0001_local_publications.sql": "70dd08ed74d64ec82a4e7ffe786bc6f2a3c6624b6347d549199e47421af5caef",
+      "tools/compiler/package.json": "8a033e8d3616e127773d764bb6f71c3db7595362d9b0ac100545812a9c1165a0",
+      "tools/compiler/server_adapter.py": "3161c351701d090337c53865c7ca1e3ecfbfb376f27be83010c7e76c580d9687",
+      "tools/compiler/src/bindings.ts": "7cf4bd332a8bca64207e66a05b462ef45700583a76b8614a551e55f521e96d77",
+      "tools/compiler/src/blocks.ts": "c43e0e5de8197c68c8e3dca20b54fb38a815b35bbda28ad988abc01f9a6ff351",
+      "tools/compiler/src/build.ts": "513063f50b439a0d81078e146303cef5098c12d79a4fa28d2b95125f146f663b",
+      "tools/compiler/src/cli.ts": "d15daceb1d2110997376d29e3ec743dd4e3482dc6996a347624d753712429fc9",
+      "tools/compiler/src/l10n.ts": "ad6aa843f82a9d17352e86a396b2363a738c316924c266b3caea913f76685dd2",
+      "tools/compiler/src/publish.ts": "11ac55d296715881a5bf5333830b440198efd38ee5b224586d3d037375be92e2",
+      "tools/compiler/src/reference-labels.ts": "c13beccd808f970a2d7ab78c608d2381a7b16bfc8831cc55a30e9b052f8d3bd2",
+      "tools/compiler/src/release.ts": "b4c9f631bfcd990b8dd81473075f2db2fa150e1178e85473e4424c93e5cd65f9",
+      "tools/compiler/src/resolve.ts": "d79704f967e7eaf1921ff723aea6103c827ab63cfb6a36957146ff6efab3aeb0",
+      "tools/compiler/src/server.ts": "ca8abe322f3f90607eebcc968ee7f702fddec361d68e1a571ccfa6e7d2ca73d3",
+      "tools/compiler/src/themes.ts": "7489e1c659012942ac161448e4c77ddb78fca650c9db1e2d98760c69701eefac",
+      "tools/compiler/test/blocks.test.ts": "75b85ae9252292a6a05d5346373a52b73845e33423775132e4896bdb9634ecc3",
+      "tools/compiler/test/build.test.ts": "a24213e88daa6ca0afcdca7100748e16bf540429b04f6760ba76c311271eecee",
+      "tools/compiler/test/isolation.test.ts": "c44cdde28df563e39a9a45135135f9bd7fb3ed5f762b4c7f1215f0c19318ac8c",
+      "tools/compiler/test/l10n.test.ts": "dbabe7061919889210306a85bd8abd6f7fcfc2915ab1ce7dcd2b647e84ab5a69",
+      "tools/compiler/test/release.test.ts": "a5b62a516272ca9be908f3b264237b84d35c6f59b1cb66414bf9969b642441da",
+      "tools/compiler/test/themes.test.ts": "17649f6fa52ca9d530f99820b5a5c7a47ca45f931594f2003f7278fa110bbcfa",
+      "tools/compiler/tsconfig.json": "2f3d07ee179d399782029221bdabd709e262fe4c9de2bf69c99f5e4e67e92275",
+      "tools/engine-demo/adapter.py": "8ca4a1b4fa8e2b58432949f06c99741e617c87f97e8322b501ab1d39af91c30f",
+      "tools/engine-demo/local_adapter.py": "30983bb5f29b3edb8aa316f07c3aebb12ccdd47f62d9feda1fcaeea5bb7cba07",
+      "tools/engine-demo/migrations/0001_synthetic_drafts.sql": "a79b04fdb23ce68f7932e77af24763e53062e4784dd9013d7a5147f5f29c4ae0",
+      "tools/engine-demo/package.json": "ef0c47de6dd31a49621c3d070a97e31ed7cfc69da5f2ceaa731e7462c1708f7b",
+      "tools/engine-demo/src/cli.ts": "b051b276220e04b502c0b3973300681ad9ee6be7dd52e8faf456418718612872",
+      "tools/engine-demo/src/parity.ts": "c301e9573d75892bc7833b88e5c3d9fc0fa5819cd2cd74633524237d842edce0",
+      "tools/engine-demo/src/reference.ts": "83bccf28a0ee6ef7eee6b78fe402ff29c47f34668a180b05d9118ef6bd8337ce",
+      "tools/engine-demo/src/restore.ts": "ada9767b3e68a584feae79ab9f36a1b95640c65a4bc77b7e00cd75f18b0d3d51",
+      "tools/engine-demo/test/demo.test.ts": "d836185cf5bcf04bb76a7761237f09bfa1077ef77567efcea7b4a083f6c8c8ba",
+      "tools/engine-demo/test/parity.test.ts": "93857bad59fdf03997af736da8877be23a5db249dfc6ad7164e46caa5f0f4f40",
+      "tools/engine-demo/test/references.test.ts": "ba42429d60ec84bb2157a4fc83be4480ece025349ade9f719d99e4eeaa98ed06",
+      "tools/engine-demo/tsconfig.json": "fea9cfcb057785994121b5c0768b9912cbcae898ce8c2c6c3ff57dd78ae99ee5",
+      "tools/lint-fixtures/fixtures/eval-usage.ts": "423cf72c509752ed61accef400c25782360fde019624d9c358abd8ce0748db12",
+      "tools/lint-fixtures/package.json": "156453943ed007d84fd70677063980e398d952fd174f2f6b76cb6cfaa9e61979",
+      "tools/lint-fixtures/test/lint-fixtures.test.ts": "cefc19bc93bb0eab4f2c8d8b570e66349df15f2a27432c0d5f765e22e8372069",
+      "tools/lint-fixtures/tsconfig.json": "fd98b3591083952cdda17a8164d8a16d9ba44b759df675f41a4aa2995fc8611d",
+      "tools/local_p0/README.md": "b5d181fc4c3d34b0325c18f8534e77be68a7ac810736ce21e4409d2a1a345b84",
+      "tools/local_p0/__init__.py": "c219aa6d8916d42de698115dfb8f0916318f3495fdb900f40f545879876c97a2",
+      "tools/local_p0/blocks.py": "14b8d80d684cf60cf235b02fd7f1fdddc85fda3015ebfaa731b27bdfec602d21",
+      "tools/local_p0/clone.py": "aaec0eadd6930bf3cdff6d39a02488168dad732c39045cb059274dd324202373",
+      "tools/local_p0/config.py": "9a64dc56949939c926834ddddac5a5a4dea4b0baa8328688ceb0288675155a11",
+      "tools/local_p0/control.py": "56f859e0f5220b777dc75126da9b61d2b794bbec467e26c6450dc16e781d69b2",
+      "tools/local_p0/environment.json": "d89cc055ecb154db07f6aae4ba2e30e7b391071a1885f1fce742d9b8338a61ad",
+      "tools/local_p0/guard.ts": "6d185b38a88e19da13b2ae010b256a5884bce7a85008eeb1fedf15c42bb8d3d7",
+      "tools/local_p0/host.ts": "983046371465c531441e2b41c2844c6c243ed3bbfdbd857babd06f37389a3e64",
+      "tools/local_p0/network.sb": "008efd97bc473d8853f09fdabc496f0eee94a3dccabc21cefb106605b1bf9025",
+      "tools/local_p0/oidc.ts": "6ffff3d1a00cb3b0e6ae45a2b20efade3afaf6e9526077c8b239759bf2a57eff",
+      "tools/local_p0/oidc_store.py": "6b270fb4a99666894283588c0217851bdbd065f5ee5d7e930a829b5d243e82c5",
+      "tools/local_p0/package.json": "eee1fc1827189cd16a3c555b8ae28a7757e8ff763c24ae5d66efdd320aef9834",
+      "tools/local_p0/probe.py": "e5d4c3d91cb3483cca3999834c9ec37ff12971dfe164a86d3d8dfd777f351a97",
+      "tools/local_p0/probe.ts": "bf7c0055552d04954290194ec687e000739f78536f030eb2be65890c049942fc",
+      "tools/local_p0/rpc.py": "e140aa05af5bad106c5278e3819c2503aeb3d2f9bf7633b448a5da6022eab67b",
+      "tools/local_p0/seed.py": "d7171aebe76b6ac3995f16ce1e179e987b88a8aa56bc152d7154de998eae30e7",
+      "tools/local_p0/start.sh": "80bb318b6ed2482de1c1f4a2204196ace2fea78164468a37a22f0d1b48f48d73",
+      "tools/local_p0/test/autosave-browser.txt": "f102629521cacd069eae5bcd885eefd7a1173dc90802b96774cbd2afcbd9ba3f",
+      "tools/local_p0/test/blocked-preview-browser.txt": "54456783d993f35fff7dde71be823d5068a845a3f37d50009c8d05585830ec07",
+      "tools/local_p0/test/browser-flow.txt": "df42de0bf3d8bba9b6430a2ec85b002a5086b83d178fa424192b0a415d4f48ef",
+      "tools/local_p0/test/clone-settings-browser.txt": "ff4e189b5539cd2c32ec2cbc89ea287ea3c58eb47549cb113e0fd7a460b94772",
+      "tools/local_p0/test/l10n-browser.txt": "593a18a14cddf6e222c691ecff96570af88db94b9fd9815b6fd446f922982df9",
+      "tools/local_p0/test/numeric-browser.txt": "d050f39b28c23f521daf2cc4ea221ccaa5da20a3ee854e4cfd30842d4dc9f34e",
+      "tools/local_p0/test/oidc-browser.txt": "9cb21e98ad969e8e3073901a247eba102e0bee67a8164d4589ce374eff6d0259",
+      "tools/local_p0/test/oidc.test.ts": "4d5492470816eb324a66ed0d6897807694a27f4131d9c9223f7731c486f21581",
+      "tools/local_p0/test/partial-preview-browser.txt": "106cd72fed890c213fd146fc7bb23f9ce2865e9c11989032e021db6ef4c1242b",
+      "tools/local_p0/test/preview-revocation-browser.txt": "84fa0793fd4b14d114d856ac364c70b3357a277b7ced19daa71f562e2a8ae816",
+      "tools/local_p0/test/reauth-draft-browser.txt": "b951c66a05d7db063c85b81d9b71007057996d23219f01f0400da852f6449738",
+      "tools/local_p0/test/reference-browser.txt": "2833bd5e186c098d81dd0d43edb309bb55c4a358910017ad86b4df9617daac8c",
+      "tools/local_p0/test/rules-browser.txt": "d379de5c4284b41736bcd558557ace10b4a243d1011bbad96bc1b63ed5d08752",
+      "tools/local_p0/test/security_http.py": "2fbc2f82a91e88d3ff626e0487d557dd08d00a4457451482044f4a0689d62e35",
+      "tools/local_p0/test/shared-block-browser.txt": "21b8a61016f2b7ce996942a1e463a379e313f368846d59c4b2c9db54f02a108d",
+      "tools/local_p0/translation.py": "f0f19bc0fec91b9a3cda3e5997e9bd613cff3949ae8463382baa7b4c024a90ed",
+      "tools/local_p0/tsconfig.json": "ef35301bd4a9f4e5979a5d967e6236ed9e517c01e14efb5aae9d92946eff56f2",
+      "tools/local_p0/web/admin.js": "46f9edbbed0fde2245cc294315985227483543725ee2f90d6fde5fbb892af633",
+      "tools/local_p0/web/i18n.js": "ddb1b1901f489202410dd02c7d93c0f0f4a048f15945a8b5c8e998b0c2424dc3",
+      "tools/local_p0/web/index.html": "8b35aaf9f44645fe464cc9f376ffbfcee6cd196806e8c89669d3bdb1bd0619a8",
+      "tools/local_p0/web/preview.js": "d077e9095113a37944eac04f831937e01f9b466cd63606f9c9c352f75bae5c38",
+      "tools/local_p0/web/style.css": "48b2592af9cc95c4f3cb79c201d5243f6ccff7b469a49554a5ce17e125c726db",
+      "tools/perf/package.json": "aa30c49321cecdb0049ba7040e3a9893e14ed11bd5247b29537359a0098015fd",
+      "tools/perf/src/cli.ts": "af3daaa373dcc330758fb4b78b1162362941009a91f561ddcf1e3467ef5934cb",
+      "tools/perf/src/sizes.ts": "90540181cffeeb6824c6bbf7674f357fb0931db97b82ae58b78419366d5941c6",
+      "tools/perf/test/sizes.test.ts": "34d3fba27fd4a346260b6206da24f9c1e1074548d0ce4a935afb76d7951d90e7",
+      "tools/perf/tsconfig.json": "fea9cfcb057785994121b5c0768b9912cbcae898ce8c2c6c3ff57dd78ae99ee5",
+      "tools/security/gitleaks.sh": "e0750ee809f32d147354e4c0e6662458c8fcef2f85108a0cf5256463a015e41e",
+      "tools/security/package.json": "5c53743418e30ed9faa06cb7cbc80891db5335182575508980307c103e0c3595",
+      "tools/security/src/scan.ts": "de94ee57039f96a7552c13221864603c7285b819c97365be3bd76c400c389f78",
+      "tools/security/src/secrets.ts": "941810b8be028f31d06c43c1c51900cc506571a6fa8e846cd258e456453b0cdb",
+      "tools/security/src/synthetic-data-check.ts": "298a41bb4582c5c288fd45cc66f52ad1fa968d73f08bd4028117e1a12ec80086",
+      "tools/security/test/alternative-scan.test.ts": "28f39928242cc2b2b4f093f9630fe0c26ea120ec4515ab3eb424e108701fd3b1",
+      "tools/security/test/gitleaks.test.ts": "7b0d6cb8cbbeeddad1b407ea7845c2872c210ce0fb1b3690969329fca9ffca18",
+      "tools/security/test/no-network.test.ts": "bea0c77b87f5a0d738c4eed30001ba42dbed82a75a00452e45424ad496407e9b",
+      "tools/security/test/synthetic-data-check.test.ts": "49f71f692052382116ea8bafd0d7084d3cf508bfbc173353ece6c213056a802b",
+      "tools/security/tsconfig.json": "47a084bcfaaea7c1d603f26c6c5063207a71f90eb0ea9dbb5daf8e4dd3759d24",
+      "tools/test-setup/no-network.ts": "3b1bca183a716569522762e7700b65bc259df1eb9f62ed50b72214b5435799a6",
+      "tools/verify/package.json": "05996bf2e47ee3bc3b642b677cc1838f71db654b915df3ffb45c58a7934c16f0",
+      "tools/verify/src/preflight.ts": "d2a25cdba6ed782f47c59766cbd0ffaf2145fedbebbb21e047a3facccb6539f0",
+      "tools/verify/test/preflight.test.ts": "92eb79e5839da9739adec928a4b7dfc687a890b8333a5cc21920d078404c079b",
+      "tools/verify/tsconfig.json": "2f3d07ee179d399782029221bdabd709e262fe4c9de2bf69c99f5e4e67e92275",
+      "tsconfig.base.json": "3a8e649cf2fbec5e4974efad96ea9ce13b68a572ca2a362381f6a85fcbe31b7d",
+      "vitest.config.ts": "3176ad02cb148d4c559d4ee6f9fe6ece80c4aa09be001a0db51900b132c8d528"
+    },
+    "index": {
+      ".dependency-cruiser.cjs": "2748310b4f00bd9c6863589710aaa4f5e24404244f657acb7437d255e02bc41f",
+      ".gitignore": "09bfd82d74aa90b00c88de02b8d46d559db34f599d4af121f884c655f6d50ac5",
+      ".gitleaks.toml": "8abe94e281f817d0d42ad531afa844617d3e05087bebefb0e00bef69ba6e1b1b",
+      ".node-version": "d9f318747a126ce2247661af67852b185def7789492eabfad7bba322be087c33",
+      ".prettierignore": "c91983865ae3c2842527288f76ed40af9d1437ec9cdb2b0bf5b4ce3c8a5ebd20",
+      ".python-version": "02e735b3dfe1c32833eb550b7ff8ffa17f5f2bc3fa1e7bae61a8f5a3883ce398",
+      "README.md": "6e05ba269076683340571a17ef6d0825ac9661475f3e9635f1586fe688b2c82b",
+      "contracts/fixtures/digest/sha256-hex.json": "0ba8cc669a0470047714e78382d053bccb83f56197c3952279badca4e2ff81ab",
+      "contracts/fixtures/engine/calculated.json": "f6a8ce21cba757c5f90c0e0a863d636ae038f46ef60905f88578f7edae54e8bb",
+      "contracts/fixtures/engine/canonical.json": "82e57a12a1fa0305537cfa694f7e8abc83e91b5ea3023a321e88d71572e492d2",
+      "contracts/fixtures/engine/golden.json": "7aa9d4bdcabe1d33321c62f15431473cceeca4fe7ff9f771dd826db96cd1992e",
+      "contracts/fixtures/engine/groups.json": "6ae98df9bcd5140ccee69b3ee2983f76ad1371f3fba0a7da58870c78613b2419",
+      "contracts/fixtures/engine/operators.json": "894d048173dbb4579442fe5efab74cde3f6f848ff43c4766acad975536f94b7d",
+      "contracts/fixtures/engine/pc-plugin.json": "84d83701b217cadf2c5bdfcf3763fee44e6c59d192d0ba966f36aade19d817ce",
+      "contracts/fixtures/engine/pc-reference.json": "7007dacfc049f921d96f1e97817048e9813e725d804c082c5d0c3471df0b0536",
+      "contracts/fixtures/engine/pc.json": "b30cdbafe1ff528ecc3a3d6d38fbbdd6e40c78de3e9bf59444120f5a2f8fe974",
+      "contracts/fixtures/engine/sports-subtle.json": "1fdc8ae7b184be66115811b40c6c316c2934a23413a3f09a3de7d63ac6a41126",
+      "contracts/fixtures/engine/sports.json": "70435d6a9e343dbdc7023b0f53312ec5a7c77d6ec21a72dbfb4d5f8b647fc5da",
+      "contracts/fixtures/jcs/cases.json": "7a105f2d2290ce1373070bced16e295ff4e52e75db3e39701b8f9a6acaf06b82",
+      "contracts/fixtures/schema-normalization/cases.json": "d5506125cf3364a525b3f4bbd78f3431d6aa550a8c7486ce76d90be7f138ddc4",
+      "contracts/fixtures/schema/payload-ref/v1/invalid/additional-property.json": "f6b74ac11ce27b44abbaebf8450211f9026b6bb04183985a7c26929f80aa6bbf",
+      "contracts/fixtures/schema/payload-ref/v1/invalid/format-wrong.json": "218e324daf48ba9fa3802ba60352ba0ac6d1d8ca09c5dab831f08aa82728dd4f",
+      "contracts/fixtures/schema/payload-ref/v1/invalid/missing-required.json": "7ca608a4b743a85a91cde161a01945653b1b5a1c6bedcedb5fdc211da0248a64",
+      "contracts/fixtures/schema/payload-ref/v1/invalid/root-array.json": "48efb6bd0b0421201b4df0aca240e26d9c414d1ae99a038deb6ca25fc085f744",
+      "contracts/fixtures/schema/payload-ref/v1/invalid/size-negative.json": "00abaa96e811dbe7af41c48b1b9d26f29809c14c919167726db9e18fd2ef60a0",
+      "contracts/fixtures/schema/payload-ref/v1/invalid/size-wrong-type.json": "7dfd9f11478340ca5da3ebf5acde8c20ccd9079c38fe571d751b55e283ce2c3d",
+      "contracts/fixtures/schema/payload-ref/v1/invalid/two-errors.json": "1f0c1bb7f4836ebd157f1c632016ecdb95ade00c192a40da60026466755d61d1",
+      "contracts/fixtures/schema/payload-ref/v1/valid/blob.json": "1c9f102a06df5a014351bb35b1a08c8117c29c901ba8c53eb94385e6d46da7a8",
+      "contracts/fixtures/schema/payload-ref/v1/valid/inline-object.json": "a307ca531594c0ad0ba2abfa7777ec827ebe32043d4d8b010348898993b0f61b",
+      "contracts/fixtures/semantic/payload-ref.json": "9cbbc98fabc2fd660debff98beb573b6059e67d0d45c8145c48873bf6a7ed2ff",
+      "contracts/schemas/engine-ir/v1.schema.json": "6d95bf3629b9e740706388ab5ae5b8a1c3e9839fd4c6ebd6537099623ce60c63",
+      "contracts/schemas/form-definition/v1.schema.json": "d9bff383edf88bbca559d17d4ef15a3d5b732c67ded01dfcecdf35865c189ba4",
+      "contracts/schemas/payload-ref/v1.schema.json": "dae63a92fbd0a6287d20672bc32af7a424057c6c4ab593bf74c0a88747195cb6",
+      "docker/builder/README.md": "6a98f8430f47b563609c81d5bd1ed09c0ea068c85bd30b6c7b06c2500f22a3ad",
+      "eslint.config.js": "6f65ae244c1ca1794875605b2ffe237893cb12ad3a01f4e10b825401ec30450d",
+      "package.json": "c02292f216eacd7bea193eda183bceaa2a580344ce4f453f89b096b4c897ed9a",
+      "packages/contracts/package.json": "a57d2e7821bca38123df41e7ae904a5e984f925ac9cff14f2b3cee2d02bb2a32",
+      "packages/contracts/scripts/gen.ts": "954b30376d6fd47fef007dd13e375d4a32f166fe7f8046dbc0d90806580729c9",
+      "packages/contracts/scripts/lint-schemas.ts": "e6733c63bca251fcc797b66389748360bdda04b1e324d4e7f118d71a4dae4f7a",
+      "packages/contracts/scripts/schema-files.ts": "1d6584a3e581074dd1bff7af4e7b604bd9d24bb1d7ad906b519e21d87e71d7f4",
+      "packages/contracts/scripts/tsconfig.json": "0b5ea654f2517259ba26c7187f41c105502f1c4500d33e1d1759da48c69e275e",
+      "packages/contracts/src/digest.ts": "3dc4aca17a9939969be88d4587b17776623e25475708776137f5150946b94f62",
+      "packages/contracts/src/generated/engine-ir.v1.ts": "32e95fd180b0c809a8146bd60b84a4efa4d1fc4aa97ceed7bfadc7dfe1052bfb",
+      "packages/contracts/src/generated/form-definition.v1.ts": "ca1cc14013fafa246a0e0b4a4960c9a4f840d345dc0530457b3cc53aa8983784",
+      "packages/contracts/src/generated/payload-ref.v1.ts": "0fd8b4a1eb374e1f1e54a0b7fab5fac383511274014cc270e8a45b343cd95c98",
+      "packages/contracts/src/generated/schemas.ts": "646b45bc121c21af54734f0140281febd2baa39bcce6e8a83377a92c88064817",
+      "packages/contracts/src/index.ts": "df9869de7c2d3f09aa5ca5a72e54489ba6a706c03a64176bdd104d43578d79ac",
+      "packages/contracts/src/jcs.ts": "1e212e26269a3eee3cc14376786bb174600e0887263e1219a6d15bdeacbee6f2",
+      "packages/contracts/src/payload-ref.ts": "f3fe9945bfe68ebbbed0c42363753ef5cb39f5bfbaea46e2bf76dad83e24da2c",
+      "packages/contracts/src/schema.ts": "34b8369d52290ae5b11578a525f1a34314623eb3ed582f77d6f63985ced008d3",
+      "packages/contracts/test/digest.test.ts": "bef2ea28f9082c3ba2bb503bc437b975f327bb212682b7cf7e767e0dd1d6146b",
+      "packages/contracts/test/fixtures.ts": "930e3584dc4d051cc9f52376aa8236abcd183a878ecc6ac95f6b2b59e14c1c1c",
+      "packages/contracts/test/jcs.test.ts": "8539d0020ea348afe2648b427d7de2b93911863cee171f5b13d26bf2bc5b2bb0",
+      "packages/contracts/test/jsts.test.ts": "7c5dec1d1e5072cd623c98d0dc74034525fbb0524cece4653634a708692bb426",
+      "packages/contracts/test/payload-ref.test.ts": "5e4bf2bb0eb80cd3988cefe74445bbb910932177dcad9b89409ea8f0a3b0484f",
+      "packages/contracts/test/schema-lint.test.ts": "6757f0f2a150a385474410b646259fe34ee0e5e2fce8ae3b4c6e870b5837469b",
+      "packages/contracts/test/schema-normalization.test.ts": "a7f5d79be01261de25be01cc368496f18a0c639bfe32455f34654d4c974fca52",
+      "packages/contracts/test/schema-parity.test.ts": "3a4c7c3195e0b1ac77377c19a167d4fb9b5efe6a79e0e5c94958d8e3f6b9944c",
+      "packages/contracts/test/smoke.test.ts": "b7142c2fd9508f0ec356162ad1c784b3d931f792cfa37423d117408e8e994208",
+      "packages/contracts/tsconfig.json": "fea9cfcb057785994121b5c0768b9912cbcae898ce8c2c6c3ff57dd78ae99ee5",
+      "packages/form-engine/package.json": "7e62b7b9b2115a5861a8a64c3ee6c1f707908791fe85a639556d647016423511",
+      "packages/form-engine/src/canonical.ts": "4157e80ca0649e49b807aefcc19efaf800c5555b15883d495bfa539cccb4dd9c",
+      "packages/form-engine/src/definition.ts": "35e7b38681538699c2701cd70ef285e5bc71272af9704d266f1aef5e338dbc1d",
+      "packages/form-engine/src/expression.ts": "46faf85aaf4107fbb17e69500231fe057156b1d4648487d036b78492b90e6650",
+      "packages/form-engine/src/groups.ts": "a72bdbd3b00d7c5d90a7282c0a0346bbefda9f9a1613b8d72310719d176ef4da",
+      "packages/form-engine/src/index.ts": "125672eca56e22b6a0da22b6337beb5902087884b07c4b9069eb232a31c4e059",
+      "packages/form-engine/src/model.ts": "88b1ea7d65e5a044f6113a3c5d8f2b419213231b8e6773e62b7392940c9aecfc",
+      "packages/form-engine/src/navigation.ts": "5bc18d9d40a3fa0c4bf928e35e72fb5f0f5e30731c3207545f85e90a3c8a9447",
+      "packages/form-engine/src/restore.ts": "3e27467fde951329984262a489861ca1cec252de69b1b477bde937bf9f9e483b",
+      "packages/form-engine/src/runtime.ts": "331afaf19ac7cdecf476a392716767419a302e643beddd20aa57fa99278ceef3",
+      "packages/form-engine/src/validators.ts": "2121baa343f3ee317ae85b726dcf9ac3b7a28fe03b1eed4510ec64fb85c13b14",
+      "packages/form-engine/test/engine.test.ts": "0b6571fa449aa64fa77f6a331c45ad158d4ffb895f65df1ccc6493fe8b150e25",
+      "packages/form-engine/test/groups.test.ts": "cec14cb0c3956d78778875563c80db295339a47de38797c8fee7de3b49aef86d",
+      "packages/form-engine/test/navigation.test.ts": "f155498473d6e1bc5b41be7683df3a69350be5961d32408ba348168a234ec458",
+      "packages/form-engine/test/operators.test.ts": "4c9c0c13654cc57f25bc00c30c5ff5cb6446331df6ea831501186c38945334cc",
+      "packages/form-engine/test/purity.test.ts": "4a0a5070d53340c7cc57a16306ee8c29968ddf0fe4590674c15ea82b88b02a9d",
+      "packages/form-engine/test/restore.test.ts": "69da7040e767c787c47ea6a19a6f8a55a1c8e03d7cfdd78aac748edef32332c8",
+      "packages/form-engine/tsconfig.json": "fea9cfcb057785994121b5c0768b9912cbcae898ce8c2c6c3ff57dd78ae99ee5",
+      "packages/motion-adapter/package.json": "b7d4010225b8297f75f0173ddcb814bce67d08fa1a7950fd0132eafbb5070a7b",
+      "packages/motion-adapter/src/index.tsx": "7662f7fa0a4207777f85c54480b16b20ad40a1db6d1d01a910455a94b49b6331",
+      "packages/motion-adapter/tsconfig.json": "9a5c5846dd460b63512f55e36607d0a8e909189e90a57f35109134de5b6bba50",
+      "packages/motion-presets/package.json": "ea965fd8c77dc609a25cf32edb11d3515aa36ea28cf997a065c7d0edbf23726e",
+      "packages/motion-presets/src/index.ts": "b42b467ffa3c64e4b094d8285a10b59a486a4e8f4b25c328e92f06831363ffdb",
+      "packages/motion-presets/tsconfig.json": "9a5c5846dd460b63512f55e36607d0a8e909189e90a57f35109134de5b6bba50",
+      "packages/sdk-browser/package.json": "d8f398ff7303b0aaaac565828b6caa17996c7e6eaedb3e961179ab7a655e1d6c",
+      "packages/sdk-browser/src/index.ts": "a8b9ec24cd5933d2b000c17e77637e620f8d230f1e0cb77d2e6754e80c9ee60b",
+      "packages/sdk-browser/tsconfig.json": "9a5c5846dd460b63512f55e36607d0a8e909189e90a57f35109134de5b6bba50",
+      "packages/static-runtime/package.json": "96104bb253fe97dd9e4c2a136a64585c797b6b77b23789196ae068ca0e3932a4",
+      "packages/static-runtime/src/assets.d.ts": "35d26ea66c86da9701e4f4b467913481ffeae910761cea34c775c5dacb7f8eaa",
+      "packages/static-runtime/src/index.ts": "50953ce166347328d91736af6b8fbfccbda06f58426801e67b6cee2ec4d9e0d8",
+      "packages/static-runtime/src/ports.ts": "6437ae9886f9cc5b987b01a053ae6d1cd67195e8dabcca6336362e5dea5ccdfc",
+      "packages/static-runtime/src/style.css": "2eff1000f35a11068314a7d3fc7245ad199c05ba649037f3ba0270cc3d8eb291",
+      "packages/static-runtime/tsconfig.json": "a2c9d111afbf0904ad59fa3f6c16196292e37c146fa3b73cd70affd8ef01ce21",
+      "plugins/store-selector/browser/index.tsx": "f507786cb5414d90871b3c77b7e1bb3b0c494a3231729f84e0682a44635c70b4",
+      "plugins/store-selector/package.json": "909cb4ef22384f0a2ed568e632c93775922f8578dad658f33cf8e0fdb17d86b2",
+      "plugins/store-selector/plugin.manifest.json": "587d16f3cc9cee84e237eb1ecca5962cb62c3f6fe50ee97d8feb0dcb57e259e3",
+      "plugins/store-selector/server/store_selector_server.py": "701cd7b89b4a1490cc9f6e8c964cdbd98608aa9e0209276cf8b899d00dd00e2b",
+      "plugins/store-selector/tsconfig.json": "d6539fad1f5b6ac924c43fd0fafc77f144bdffb5716d12960665684a17f80495",
+      "pnpm-workspace.yaml": "d501e25a22d5dff10bcfa5f73805f17334aa0876625e5d83f2775c2ee739dca9",
+      "prettier.config.js": "bb971cbb7a0623cb1ac6eb89a1a76ea292ccf207e1176e9037c4e7ffe14707c4",
+      "pyproject.toml": "5d14b9c23cab239bac628543625866e223c84af267acc37fa294ebbc15c8a84d",
+      "python/fb_contracts/pyproject.toml": "01adefb6f1bba69c54394c4610fa69f161d56c38690f83649844e9b1146b1f54",
+      "python/fb_contracts/src/fb_contracts/__init__.py": "3aef5f050a989038a7e7c2ad2b0dcdd776f983febcecf90a06e3b1932c1ae969",
+      "python/fb_contracts/src/fb_contracts/digest.py": "688c8eebf5ebcc608118995dbdfe218fb787eab0fb2c7eb0f37c25c402064ab1",
+      "python/fb_contracts/src/fb_contracts/jcs.py": "283ef04c55684e537dd58d79f932e51d72111c90c7bba92e161ac59aa39fe849",
+      "python/fb_contracts/src/fb_contracts/payload_ref.py": "f09091936d70c944b0425f792afa56c07ff9268d97e6eb72f1676c7327fe7753",
+      "python/fb_contracts/src/fb_contracts/py.typed": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "python/fb_contracts/src/fb_contracts/schema.py": "aa443a07b49fa9633cf2e94506361a242117ae82b0c792eeb3a5a8ba87de4a17",
+      "python/fb_contracts/tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "python/fb_contracts/tests/fixtures.py": "9bed4e527e3664d764088d5695ee22720440ccc9d3e6241204e40e387010e780",
+      "python/fb_contracts/tests/test_digest.py": "2509043b7bcbb68956d81623ced65da5d5b0978099b301beffd95a3546ced7e1",
+      "python/fb_contracts/tests/test_jcs.py": "1506a71ae6c861d001665ef47afc3bd32f34ae2c1873e0bade9f5e913ec686f1",
+      "python/fb_contracts/tests/test_json_pointer.py": "91a7aeb8787bf5bb9b76338a4880a0eb2b81766b6c731250bbc22d0cf2f0eafc",
+      "python/fb_contracts/tests/test_jsts.py": "db595a5dca0ac2ffbf546f7c399889c8cea2be4323d8123b2f8b6b93ad310361",
+      "python/fb_contracts/tests/test_payload_ref.py": "e427d0e728d4027547fe75c3267fe4ac2cf9f1f2d53f3c063e72146cbe7a0f33",
+      "python/fb_contracts/tests/test_schema_normalization.py": "bc5235fa5c117c2b04e9e9271241cee25453a96cffa36fa693401202e3f490a8",
+      "python/fb_contracts/tests/test_schema_parity.py": "82788e0082f3d2d174692767ac761f4a50e74f9998d8d2550847b6ad7f6d961b",
+      "python/fb_contracts/tests/test_smoke.py": "3cd1e0ac3be1e69a25a26779d2766c958c54a1be3018b77581cd426018ed6b9a",
+      "python/fb_engine/pyproject.toml": "0b28f1f5248ec3da5cfb62122cbff7f0909852f54831a4d69199e5bab204cb1b",
+      "python/fb_engine/src/fb_engine/__init__.py": "eec427aeb951c92b3ad8337f658e54dae64d6983e45d47b709c082a5e94e2f97",
+      "python/fb_engine/src/fb_engine/canonical.py": "0b997f764bd98e041d981858fb8b504f2fc21f5cd56c79f911af7b03045fc854",
+      "python/fb_engine/src/fb_engine/core.py": "8825193dfc524150c463b205a22e0910f1f57c66c997b23cd6edf61609531819",
+      "python/fb_engine/src/fb_engine/py.typed": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "python/fb_engine/tests/local_p0/test_control.py": "9e05e34599a14a6a814a09463cf2cfe3609971a21c44106b129c2465cdb12253",
+      "python/fb_engine/tests/test_compiler_integration.py": "209ef9f3b1c1a0e55fd6445334d1256f80b4a625a11b4cf9d89c0d667f058cc7",
+      "python/fb_engine/tests/test_local_drafts.py": "2abd07cd4a7bc252f37baff646eb18dcf87a26e10084065cfa97c87975463fcb",
+      "python/fb_engine/tests/test_operators.py": "241721c6d0c2e3937453fe53c74f3c09094d63b17790d732b1cfe35f803f722d",
+      "python/fb_engine/tests/test_submission.py": "a134d533a3fa88f415717c4165b1efb04a6c93f3160a103a4216f2769dd5a05d",
+      "python/fb_store/pyproject.toml": "fe71a947ceac52d9bbfc73342fb12072aa6623b01ba1a9322f04db59b4583581",
+      "python/fb_store/src/fb_store/__init__.py": "94634ea4f09b6d481dda931cac570056970ed81f6e2d2927644bb4dcfda6e06b",
+      "python/fb_store/src/fb_store/__main__.py": "9c94b74266adaea6f02f4f05919d83590457328e813d48120aa7404890779328",
+      "python/fb_store/src/fb_store/clock.py": "a10fe6f562e236b91e41b1b10143cd7ea120166ea88bad8b1abde368708492b9",
+      "python/fb_store/src/fb_store/errors.py": "333ccec858b3b29a02c7900f71e5da79ed4d14fddc8b5cdfb5f3b37e540e3c97",
+      "python/fb_store/src/fb_store/fsstore.py": "d4257af08d1cc88eeffe7dd69b13bd081cbd1d21ee0ea1d7310b5022531f1062",
+      "python/fb_store/src/fb_store/layout.py": "5e1775ed5ec2b46f283571da9e21b5f543866b1a56c2888ff33807fb763cb61f",
+      "python/fb_store/src/fb_store/migrations.py": "a01b5cb661e117d3d1a0215ed4734681a2ef59818e658b61ec04cfcd1560d29c",
+      "python/fb_store/src/fb_store/migrations/.keep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "python/fb_store/src/fb_store/py.typed": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "python/fb_store/src/fb_store/sqlite.py": "ea7c0d9bbe34b6f53f18d1320a1efb3da3c7db5f938d1f31617962f2eac19620",
+      "python/fb_store/tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "python/fb_store/tests/migrations_fixture/badname/1_t.sql": "741bf0d04b678b1d8370e7b4f9403cb8c9db8f86d1358ab17e75594172b90337",
+      "python/fb_store/tests/migrations_fixture/broken/0001_broken.sql": "c3999047ca5651d9906a53a48539037c7c27465a7544b8c37d35dc416ab2a186",
+      "python/fb_store/tests/migrations_fixture/dup/0001_a.sql": "61ce4158f0f120638c52e42a39b9eeb6b59b6df468ad056440ab396f8db681be",
+      "python/fb_store/tests/migrations_fixture/dup/0001_b.sql": "52a0231f131e8708c663ea22e589e5f8b08412ff4a559dc54f3999d22775d3d4",
+      "python/fb_store/tests/migrations_fixture/ok/0001_create_a.sql": "ff8a79ec061f9d4548316b1e50add3736cf37fff1e445d7a31987577b8cfbc49",
+      "python/fb_store/tests/migrations_fixture/ok/0002_create_b.sql": "daaa1ead0c9e9cc69cf396b965d0634760c4c66595422e0a1b5bd857a4fefd8a",
+      "python/fb_store/tests/migrations_fixture/txstmt/0001_own_tx.sql": "147f2a7b4b05df884fdef75a226002098abc78c83fa412b3381158697cea1c2b",
+      "python/fb_store/tests/test_clock.py": "c25eea21645c429cba37393d9fc3b8d0948fb5a85c58d3f3aa3ba3f3d740a520",
+      "python/fb_store/tests/test_fsstore_blob.py": "088cb32bb6514fcc41d2da1205523ef14a803e999e57ab3c6b0abf0ea618f439",
+      "python/fb_store/tests/test_fsstore_concurrency.py": "ac98963c9148879ae77fe359bd6527405692825ef3b2386e51c15b596609ec98",
+      "python/fb_store/tests/test_fsstore_durability.py": "c294270252e4da6e0fcac12b1a11a3795c5573a0e3fbd3be0f129643f968f663",
+      "python/fb_store/tests/test_fsstore_fail_closed.py": "bdb0d547fedeaf8dcc0dc0797d622fb192e1c74390fc4dfecdccde1f17083ce9",
+      "python/fb_store/tests/test_fsstore_failures.py": "1a7d463bf121a23cae526cc8e4ada178fc939d1a151dab5b6483efc3e92a6a1b",
+      "python/fb_store/tests/test_fsstore_keys.py": "3121ad6593c1b73d09b59b941389e7ed8769fcdc09bfd050ba7cea8aa7372dfc",
+      "python/fb_store/tests/test_fsstore_release.py": "6ef4d512c9e350d290ea8ceea281efb603f3dc95b471d7fd038d8ed951250d9a",
+      "python/fb_store/tests/test_import_contracts.py": "deba0f9a5f37f72b3cc9a726eda3da0138bcad4b1545dd970e832413894582f0",
+      "python/fb_store/tests/test_layout.py": "36d11e7dbc50ad55cb3a5967a8d10309b60198a55bc385afc59801ddcc252726",
+      "python/fb_store/tests/test_migrations.py": "8cae22d1de8b83f6cd0ecbf8b2bc5d13562ba7bfc9f353a0d14fb78fe10e8e6e",
+      "python/fb_store/tests/test_network_blocked.py": "f8f6ecf772a6727568c0d28440e7499d046c8e61ea9c873e942a80177af5c10f",
+      "python/fb_store/tests/test_smoke.py": "172ae33fb68f3038c4b91e68e5ca78ca5e464520c20913db355522957e043244",
+      "python/fb_store/tests/test_sqlite_conflict.py": "6eeb449acc0d63d0a49b35a826505e372c25182ff22b2cc31fb67b70e6a22286",
+      "python/fb_store/tests/test_sqlite_tx.py": "cca22bdb01dd32d4e6b6d52d890be194768f41bc3c6e6c4285bd1c4cd06d22a3",
+      "tools/boundaries/fixtures/control/packages/contracts/scripts/named.ts": "4304c9f77a87640df181f0a3bd613b083c683c420de26ef25a907c3960ceba51",
+      "tools/boundaries/fixtures/control/packages/contracts/src/helper.ts": "969a5498f0d3727682e17d0ed5ed8b18bfb6382a339f3afe042a2642b19c1df6",
+      "tools/boundaries/fixtures/control/packages/contracts/src/index.ts": "c6368835220b29b4f1883a2044c91e5f40f19070297f82f9bb3ee56fc41e2b6d",
+      "tools/boundaries/fixtures/control/packages/other/package.json": "48fdfd8230a8a4d46c9ed471537175c0dcc4ecacc1e363654c4cadf1e6a3d8ca",
+      "tools/boundaries/fixtures/control/packages/other/src/index.ts": "fb87cfe3d565c10bf5a7bb203d519dd777474f174c9c5fb42d144fb044d6b09d",
+      "tools/boundaries/fixtures/engine-violations/packages/contracts/src/index.ts": "a03d6b992a9893619b992580e7341f4e664b547b45dc0d5717f6d7ea1618edf2",
+      "tools/boundaries/fixtures/engine-violations/packages/form-engine/package.json": "6282238049525e7026c0f04187b931c7c0a3ff0b2dc47467501603d45beaf98f",
+      "tools/boundaries/fixtures/engine-violations/packages/form-engine/src/index.ts": "c091ff551e95aeb45493569d25c44b356f19a016f25edcf9586bf67df1625d9e",
+      "tools/boundaries/fixtures/engine-violations/packages/static-runtime/package.json": "638e8645a7ef3869df7c9977eb4b153762439eeb2956f12b6fa834e50bf790e7",
+      "tools/boundaries/fixtures/engine-violations/packages/static-runtime/src/index.ts": "99fae82f21a05e637032eb16e54715d201066876a4f8df8a557dc812ba4d3a1a",
+      "tools/boundaries/fixtures/plugin-violations/packages/form-engine/src/index.ts": "ddf066ee341c060cca67ed6faa462602690b490d98c6fecdf607c447754e14bb",
+      "tools/boundaries/fixtures/plugin-violations/packages/motion-adapter/src/index.ts": "e4e1daa3bed1a09083d87cc9ac0ebdd23f3d5598503b8796b05d1ed0e16e5c96",
+      "tools/boundaries/fixtures/plugin-violations/plugins/store-selector/browser/index.ts": "0cb4b2b30d96e50818167dc4f00d6eafcf0549ba870c015b056d2e705563ff52",
+      "tools/boundaries/fixtures/plugin-violations/plugins/store-selector/server/index.ts": "ddf066ee341c060cca67ed6faa462602690b490d98c6fecdf607c447754e14bb",
+      "tools/boundaries/fixtures/violations/packages/contracts/scripts/cross.ts": "b3944693a792865f953e511d8af121da899a5f532c42936d79dd6be2ea33123e",
+      "tools/boundaries/fixtures/violations/packages/contracts/scripts/tool.ts": "d239396bee6d04e9e69c8904a29ad1c824b7ad083dab4324f2b6fb2c9e256620",
+      "tools/boundaries/fixtures/violations/packages/contracts/src/cycle-a.ts": "2a4e0505070dcddb2bb52c081e12cd68e79165766e6ca3e70ba0c40b32a18e7b",
+      "tools/boundaries/fixtures/violations/packages/contracts/src/cycle-b.ts": "bfc8f860edcb7feceafb4e08b6729da988ea3cba522dd267e837212ebdce5e12",
+      "tools/boundaries/fixtures/violations/packages/contracts/src/design.ts": "8cbc6484254fbb58af5e0d5f32012f4895f572b646607a17f9881901509031bc",
+      "tools/boundaries/fixtures/violations/packages/contracts/src/node.ts": "495eee5ed074f607574953ec4a9a61f9dd474fb49ffccf8805e3a1538c776a97",
+      "tools/boundaries/fixtures/violations/packages/contracts/test/helper.ts": "df119b46cf438cf58c31b3c2e64410f13d29e18ecf7679e36d1d0595b9b9a5af",
+      "tools/boundaries/fixtures/violations/packages/other/src/index.ts": "fb87cfe3d565c10bf5a7bb203d519dd777474f174c9c5fb42d144fb044d6b09d",
+      "tools/boundaries/fixtures/violations/tools/util/index.ts": "3ae222ca804a83ca4b2aa23e96c4e57f94e4c604faa6c1decefbbbe0112ddf20",
+      "tools/boundaries/package.json": "08e7e718cc4e36333c45648a29cde591f7543a2b2b0cced61336abf3cd4d3c2c",
+      "tools/boundaries/test/rules.test.ts": "1e57b1981597443a9c7f74d1e7f54711f60aab248ab5d30d55d9c4395fce9d25",
+      "tools/boundaries/tsconfig.json": "fea9cfcb057785994121b5c0768b9912cbcae898ce8c2c6c3ff57dd78ae99ee5",
+      "tools/compiler/__init__.py": "afeed568d5761bb04e2fa529942ceab9493ba03a4caee0b23c070224dd7a5c20",
+      "tools/compiler/local_publish.py": "1ab9461e09f9748546d2dc259d47aab8589fc4e51edb6c64e93bd85accb86c07",
+      "tools/compiler/migrations/0001_local_publications.sql": "70dd08ed74d64ec82a4e7ffe786bc6f2a3c6624b6347d549199e47421af5caef",
+      "tools/compiler/package.json": "8a033e8d3616e127773d764bb6f71c3db7595362d9b0ac100545812a9c1165a0",
+      "tools/compiler/server_adapter.py": "d3ed76e71795e8ae3a83b22f8eb0a5db06c7f8e85415419df43eafb8e8cffd3e",
+      "tools/compiler/src/bindings.ts": "7cf4bd332a8bca64207e66a05b462ef45700583a76b8614a551e55f521e96d77",
+      "tools/compiler/src/build.ts": "d58000bc6f57bef83c5438f5319cde5b5a6c9ace7b607240f4d683a4ac47449a",
+      "tools/compiler/src/cli.ts": "dcff426a8becc056bd9ef76cfb27a8f9e4ea16ab67c18539531ee409138216b6",
+      "tools/compiler/src/publish.ts": "11ac55d296715881a5bf5333830b440198efd38ee5b224586d3d037375be92e2",
+      "tools/compiler/src/resolve.ts": "c8f63bad61fc9fc74e39794b996bb590482aa784da955a5e661c6fd0ad8c47bb",
+      "tools/compiler/src/server.ts": "0f9e18e1d3eb2f703c983fa7c46d0fd70be5a5a102a6c051f255f741c6540861",
+      "tools/compiler/test/build.test.ts": "a24213e88daa6ca0afcdca7100748e16bf540429b04f6760ba76c311271eecee",
+      "tools/compiler/test/isolation.test.ts": "c44cdde28df563e39a9a45135135f9bd7fb3ed5f762b4c7f1215f0c19318ac8c",
+      "tools/compiler/tsconfig.json": "2f3d07ee179d399782029221bdabd709e262fe4c9de2bf69c99f5e4e67e92275",
+      "tools/engine-demo/adapter.py": "8ca4a1b4fa8e2b58432949f06c99741e617c87f97e8322b501ab1d39af91c30f",
+      "tools/engine-demo/local_adapter.py": "30983bb5f29b3edb8aa316f07c3aebb12ccdd47f62d9feda1fcaeea5bb7cba07",
+      "tools/engine-demo/migrations/0001_synthetic_drafts.sql": "a79b04fdb23ce68f7932e77af24763e53062e4784dd9013d7a5147f5f29c4ae0",
+      "tools/engine-demo/package.json": "ef0c47de6dd31a49621c3d070a97e31ed7cfc69da5f2ceaa731e7462c1708f7b",
+      "tools/engine-demo/src/cli.ts": "b051b276220e04b502c0b3973300681ad9ee6be7dd52e8faf456418718612872",
+      "tools/engine-demo/src/parity.ts": "c301e9573d75892bc7833b88e5c3d9fc0fa5819cd2cd74633524237d842edce0",
+      "tools/engine-demo/src/reference.ts": "83bccf28a0ee6ef7eee6b78fe402ff29c47f34668a180b05d9118ef6bd8337ce",
+      "tools/engine-demo/src/restore.ts": "ada9767b3e68a584feae79ab9f36a1b95640c65a4bc77b7e00cd75f18b0d3d51",
+      "tools/engine-demo/test/demo.test.ts": "d836185cf5bcf04bb76a7761237f09bfa1077ef77567efcea7b4a083f6c8c8ba",
+      "tools/engine-demo/test/parity.test.ts": "93857bad59fdf03997af736da8877be23a5db249dfc6ad7164e46caa5f0f4f40",
+      "tools/engine-demo/test/references.test.ts": "ba42429d60ec84bb2157a4fc83be4480ece025349ade9f719d99e4eeaa98ed06",
+      "tools/engine-demo/tsconfig.json": "fea9cfcb057785994121b5c0768b9912cbcae898ce8c2c6c3ff57dd78ae99ee5",
+      "tools/lint-fixtures/fixtures/eval-usage.ts": "423cf72c509752ed61accef400c25782360fde019624d9c358abd8ce0748db12",
+      "tools/lint-fixtures/package.json": "156453943ed007d84fd70677063980e398d952fd174f2f6b76cb6cfaa9e61979",
+      "tools/lint-fixtures/test/lint-fixtures.test.ts": "cefc19bc93bb0eab4f2c8d8b570e66349df15f2a27432c0d5f765e22e8372069",
+      "tools/lint-fixtures/tsconfig.json": "fd98b3591083952cdda17a8164d8a16d9ba44b759df675f41a4aa2995fc8611d",
+      "tools/local_p0/README.md": "6e8c6c53227f48c9a12539985729182c8f52b596eb782f49e42a21d1002bcfa8",
+      "tools/local_p0/__init__.py": "c219aa6d8916d42de698115dfb8f0916318f3495fdb900f40f545879876c97a2",
+      "tools/local_p0/config.py": "9a64dc56949939c926834ddddac5a5a4dea4b0baa8328688ceb0288675155a11",
+      "tools/local_p0/control.py": "2e5f9d91a4b10e7ede1f3a1dc9804f40d8b171ce64cade9b4e45f37250813f50",
+      "tools/local_p0/environment.json": "d89cc055ecb154db07f6aae4ba2e30e7b391071a1885f1fce742d9b8338a61ad",
+      "tools/local_p0/guard.ts": "6d185b38a88e19da13b2ae010b256a5884bce7a85008eeb1fedf15c42bb8d3d7",
+      "tools/local_p0/host.ts": "04db3710180032aacd9e097ca97864ddef824513512ebbe7f33bf55ea99d8063",
+      "tools/local_p0/network.sb": "676d45ca6abf3de0c771cbffbdde5f13ce4c42bfff68b76d35306be8c2bb70f6",
+      "tools/local_p0/package.json": "eee1fc1827189cd16a3c555b8ae28a7757e8ff763c24ae5d66efdd320aef9834",
+      "tools/local_p0/probe.py": "e5d4c3d91cb3483cca3999834c9ec37ff12971dfe164a86d3d8dfd777f351a97",
+      "tools/local_p0/probe.ts": "bf7c0055552d04954290194ec687e000739f78536f030eb2be65890c049942fc",
+      "tools/local_p0/rpc.py": "f78dd243d30c4cf8916df0249ac85abe719edcf5df96c7d013d5086891ec86fa",
+      "tools/local_p0/seed.py": "d7171aebe76b6ac3995f16ce1e179e987b88a8aa56bc152d7154de998eae30e7",
+      "tools/local_p0/start.sh": "80bb318b6ed2482de1c1f4a2204196ace2fea78164468a37a22f0d1b48f48d73",
+      "tools/local_p0/test/browser-flow.txt": "25a380db1d37807ba08b1d13677f0f904fb3f33916ac8e59ff80c514f38fbb41",
+      "tools/local_p0/test/numeric-browser.txt": "3e470ed6c18e04090d00510d7f177f511b70278c753e7fdec38fe14868029133",
+      "tools/local_p0/test/reference-browser.txt": "48ce2fb3d85f17f0a0a1edb5601daf65bc3125bd277c87f3816765dd78e62480",
+      "tools/local_p0/test/security_http.py": "2fbc2f82a91e88d3ff626e0487d557dd08d00a4457451482044f4a0689d62e35",
+      "tools/local_p0/tsconfig.json": "c85bb9d4d96fad6270dc29297b4319cf0fbf3142d102ed7e5823764cc2babc4b",
+      "tools/local_p0/web/admin.js": "db003acecfa5ad143ba599e8396e3941850350df4a093b65ad688ee86ce9a2d8",
+      "tools/local_p0/web/index.html": "5449e763b04eaa173c97203a312ccd4eb26e6e6c2b5079e903e9f276617f8662",
+      "tools/local_p0/web/preview.js": "2cb204919a5505f8bf57907f5eb9dacb504530f83310c68713f6446c5659d650",
+      "tools/local_p0/web/style.css": "2376c8f5f786d0bd8d8eebd17a214a5ee699425862bd6da3d40bdbc0935c8383",
+      "tools/perf/package.json": "aa30c49321cecdb0049ba7040e3a9893e14ed11bd5247b29537359a0098015fd",
+      "tools/perf/src/cli.ts": "af3daaa373dcc330758fb4b78b1162362941009a91f561ddcf1e3467ef5934cb",
+      "tools/perf/src/sizes.ts": "90540181cffeeb6824c6bbf7674f357fb0931db97b82ae58b78419366d5941c6",
+      "tools/perf/test/sizes.test.ts": "34d3fba27fd4a346260b6206da24f9c1e1074548d0ce4a935afb76d7951d90e7",
+      "tools/perf/tsconfig.json": "fea9cfcb057785994121b5c0768b9912cbcae898ce8c2c6c3ff57dd78ae99ee5",
+      "tools/security/gitleaks.sh": "e0750ee809f32d147354e4c0e6662458c8fcef2f85108a0cf5256463a015e41e",
+      "tools/security/package.json": "5c53743418e30ed9faa06cb7cbc80891db5335182575508980307c103e0c3595",
+      "tools/security/src/scan.ts": "cb44e78b7be2269a9b086aa5c2bca93e6f2b7ddb407d540b88730735a122d6cb",
+      "tools/security/src/secrets.ts": "941810b8be028f31d06c43c1c51900cc506571a6fa8e846cd258e456453b0cdb",
+      "tools/security/src/synthetic-data-check.ts": "298a41bb4582c5c288fd45cc66f52ad1fa968d73f08bd4028117e1a12ec80086",
+      "tools/security/test/alternative-scan.test.ts": "7c9f9e65248eb47a43bd9d79666cd1fdc6be598f9d3b3e84899ed26d79f0991e",
+      "tools/security/test/gitleaks.test.ts": "7b0d6cb8cbbeeddad1b407ea7845c2872c210ce0fb1b3690969329fca9ffca18",
+      "tools/security/test/no-network.test.ts": "bea0c77b87f5a0d738c4eed30001ba42dbed82a75a00452e45424ad496407e9b",
+      "tools/security/test/synthetic-data-check.test.ts": "49f71f692052382116ea8bafd0d7084d3cf508bfbc173353ece6c213056a802b",
+      "tools/security/tsconfig.json": "47a084bcfaaea7c1d603f26c6c5063207a71f90eb0ea9dbb5daf8e4dd3759d24",
+      "tools/test-setup/no-network.ts": "3b1bca183a716569522762e7700b65bc259df1eb9f62ed50b72214b5435799a6",
+      "tools/verify/package.json": "05996bf2e47ee3bc3b642b677cc1838f71db654b915df3ffb45c58a7934c16f0",
+      "tools/verify/src/preflight.ts": "d2a25cdba6ed782f47c59766cbd0ffaf2145fedbebbb21e047a3facccb6539f0",
+      "tools/verify/test/preflight.test.ts": "92eb79e5839da9739adec928a4b7dfc687a890b8333a5cc21920d078404c079b",
+      "tools/verify/tsconfig.json": "2f3d07ee179d399782029221bdabd709e262fe4c9de2bf69c99f5e4e67e92275",
+      "tsconfig.base.json": "3a8e649cf2fbec5e4974efad96ea9ce13b68a572ca2a362381f6a85fcbe31b7d",
+      "vitest.config.ts": "3176ad02cb148d4c559d4ee6f9fe6ece80c4aa09be001a0db51900b132c8d528"
+    }
+  },
+  "exclusions": [
+    "docs (governance/evidence, not source)",
+    "contracts/vendor (third party)",
+    "lockfiles",
+    "CLAUDE.md",
+    "untracked spikes and Git-ignored files"
+  ]
+}

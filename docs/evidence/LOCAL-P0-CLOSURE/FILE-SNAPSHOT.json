@@ -1,0 +1,1099 @@
+{
+  "branch": "codex/p03-s1-workflow-engine",
+  "HEAD": "693969a8a226af3227ed3bb0e4cd49994126f12c",
+  "stagedDiff": [],
+  "workingFiles": 155,
+  "groupA": 142,
+  "groupB": 13,
+  "hashExclusions": [
+    "docs/evidence/LOCAL-P0-CLOSURE/PROPOSED-SCOPE.md",
+    "docs/evidence/LOCAL-P0-CLOSURE/FILE-SNAPSHOT.json"
+  ],
+  "files": [
+    {
+      "path": "contracts/schemas/engine-ir/v1.schema.json",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "42b0993dd9fcf78e52709950445234bc63c8e53e4d23f3886d99706812a605cd"
+    },
+    {
+      "path": "contracts/schemas/form-definition/v1.schema.json",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "79f90dabc90d14f2268b96a4e871bae15e005a84c0328030c466888bd38ea763"
+    },
+    {
+      "path": "docker/builder/README.md",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "0d2ee350d6f2148f7cd35af53f546f786d3d59f78d0b1518c0ca686637f2da6c"
+    },
+    {
+      "path": "docs/CONTEXT_HANDOFF.md",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "B: pre-existing governance/localization docs",
+      "sha256": "96fe3230d580c35f34994dabadefd617ee467a3e70e0568df48d7a1b7fcc8ab7"
+    },
+    {
+      "path": "docs/CURRENT_STATUS.md",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "B: pre-existing governance/localization docs",
+      "sha256": "5c500eb6e2e1c42f9f2e98b4f63920ace26edb1631a19b6d8041f5232a5c8325"
+    },
+    {
+      "path": "docs/DECISIONS.md",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "B: pre-existing governance/localization docs",
+      "sha256": "70c05d3f910991342061c6b5864c0a1c8dcbfb9a26b715224d6bf097e8c1fc9c"
+    },
+    {
+      "path": "docs/PROJECT_CHECKLIST.md",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "B: pre-existing governance/localization docs",
+      "sha256": "f5f6654fe3f5cf4eb96c2d283ece939b812461097de7df523a1a9006540f335c"
+    },
+    {
+      "path": "docs/REQUIREMENTS_TRACEABILITY.md",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "B: pre-existing governance/localization docs",
+      "sha256": "0564c7c7841906a9dccefe8ad882f91fd54c20073b8571b8f525183d950eb871"
+    },
+    {
+      "path": "packages/contracts/src/generated/engine-ir.v1.ts",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "4b3eae3ca6fafe514d753df31c8d46c51d6f4294ceb74228097af374583cb9b0"
+    },
+    {
+      "path": "packages/contracts/src/generated/form-definition.v1.ts",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "7d6f20dbcf80afbfb37fddd07dd52856172ebdd66cef7b3716a2fb3813df33f1"
+    },
+    {
+      "path": "packages/contracts/src/generated/schemas.ts",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "93935aea5934f560f331d5b5c50b25908ba06cb5d8a7c9cb03e89d0280e877f2"
+    },
+    {
+      "path": "packages/form-engine/src/definition.ts",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "b0a1870b1e6d1abef9ad22b1084697cd019fe2c3054875427bfa03c2ad6d4e26"
+    },
+    {
+      "path": "packages/form-engine/src/index.ts",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "d011f7a7165feca532217a0ed63564d38edbcbe8735da6837cf1121f8a3e994a"
+    },
+    {
+      "path": "packages/form-engine/src/runtime.ts",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "224cb9a21399f5b8364fde2a35b2db2d7e89ec6d5f21bcbbc9ebb557f3a224fd"
+    },
+    {
+      "path": "packages/static-runtime/src/index.ts",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "b43196a5d3f406406b9ab3a75a4873d154b7d12eb1740a717fe89edbd2fc04ae"
+    },
+    {
+      "path": "packages/static-runtime/src/style.css",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "9bd4a723dc4731247ad215b31de982dc710f26603329ee09a4e88233ec4008e6"
+    },
+    {
+      "path": "python/fb_engine/src/fb_engine/core.py",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "06cb9f73c7a171143972331b7a37f807bd63c79bc8dd5831e153806a7a83a0c3"
+    },
+    {
+      "path": "python/fb_engine/tests/local_p0/test_control.py",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "0ffb374ef53525270621afe8fd9c6c0819e5bce891daa99504337ac1bebe24d0"
+    },
+    {
+      "path": "python/fb_engine/tests/test_compiler_integration.py",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "d65e4b58dc3e52327c6b98784dc665a00a62011b03de49956193a4e4aba1c498"
+    },
+    {
+      "path": "tools/compiler/local_publish.py",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "7845abd2fde66537bb3f3d4fba74b44c79f6a0de15b864db819b4becf87bb547"
+    },
+    {
+      "path": "tools/compiler/server_adapter.py",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "3161c351701d090337c53865c7ca1e3ecfbfb376f27be83010c7e76c580d9687"
+    },
+    {
+      "path": "tools/compiler/src/build.ts",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "513063f50b439a0d81078e146303cef5098c12d79a4fa28d2b95125f146f663b"
+    },
+    {
+      "path": "tools/compiler/src/cli.ts",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "d15daceb1d2110997376d29e3ec743dd4e3482dc6996a347624d753712429fc9"
+    },
+    {
+      "path": "tools/compiler/src/resolve.ts",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "d79704f967e7eaf1921ff723aea6103c827ab63cfb6a36957146ff6efab3aeb0"
+    },
+    {
+      "path": "tools/compiler/src/server.ts",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "ca8abe322f3f90607eebcc968ee7f702fddec361d68e1a571ccfa6e7d2ca73d3"
+    },
+    {
+      "path": "tools/local_p0/README.md",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "b5d181fc4c3d34b0325c18f8534e77be68a7ac810736ce21e4409d2a1a345b84"
+    },
+    {
+      "path": "tools/local_p0/control.py",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "56f859e0f5220b777dc75126da9b61d2b794bbec467e26c6450dc16e781d69b2"
+    },
+    {
+      "path": "tools/local_p0/host.ts",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "983046371465c531441e2b41c2844c6c243ed3bbfdbd857babd06f37389a3e64"
+    },
+    {
+      "path": "tools/local_p0/network.sb",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "008efd97bc473d8853f09fdabc496f0eee94a3dccabc21cefb106605b1bf9025"
+    },
+    {
+      "path": "tools/local_p0/rpc.py",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "e140aa05af5bad106c5278e3819c2503aeb3d2f9bf7633b448a5da6022eab67b"
+    },
+    {
+      "path": "tools/local_p0/test/browser-flow.txt",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "0de03e0536661d191865f2387198ddc4491a95e626aca8ae6a821d7fc2834f59"
+    },
+    {
+      "path": "tools/local_p0/test/numeric-browser.txt",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "d050f39b28c23f521daf2cc4ea221ccaa5da20a3ee854e4cfd30842d4dc9f34e"
+    },
+    {
+      "path": "tools/local_p0/test/reference-browser.txt",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "2833bd5e186c098d81dd0d43edb309bb55c4a358910017ad86b4df9617daac8c"
+    },
+    {
+      "path": "tools/local_p0/tsconfig.json",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "ef35301bd4a9f4e5979a5d967e6236ed9e517c01e14efb5aae9d92946eff56f2"
+    },
+    {
+      "path": "tools/local_p0/web/admin.js",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "46f9edbbed0fde2245cc294315985227483543725ee2f90d6fde5fbb892af633"
+    },
+    {
+      "path": "tools/local_p0/web/index.html",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "8b35aaf9f44645fe464cc9f376ffbfcee6cd196806e8c89669d3bdb1bd0619a8"
+    },
+    {
+      "path": "tools/local_p0/web/preview.js",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "d077e9095113a37944eac04f831937e01f9b466cd63606f9c9c352f75bae5c38"
+    },
+    {
+      "path": "tools/local_p0/web/style.css",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "48b2592af9cc95c4f3cb79c201d5243f6ccff7b469a49554a5ce17e125c726db"
+    },
+    {
+      "path": "tools/security/src/scan.ts",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "de94ee57039f96a7552c13221864603c7285b819c97365be3bd76c400c389f78"
+    },
+    {
+      "path": "tools/security/test/alternative-scan.test.ts",
+      "gitStatus": " M",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "28f39928242cc2b2b4f093f9630fe0c26ea120ec4515ab3eb424e108701fd3b1"
+    },
+    {
+      "path": "contracts/fixtures/blocks/blk_customer_info@r1.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "35f73aa33f1ee15bd9c2ae287a4bc958c231c3472ba9b232146f0774ce4e987a"
+    },
+    {
+      "path": "contracts/fixtures/blocks/blk_customer_info@r2.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "38dd6ff83bb700cfffbefcd9410226ffed1e531819a6de3fdc90306731e881b2"
+    },
+    {
+      "path": "contracts/fixtures/blocks/registry.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "e9d20e62a447e2378e27aa95c1e4c94651d885e69fc9424d636fea07fbfc6dec"
+    },
+    {
+      "path": "docs/evidence/L10N-JA-VI/RESULTS.md",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "B: pre-existing governance/localization docs",
+      "sha256": "b8c18578efddd7be4610a5573badfbda5a0464d6664007823f63d558c9185d0c"
+    },
+    {
+      "path": "docs/evidence/L10N-JA-VI/l10n-admin-ja.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "B: pre-existing governance/localization docs",
+      "sha256": "a9be342a489ffc4ab2b95ebc9ea57b62d5d70bfc3eec6c56e953f66174bd61ab"
+    },
+    {
+      "path": "docs/evidence/L10N-JA-VI/l10n-admin-vi.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "B: pre-existing governance/localization docs",
+      "sha256": "4c85f02abda9a4b3461e91c81bb41e68fa130ae7f38343179042133fa7be93e0"
+    },
+    {
+      "path": "docs/evidence/L10N-JA-VI/l10n-browser.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "B: pre-existing governance/localization docs",
+      "sha256": "47b41136d0e67a70b7c6dc159ee521dfa73cfb0a8b8663dc1bec6736203b2ea6"
+    },
+    {
+      "path": "docs/evidence/L10N-JA-VI/l10n-customer-ja-review.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "B: pre-existing governance/localization docs",
+      "sha256": "5c6449be7f4f0c44aa3a7639bf234cbdb285045f0b1b2fd43dc879d8ebe60e58"
+    },
+    {
+      "path": "docs/evidence/L10N-JA-VI/l10n-customer-vi-complete.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "B: pre-existing governance/localization docs",
+      "sha256": "3c6c813d2649b7037e0482dd41df9836f624e02211b9d4a3e84b70df484af622"
+    },
+    {
+      "path": "docs/evidence/L10N-JA-VI/l10n-customer-vi-fallback.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "B: pre-existing governance/localization docs",
+      "sha256": "4e85c4d666a2cdb8e61a9ba19a54c6b634c1c70f6b2469daf39aaf9d13710236"
+    },
+    {
+      "path": "docs/evidence/L10N-JA-VI/l10n-customer-vi-required.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "B: pre-existing governance/localization docs",
+      "sha256": "fcd32052dcb29378e8aea986e3d7e1ee184e614e36f648a3902aa381e80e44b0"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/FILE-SNAPSHOT.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": null
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/PROPOSED-SCOPE.md",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": null
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/RESULTS.md",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "82f084f080722d0b4d270c31078a496eb95595e29658fc0dfc2283c05761d83e"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/blocked-preview-browser.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "cba5962a1c7fca34764a6fc444f5d5fec8b18df33dea61de032ae7a2e822ff4a"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/builder-cache-node-version.txt",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "50956a2c27b1a442408131f86103ff1df8a7f4a29502df81d216ba19e2c2f4a6"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/canonical-final-byte-tests.log",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "9a90e977bd6f942dd67630a833bf0efb79b1588e1fd2e04de92b0bbdaf60a88c"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/closure-blocked-preview.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "af37283aeb5def7fc4ef8763b0a9c5bf28543e69a01213dd85bdc319b64c17b6"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/closure-oidc-admin.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "7c306cebbb2fce3c094214b298ca552f31012144dcd3cf20ac0845e451e2f931"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/closure-partial-preview.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "abac87e053948cb3dc29f5ebd8b9d797d877f162baca29cddf02cf26644b259d"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/closure-partial-stop.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "cd71a890d1d1016fcb6943540ea37f4cbb1a53e7ba015f17db30e9b3a8906e6d"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/closure-pc-store.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "e08d26894fefcacf9557518a25eb90ce861aab0acc89b2405ec13264114c83dc"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/closure-sports-customer.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "581c7d178ff265f55d5847588849843484ab8c0a38f80da7273f7b9f14040d08"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/full-browser-e2e.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "bbc1a84e771b9103d9584097dd186e40b95074cce08b429c0be3a7dac1b04a27"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/local-p0-admin-preview.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "134ff997cb3391e22a25e0cdfea013a0ad9949723a8b55e96c05c08fc63db01a"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/local-p0-customer-complete.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "22e7a187f37be5e06b85eef948a90596aa2595288441717b6401116bfc35a7d3"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/local-p0-rollback.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "8b0ccef05ddb8a168862da80023f55cc866f97dd4b46fb63791daa1b586cd051"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/network-node.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "1a319fd532449ca67414c615ae45a7bb1a503b192e4bcadfa62103231d87b819"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/network-python.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "0a06020aff0438b0551d62ceb4c0fbfb555dbf0145307bf3e335e84819c0cd8e"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/oidc-browser.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "74cd3950a29b990a450ef9914c9189c00d7b9153ed4dafc1355d9c14d4c662ad"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/partial-preview-browser.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "d645f9df2111de5f5104fb87b6a6444e970e7525d152062206a1172b20fd6dfc"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/performance.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "d7137fc3a0eb6d0892b586b02027a5bf3d1ae8a6fbb1aba94ab87d54611128cc"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/public-artifact-secret-scan-raw.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "142b4fb1e34dc977f8c2177470dc6b99dc3a43f9584c92d4fd752842db0da4a1"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/public-artifact-secret-scan.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "4ee415292435fcfd576c2cd71ec5aaff0e535da1596d1b434ecd7d86437bbbce"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/publish-rollback-mock-effect.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "6717c1b576414dae8b25d7d854e8f1d05ad45d8e76b67cca5d205fb8cca143d4"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/reauth-draft-browser.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "d956f655971e982548dc1380a7d693e7868c3b4f2b6971d3b60c5ef8745ddddb"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/reference-browser.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "466902d2bfd5356feda662a9dc1c613756b43606db5255b7d57c96d521f9f377"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/references.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "9b3d34f02ce4ee2ad5437adb318d58a162eb059ef4893492ae40ee323c0d1944"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/scanner-negative-tests.log",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "a94241e1cca132e2627b90e16c148f23ae9616f8d9b058a6f526208aa40c90a9"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/source-secret-scan.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "f1603f6a77e5d40aa71302f4818318da1d621721682baac47fcabc0e79dba52c"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/sports-release/attestation.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "e52eb568c08e00bb78cd973532d84f311df0f85f1208a97c4d0c746659b3ec7b"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/sports-release/chunk-plan.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "fa2914a6358a5f08abac0b2b0d2bafeeae0eb6d0d47658212e37b161734f18b7"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/sports-release/host-final-verification.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "e5996518ea168e8ab64bc2f070855ea2286183502cce2b500b9107adc090bbbf"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/sports-release/lrm.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "b70b440cc4fc37c9d377b31151e842d0d20b6057bea459be50a84ab406df781f"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/sports-release/provenance.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "37a29564286504d6e246440eca19d580c5f137f6fe1a776ed789d269eea11039"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/sports-release/semantic-fixtures.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "97fbdc94b4fae5a015546d78984d63ffd39c94fa96b1640960aef988287e19a6"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/verification-summary.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "12d1abeab1b707243a4bda880c0b0ea9f3c66cb0bebe6236643b5b0c39b2c337"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CLOSURE/verification.log",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "43bead39bf2f2b1e98734a38949c725ecdace4a405b6d06c5ed9e494a37b6a07"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/693969a-index-secret-scan.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "ad8f698892cf0ab8ae8aa2ba462979fcd207f29fe3a3028df5fcc5c732ff9e7b"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/RESULTS.md",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "0fb94fc9f843121563cb8fc1350567dea1c79dde03125145d6276c1144510b73"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/WORKING-SCOPE.txt",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "467741e04e6bf9315a74148c1eedbb04872de6f06da8b69bfd508389b290beff"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/alternative-scanner-negative-tests.txt",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "3bfcb9862b9e7735f9c39d65e18b45c71f5e39fcfec49a6d679b7222b690cf2f"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/autosave-browser.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "e2ccad23743fcfb625145169a1c1c39b43e8930b85cf51ffcbccd4f0f0b747d9"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/clone-settings-browser.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "a0829ab6faca23fe2d3c81c99a30145a89ee9444b022bccd75d66619b46941ca"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/ct26.txt",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "d9a6343f61c8ff9b79496e47978068ff73808d38c816dca8e47bcfbc20f54bd0"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/local-p0-admin-preview.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "a9a2f35ce8abfe0f3b718eb7440dcd7618f93cfb281bb135a6ccda02721d0117"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/local-p0-admin-viewport.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "8ff9a1c20a2098d6dbb3918da3158edec4730221a5227fd5c01736c89c336ae9"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/local-p0-cas-conflict.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "8b5afd54db3d67c0af7b84e6a2222d53d9df7cd934ac6941b77e742d51dde510"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/local-p0-clone-settings.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "2c0efc78ba2cf22a227afed102bc243440125c1732b4968fe8c51ef5b044043e"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/local-p0-customer-complete.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "941ab51cd563b7e9f9bc82b908fcbc4a777c1df76fdfe1faf807eb38a5497964"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/local-p0-named-rules.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "3b39ba97dfda9b47056a622d3181c50154142cf544a9215a2b74aeb010e1eeae"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/local-p0-preview-form.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "1ca3f5449a482c5079aaade0f302cf830cff77cf7b5cd7a14da054f94a4b1df8"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/local-p0-preview-revoked.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "976edf5df677f6edd74260829eeea21d822c4dacd0f0d88e469f0c79f89a586f"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/local-p0-preview-viewport.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "2fbb24dfc54801af24237575b93a4eba203bc2bc40284dbc1dfe956ff1cd2116"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/local-p0-rollback.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "abc47cef035f8552ce300866caed695e205fb22905e27c79227d642f5eb0c105"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/local-p0-shared-blocks.png",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "0e5fc50b4305e86fdebad98909dc34ba8974b46947e7a99f7d408a5b08b0cccb"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/mock-effect.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "05a15848e84febd8c615cffd19bd2f2f7bd280e464e2d33ade83191b28540023"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/named-rules-browser.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "5e193c45ab0c55af6d2f47cacca0db911b175cd55ea85c05191683bd1ce4d820"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/no-code-browser.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "922fc427062a12855966f5b407e9678365583765c3d138b892543929fad49ee3"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/performance.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "aba7bdbda70c483cc15ae478759db7921cf6080387619c732e598a20e19e1a2b"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/preview-revocation-browser.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "f1063d78bbcffb49a1540e9749f7a051d69157a68e44abd494f6bc36384e12e8"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/reference-browser.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "15a6a638b985ad78916201896dc58ca20e61f2ecc41530542f0e40616a083bd1"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/references.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "3d91494b92f5923cbd3f03e487f4823ec012acc2465cc703349e92fa34bc409b"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/security-http.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "054047a729971c6f54a646428f8f3f5f0ca89e4f203e08795f5e4c2ca32d4d9f"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/shared-block-browser.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "294fe4a057747d63ca379610fbf2bd46f9d4942082626c8db8696b0e8e9dc133"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/source-secret-scan.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "c88312b7da39456d28180eee2ed474fb82971184bd8c2fec019561f8ec762e03"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/verification-summary.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "7e0308b4caa976491de6f6f4ab7c7dbdcffce43e60fef5ef5131712c8af8c516"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/verification.txt",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "514513d478b5a1ce6d51f3514e74ce6e852e4e2686ae29f46b6a7d3c2591cff1"
+    },
+    {
+      "path": "docs/evidence/LOCAL-P0-CP2/viewport-screenshots.json",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "a2fa4bad5c9239ec9b08bbd988e47bdaf3953472e0b71eee199fcd7957e10ed4"
+    },
+    {
+      "path": "packages/form-engine/src/preview.ts",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "e8c515c26999a660d047ebda5a78ef9ef482028264e0668e2653eeeb4d1e0010"
+    },
+    {
+      "path": "packages/form-engine/test/preview.test.ts",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "4c565e49a3d6478e380cfdb902c2bac7e0ade3e67459cc9902fd3507fc286ace"
+    },
+    {
+      "path": "python/fb_engine/tests/local_p0/test_contracts.py",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "af7fc5fac0502fca5ae3d8beec5746f56985184b43f5418e9ac58893c082f633"
+    },
+    {
+      "path": "python/fb_engine/tests/local_p0/test_ct26.py",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "0a1220f9f6f11f76ee5662f7a53f9fe2aeaa6ea4460e66d36f174a14a09cf3d7"
+    },
+    {
+      "path": "python/fb_engine/tests/local_p0/test_form_clone.py",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "799cc8ce3ba3dd7ebf0a14bfbff677f55fbefb18ee6a4692a4f419b9718c1e3c"
+    },
+    {
+      "path": "python/fb_engine/tests/local_p0/test_key_contract_ack.py",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "e1ac2f253039fd9450cdd9dde4288f8cdfaa97220019152c341987f29a50f055"
+    },
+    {
+      "path": "python/fb_engine/tests/local_p0/test_oidc.py",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "4d3a6a99ca041e4d107455b0c0449d27207c8e1824be54be649a3439301b389f"
+    },
+    {
+      "path": "python/fb_engine/tests/local_p0/test_operations.py",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "65350ccb01eaacf09468b52fe38697c72dd8db50d65bbb4defb53e0e7459440e"
+    },
+    {
+      "path": "python/fb_engine/tests/local_p0/test_review_lifecycle.py",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "0d3f975353802d743117c731ff5de171b713ab93cea4e8493c1bce8c54693f80"
+    },
+    {
+      "path": "python/fb_engine/tests/local_p0/test_translation.py",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "fbfd3f5c86639a6a2d2ced65942812984e9558b005921f8d1b46c94df20cb863"
+    },
+    {
+      "path": "tools/compiler/src/blocks.ts",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "c43e0e5de8197c68c8e3dca20b54fb38a815b35bbda28ad988abc01f9a6ff351"
+    },
+    {
+      "path": "tools/compiler/src/l10n.ts",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "ad6aa843f82a9d17352e86a396b2363a738c316924c266b3caea913f76685dd2"
+    },
+    {
+      "path": "tools/compiler/src/reference-labels.ts",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "c13beccd808f970a2d7ab78c608d2381a7b16bfc8831cc55a30e9b052f8d3bd2"
+    },
+    {
+      "path": "tools/compiler/src/release.ts",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "b4c9f631bfcd990b8dd81473075f2db2fa150e1178e85473e4424c93e5cd65f9"
+    },
+    {
+      "path": "tools/compiler/src/themes.ts",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "7489e1c659012942ac161448e4c77ddb78fca650c9db1e2d98760c69701eefac"
+    },
+    {
+      "path": "tools/compiler/test/blocks.test.ts",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "75b85ae9252292a6a05d5346373a52b73845e33423775132e4896bdb9634ecc3"
+    },
+    {
+      "path": "tools/compiler/test/l10n.test.ts",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "dbabe7061919889210306a85bd8abd6f7fcfc2915ab1ce7dcd2b647e84ab5a69"
+    },
+    {
+      "path": "tools/compiler/test/release.test.ts",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "a5b62a516272ca9be908f3b264237b84d35c6f59b1cb66414bf9969b642441da"
+    },
+    {
+      "path": "tools/compiler/test/themes.test.ts",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "17649f6fa52ca9d530f99820b5a5c7a47ca45f931594f2003f7278fa110bbcfa"
+    },
+    {
+      "path": "tools/local_p0/blocks.py",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "14b8d80d684cf60cf235b02fd7f1fdddc85fda3015ebfaa731b27bdfec602d21"
+    },
+    {
+      "path": "tools/local_p0/clone.py",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "aaec0eadd6930bf3cdff6d39a02488168dad732c39045cb059274dd324202373"
+    },
+    {
+      "path": "tools/local_p0/oidc.ts",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "6ffff3d1a00cb3b0e6ae45a2b20efade3afaf6e9526077c8b239759bf2a57eff"
+    },
+    {
+      "path": "tools/local_p0/oidc_store.py",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "6b270fb4a99666894283588c0217851bdbd065f5ee5d7e930a829b5d243e82c5"
+    },
+    {
+      "path": "tools/local_p0/test/autosave-browser.txt",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "f102629521cacd069eae5bcd885eefd7a1173dc90802b96774cbd2afcbd9ba3f"
+    },
+    {
+      "path": "tools/local_p0/test/blocked-preview-browser.txt",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "54456783d993f35fff7dde71be823d5068a845a3f37d50009c8d05585830ec07"
+    },
+    {
+      "path": "tools/local_p0/test/clone-settings-browser.txt",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "ff4e189b5539cd2c32ec2cbc89ea287ea3c58eb47549cb113e0fd7a460b94772"
+    },
+    {
+      "path": "tools/local_p0/test/l10n-browser.txt",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "593a18a14cddf6e222c691ecff96570af88db94b9fd9815b6fd446f922982df9"
+    },
+    {
+      "path": "tools/local_p0/test/oidc-browser.txt",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "9cb21e98ad969e8e3073901a247eba102e0bee67a8164d4589ce374eff6d0259"
+    },
+    {
+      "path": "tools/local_p0/test/oidc.test.ts",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "4d5492470816eb324a66ed0d6897807694a27f4131d9c9223f7731c486f21581"
+    },
+    {
+      "path": "tools/local_p0/test/partial-preview-browser.txt",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "106cd72fed890c213fd146fc7bb23f9ce2865e9c11989032e021db6ef4c1242b"
+    },
+    {
+      "path": "tools/local_p0/test/preview-revocation-browser.txt",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "84fa0793fd4b14d114d856ac364c70b3357a277b7ced19daa71f562e2a8ae816"
+    },
+    {
+      "path": "tools/local_p0/test/reauth-draft-browser.txt",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "b951c66a05d7db063c85b81d9b71007057996d23219f01f0400da852f6449738"
+    },
+    {
+      "path": "tools/local_p0/test/rules-browser.txt",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "d379de5c4284b41736bcd558557ace10b4a243d1011bbad96bc1b63ed5d08752"
+    },
+    {
+      "path": "tools/local_p0/test/shared-block-browser.txt",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "21b8a61016f2b7ce996942a1e463a379e313f368846d59c4b2c9db54f02a108d"
+    },
+    {
+      "path": "tools/local_p0/translation.py",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "f0f19bc0fec91b9a3cda3e5997e9bd613cff3949ae8463382baa7b4c024a90ed"
+    },
+    {
+      "path": "tools/local_p0/web/i18n.js",
+      "gitStatus": "??",
+      "staged": false,
+      "group": "A: integrated local P0",
+      "sha256": "ddb1b1901f489202410dd02c7d93c0f0f4a048f15945a8b5c8e998b0c2424dc3"
+    }
+  ]
+}

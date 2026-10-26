@@ -1,0 +1,19 @@
+{
+  "command": "pnpm verify",
+  "exitCode": 0,
+  "typescriptPassed": 627,
+  "typescriptExpectedFail": 15,
+  "intentionalSkipped": 1,
+  "skip": "optional Gitleaks CLI unavailable; accepted alternative scanner remains mandatory",
+  "pythonPassed": 793,
+  "alternativeScanner": "detect-secrets==1.5.0",
+  "defaultDetectors": 27,
+  "workingSourceFiles": 283,
+  "indexSourceFiles": 263,
+  "unresolved": 0,
+  "stagedFiles": 0,
+  "gitMutationPerformed": false,
+  "baseline": "693969a8a226af3227ed3bb0e4cd49994126f12c",
+  "T12": "BLOCKED_BY_ENVIRONMENT",
+  "K13": "VERIFICATION_PENDING"
+}

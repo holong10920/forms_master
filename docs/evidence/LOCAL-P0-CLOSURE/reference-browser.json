@@ -1,0 +1,169 @@
+{
+  "allPassed": true,
+  "browser": "156.0.8078.47",
+  "runs": [
+    {
+      "name": "sports",
+      "reduced": false,
+      "completed": true,
+      "payload": {
+        "category": "golf",
+        "clubType": "iron",
+        "condition": "junk",
+        "damageDescription": "Synthetic damage",
+        "purchaseMethod": "shuccho",
+        "customerName": "Synthetic Browser Customer",
+        "consent": true
+      },
+      "motionRequests": [],
+      "requests": [
+        "http://127.0.0.1:4173/r/rel_w4fuidge7q34tu3xwmivd2cc2d/index.html",
+        "http://127.0.0.1:4173/r/rel_w4fuidge7q34tu3xwmivd2cc2d/assets/entry.c9ed9d8ab25e.css",
+        "http://127.0.0.1:4173/r/rel_w4fuidge7q34tu3xwmivd2cc2d/assets/theme.cad1d23ddcef8ee1aa044b8d6630246a9abfe6214e7ea74a0b2f858c039d4a86.css",
+        "http://127.0.0.1:4173/r/rel_w4fuidge7q34tu3xwmivd2cc2d/assets/bootstrap.b44f7c1c75642bfe86a3c4935f318fcdbe03076ba77626a3b53385275f7f5727.js",
+        "http://127.0.0.1:4173/r/rel_w4fuidge7q34tu3xwmivd2cc2d/assets/entry.21f135d0a9ba.js",
+        "http://127.0.0.1:4173/r/rel_w4fuidge7q34tu3xwmivd2cc2d/assets/form-ir.741ff2d1fa8134a6e85c882885437ae9c2656d54f6f80296b66ca212cc17ccd3.json",
+        "http://127.0.0.1:4173/r/rel_w4fuidge7q34tu3xwmivd2cc2d/api/submit"
+      ]
+    },
+    {
+      "name": "sports-subtle",
+      "reduced": false,
+      "completed": true,
+      "payload": {
+        "category": "golf",
+        "clubType": "iron",
+        "condition": "junk",
+        "damageDescription": "Synthetic damage",
+        "purchaseMethod": "shuccho",
+        "customerName": "Synthetic Browser Customer",
+        "consent": true
+      },
+      "motionRequests": [
+        "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/chunk.bd23c5034933.js",
+        "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/chunk.bd23c5034933.js"
+      ],
+      "requests": [
+        "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/index.html",
+        "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/entry.c9ed9d8ab25e.css",
+        "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/theme.cad1d23ddcef8ee1aa044b8d6630246a9abfe6214e7ea74a0b2f858c039d4a86.css",
+        "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/bootstrap.b44f7c1c75642bfe86a3c4935f318fcdbe03076ba77626a3b53385275f7f5727.js",
+        "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/entry.3691b9f205d9.js",
+        "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/form-ir.18e0b26d9f19f00facaf05c56ec4925aab9ffaa48cff7e370ffaea2353d54325.json",
+        "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/chunk.bd23c5034933.js",
+        "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/chunk.bd23c5034933.js",
+        "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/api/submit"
+      ]
+    },
+    {
+      "name": "sports-subtle",
+      "reduced": true,
+      "completed": true,
+      "payload": {
+        "category": "golf",
+        "clubType": "iron",
+        "condition": "junk",
+        "damageDescription": "Synthetic damage",
+        "purchaseMethod": "shuccho",
+        "customerName": "Synthetic Browser Customer",
+        "consent": true
+      },
+      "motionRequests": [],
+      "requests": [
+        "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/index.html",
+        "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/entry.c9ed9d8ab25e.css",
+        "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/theme.cad1d23ddcef8ee1aa044b8d6630246a9abfe6214e7ea74a0b2f858c039d4a86.css",
+        "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/bootstrap.b44f7c1c75642bfe86a3c4935f318fcdbe03076ba77626a3b53385275f7f5727.js",
+        "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/entry.3691b9f205d9.js",
+        "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/form-ir.18e0b26d9f19f00facaf05c56ec4925aab9ffaa48cff7e370ffaea2353d54325.json",
+        "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/api/submit"
+      ]
+    },
+    {
+      "name": "pc-plugin",
+      "method": "takuhai",
+      "completed": true,
+      "payload": {
+        "deviceType": "laptop",
+        "batteryHealth": "good",
+        "defects": [
+          "screen"
+        ],
+        "purchaseMethod": "takuhai",
+        "packingKit": "yes",
+        "customerName": "Synthetic Browser Customer",
+        "consent": true
+      },
+      "storeRequests": [],
+      "requests": [
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/index.html",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/entry.c9ed9d8ab25e.css",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/theme.8ac0a72a3f3c71d9c03c2f0665b6c55672a9bffec6be60f624feb58cb84ee4cd.css",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/bootstrap.b44f7c1c75642bfe86a3c4935f318fcdbe03076ba77626a3b53385275f7f5727.js",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/entry.8f09f4c4c1b3.js",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/form-ir.63bf25e78c3a0caae1c17fec04ddec06af4e23e1c0088d6a5739d0fea817d6e5.json",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.475b32a23e17.js",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.8ec1e97fe68a.js",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.475b32a23e17.js",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.8ec1e97fe68a.js",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/api/submit"
+      ]
+    },
+    {
+      "name": "pc-plugin",
+      "method": "store",
+      "completed": true,
+      "payload": {
+        "deviceType": "laptop",
+        "batteryHealth": "good",
+        "defects": [
+          "screen"
+        ],
+        "purchaseMethod": "store",
+        "store": "ST-1001",
+        "customerName": "Synthetic Browser Customer",
+        "consent": true
+      },
+      "storeRequests": [
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.7701aeeb2589.js",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.7701aeeb2589.js",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/api/store-list"
+      ],
+      "requests": [
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/index.html",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/entry.c9ed9d8ab25e.css",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/theme.8ac0a72a3f3c71d9c03c2f0665b6c55672a9bffec6be60f624feb58cb84ee4cd.css",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/bootstrap.b44f7c1c75642bfe86a3c4935f318fcdbe03076ba77626a3b53385275f7f5727.js",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/entry.8f09f4c4c1b3.js",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/form-ir.63bf25e78c3a0caae1c17fec04ddec06af4e23e1c0088d6a5739d0fea817d6e5.json",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.475b32a23e17.js",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.8ec1e97fe68a.js",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.475b32a23e17.js",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.8ec1e97fe68a.js",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.7701aeeb2589.js",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.8ec1e97fe68a.js",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.7701aeeb2589.js",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/api/store-list",
+        "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/api/submit"
+      ]
+    }
+  ],
+  "capabilityFailureVerified": true,
+  "authoritativeRejectRetryVerified": true,
+  "crossSiteRejected": {
+    "status": 422,
+    "body": {
+      "ok": false,
+      "errors": [
+        {
+          "code": "storeNotAvailable",
+          "path": "fld_store"
+        }
+      ],
+      "payload": {}
+    }
+  },
+  "rollbackVerified": true,
+  "pinnedOldRevisionVerified": true,
+  "normalPageErrors": []
+}

@@ -1,1 +1,4 @@
-{ "extends": "../../tsconfig.base.json", "include": ["host.ts", "probe.ts", "guard.ts"] }
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["host.ts", "probe.ts", "guard.ts", "oidc.ts", "test/*.test.ts"]
+}

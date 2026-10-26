@@ -2,5 +2,5 @@
 (allow default)
 (deny network*)
 (allow network-bind (local ip "localhost:*"))
-(allow network-inbound (local ip "localhost:4173") (local ip "localhost:4174") (local ip "localhost:4175"))
-(allow network-outbound (remote ip "localhost:4173") (remote ip "localhost:4174") (remote ip "localhost:4175"))
+(allow network-inbound (local ip "localhost:4173") (local ip "localhost:4174") (local ip "localhost:4175") (local ip "localhost:4176"))
+(allow network-outbound (remote ip "localhost:4173") (remote ip "localhost:4174") (remote ip "localhost:4175") (remote ip "localhost:4176"))

@@ -29,3 +29,14 @@ không dùng `--prod=false` (pnpm 12 không có cờ này). Copy source theo man
 không đưa cache/dependencies/data/home/credential vào build context.
 Entrypoint áp umask 022 rồi exec command; workdir /build. Cấm tag floating thay digest.
 Dockerfile/build vẫn chưa thực hiện vì không có digest được xác minh.
+
+## Local closure cache check — 2026-10-26
+
+One local image inventory was checked, without contacting a registry. The cached Playwright
+image `mcr.microsoft.com/playwright@sha256:b0ab6f3cb99aa7803adbc14d9027ec1785fc6e433b97e134e0f8fe61683b6b53`
+was executed with `--pull=never --network=none`; `node --version` returned `v24.14.1`.
+It does not satisfy pinned Node 24.22.1. Cached Node 20/22 images also do not satisfy the pin.
+No compatible verified builder digest was selected. No registry retry, Dockerfile with an
+unverified digest, image build or canonical container K13 result is claimed.
+Host A/B verification and local `rel_` publication are separate evidence; T12 remains
+`BLOCKED_BY_ENVIRONMENT` until the exact supported builder can be verified and executed.

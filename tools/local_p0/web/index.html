@@ -16,11 +16,19 @@
           <option>synthetic-editor</option>
           <option>synthetic-reviewer</option>
           <option>synthetic-publisher</option>
+          <option>synthetic-viewer</option>
           <option>synthetic-other</option>
           <option>synthetic-security</option>
         </select></label
       ><button id="login">ログイン / 切替</button><button id="logout">ログアウト</button
-      ><span id="identity"></span>
+      ><span id="identity" translate="no"></span
+      ><label
+        >表示言語
+        <select id="admin-locale" translate="no">
+          <option value="ja" lang="ja-JP">日本語</option>
+          <option value="vi" lang="vi-VN">Tiếng Việt</option>
+        </select></label
+      >
     </header>
     <main id="studio" hidden>
       <nav>
@@ -29,18 +37,26 @@
           <select id="site"></select></label
         ><label
           >フォーム
-          <select id="forms"></select></label
+          <select id="forms" translate="no"></select></label
         ><button id="load">開く / 再読込</button
         ><label>新規フォーム名 <input id="new-name" placeholder="イベント申込" /></label
         ><button id="create">フォーム作成</button>
       </nav>
       <div class="toolbar">
+        <label>フォーム名<input id="form-title" maxlength="200" /></label>
+        <label><input id="autosave" type="checkbox" checked />自動保存</label>
         <button id="save">保存</button><button id="validate">診断</button
         ><button id="preview">プレビュー</button><button id="review">レビュー依頼</button
         ><button id="delete">未公開ドラフト削除</button><span id="version"></span>
       </div>
       <p id="notice" role="status"></p>
       <p id="diagnostics" role="alert"></p>
+      <section id="conflict" hidden>
+        <h2>この下書きは他の場所で更新されました</h2>
+        <p>自分の未保存の変更はこの画面に残っています。</p>
+        <button id="compare">最新版と比較</button>
+        <pre id="conflict-details" translate="no"></pre>
+      </section>
       <div class="workspace">
         <aside>
           <h2>フィールド</h2>
@@ -48,6 +64,9 @@
             >種類
             <select id="palette"></select></label
           ><button id="add-field">フィールド追加</button><button id="add-step">ステップ追加</button>
+          <h2>共通ブロック</h2>
+          <label>固定リビジョン<select id="block-pin"></select></label
+          ><button id="insert-block">共通ブロックを挿入</button>
           <div id="steps"></div>
         </aside>
         <section>
@@ -60,23 +79,45 @@
         </aside>
       </div>
       <section>
-        <h2>分岐ルール</h2>
-        <div id="branches"></div>
+        <h2>設定</h2>
+        <div id="settings"></div>
       </section>
       <section>
+        <h2>翻訳（日本語 / Tiếng Việt）</h2>
+        <div id="translations"></div>
+      </section>
+      <section>
+        <h2>フロー（参照用）</h2>
+        <div id="flow-overview"></div>
+      </section>
+      <section>
+        <h2>分岐ルール</h2>
+        <div id="branches"></div>
+        <h2>名前付き条件</h2>
+        <div id="named-conditions"></div>
+      </section>
+      <section>
+        <details id="contract">
+          <summary>Data Contract / 変更点</summary>
+          <pre id="contract-diff" translate="no"></pre>
+          <label><input id="contract-ack" type="checkbox" />契約変更を確認しました</label>
+        </details>
         <h2>レビュー / 公開履歴</h2>
         <div id="history"></div>
       </section>
       <section>
         <h2>隔離プレビュー</h2>
-        <iframe
-          id="preview-frame"
-          title="Interactive isolated preview"
-          sandbox="allow-scripts allow-same-origin"
-          src="about:blank"
-        ></iframe>
+        <div id="preview-container">
+          <iframe
+            id="preview-frame"
+            title="Interactive isolated preview"
+            sandbox="allow-scripts allow-same-origin"
+            src="about:blank"
+          ></iframe>
+        </div>
       </section>
     </main>
+    <script type="module" src="/i18n.js"></script>
     <script type="module" src="/admin.js"></script>
   </body>
 </html>

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0.0",
+  "kind": "block",
+  "blockId": "blk_customer_info",
+  "inputs": {
+    "requireKana": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "exports": [
+    {
+      "id": "email",
+      "field": "fld_email",
+      "type": "string",
+      "classification": "personal"
+    }
+  ],
+  "fields": [
+    {
+      "id": "fld_name",
+      "key": "name",
+      "type": "text",
+      "label": {
+        "ja": "お名前（合成データのみ）"
+      },
+      "classification": "personal",
+      "persist": "allowed",
+      "required": true
+    },
+    {
+      "id": "fld_email",
+      "key": "email",
+      "type": "email",
+      "label": {
+        "ja": "メール（合成データのみ）"
+      },
+      "classification": "personal",
+      "persist": "allowed",
+      "required": true
+    },
+    {
+      "id": "fld_kana",
+      "key": "nameKana",
+      "type": "katakana",
+      "label": {
+        "ja": "フリガナ（合成データのみ）"
+      },
+      "classification": "personal",
+      "persist": "allowed",
+      "requiredWhen": {
+        "op": "eq",
+        "args": [
+          {
+            "input": "requireKana"
+          },
+          {
+            "const": true
+          }
+        ]
+      }
+    }
+  ],
+  "revision": "r2"
+}

@@ -132,3 +132,35 @@ pre {
 [hidden] {
   display: none !important;
 }
+
+#canvas {
+  background: var(--form-background, #f1f5f9);
+  color: var(--form-foreground, #1e293b);
+  border-top: 4px solid var(--form-accent, #0f766e);
+  padding: 1rem;
+}
+#translations table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+#translations th,
+#translations td {
+  border-bottom: 1px solid #d5e2dc;
+  padding: 6px;
+  text-align: left;
+  vertical-align: top;
+}
+#translations td input {
+  width: 100%;
+}
+#translations [data-state="missing"] {
+  color: #8a4b00;
+}
+#translations [data-state="machine"] {
+  color: #6b2fa0;
+}
+#translations [data-state="error"] {
+  color: #b00020;
+  font-weight: 600;
+}

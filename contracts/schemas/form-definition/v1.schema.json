@@ -22,8 +22,10 @@
         "supported": {
           "type": "array",
           "items": {
-            "const": "ja"
-          }
+            "enum": ["ja", "vi"]
+          },
+          "minItems": 1,
+          "maxItems": 2
         }
       },
       "required": ["default", "supported"],
@@ -77,9 +79,14 @@
             }
           },
           "additionalProperties": false
+        },
+        "blocks": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         }
       },
-      "required": ["capabilities"],
       "additionalProperties": false
     },
     "motion": {
@@ -124,6 +131,117 @@
         }
       },
       "required": ["preset"],
+      "additionalProperties": false
+    },
+    "blockInstances": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "alias": {
+            "type": "string"
+          },
+          "block": {
+            "type": "string"
+          },
+          "inputs": {
+            "type": "object",
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "required": ["id", "alias", "block"],
+        "additionalProperties": false
+      }
+    },
+    "themeRef": {
+      "enum": ["theme_sports@1", "theme_sports_contrast@1", "theme_pc@1", "theme_pc_contrast@1"]
+    },
+    "texts": {
+      "type": "object",
+      "properties": {
+        "formTitle": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "formDescription": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "next": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "back": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "submit": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "selectPrompt": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "reviewTitle": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "payloadTitle": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "errorSummary": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "completeTitle": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "completeBody": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "invalidNumber": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "required": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "mustBeTrue": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "minLength": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "maxLength": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "min": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "max": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "minItems": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "maxItems": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "exclusiveOption": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "syntheticNotice": {
+          "$ref": "#/$defs/LocalizedOverride"
+        }
+      },
       "additionalProperties": false
     }
   },
@@ -285,6 +403,9 @@
           "properties": {
             "ja": {
               "type": "string"
+            },
+            "vi": {
+              "type": "string"
             }
           },
           "required": ["ja"],
@@ -326,6 +447,9 @@
                 "type": "object",
                 "properties": {
                   "ja": {
+                    "type": "string"
+                  },
+                  "vi": {
                     "type": "string"
                   }
                 },
@@ -388,6 +512,12 @@
             }
           },
           "additionalProperties": false
+        },
+        "placeholder": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "help": {
+          "$ref": "#/$defs/LocalizedOverride"
         }
       },
       "required": ["id", "key", "type", "classification"],
@@ -434,6 +564,9 @@
           "properties": {
             "ja": {
               "type": "string"
+            },
+            "vi": {
+              "type": "string"
             }
           },
           "required": ["ja"],
@@ -462,6 +595,16 @@
                 },
                 "required": ["group"],
                 "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "block": {
+                    "type": "string"
+                  }
+                },
+                "required": ["block"],
+                "additionalProperties": false
               }
             ]
           }
@@ -486,6 +629,9 @@
           "type": "object",
           "properties": {
             "ja": {
+              "type": "string"
+            },
+            "vi": {
               "type": "string"
             }
           },
@@ -515,6 +661,9 @@
           "type": "object",
           "properties": {
             "ja": {
+              "type": "string"
+            },
+            "vi": {
               "type": "string"
             }
           },
@@ -566,6 +715,20 @@
           "$ref": "#/$defs/Group"
         }
       ]
+    },
+    "LocalizedOverride": {
+      "type": "object",
+      "properties": {
+        "ja": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "vi": {
+          "type": "string",
+          "maxLength": 2000
+        }
+      },
+      "additionalProperties": false
     }
   }
 }

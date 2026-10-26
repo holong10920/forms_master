@@ -74,3 +74,40 @@ test("only recomputed fixture hashes are classified, tampered values remain find
   writeFileSync(file, JSON.stringify(data, null, 2));
   expect(scanDirectory(dir, true).unresolved).toBeGreaterThan(0);
 }, 30_000);
+
+test("block registry findings require recomputing the pinned fixture bytes", () => {
+  const dir = scratch();
+  const source = resolve(import.meta.dirname, "../../../contracts/fixtures/blocks");
+  const target = join(dir, "contracts/fixtures/blocks");
+  mkdirSync(target, { recursive: true });
+  cpSync(source, target, { recursive: true });
+  const clean = scanDirectory(dir, true);
+  expect(clean.unresolved).toBe(0);
+  expect(
+    clean.findings.filter((f) => f.classification === "recomputed-fixture-digest"),
+  ).toHaveLength(2);
+  const pin = join(target, "blk_customer_info@r1.json");
+  writeFileSync(pin, readFileSync(pin, "utf8") + "\n");
+  expect(scanDirectory(dir, true).unresolved).toBe(1);
+}, 30_000);
+
+test("public RFC PKCE vectors are classified exactly; a synthetic credential in the same file remains unresolved", () => {
+  const dir = scratch(),
+    path = join(dir, "tools/local_p0/test");
+  mkdirSync(path, { recursive: true });
+  const source = readFileSync(
+    resolve(import.meta.dirname, "../../local_p0/test/oidc.test.ts"),
+    "utf8",
+  );
+  writeFileSync(join(path, "oidc.test.ts"), source);
+  const clean = scanDirectory(dir, true);
+  expect(clean.findings.filter((f) => f.classification === "public-rfc7636-vector")).toHaveLength(
+    2,
+  );
+  expect(clean.unresolved).toBe(0);
+  writeFileSync(
+    join(path, "oidc.test.ts"),
+    source + '\npassword = "' + randomBytes(30).toString("base64") + '"\n',
+  );
+  expect(scanDirectory(dir, true).unresolved).toBeGreaterThan(0);
+}, 30000);

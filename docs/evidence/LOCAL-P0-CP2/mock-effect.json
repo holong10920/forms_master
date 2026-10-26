@@ -1,0 +1,7 @@
+{
+  "receipt": "synthetic_247ea243afeb3e7a1cf29a73",
+  "release": "dev_2oqtzvdts2nmhx4loic3of6yft",
+  "outboxState": "DONE",
+  "mockEffectCount": 1,
+  "scope": "local SQLite; synthetic-only; no external effect"
+}

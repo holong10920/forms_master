@@ -1,0 +1,22 @@
+[
+  {
+    "role": "Form-API",
+    "externalDeniedByKernel": true,
+    "localAllowed": true
+  },
+  {
+    "role": "Preview-API",
+    "externalDeniedByKernel": true,
+    "localAllowed": true
+  },
+  {
+    "role": "worker",
+    "externalDeniedByKernel": true,
+    "localAllowed": true
+  },
+  {
+    "role": "adapter",
+    "externalDeniedByKernel": true,
+    "localAllowed": true
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "allPassed": true,
+  "liveRevocation": true,
+  "iframeUnmounted": true,
+  "detectedWithinMs": 4823,
+  "noAutomaticRecreation": true,
+  "previewCreates": 2,
+  "blockedReopenStableAcrossTwoPolls": true,
+  "blockedPluginChunks": 0,
+  "partialSubmitDenied": true
+}

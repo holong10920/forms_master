@@ -1,0 +1,10 @@
+{
+  "receipt": "synthetic_ee72643b08feb79e82ab7471",
+  "submittedRelease": "rel_idd46masws7dka2ved6vibdo2m",
+  "outboxState": "DONE",
+  "mockEffectCount": 1,
+  "publishedRevisions": 2,
+  "activeAfterRollback": "rel_idd46masws7dka2ved6vibdo2m",
+  "pointerVersion": 3,
+  "scope": "local SQLite synthetic; no external effect"
+}
