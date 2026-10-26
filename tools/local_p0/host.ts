@@ -313,7 +313,18 @@ async function admin(req: IncomingMessage, res: ServerResponse) {
     return send(res, r.status, r.body);
   }
   const file = path === "/" ? "index.html" : path.slice(1);
-  if (req.method !== "GET" || !["index.html", "admin.js", "i18n.js", "style.css"].includes(file))
+  const adminFiles = [
+    "index.html",
+    "admin.js",
+    "i18n.js",
+    "style.css",
+    "ui.js",
+    "state.js",
+    "rules.js",
+    "editor.js",
+    "workflow.js",
+  ];
+  if (req.method !== "GET" || !adminFiles.includes(file))
     return send(res, 404, { code: "NOT_FOUND" });
   res.setHeader(
     "Content-Type",
