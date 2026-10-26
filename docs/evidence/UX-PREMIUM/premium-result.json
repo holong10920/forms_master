@@ -1,0 +1,41 @@
+{
+  "allPassed": true,
+  "twoStepsAdded": true,
+  "threeFields": true,
+  "inlineRename": true,
+  "orRuleTwoAtoms": true,
+  "keyboardReorder": true,
+  "buttonReorder": true,
+  "dragReorder": true,
+  "themeFeedback": "#164e63",
+  "motion": "guided",
+  "speed": "fast",
+  "jaViJa": true,
+  "saveReload": true,
+  "dimensions": [
+    {
+      "viewport": 1440,
+      "page": 1440
+    },
+    {
+      "viewport": 1280,
+      "page": 1280
+    },
+    {
+      "viewport": 1024,
+      "page": 1024
+    }
+  ],
+  "mobileCanvas": true,
+  "keyboardTabs": true,
+  "focus": {
+    "visible": true,
+    "outline": "solid"
+  },
+  "previewNavigated": true,
+  "emptySearch": true,
+  "loading": true,
+  "staleSiteResponseIgnored": true,
+  "errorRecovery": true,
+  "pageErrors": []
+}

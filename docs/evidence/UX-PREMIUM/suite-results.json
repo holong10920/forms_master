@@ -1,0 +1,352 @@
+{
+  "oidc": {
+    "exit": 0,
+    "result": {
+      "allPassed": true,
+      "provider": "local mock; not Cognito",
+      "authorizationCode": true,
+      "pkceS256": true,
+      "noBrowserTokenExchange": true,
+      "callbackReplayRejected": true,
+      "secureHttpOnlyStrictCookie": true,
+      "viewerRead": true,
+      "viewerWriteDenied": true,
+      "crossSiteDenied": true,
+      "logoutUnauthorized": true
+    }
+  },
+  "autosave": {
+    "exit": 0,
+    "result": {
+      "allPassed": true,
+      "form": "frm_e534d79d441d42a8902fe2c36da7d386",
+      "autosaveDefault": true,
+      "debouncedRequests": 1,
+      "casConflict": true,
+      "localEditsPreserved": true,
+      "serverNotOverwritten": true,
+      "title": "合成自動保存"
+    }
+  },
+  "numeric": {
+    "exit": 0,
+    "result": {
+      "allPassed": true,
+      "invalidDecimalBlocked": true,
+      "integerPayloadTyped": true,
+      "cookie": {
+        "name": "__Host-session",
+        "httpOnly": true,
+        "secure": true,
+        "sameSite": "Strict",
+        "domain": "localhost"
+      },
+      "browser": "156.0.8078.47"
+    }
+  },
+  "rules": {
+    "exit": 0,
+    "result": {
+      "allPassed": true,
+      "form": "frm_a59df25305c842df93c559183c8173df",
+      "namedCondition": "cnd_42b417996d5f4a1eba7618770e6d8bb2",
+      "oneLevelAnd": true,
+      "typedInteger": true,
+      "requiredWhen": true,
+      "saveReload": true,
+      "payload": {
+        "mode": "yes",
+        "count": 11,
+        "note": "Synthetic required note"
+      }
+    }
+  },
+  "clone-settings": {
+    "exit": 0,
+    "result": {
+      "allPassed": true,
+      "source": "http://127.0.0.1:4173/r/dev_x5pubpxydeyv2qrcsrl5ergcgp/index.html",
+      "form": "frm_6e20e8b50851406aab3365421b4277cf",
+      "clone": true,
+      "remappedStepsEditable": true,
+      "pinnedTheme": true,
+      "previewBackground": "rgb(255, 255, 255)",
+      "motionSubtle": true,
+      "speed": "slow",
+      "blockExportRule": true,
+      "saveReload": true
+    }
+  },
+  "l10n": {
+    "exit": 0,
+    "result": {
+      "allPassed": true,
+      "form": "frm_25ce6b82f2744dcc982c2e1273e2eae7",
+      "url": "http://127.0.0.1:4173/r/rel_f3jyrmhpvnm4zf7mavzqkbz4nu/index.html",
+      "payload": {
+        "method": "store",
+        "nickname": "Synthetic",
+        "comment": "合成メモ"
+      },
+      "step2": "stp_235fb4d199",
+      "scenarios": [
+        "ja-vi-ja",
+        "typing",
+        "mid-workflow",
+        "validation-per-locale",
+        "select-value-stable",
+        "fallback-ja",
+        "save-reload",
+        "preview-and-published",
+        "payload-unchanged"
+      ],
+      "autoTranslate": {
+        "provider": "TRANSLATION_PROVIDER_UNAVAILABLE",
+        "stubbedDraftsFillEmptyOnly": true
+      },
+      "screenshots": [
+        "l10n-admin-ja.png",
+        "l10n-admin-vi.png",
+        "l10n-customer-vi-required.png",
+        "l10n-customer-vi-fallback.png",
+        "l10n-customer-ja-review.png",
+        "l10n-customer-vi-complete.png"
+      ]
+    }
+  },
+  "shared-block": {
+    "exit": 0,
+    "result": {
+      "allPassed": true,
+      "form": "frm_aeff916e7ef44c8eb7726a35cdff8dd3",
+      "url1": "http://127.0.0.1:4173/r/rel_cexnack55tzkm376xp2z5cgpov/index.html",
+      "url2": "http://127.0.0.1:4173/r/rel_mra76s6zge6tl6fr2r4qvmcj7h/index.html",
+      "twoInstances": true,
+      "namespacePayload": true,
+      "backendReceipt": "synthetic_ddcfe725d4fafeebf59b2c51",
+      "oneInstanceUpgrade": true,
+      "dataContractAckRequired": true,
+      "browser": "156.0.8078.47"
+    }
+  },
+  "partial-preview": {
+    "exit": 0,
+    "result": {
+      "allPassed": true,
+      "form": "frm_f5182b6079a14a1ebf19c83fecd6d399",
+      "partialStop": true,
+      "backPreservesValue": true,
+      "submitUnavailable": true,
+      "sourceDraftUnchanged": true,
+      "reviewBlocked": true
+    }
+  },
+  "preview-revocation": {
+    "exit": 0,
+    "result": {
+      "allPassed": true,
+      "liveRevocation": true,
+      "iframeUnmounted": true,
+      "detectedWithinMs": 5321,
+      "noAutomaticRecreation": true,
+      "previewCreates": 1
+    }
+  },
+  "blocked-preview": {
+    "exit": 0,
+    "result": {
+      "allPassed": true,
+      "liveRevocation": true,
+      "iframeUnmounted": true,
+      "detectedWithinMs": 5323,
+      "noAutomaticRecreation": true,
+      "previewCreates": 2,
+      "blockedReopenStableAcrossTwoPolls": true,
+      "blockedPluginChunks": 0,
+      "partialSubmitDenied": true
+    }
+  },
+  "reauth-draft": {
+    "exit": 0,
+    "result": {
+      "allPassed": true,
+      "form": "frm_070b65429f6d405894b5faeedc394bad",
+      "expiredResponseInjected": true,
+      "realOidcReauthentication": true,
+      "unsavedSchemaPreserved": true,
+      "saveReload": true
+    }
+  },
+  "reference": {
+    "exit": 0,
+    "result": {
+      "allPassed": true,
+      "browser": "156.0.8078.47",
+      "runs": [
+        {
+          "name": "sports",
+          "reduced": false,
+          "completed": true,
+          "payload": {
+            "category": "golf",
+            "clubType": "iron",
+            "condition": "junk",
+            "damageDescription": "Synthetic damage",
+            "purchaseMethod": "shuccho",
+            "customerName": "Synthetic Browser Customer",
+            "consent": true
+          },
+          "motionRequests": [],
+          "requests": [
+            "http://127.0.0.1:4173/r/rel_w4fuidge7q34tu3xwmivd2cc2d/index.html",
+            "http://127.0.0.1:4173/r/rel_w4fuidge7q34tu3xwmivd2cc2d/assets/entry.c9ed9d8ab25e.css",
+            "http://127.0.0.1:4173/r/rel_w4fuidge7q34tu3xwmivd2cc2d/assets/theme.cad1d23ddcef8ee1aa044b8d6630246a9abfe6214e7ea74a0b2f858c039d4a86.css",
+            "http://127.0.0.1:4173/r/rel_w4fuidge7q34tu3xwmivd2cc2d/assets/bootstrap.b44f7c1c75642bfe86a3c4935f318fcdbe03076ba77626a3b53385275f7f5727.js",
+            "http://127.0.0.1:4173/r/rel_w4fuidge7q34tu3xwmivd2cc2d/assets/entry.21f135d0a9ba.js",
+            "http://127.0.0.1:4173/r/rel_w4fuidge7q34tu3xwmivd2cc2d/assets/form-ir.741ff2d1fa8134a6e85c882885437ae9c2656d54f6f80296b66ca212cc17ccd3.json",
+            "http://127.0.0.1:4173/r/rel_w4fuidge7q34tu3xwmivd2cc2d/api/submit"
+          ]
+        },
+        {
+          "name": "sports-subtle",
+          "reduced": false,
+          "completed": true,
+          "payload": {
+            "category": "golf",
+            "clubType": "iron",
+            "condition": "junk",
+            "damageDescription": "Synthetic damage",
+            "purchaseMethod": "shuccho",
+            "customerName": "Synthetic Browser Customer",
+            "consent": true
+          },
+          "motionRequests": [
+            "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/chunk.bd23c5034933.js",
+            "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/chunk.bd23c5034933.js"
+          ],
+          "requests": [
+            "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/index.html",
+            "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/entry.c9ed9d8ab25e.css",
+            "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/theme.cad1d23ddcef8ee1aa044b8d6630246a9abfe6214e7ea74a0b2f858c039d4a86.css",
+            "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/bootstrap.b44f7c1c75642bfe86a3c4935f318fcdbe03076ba77626a3b53385275f7f5727.js",
+            "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/entry.3691b9f205d9.js",
+            "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/form-ir.18e0b26d9f19f00facaf05c56ec4925aab9ffaa48cff7e370ffaea2353d54325.json",
+            "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/chunk.bd23c5034933.js",
+            "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/chunk.bd23c5034933.js",
+            "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/api/submit"
+          ]
+        },
+        {
+          "name": "sports-subtle",
+          "reduced": true,
+          "completed": true,
+          "payload": {
+            "category": "golf",
+            "clubType": "iron",
+            "condition": "junk",
+            "damageDescription": "Synthetic damage",
+            "purchaseMethod": "shuccho",
+            "customerName": "Synthetic Browser Customer",
+            "consent": true
+          },
+          "motionRequests": [],
+          "requests": [
+            "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/index.html",
+            "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/entry.c9ed9d8ab25e.css",
+            "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/theme.cad1d23ddcef8ee1aa044b8d6630246a9abfe6214e7ea74a0b2f858c039d4a86.css",
+            "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/bootstrap.b44f7c1c75642bfe86a3c4935f318fcdbe03076ba77626a3b53385275f7f5727.js",
+            "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/entry.3691b9f205d9.js",
+            "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/assets/form-ir.18e0b26d9f19f00facaf05c56ec4925aab9ffaa48cff7e370ffaea2353d54325.json",
+            "http://127.0.0.1:4173/r/rel_pfjwsj2ma3eljl2ijvjord2hvf/api/submit"
+          ]
+        },
+        {
+          "name": "pc-plugin",
+          "method": "takuhai",
+          "completed": true,
+          "payload": {
+            "deviceType": "laptop",
+            "batteryHealth": "good",
+            "defects": [
+              "screen"
+            ],
+            "purchaseMethod": "takuhai",
+            "packingKit": "yes",
+            "customerName": "Synthetic Browser Customer",
+            "consent": true
+          },
+          "storeRequests": [],
+          "requests": [
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/index.html",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/entry.c9ed9d8ab25e.css",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/theme.8ac0a72a3f3c71d9c03c2f0665b6c55672a9bffec6be60f624feb58cb84ee4cd.css",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/bootstrap.b44f7c1c75642bfe86a3c4935f318fcdbe03076ba77626a3b53385275f7f5727.js",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/entry.8f09f4c4c1b3.js",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/form-ir.63bf25e78c3a0caae1c17fec04ddec06af4e23e1c0088d6a5739d0fea817d6e5.json",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.475b32a23e17.js",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.8ec1e97fe68a.js",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.475b32a23e17.js",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.8ec1e97fe68a.js",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/api/submit"
+          ]
+        },
+        {
+          "name": "pc-plugin",
+          "method": "store",
+          "completed": true,
+          "payload": {
+            "deviceType": "laptop",
+            "batteryHealth": "good",
+            "defects": [
+              "screen"
+            ],
+            "purchaseMethod": "store",
+            "store": "ST-1001",
+            "customerName": "Synthetic Browser Customer",
+            "consent": true
+          },
+          "storeRequests": [
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.7701aeeb2589.js",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.7701aeeb2589.js",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/api/store-list"
+          ],
+          "requests": [
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/index.html",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/entry.c9ed9d8ab25e.css",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/theme.8ac0a72a3f3c71d9c03c2f0665b6c55672a9bffec6be60f624feb58cb84ee4cd.css",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/bootstrap.b44f7c1c75642bfe86a3c4935f318fcdbe03076ba77626a3b53385275f7f5727.js",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/entry.8f09f4c4c1b3.js",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/form-ir.63bf25e78c3a0caae1c17fec04ddec06af4e23e1c0088d6a5739d0fea817d6e5.json",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.475b32a23e17.js",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.8ec1e97fe68a.js",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.475b32a23e17.js",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.8ec1e97fe68a.js",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.7701aeeb2589.js",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.8ec1e97fe68a.js",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/assets/chunk.7701aeeb2589.js",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/api/store-list",
+            "http://127.0.0.1:4173/r/rel_ayic5cin2i4bsabicpnzewvuw5/api/submit"
+          ]
+        }
+      ],
+      "capabilityFailureVerified": true,
+      "authoritativeRejectRetryVerified": true,
+      "crossSiteRejected": {
+        "status": 422,
+        "body": {
+          "ok": false,
+          "errors": [
+            {
+              "code": "storeNotAvailable",
+              "path": "fld_store"
+            }
+          ],
+          "payload": {}
+        }
+      },
+      "rollbackVerified": true,
+      "pinnedOldRevisionVerified": true,
+      "normalPageErrors": []
+    }
+  }
+}

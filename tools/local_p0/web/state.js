@@ -231,17 +231,28 @@ export async function api(op, body = {}) {
   return value;
 }
 
+let formsRequest = 0,
+  formsSite;
 export async function refreshForms() {
+  const request = ++formsRequest,
+    siteId = site();
+  const current = () => request === formsRequest && site() === siteId;
+  // A pending response from a previous site must never replace the current site's list or error.
+  if (formsSite !== siteId) S.forms = [];
+  formsSite = siteId;
   S.formsState = "loading";
   emit("forms");
   try {
-    S.forms = (await api("list", { site: site() })).forms;
+    const data = await api("list", { site: siteId });
+    if (!current()) return;
+    S.forms = data.forms;
     S.formsState = "idle";
   } catch (e) {
+    if (!current()) return;
     S.formsState = "error";
     throw e;
   } finally {
-    emit("forms");
+    if (current()) emit("forms");
   }
 }
 

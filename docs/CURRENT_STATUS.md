@@ -1,5 +1,19 @@
 # Current Status
 
+## Checkpoint UX Premium — 2026-10-26 (mới nhất)
+
+Đã tiếp nhận worktree `forms_master-ux` của Claude và hợp nhất local theo yêu cầu user:
+`f9f3313` (13 file JA/VI), `6c425eb` (23 file UX), merge `1cce3b7`.
+Chỉ tiếp tục viết tại `forms_master`, nhánh `codex/p03-s1-workflow-engine`.
+UX ba panel/Canvas/Inspector, inline edit, drag + keyboard reorder, theme/Motion và JA/VI đã chạy UAT.
+Sửa thêm request race khi đổi site: phản hồi cũ không ghi đè danh sách/trạng thái lỗi mới.
+Full verify: **638 TS PASS, 798 Python PASS**, 15 expected fail và 1 optional skip được giữ nguyên.
+Browser: hành trình publish/submit/rollback + 12 regression + UAT premium PASS.
+Evidence và giới hạn: `docs/evidence/UX-PREMIUM/RESULTS.md`.
+**LOCAL_POC_VERIFIED = NO**; G2 conditional, T12/canonical K13 vẫn pending. Không GitHub/AWS.
+Các checkpoint bên dưới là lịch sử tại thời điểm ghi, kể cả ghi chú “chưa commit”.
+
+
 > Cập nhật lần cuối: 2026-10-25 (**G1 APPROVED** cho local synthetic P0, ADR-078). Lịch sử chi tiết bên dưới giữ nguyên.
 
 | Mục | Giá trị |

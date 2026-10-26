@@ -1,5 +1,11 @@
 # Project Checklist
 
+
+> UX Premium local synthetic đã kiểm tra ngày 2026-10-26: ba panel, Canvas/Inspector,
+> reorder bằng kéo-thả/bàn phím/nút, JA/VI, theme/Motion và publish/submission/rollback UAT PASS.
+> Xem `docs/evidence/UX-PREMIUM/RESULTS.md`. Đây không phải full S2/G2 acceptance; T12/K13 giữ pending.
+
+
 > Sinh từ master prompt (mọi checklist ID). Chỉ sửa cột **Status / Evidence / Note**; không sửa mô tả mục tiêu.
 > Status: `TODO` · `IN_PROGRESS` · `DONE` (có evidence) · `BLOCKED` · `NEEDS_APPROVAL` · `N/A` (kèm lý do + approval).
 > Mô tả được rút gọn từ master; xem master để đọc đầy đủ acceptance criteria.

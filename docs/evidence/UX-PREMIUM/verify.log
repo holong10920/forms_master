@@ -1,0 +1,402 @@
+$ pnpm preflight && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm gen:check && pnpm schemas:lint && pnpm boundaries && pnpm py:lint && pnpm py:typecheck && pnpm py:imports && pnpm py:test && pnpm synthetic:check && pnpm secrets
+$ node tools/verify/src/preflight.ts
+preflight PASS: Node 24.22.1, pnpm 12.15.0
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ eslint . --max-warnings=0
+$ pnpm -r --if-present typecheck
+packages/contracts typecheck$ tsc -p tsconfig.json && tsc -p scripts/tsconfig.json
+packages/sdk-browser typecheck$ tsc -p tsconfig.json
+tools/boundaries typecheck$ tsc -p tsconfig.json
+packages/motion-presets typecheck$ tsc -p tsconfig.json
+packages/motion-presets typecheck: Done
+tools/lint-fixtures typecheck$ tsc -p tsconfig.json
+tools/boundaries typecheck: Done
+tools/local_p0 typecheck$ tsc -p tsconfig.json
+packages/sdk-browser typecheck: Done
+tools/perf typecheck$ tsc -p tsconfig.json
+packages/contracts typecheck: Done
+tools/security typecheck$ tsc -p tsconfig.json
+tools/lint-fixtures typecheck: Done
+tools/verify typecheck$ tsc -p tsconfig.json
+tools/perf typecheck: Done
+packages/motion-adapter typecheck$ tsc -p tsconfig.json
+tools/local_p0 typecheck: Done
+plugins/store-selector typecheck$ tsc -p tsconfig.json
+tools/security typecheck: Done
+packages/form-engine typecheck$ tsc -p tsconfig.json
+tools/verify typecheck: Done
+plugins/store-selector typecheck: Done
+packages/motion-adapter typecheck: Done
+packages/form-engine typecheck: Done
+tools/engine-demo typecheck$ tsc -p tsconfig.json
+tools/compiler typecheck$ tsc -p tsconfig.json
+packages/static-runtime typecheck$ tsc -p tsconfig.json
+tools/engine-demo typecheck: Done
+packages/static-runtime typecheck: Done
+tools/compiler typecheck: Done
+$ vitest run
+
+ RUN  v5.0.5 /Users/hongocbaolong/Documents/marketenterprise/forms_master
+
+
+ Test Files  33 passed (33)
+      Tests  638 passed | 15 expected fail | 1 skipped (654)
+   Start at  16:23:33
+   Duration  8.82s (tests 93%, import 6%, transform 1%)
+
+$ pnpm --filter @fb/contracts gen:check
+$ node scripts/gen.ts --check
+gen:check OK (4 generated files)
+$ pnpm --filter @fb/contracts lint:schemas
+$ node scripts/lint-schemas.ts
+schemas:lint OK (3 schema files)
+$ depcruise packages tools plugins --config .dependency-cruiser.cjs --output-type err
+
+✔ no dependency violations found (124 modules, 366 dependencies cruised)
+
+$ uv run ruff check python tools/engine-demo tools/compiler plugins/store-selector/server tools/local_p0 && uv run ruff format --check python tools/engine-demo tools/compiler plugins/store-selector/server tools/local_p0
+All checks passed!
+73 files already formatted
+$ uv run mypy
+Success: no issues found in 72 source files
+$ uv run lint-imports
+
+╔══╗─────────▶╔╗ ╔╗      ╔╗◀───┐
+╚╣╠╝◀─────┐  ╔╝╚╗║║────▶╔╝╚╗   │
+ ║║   ╔══╦══╦╩╗╔╝║║  ╔╦═╩╗╔╝╔═╦══╗
+ ║║╔══╣╔╗║╔╗║╔╣║ ║║ ╔╬╣╔╗║║ ║│║╔═╝
+╔╣╠╣║║║╚╝║╚╝║║║╚╗║╚═╝║║║║║╚╗║═╣║
+╚══╩╩╩╣╔═╩══╩╝╚═╝╚═══╩╩╝╚╩═╩╩═╩╝
+  └──▶║║                    ▲
+      ╚╝────────────────────┘
+
+
+---------
+Contracts
+---------
+
+Analyzed 16 files, 16 dependencies.
+-----------------------------------
+
+Store depends on contracts, never the reverse KEPT
+Pure evaluator depends only on contracts KEPT
+Evaluator cannot import persistence KEPT
+
+Contracts: 3 kept, 0 broken.
+$ uv run pytest
+============================= test session starts ==============================
+platform darwin -- Python 3.13.15, pytest-9.1.1, pluggy-1.7.0
+rootdir: /Users/hongocbaolong/Documents/marketenterprise/forms_master
+configfile: pyproject.toml
+testpaths: python
+plugins: socket-0.8.1
+collected 798 items
+
+python/fb_contracts/tests/test_digest.py .........                       [  1%]
+python/fb_contracts/tests/test_jcs.py .......................            [  4%]
+python/fb_contracts/tests/test_json_pointer.py ..                        [  4%]
+python/fb_contracts/tests/test_jsts.py ................................. [  8%]
+........................................................................ [ 17%]
+........................................................................ [ 26%]
+........................................................................ [ 35%]
+........................................................................ [ 44%]
+........................................................................ [ 53%]
+............................................                             [ 59%]
+python/fb_contracts/tests/test_payload_ref.py .......                    [ 59%]
+python/fb_contracts/tests/test_schema_normalization.py ............      [ 61%]
+python/fb_contracts/tests/test_schema_parity.py ..............           [ 63%]
+python/fb_contracts/tests/test_smoke.py .                                [ 63%]
+python/fb_engine/tests/local_p0/test_contracts.py ....                   [ 63%]
+python/fb_engine/tests/local_p0/test_control.py ......................   [ 66%]
+python/fb_engine/tests/local_p0/test_ct26.py .......................     [ 69%]
+python/fb_engine/tests/local_p0/test_form_clone.py ..                    [ 69%]
+python/fb_engine/tests/local_p0/test_key_contract_ack.py .               [ 69%]
+python/fb_engine/tests/local_p0/test_oidc.py ..                          [ 70%]
+python/fb_engine/tests/local_p0/test_operations.py ......                [ 70%]
+python/fb_engine/tests/local_p0/test_review_lifecycle.py .....           [ 71%]
+python/fb_engine/tests/local_p0/test_translation.py ...                  [ 71%]
+python/fb_engine/tests/test_compiler_integration.py ......               [ 72%]
+python/fb_engine/tests/test_local_drafts.py ....                         [ 73%]
+python/fb_engine/tests/test_operators.py ............................... [ 76%]
+.                                                                        [ 77%]
+python/fb_engine/tests/test_submission.py ...........                    [ 78%]
+python/fb_store/tests/test_clock.py ....                                 [ 78%]
+python/fb_store/tests/test_fsstore_blob.py .........                     [ 80%]
+python/fb_store/tests/test_fsstore_concurrency.py ....                   [ 80%]
+python/fb_store/tests/test_fsstore_durability.py ..........              [ 81%]
+python/fb_store/tests/test_fsstore_fail_closed.py ...................    [ 84%]
+python/fb_store/tests/test_fsstore_failures.py ......                    [ 84%]
+python/fb_store/tests/test_fsstore_keys.py ....................          [ 87%]
+python/fb_store/tests/test_fsstore_release.py ......                     [ 88%]
+python/fb_store/tests/test_import_contracts.py .                         [ 88%]
+python/fb_store/tests/test_layout.py ....                                [ 88%]
+python/fb_store/tests/test_migrations.py ............................... [ 92%]
+...................................                                      [ 97%]
+python/fb_store/tests/test_network_blocked.py .                          [ 97%]
+python/fb_store/tests/test_smoke.py .                                    [ 97%]
+python/fb_store/tests/test_sqlite_conflict.py .........                  [ 98%]
+python/fb_store/tests/test_sqlite_tx.py ............                     [100%]
+
+============================= 798 passed in 25.05s =============================
+$ node tools/security/src/synthetic-data-check.ts contracts/fixtures
+{
+  "findings": []
+}
+$ node tools/security/src/secrets.ts
+{
+  "working": {
+    "scanner": "detect-secrets==1.5.0",
+    "detectors": 27,
+    "files": 307,
+    "findings": [
+      {
+        "file": "contracts/fixtures/blocks/registry.json",
+        "line": 2,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/blocks/registry.json",
+        "line": 3,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 6,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 12,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 9,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 16,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 23,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 30,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 37,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 44,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 51,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 58,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 65,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 72,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "package.json",
+        "line": 25,
+        "type": "Secret Keyword",
+        "classification": "fixed-scan-command"
+      },
+      {
+        "file": "tools/local_p0/test/oidc.test.ts",
+        "line": 23,
+        "type": "Base64 High Entropy String",
+        "classification": "public-rfc7636-vector"
+      },
+      {
+        "file": "tools/local_p0/test/oidc.test.ts",
+        "line": 24,
+        "type": "Base64 High Entropy String",
+        "classification": "public-rfc7636-vector"
+      },
+      {
+        "file": "tools/security/src/scan.ts",
+        "line": 141,
+        "type": "Base64 High Entropy String",
+        "classification": "public-rfc7636-vector"
+      },
+      {
+        "file": "tools/security/src/scan.ts",
+        "line": 142,
+        "type": "Base64 High Entropy String",
+        "classification": "public-rfc7636-vector"
+      }
+    ],
+    "unresolved": 0
+  },
+  "index": {
+    "scanner": "detect-secrets==1.5.0",
+    "detectors": 27,
+    "files": 307,
+    "findings": [
+      {
+        "file": "contracts/fixtures/blocks/registry.json",
+        "line": 2,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/blocks/registry.json",
+        "line": 3,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 6,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/digest/sha256-hex.json",
+        "line": 12,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 9,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 16,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 23,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 30,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 37,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 44,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 51,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 58,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 65,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "contracts/fixtures/jcs/cases.json",
+        "line": 72,
+        "type": "Hex High Entropy String",
+        "classification": "recomputed-fixture-digest"
+      },
+      {
+        "file": "package.json",
+        "line": 25,
+        "type": "Secret Keyword",
+        "classification": "fixed-scan-command"
+      },
+      {
+        "file": "tools/local_p0/test/oidc.test.ts",
+        "line": 23,
+        "type": "Base64 High Entropy String",
+        "classification": "public-rfc7636-vector"
+      },
+      {
+        "file": "tools/local_p0/test/oidc.test.ts",
+        "line": 24,
+        "type": "Base64 High Entropy String",
+        "classification": "public-rfc7636-vector"
+      },
+      {
+        "file": "tools/security/src/scan.ts",
+        "line": 141,
+        "type": "Base64 High Entropy String",
+        "classification": "public-rfc7636-vector"
+      },
+      {
+        "file": "tools/security/src/scan.ts",
+        "line": 142,
+        "type": "Base64 High Entropy String",
+        "classification": "public-rfc7636-vector"
+      }
+    ],
+    "unresolved": 0
+  },
+  "stagedFiles": 0,
+  "stagedCovered": true,
+  "exclusions": [
+    "docs (governance/evidence, not source)",
+    "contracts/vendor (third party)",
+    "lockfiles",
+    "CLAUDE.md",
+    "untracked spikes and Git-ignored files"
+  ]
+}

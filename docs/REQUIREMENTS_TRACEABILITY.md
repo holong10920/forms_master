@@ -1,5 +1,12 @@
 # Requirements Traceability
 
+
+> UX-PREMIUM (2026-10-26): F-P0 Admin UX đã được triển khai và kiểm tra local synthetic:
+> shell/structure, Canvas/Inspector, required + AND/OR, reorder, theme/Motion, JA/VI,
+> Preview/review/publish/rollback. Evidence: `docs/evidence/UX-PREMIUM/RESULTS.md`.
+> Style chỉ là approved themes; không thêm DSL/CSS injection. G2/T12/K13 không đổi.
+
+
 `Requirement ID → Design → Implementation → Tests → Evidence → Status`
 
 > Bảng này chỉ theo dõi requirement mang tính sản phẩm/kỹ thuật (F-*, UX-*, ARCH-*, BUILD-*, MOTION-*, API-*, PERF-*, TEST-*, SEC-*, CICD-*, DOD-*). Checklist quy trình (CTX/SAFE/GIT/SP/Pxx) theo dõi ở `PROJECT_CHECKLIST.md`.

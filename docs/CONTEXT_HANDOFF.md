@@ -1,5 +1,14 @@
 # Context Handoff
 
+
+> **2026-10-26 — bàn giao UX mới nhất:** làm tiếp chỉ tại `forms_master` trên
+> `codex/p03-s1-workflow-engine`. User đã yêu cầu commit hai tree và hợp nhất local:
+> JA/VI `f9f3313`, UX `6c425eb`, merge `1cce3b7`. Tree UX giữ làm bản đồng bộ;
+> không dùng làm writer thứ hai. Xem `docs/evidence/UX-PREMIUM/RESULTS.md` và
+> checkpoint UX trong CURRENT_STATUS. Full verify + browser UAT PASS trong local synthetic;
+> T12/K13 chưa hoàn tất. Các ghi chú uncommitted bên dưới mô tả checkpoint cũ.
+
+
 > 2026-10-26: L10N ja ⇄ vi (ADR-080) đã implement local synthetic, chưa commit. Xem `docs/evidence/L10N-JA-VI/RESULTS.md`
 > (phạm vi commit đề xuất, file trộn với CP2 Codex, giới hạn). Không có provider dịch tự động; không thêm khi chưa có ADR + user approval.
 

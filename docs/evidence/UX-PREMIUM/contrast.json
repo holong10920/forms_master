@@ -1,0 +1,11 @@
+{
+  "textContrastRatios": {
+    "body": 17.75,
+    "secondary": 10.46,
+    "muted": 5.29,
+    "primary button": 6.29,
+    "selected": 7.07,
+    "success": 5.4
+  },
+  "allAtLeast4_5": true
+}
