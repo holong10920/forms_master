@@ -1,0 +1,57 @@
+{
+  "mode": "apply",
+  "entries": [
+    {
+      "path": ".venv",
+      "action": "removed"
+    },
+    {
+      "path": ".tools/uv-cache",
+      "action": "removed"
+    },
+    {
+      "path": ".tools/uv-tools",
+      "action": "removed"
+    },
+    {
+      "path": ".import_linter_cache",
+      "action": "removed"
+    },
+    {
+      "path": ".mypy_cache",
+      "action": "removed"
+    },
+    {
+      "path": ".pytest_cache",
+      "action": "removed"
+    },
+    {
+      "path": ".ruff_cache",
+      "action": "removed"
+    },
+    {
+      "path": ".playwright-cli",
+      "action": "removed"
+    },
+    {
+      "path": ".pnpm-store",
+      "action": "removed"
+    },
+    {
+      "path": "spikes/compiler-feasibility/gen",
+      "action": "removed"
+    },
+    {
+      "path": "spikes/compiler-feasibility/out",
+      "action": "removed"
+    },
+    {
+      "path": "spikes/compiler-feasibility/node_modules",
+      "action": "removed"
+    },
+    {
+      "path": "spikes/compiler-feasibility/test-results",
+      "action": "removed"
+    }
+  ]
+}

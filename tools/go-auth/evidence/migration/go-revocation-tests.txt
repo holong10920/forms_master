@@ -1,0 +1,4 @@
+=== RUN   TestCapabilityRevocationAndPartialPreview
+--- PASS: TestCapabilityRevocationAndPartialPreview (13.27s)
+PASS
+ok  	forms-master/go-auth/internal/studio	13.975s

@@ -1,0 +1,121 @@
+{
+  "scenario": "Admin login → dashboard → admin page → refresh → logout",
+  "role": "admin",
+  "adminStatus": 200,
+  "refreshed": true,
+  "afterLogout": 401,
+  "cookies": [
+    {
+      "name": "fm_local_session",
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "browserStorage": {
+    "localStorageKeys": [],
+    "sessionStorageKeys": []
+  },
+  "network": [
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 401
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/login",
+      "status": 302
+    },
+    {
+      "method": "GET",
+      "path": "/authorize",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/choose",
+      "status": 303
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/callback",
+      "status": 302
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/overview",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/overview",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/overview",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "status": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 401
+    }
+  ]
+}

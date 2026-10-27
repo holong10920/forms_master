@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { createHash, generateKeyPairSync, randomBytes } from "node:crypto";
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, expect, test } from "vitest";
@@ -17,8 +17,11 @@ afterEach(() => {
 test("pinned scanner accepts clean input and detects generated synthetic credentials/private key offline", () => {
   const dir = scratch();
   writeFileSync(join(dir, "fixture.txt"), "synthetic clean content\n");
-  expect(scanDirectory(dir, true).unresolved).toBe(0);
-  const key = "AK" + "IA" + randomBytes(8).toString("hex").toUpperCase();
+  expect(scanDirectory(dir).unresolved).toBe(0);
+  const key =
+    "AK" +
+    "IA" +
+    Array.from(randomBytes(16), (n) => "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"[n % 32]).join("");
   const credential = randomBytes(30).toString("base64");
   const { privateKey } = generateKeyPairSync("ed25519", {
     privateKeyEncoding: { type: "pkcs8", format: "pem" },
@@ -28,12 +31,12 @@ test("pinned scanner accepts clean input and detects generated synthetic credent
     join(dir, "fixture.txt"),
     `aws_access_key_id = ${key}\npassword = "${credential}"\n${privateKey}`,
   );
-  const report = scanDirectory(dir, true);
-  expect(report.detectors).toBe(27);
+  const report = scanDirectory(dir);
+  expect(report.scanner).toBe("gitleaks==8.30.1");
   const types = report.findings.map((f) => f.type);
-  expect(types).toContain("AWS Access Key");
-  expect(types).toContain("Secret Keyword");
-  expect(types).toContain("Private Key");
+  expect(types).toContain("aws-access-token");
+  expect(types).toContain("generic-api-key");
+  expect(types).toContain("private-key");
   expect(report.unresolved).toBeGreaterThanOrEqual(3);
   expect(JSON.stringify(report)).not.toContain(key);
   expect(JSON.stringify(report)).not.toContain(credential);
@@ -58,56 +61,12 @@ test("snapshot rejects path traversal", () => {
   expect(() => exportSnapshot(dir, ["../outside"], false, join(dir, "out"))).toThrow("unsafe");
 });
 
-test("only recomputed fixture hashes are classified, tampered values remain findings", () => {
+test("fixed RFC vectors do not hide credentials in the same file", () => {
   const dir = scratch();
-  const target = join(dir, "contracts/fixtures/digest");
-  mkdirSync(target, { recursive: true });
-  const file = join(target, "sha256-hex.json");
-  cpSync(resolve(import.meta.dirname, "../../../contracts/fixtures/digest/sha256-hex.json"), file);
-  const clean = scanDirectory(dir, true);
-  expect(clean.findings.some((f) => f.classification === "recomputed-fixture-digest")).toBe(true);
-  expect(clean.unresolved).toBe(0);
-  const data = JSON.parse(readFileSync(file, "utf8")) as { jcsDigests: { sha256: string }[] };
-  const first = data.jcsDigests[0];
-  if (!first) throw new Error("missing fixture");
-  first.sha256 = randomBytes(32).toString("hex");
-  writeFileSync(file, JSON.stringify(data, null, 2));
-  expect(scanDirectory(dir, true).unresolved).toBeGreaterThan(0);
-}, 30_000);
-
-test("block registry findings require recomputing the pinned fixture bytes", () => {
-  const dir = scratch();
-  const source = resolve(import.meta.dirname, "../../../contracts/fixtures/blocks");
-  const target = join(dir, "contracts/fixtures/blocks");
-  mkdirSync(target, { recursive: true });
-  cpSync(source, target, { recursive: true });
-  const clean = scanDirectory(dir, true);
-  expect(clean.unresolved).toBe(0);
-  expect(
-    clean.findings.filter((f) => f.classification === "recomputed-fixture-digest"),
-  ).toHaveLength(2);
-  const pin = join(target, "blk_customer_info@r1.json");
-  writeFileSync(pin, readFileSync(pin, "utf8") + "\n");
-  expect(scanDirectory(dir, true).unresolved).toBe(1);
-}, 30_000);
-
-test("public RFC PKCE vectors are classified exactly; a synthetic credential in the same file remains unresolved", () => {
-  const dir = scratch(),
-    path = join(dir, "tools/local_p0/test");
-  mkdirSync(path, { recursive: true });
-  const source = readFileSync(
-    resolve(import.meta.dirname, "../../local_p0/test/oidc.test.ts"),
-    "utf8",
-  );
-  writeFileSync(join(path, "oidc.test.ts"), source);
-  const clean = scanDirectory(dir, true);
-  expect(clean.findings.filter((f) => f.classification === "public-rfc7636-vector")).toHaveLength(
-    2,
-  );
-  expect(clean.unresolved).toBe(0);
-  writeFileSync(
-    join(path, "oidc.test.ts"),
-    source + '\npassword = "' + randomBytes(30).toString("base64") + '"\n',
-  );
-  expect(scanDirectory(dir, true).unresolved).toBeGreaterThan(0);
-}, 30000);
+  const file = join(dir, "fixture.ts");
+  const source = 'const publicPkce = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";\n';
+  writeFileSync(file, source);
+  expect(scanDirectory(dir).unresolved).toBe(0);
+  writeFileSync(file, source + 'const api_key = "' + randomBytes(30).toString("base64") + '";\n');
+  expect(scanDirectory(dir).unresolved).toBeGreaterThan(0);
+});

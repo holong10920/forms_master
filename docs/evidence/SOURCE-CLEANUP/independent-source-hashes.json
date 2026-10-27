@@ -1,0 +1,13 @@
+{
+  "package.json": "c4f70cfcd82c7bcd62820189c527ec24991fbd14156bec92f6169a54d6fa35af",
+  "README.md": "026ebf00f167fa23e72b3a70dcd755debd0fde2df3ef82c9d0cedaaeca995e10",
+  "CLAUDE.md": "64dc52b932651d9a7f7ffa6ccb2f4a187525829ac87996f04fb3f16a565388d3",
+  "eslint.config.js": "aac57bf156e3fae0735812bbd212ff4309deeb95aeaceb2ed1887d6fe5684e70",
+  ".prettierignore": "68bdce6f6b9c3acb41c5ddcb9e88e6d71f042f30fe28fd2d39cceb44bf0c1b47",
+  "tools/go-auth/go-tool.ts": "16534f303bda61e7ff1c2f1ed945e79b570c7b50f1112949fd1d6139dbd17dc1",
+  "tools/go-auth/internal/studio/bootstrap.go": "b11df9cc67c354ddb35eb93bbc29c233964643562d008765ab9a94dac9fb8fa1",
+  "tools/go-auth/internal/studio/store_adapter.go": "1dd28107941bd43cd29f4906042081c8d1c4405b59ddf6c356de706b7b0e32dd",
+  "tools/go-auth/internal/studio/public.go": "41b5625a2fd3acbb44b18a0a565ae17db5b35a5c330ffadbccd4bd30d84ffee6",
+  "tools/compiler/src/release.ts": "403bb260809eb54c6beb8de0053eaa7e2c03710f182e73336e7d73bbf99227d1",
+  "tools/security/src/scan.ts": "fb351bf56ec74f7ec7bb80429ab5da96284fe1bf518c8fa552f2826e72d19dab"
+}

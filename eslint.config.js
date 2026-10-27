@@ -7,12 +7,13 @@ export default defineConfig(
     ignores: [
       "spikes/**",
       ".venv/**",
-      "python/**",
       "docs/**",
       "var/**",
       ".tools/**",
       "contracts/vendor/**",
       "tools/lint-fixtures/fixtures/**",
+      "tools/go-auth/web/public/studio/**",
+      "tools/go-auth/web/dist/**",
       "tools/boundaries/fixtures/**",
     ],
   },
@@ -75,7 +76,7 @@ export default defineConfig(
     },
   },
   {
-    files: ["tools/local_p0/web/*.js"],
+    files: ["tools/go-auth/studio/*.js"],
     languageOptions: {
       parserOptions: { projectService: false },
       globals: Object.fromEntries(

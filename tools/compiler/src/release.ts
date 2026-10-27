@@ -1,3 +1,4 @@
+import { goTool } from "../../go-auth/go-tool.ts";
 import { gzipSync } from "node:zlib";
 /** Host release orchestration. Canonical container K13 remains a distinct, mandatory gate. */
 import {
@@ -35,7 +36,7 @@ function once(path: string, data: Buffer) {
   } else writeFileSync(path, data, { flag: "wx" });
 }
 const bootstrap =
-  'let p=JSON.parse(document.querySelector("#release").textContent).load,s=document.createElement("script");s.type="module";s.src=p.entry;s.integrity=p.entryIntegrity;document.head.append(s);';
+  'let p=JSON.parse(document.querySelector("#release").text).load,s=document.createElement("script");s.type="module";s.src=p.entry;s.integrity=p.entryIntegrity;document.head.append(s);';
 const template =
   "canonical-release-html-v1:external-bootstrap+sri;metadata-jcs;no-inline-executable";
 export async function compileRelease(
@@ -66,7 +67,7 @@ export async function compileRelease(
     const pin = JSON.parse(metadataMatch[1]) as {
       releaseId: string;
       mode: string;
-      groups: { store: string[]; motion: string[] };
+      groups: { store: string[]; motion: string[]; enhancements?: string[] };
       ir: { path: string };
       assets: { path: string; sha256: string }[];
       load?: { entry: string; entryIntegrity: string };
@@ -152,6 +153,7 @@ export async function compileRelease(
     audit(graph.chunks, files, {
       plugin: pin.groups.store.length > 0,
       motion: pin.groups.motion.length > 0,
+      enhancements: !!pin.groups.enhancements?.length,
     });
     if (!pin.groups.store.length && !pin.groups.motion.length) {
       const gzip = (paths: string[]) =>
@@ -211,12 +213,12 @@ export async function compileRelease(
       };
     });
     const fixtures = { semanticFixtureFormat: 1, irDigest: a.manifest.inputs.ir, cases };
-    const python = execFileSync(
-      join(root, ".venv/bin/python"),
-      [join(root, "tools/engine-demo/adapter.py"), "--ir", join(a.directory, pin.ir.path)],
-      { input: JSON.stringify(cases), cwd: root, encoding: "utf8" },
+    const authoritative = execFileSync(
+      goTool("engine-oracle"),
+      ["--ir", join(a.directory, pin.ir.path)],
+      { input: JSON.stringify(cases), cwd: root, encoding: "utf8", timeout: 30000 },
     );
-    if (canonicalJson(JSON.parse(python)) !== canonicalJson(cases.map((c) => c.expected)))
+    if (canonicalJson(JSON.parse(authoritative)) !== canonicalJson(cases.map((c) => c.expected)))
       throw Error("E-SEMANTIC-CONFORMANCE");
     const artifactSet = [...files]
       .map(([path, data]) => ({ path, sha256: sha(data) }))

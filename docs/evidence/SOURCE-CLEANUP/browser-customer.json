@@ -1,0 +1,425 @@
+[
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "method": "shop",
+    "styles": {
+      "width": "640px",
+      "padding": "24px",
+      "fontSize": "16px"
+    },
+    "receipt": {
+      "ok": true,
+      "receipt": "synthetic_cOo6aR3m4E0Km-3eAHxLy99O",
+      "synthetic": true
+    },
+    "status": 200,
+    "fieldKeys": [
+      "category",
+      "title",
+      "cpu",
+      "memory",
+      "os",
+      "boot_check",
+      "battery",
+      "adapter",
+      "has_original_box",
+      "internal_problems",
+      "pickup_method",
+      "business_domain",
+      "kana",
+      "email",
+      "phone_number",
+      "zip",
+      "agree_policy"
+    ],
+    "privatePersistence": false,
+    "cookies": [],
+    "errors": [],
+    "network": [
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/index.html",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/entry.ab3cf70373ec.css",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/theme.8ac0a72a3f3c71d9c03c2f0665b6c55672a9bffec6be60f624feb58cb84ee4cd.css",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/bootstrap.5f646031949f77778abd4965985083296a2bdf3b2bf4c570bcaa7b47c8dffe96.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/entry.893a593d955f.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/form-ir.fcdf1bd99bcd0da5e4cb8490b4155c9a7909fe0838ca9fa3dbb7c3d1942f813c.json",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/chunk.7f9092cd75f2.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/entry.893a593d955f.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/chunk.7f9092cd75f2.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/index.html",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/bootstrap.5f646031949f77778abd4965985083296a2bdf3b2bf4c570bcaa7b47c8dffe96.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/entry.ab3cf70373ec.css",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/theme.8ac0a72a3f3c71d9c03c2f0665b6c55672a9bffec6be60f624feb58cb84ee4cd.css",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/entry.893a593d955f.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/form-ir.fcdf1bd99bcd0da5e4cb8490b4155c9a7909fe0838ca9fa3dbb7c3d1942f813c.json",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/chunk.7f9092cd75f2.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/entry.893a593d955f.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/chunk.7f9092cd75f2.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/api/submit",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "method": "delivery",
+    "styles": {
+      "width": "640px",
+      "padding": "24px",
+      "fontSize": "16px"
+    },
+    "receipt": {
+      "ok": true,
+      "receipt": "synthetic_Lucrq1vbGxspkppn4cTrsRed",
+      "synthetic": true
+    },
+    "status": 200,
+    "fieldKeys": [
+      "category",
+      "title",
+      "cpu",
+      "memory",
+      "os",
+      "boot_check",
+      "battery",
+      "adapter",
+      "has_original_box",
+      "internal_problems",
+      "pickup_method",
+      "delivery_date",
+      "delivery_time",
+      "has_box",
+      "kana",
+      "email",
+      "phone_number",
+      "zip",
+      "address",
+      "agree_policy"
+    ],
+    "privatePersistence": false,
+    "cookies": [],
+    "errors": [],
+    "network": [
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/index.html",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/entry.ab3cf70373ec.css",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/bootstrap.5f646031949f77778abd4965985083296a2bdf3b2bf4c570bcaa7b47c8dffe96.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/theme.8ac0a72a3f3c71d9c03c2f0665b6c55672a9bffec6be60f624feb58cb84ee4cd.css",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/entry.893a593d955f.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/form-ir.fcdf1bd99bcd0da5e4cb8490b4155c9a7909fe0838ca9fa3dbb7c3d1942f813c.json",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/chunk.7f9092cd75f2.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/entry.893a593d955f.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/chunk.7f9092cd75f2.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/index.html",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/entry.ab3cf70373ec.css",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/theme.8ac0a72a3f3c71d9c03c2f0665b6c55672a9bffec6be60f624feb58cb84ee4cd.css",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/bootstrap.5f646031949f77778abd4965985083296a2bdf3b2bf4c570bcaa7b47c8dffe96.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/entry.893a593d955f.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/form-ir.fcdf1bd99bcd0da5e4cb8490b4155c9a7909fe0838ca9fa3dbb7c3d1942f813c.json",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/chunk.7f9092cd75f2.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/entry.893a593d955f.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/chunk.7f9092cd75f2.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/api/postal-lookup",
+        "method": "GET",
+        "status": 404
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/api/postal-lookup",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/api/submit",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "method": "dither",
+    "styles": {
+      "width": "334px",
+      "padding": "12px",
+      "fontSize": "16px"
+    },
+    "receipt": {
+      "ok": true,
+      "receipt": "synthetic_p92nFkAV_HsfuwSk7GAEBI-R",
+      "synthetic": true
+    },
+    "status": 200,
+    "fieldKeys": [
+      "category",
+      "title",
+      "cpu",
+      "memory",
+      "os",
+      "boot_check",
+      "battery",
+      "adapter",
+      "has_original_box",
+      "internal_problems",
+      "pickup_method",
+      "kana",
+      "email",
+      "phone_number",
+      "zip",
+      "agree_policy"
+    ],
+    "privatePersistence": false,
+    "cookies": [],
+    "errors": [],
+    "network": [
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/index.html",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/entry.ab3cf70373ec.css",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/bootstrap.5f646031949f77778abd4965985083296a2bdf3b2bf4c570bcaa7b47c8dffe96.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/theme.8ac0a72a3f3c71d9c03c2f0665b6c55672a9bffec6be60f624feb58cb84ee4cd.css",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/entry.893a593d955f.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/form-ir.fcdf1bd99bcd0da5e4cb8490b4155c9a7909fe0838ca9fa3dbb7c3d1942f813c.json",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/chunk.7f9092cd75f2.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/entry.893a593d955f.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/chunk.7f9092cd75f2.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/index.html",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/theme.8ac0a72a3f3c71d9c03c2f0665b6c55672a9bffec6be60f624feb58cb84ee4cd.css",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/bootstrap.5f646031949f77778abd4965985083296a2bdf3b2bf4c570bcaa7b47c8dffe96.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/entry.ab3cf70373ec.css",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/entry.893a593d955f.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/form-ir.fcdf1bd99bcd0da5e4cb8490b4155c9a7909fe0838ca9fa3dbb7c3d1942f813c.json",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/chunk.7f9092cd75f2.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/entry.893a593d955f.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/assets/chunk.7f9092cd75f2.js",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/r/rel_655nayozhotalkuxkbrvf7sgl4/api/submit",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  }
+]

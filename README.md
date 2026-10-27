@@ -1,112 +1,88 @@
-# Multi-Site Form Builder PoC
+# Form Master — Go + React Workspace
 
-Local synthetic P0, S0 engineering foundation. Chưa có Workflow Engine, Compiler nghiệp vụ,
-Admin UI hoặc AWS deployment. S0 chưa DONE; xem các gate còn mở bên dưới.
+No-Code Form Builder chạy local với **Go modular monolith**, React/TypeScript và SQLite. TypeScript Workflow Engine, Compiler và Customer Runtime được giữ lại. **Python runtime, oracle, rollback host và môi trường uv đã được gỡ theo yêu cầu ngày 2026-10-27.**
 
-## Setup trên macOS
+> Checkpoint cleanup: backend và các gate độc lập đã qua. Một phiên khác đang sửa UI; integration Studio mới nhất đang chờ chốt, không kế thừa browser PASS của bản trước. Xem [báo cáo](docs/evidence/SOURCE-CLEANUP/RESULTS.md).
 
-Cần Volta, Node **24.22.1**, pnpm **12.15.0** qua Corepack, Python **3.13.x**, uv **≥0.13.5**.
-Giữ Node mặc định của máy; chỉ `volta fetch`, không `volta install`.
+## Chạy local
 
-```sh
-volta fetch node@24.22.1
-export PATH="$HOME/.volta/bin:$PATH"
-node -v
-```
-
-Corepack phải thuộc toolchain Node 24; lệnh `corepack` trần có thể trỏ vào nvm/Node khác.
-Dùng đường dẫn runtime đã resolve qua Volta. Nếu file Corepack chưa có, cài đúng version
-bằng npm của Node 24 (không đổi Node mặc định).
+Yêu cầu Node **24.22.1**, pnpm **12.15.0**, Go toolchain **1.27.3** và macOS với kernel network sandbox. Không cần Docker hoặc AWS.
 
 ```sh
-FB_NODE24_BIN="$(dirname "$(node -p 'process.execPath')")"
-# Chỉ nếu Corepack chưa có trong toolchain này:
-# "$FB_NODE24_BIN/node" "$FB_NODE24_BIN/npm" install --global corepack@0.36.0
-"$FB_NODE24_BIN/node" "$FB_NODE24_BIN/corepack" --version
-mkdir -p .tools/bin
-"$FB_NODE24_BIN/node" "$FB_NODE24_BIN/corepack" enable --install-directory "$PWD/.tools/bin" pnpm
-export PATH="$PWD/.tools/bin:$HOME/.volta/bin:$PATH"
-pnpm --version
-pnpm preflight
+export PATH="$PWD/.tools/bin:$PATH"
 pnpm install --frozen-lockfile
-uv sync --locked
+pnpm --dir tools/go-auth/web --ignore-workspace install --frozen-lockfile
+pnpm local:master
 ```
 
-Mỗi package workspace dùng `volta.extends` về root. `node` phải resolve qua Volta shim;
-Homebrew Node đứng trước Volta trong PATH sẽ không áp project pin. Không chạy install với
-Node ngoài pin. `pnpm preflight` kiểm Node/pnpm và file pin nhất quán trước `pnpm verify`.
+Mở **http://localhost:4180/**, đăng nhập qua mock OIDC bằng `synthetic-admin` hoặc `synthetic-member`. Admin mở Form Builder tại `/studio`; Member chỉ có quyền đọc PC được cấp trên server. `synthetic-approver` duyệt review độc lập. Không có mật khẩu thật hoặc token trong browser storage.
 
-Scanner thay thế pin **detect-secrets==1.5.0**, chạy isolated bằng uvx/PyPI, không sửa dependency
-runtime. Provision trước khi chạy tests (negative fixtures chạy scanner offline):
+| Thành phần                     | Địa chỉ                                              |
+| ------------------------------ | ---------------------------------------------------- |
+| Workspace / Dashboard / Studio | http://localhost:4180/                               |
+| Go API/BFF                     | loopback 4181, truy cập qua proxy `/api` cùng origin |
+| Mock OIDC                      | http://127.0.0.1:4182/                               |
+| Customer đã publish            | http://127.0.0.1:4183/r/RELEASE_ID/index.html        |
+| Preview cô lập                 | http://127.0.0.1:4185/                               |
+
+Launcher kiểm tra port, build Go và Studio, health-check các dịch vụ, in URL và dừng child process bằng Ctrl-C. Lần đầu sẽ snapshot SQLite cũ nếu còn, hoặc khởi tạo ba draft synthetic bằng Go nếu không có dữ liệu cũ; không cần Python. Không tự giết tiến trình chiếm port. Go phục vụ business API, session/RBAC, review/publish/rollback, submission/outbox và mock effects. Không khởi động backend Python.
+
+## Source hiện hành
+
+| Thư mục                                           | Vai trò                                                                            |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `tools/go-auth/cmd`, `internal`                   | Go API/BFF, engine validation, persistence, business modules và verifier           |
+| `tools/go-auth/web/src`                           | React Workspace, login và lifecycle Studio                                         |
+| `tools/go-auth/studio`                            | Source editor No-Code duy nhất; được bundle/mount trong React, không iframe editor |
+| `tools/compiler`                                  | TypeScript compiler, release integrity và build isolation; semantic gate gọi Go    |
+| `packages/form-engine`, `packages/static-runtime` | Workflow và runtime customer dùng chung                                            |
+| `contracts`                                       | Schema, generated contracts và golden fixtures                                     |
+| `plugins`                                         | Trusted browser plugin và metadata/pin contract; thực thi server bằng Go           |
+| `tools/legacy-analyzer`                           | Analyzer AST read-only, import nháp và mẫu PC                                      |
+| `tools/security`, `tools/verify`                  | Security checks, toolchain và cleanup có giới hạn                                  |
+| `docs`                                            | Tài liệu hiện tại, lịch sử và bằng chứng                                           |
+| `var`                                             | Database, immutable releases, khóa local và backup; không phải source thừa         |
+| `output/playwright`                               | Ảnh kiểm chứng đã được dẫn trong báo cáo                                           |
+
+Không xóa `node_modules`/`.tools/bin` khi đang chạy. `dist` và Studio public bundle là đầu ra tái tạo; source editor không nằm ở `tools/local_p0/web` nữa. Thư mục `tools/local_p0` đã được gỡ.
+
+## Kiểm chứng
 
 ```sh
-export UV_CACHE_DIR="$PWD/.tools/uv-cache"
-export UV_TOOL_DIR="$PWD/.tools/uv-tools"
-export UV_TOOL_BIN_DIR="$PWD/.tools/uv-bin"
-uvx --from detect-secrets==1.5.0 detect-secrets scan --help >/dev/null
-pnpm verify
-uv run python -m fb_store init --data-dir var
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm gen:check
+pnpm schemas:lint
+pnpm boundaries
+pnpm --dir tools/go-auth/web test
+pnpm --dir tools/go-auth/web build
+cd tools/go-auth
+./go-local.sh test ./...
+./go-local.sh test -race ./...
+./go-local.sh vet ./...
 ```
 
-`pnpm verify` chạy format, lint, typecheck, test, schema drift/lint, TS/Python boundaries,
-synthetic fixtures và alternative secret scan. Lần đầu cần mạng cho dependency provisioning;
-unit tests không dùng mạng. Có thể dùng cache ở `/tmp` khi sandbox không cho ghi cache mặc định.
+`pnpm secrets` dùng **Gitleaks 8.30.1** native, không `uvx`/detect-secrets. Cần scanner đúng version trong PATH, `.tools/bin/gitleaks`, hoặc `FB_GITLEAKS_BIN`. Thiếu scanner làm security gate fail; không tải tool từ GitHub. Scanner chỉ báo path/dòng/rule, không in giá trị secret. Kết quả Python 798 PASS trong báo cáo trước đây là lịch sử, không phải test suite hiện hành.
 
-## Coverage và gate còn mở
-
-`pnpm secrets` scan source hiện tại, candidate source chưa track và toàn bộ Git index riêng
-bằng 27 detector mặc định, không network verification. Báo file/dòng/type, không giá trị secret.
-Digest fixture chỉ được phân loại false positive khi recompute khớp; chuỗi script scanner phải
-khớp chính xác command cố định. Docs lịch sử, vendor, lockfile và file ignored nằm ngoài source coverage; mọi file added/modified/renamed trong staging vẫn được scan từ index, không áp source exclusions.
-Xem [security boundary](docs/engineering/SECURITY_BOUNDARIES_P0.md).
-
-`pnpm secrets:gitleaks` là kiểm tùy chọn chưa chạy được; test Gitleaks chủ đích SKIP khi thiếu
-CLI 8.30.1. Gitleaks NOT_EXECUTED. Alternative scanner đã được user ACCEPTED cho S0 local synthetic P0; không còn bắt buộc tải Gitleaks để đóng T10 trong phạm vi này. Không tuyên bố hai scanner tương đương.
-
-T12 container: `BLOCKED_BY_ENVIRONMENT` khi local cache không có Node 24 với digest hợp lệ.
-Không có container build PASS, không có A/B reproducibility claim. Budget/perf artifact thuộc S2.
-G9/G10 BLOCKED: không GitHub/push, không AWS write. Không tự chuyển S0 DONE hoặc G2 PASS.
-
-## Workflow Engine local synthetic (S1)
-
-Sau setup ở trên:
+Dọn cache/output thử nghiệm theo allowlist, sau khi dừng test/browser automation:
 
 ```sh
-pnpm engine:demo --scenario pc-branch
-pnpm engine:demo --scenario restore
-pnpm engine:demo --scenario references
-pnpm engine:parity
-pnpm verify
+pnpm clean:local          # dry-run
+pnpm clean:local --apply  # xóa các mục được liệt kê
 ```
 
-Demo đầu chạy Next/Back và đổi nhánh 宅配 → 店頭 → 宅配; preview loại field inactive.
-Demo restore ghi draft public được phép persist vào SQLite tạm, mở lại bằng tiến trình
-Python mới rồi khôi phục theo release/revision; secret không được ghi. Dữ liệu và database
-đều synthetic, thư mục tạm được xóa sau demo. Engine không gọi mạng, clock hoặc random;
-clock/identity/persistence nằm ở adapter.
+Lệnh này không xóa source, database, release, backup, screenshot, dependency đang dùng hoặc Git state. Chi tiết quyết định giữ/xóa và kiểm chứng: [cleanup report](docs/evidence/SOURCE-CLEANUP/RESULTS.md).
 
-S1 có core rules/calculated, navigation và mock async ports; chưa có UI, plugin registry/loader
-thật, lookup/prefill merge, Compiler hoặc submission admission service.
-Xem [checkpoint S1-CP2](docs/evidence/P03/S1-CP2/RESULTS.md) cho coverage và giới hạn.
+## Trạng thái và giới hạn
 
-`references` chạy Sports (category + Junk validation + 出張) và PC (device conditions,
-店頭/宅配, terminal riêng) qua engine TS và backend evaluator Python. Store Selector là
-mock core choice cho engine fixture; plugin binding, block expansion và artifact isolation
-chưa được kiểm chứng bằng Compiler. Xem [S1 exit/G3 package](docs/evidence/P03/S1-EXIT.md).
+Local Go Workspace và các luồng P0 đã có bằng chứng thực thi; đây không phải chứng nhận production/ECS/PostgreSQL. T12/K13 vẫn **VERIFICATION_PENDING**. Không GitHub/Git mutation, AWS write, production API hoặc PII.
 
-## Compiler / Static Runtime — first S2 candidate
+Mở rộng legacy hiện là prototype PC một sản phẩm desktop/notebook; 14/34 nhóm capability trong audit được hỗ trợ đầy đủ. Chưa hỗ trợ toàn bộ Apply/Add/Entry/Raiten; còn giỏ hàng nhiều sản phẩm, catalog động và mapping payload legacy. Không dùng tên “migration complete” cho phần capability này.
 
-```sh
-pnpm compiler:build
-pnpm compiler:serve
-```
-
-Open the immutable `http://127.0.0.1:4173/r/dev_.../index.html` URL printed by build.
-Sports Motion-none compiles the approved core reference definition and uses the shared
-S1 engine. Public files are in `var/s2-candidates/r/<candidateId>/`; private inventory and
-module graph are outside the served tree. The server binds loopback only. Completion
-is explicitly a local simulation, with no business API or customer-data persistence.
-
-`dev_...` identifies a content-addressed local candidate, not an accepted canonical release.
-T12 builder/container verification, final LRM/FRA, plugin host, block expansion and
-publish/rollback integration are still pending. See [S2 checkpoint](docs/evidence/P07/CP1/RESULTS.md).
+- [Trạng thái hiện tại](docs/CURRENT_STATUS.md)
+- [Bàn giao](docs/CONTEXT_HANDOFF.md)
+- [Go routes/modules/security](tools/go-auth/README.md)
+- [Route migration matrix](tools/go-auth/evidence/migration/ROUTE-MATRIX.md)
+- [Legacy capability/evidence](tools/legacy-analyzer/evidence/RESULTS.md)
+- [Responsive verification](tools/go-auth/evidence/responsive/RESULTS.md)

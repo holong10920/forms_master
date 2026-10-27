@@ -1,0 +1,15 @@
+async(page)=>{
+ const network=[];const errors=[];const listener=r=>{const u=new URL(r.url());if(u.pathname.startsWith('/api/')||u.port==='4185')network.push({port:u.port,path:u.pathname,method:r.request().method(),status:r.status()})};page.on('response',listener);page.on('pageerror',e=>errors.push(e.message));
+ await page.locator('#preview').click();
+ const frame=page.frameLocator('#preview-frame');await frame.locator('#app[data-step="stp_details"]').waitFor({timeout:30000});
+ await frame.locator('select[name="attendance"]').selectOption('no');await frame.getByRole('button',{name:'次へ',exact:true}).click();await frame.locator('#app[data-step="stp_review"]').waitFor();const conditionalPayload=await frame.locator('pre').innerText();if(conditionalPayload.includes('syntheticNickname'))throw Error('Inactive data leaked');
+ await page.screenshot({path:'output/playwright/master-conditional-preview.png',fullPage:true});
+ // Deliberately unset the default path through the real inspector, then save.
+ await page.locator('#modes [data-mode="build"]').click();await page.locator('#left-tabs [data-tab="outline"]').click();await page.locator('#steps [data-focus-key="ol-step:stp_details"]').click();await page.locator('#inspector-tabs [data-tab="branches"]').click();await page.getByRole('combobox',{name:'次のステップ',exact:true}).selectOption('');
+ await page.locator('#save-state').click();await page.locator('#save').focus();await page.locator('#save').press('Enter');await page.locator('#save-state[data-state="saved"]').waitFor();
+ await page.locator('#preview').click();await frame.getByText('一部プレビュー：未設定の経路 1件',{exact:true}).waitFor({timeout:30000});await frame.locator('select[name="attendance"]').selectOption('yes');await frame.getByRole('button',{name:'次へ',exact:true}).click();await frame.getByRole('heading',{name:'この先の経路はまだ設定されていません（プレビューのみ）',exact:true}).waitFor();
+ const partialSubmitButtons=await frame.getByRole('button',{name:'ローカル模擬受付',exact:true}).count();await page.screenshot({path:'output/playwright/master-partial-preview.png',fullPage:true});
+ // Restore the approved route through the inspector for review/publication.
+ await page.locator('#modes [data-mode="build"]').click();await page.locator('#left-tabs [data-tab="outline"]').click();await page.locator('#steps [data-focus-key="ol-step:stp_details"]').click();await page.locator('#inspector-tabs [data-tab="branches"]').click();const options=await page.getByRole('combobox',{name:'次のステップ',exact:true}).locator('option').evaluateAll(options=>options.map(o=>({value:o.value,text:o.textContent})));
+ page.off('response',listener);return {conditionalPayload,partialSubmitButtons,options,errors,network};
+}

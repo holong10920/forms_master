@@ -197,8 +197,38 @@
         },
         "syntheticNotice": {
           "$ref": "#/$defs/LocalizedOverride"
+        },
+        "formatEmail": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "formatPhoneJP": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "formatPostalJP": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "formatKatakana": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "formatDate": {
+          "$ref": "#/$defs/LocalizedOverride"
         }
       },
+      "additionalProperties": false
+    },
+    "appearance": {
+      "$ref": "#/$defs/Appearance"
+    },
+    "customerDraft": {
+      "type": "object",
+      "properties": {
+        "ttlMinutes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60
+        }
+      },
+      "required": ["ttlMinutes"],
       "additionalProperties": false
     }
   },
@@ -361,7 +391,8 @@
             "tel",
             "postal",
             "katakana",
-            "plugin:storeSel"
+            "plugin:storeSel",
+            "date"
           ]
         },
         "label": {
@@ -448,7 +479,12 @@
                   "minItems",
                   "maxItems",
                   "exclusiveOption",
-                  "mustBeTrue"
+                  "mustBeTrue",
+                  "formatEmail",
+                  "formatPhoneJP",
+                  "formatPostalJP",
+                  "formatKatakana",
+                  "formatDate"
                 ]
               },
               "params": {
@@ -475,6 +511,20 @@
             "placeholder": {
               "type": "string",
               "maxLength": 40
+            },
+            "searchable": {
+              "type": "boolean"
+            },
+            "postalAddressTarget": {
+              "type": "string",
+              "pattern": "^fld_[a-zA-Z0-9_]+$"
+            },
+            "queryParameter": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,30}$"
+            },
+            "presentation": {
+              "enum": ["native", "compact"]
             }
           },
           "additionalProperties": false
@@ -495,6 +545,9 @@
         },
         "help": {
           "$ref": "#/$defs/LocalizedOverride"
+        },
+        "appearance": {
+          "$ref": "#/$defs/Appearance"
         }
       },
       "required": ["id", "key", "type", "classification"],
@@ -693,6 +746,143 @@
         "vi": {
           "type": "string",
           "maxLength": 2000
+        }
+      },
+      "additionalProperties": false
+    },
+    "AppearanceValues": {
+      "type": "object",
+      "properties": {
+        "maxWidth": {
+          "type": "integer",
+          "minimum": 320,
+          "maximum": 960
+        },
+        "padding": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "margin": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "gap": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "columns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "fontSize": {
+          "type": "integer",
+          "minimum": 12,
+          "maximum": 24
+        },
+        "fontWeight": {
+          "enum": [400, 500, 600, 700]
+        },
+        "align": {
+          "enum": ["left", "center", "right"]
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "background": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "borderColor": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "borderWidth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "radius": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 32
+        },
+        "shadow": {
+          "enum": ["none", "soft"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "Appearance": {
+      "type": "object",
+      "properties": {
+        "maxWidth": {
+          "type": "integer",
+          "minimum": 320,
+          "maximum": 960
+        },
+        "padding": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "margin": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "gap": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "columns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "fontSize": {
+          "type": "integer",
+          "minimum": 12,
+          "maximum": 24
+        },
+        "fontWeight": {
+          "enum": [400, 500, 600, 700]
+        },
+        "align": {
+          "enum": ["left", "center", "right"]
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "background": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "borderColor": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "borderWidth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "radius": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 32
+        },
+        "shadow": {
+          "enum": ["none", "soft"]
+        },
+        "mobile": {
+          "$ref": "#/$defs/AppearanceValues"
         }
       },
       "additionalProperties": false

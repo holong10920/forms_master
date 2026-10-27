@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "1.0.0",
+  "kind": "form",
+  "formId": "frm_formats_synthetic",
+  "siteId": "site_demo",
+  "fields": [
+    {
+      "id": "fld_email",
+      "key": "email",
+      "type": "email",
+      "classification": "personal",
+      "persist": "never",
+      "validators": [
+        {
+          "use": "formatEmail"
+        }
+      ]
+    },
+    {
+      "id": "fld_tel",
+      "key": "tel",
+      "type": "tel",
+      "classification": "personal",
+      "persist": "never",
+      "validators": [
+        {
+          "use": "formatPhoneJP"
+        }
+      ]
+    },
+    {
+      "id": "fld_postal",
+      "key": "postal",
+      "type": "postal",
+      "classification": "personal",
+      "persist": "never",
+      "validators": [
+        {
+          "use": "formatPostalJP"
+        }
+      ]
+    },
+    {
+      "id": "fld_katakana",
+      "key": "katakana",
+      "type": "katakana",
+      "classification": "personal",
+      "persist": "never",
+      "validators": [
+        {
+          "use": "formatKatakana"
+        }
+      ]
+    },
+    {
+      "id": "fld_date",
+      "key": "date",
+      "type": "date",
+      "classification": "personal",
+      "persist": "never",
+      "validators": [
+        {
+          "use": "formatDate"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "stp_input",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_email"
+        },
+        {
+          "field": "$local:fld_tel"
+        },
+        {
+          "field": "$local:fld_postal"
+        },
+        {
+          "field": "$local:fld_katakana"
+        },
+        {
+          "field": "$local:fld_date"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_review"
+        }
+      ]
+    },
+    {
+      "id": "stp_review",
+      "kind": "review",
+      "transitions": [
+        {
+          "default": "stp_complete"
+        }
+      ]
+    },
+    {
+      "id": "stp_complete",
+      "kind": "complete"
+    }
+  ]
+}

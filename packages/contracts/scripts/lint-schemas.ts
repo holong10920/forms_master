@@ -2,8 +2,16 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { listSchemaFiles, schemasDir } from "./schema-files.ts";
 
-/** Keyword allowlist of spec #1 section 7.7. `pattern` and `format` are rejected (S0 is stricter
- * than the spec for `format`). */
+/** Keyword allowlist of spec #1 section 7.7. unrestricted `pattern` and `format` are rejected. Only the fixed host-owned appearance/config token patterns below are allowed. */
+const fixedPatterns = new Map([
+  ["/$defs/Field/properties/config/properties/postalAddressTarget", "^fld_[a-zA-Z0-9_]+$"],
+  ["/$defs/Field/properties/config/properties/queryParameter", "^[a-z][a-z0-9_]{0,30}$"],
+  ...["Appearance", "AppearanceValues"].flatMap((name) =>
+    ["color", "background", "borderColor"].map(
+      (key) => [`/$defs/${name}/properties/${key}`, "^#[a-fA-F0-9]{6}$"] as const,
+    ),
+  ),
+]);
 const KEYWORDS = new Set([
   "type",
   "properties",
@@ -58,6 +66,9 @@ function visit(
   }
   for (const [keyword, value] of Object.entries(node)) {
     const allowed =
+      (keyword === "pattern" &&
+        ["form-definition/v1.schema.json", "engine-ir/v1.schema.json"].includes(file) &&
+        fixedPatterns.get(pointer) === value) ||
       KEYWORDS.has(keyword) ||
       ANNOTATIONS.has(keyword) ||
       (pointer === "" && ROOT_ONLY.has(keyword));

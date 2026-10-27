@@ -64,13 +64,13 @@
       "current": "stp_review",
       "values": {
         "fld_flag": true,
-        "fld_label": "\ud842\udfb7\ufa30"
+        "fld_label": "𠮷侮"
       },
       "expected": {
         "payload": {
           "flag": true,
-          "label": "\ud842\udfb7\ufa30",
-          "echo": "\ud842\udfb7\ufa30!",
+          "label": "𠮷侮",
+          "echo": "𠮷侮!",
           "count": 0
         },
         "errors": []
@@ -82,7 +82,7 @@
       "current": "stp_review",
       "values": {
         "fld_flag": true,
-        "fld_label": "\ud842\udfb7ab"
+        "fld_label": "𠮷ab"
       },
       "expected": {
         "errors": [
@@ -237,7 +237,7 @@
       "current": "stp_review",
       "values": {
         "fld_flag": true,
-        "fld_label": "\ufeffa\ufeff"
+        "fld_label": "﻿a﻿"
       },
       "expected": {
         "payload": {
@@ -255,13 +255,13 @@
       "current": "stp_review",
       "values": {
         "fld_flag": true,
-        "fld_label": "\u304b\u3099"
+        "fld_label": "が"
       },
       "expected": {
         "payload": {
           "flag": true,
-          "label": "\u304b\u3099",
-          "echo": "\u304b\u3099!",
+          "label": "が",
+          "echo": "が!",
           "count": 0
         },
         "errors": []
@@ -418,12 +418,12 @@
       "definition": "canonical",
       "current": "stp_review",
       "values": {
-        "fld_text": "\ufa30",
+        "fld_text": "侮",
         "fld_area": " x\r\ny ",
-        "fld_email": "\uff54\uff41\uff52\uff4f\uff20\uff45\uff58\uff41\uff4d\uff50\uff4c\uff45\uff0e\uff4a\uff50",
-        "fld_tel": "\uff10\uff19\uff10\uff0d\uff11\uff12\uff13\uff14-\uff15\uff16\uff17\uff18",
-        "fld_postal": "\uff11\uff12\uff13\uff0d\uff14\uff15\uff16\uff17",
-        "fld_kana": "\uff8a\uff9f\uff80\uff9e",
+        "fld_email": "ｔａｒｏ＠ｅｘａｍｐｌｅ．ｊｐ",
+        "fld_tel": "０９０－１２３４-５６７８",
+        "fld_postal": "１２３－４５６７",
+        "fld_kana": "ﾊﾟﾀﾞ",
         "fld_choice": " a ",
         "fld_flag": true,
         "fld_cond": "a"
@@ -431,12 +431,12 @@
       "expected": {
         "errors": [],
         "payload": {
-          "text": "\ufa30",
+          "text": "侮",
           "area": "x\ny",
           "email": "taro@example.jp",
           "tel": "09012345678",
           "postal": "1234567",
-          "kana": "\u30d1\u30c0",
+          "kana": "パダ",
           "choice": " a ",
           "flag": true,
           "conditional": "a"
@@ -468,11 +468,11 @@
       "definition": "canonical",
       "current": "stp_review",
       "values": {
-        "fld_kana": "\u3084\u307e\u3060"
+        "fld_kana": "やまだ"
       },
       "expected": {
         "payload": {
-          "kana": "\u3084\u307e\u3060"
+          "kana": "やまだ"
         }
       }
     },
@@ -856,6 +856,844 @@
           "customerName": "Synthetic Customer",
           "consent": true
         }
+      }
+    },
+    {
+      "name": "formats-normalized",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "ｓｙｎｔｈｅｔｉｃ＠ｅｘａｍｐｌｅ．ｉｎｖａｌｉｄ",
+        "fld_tel": "０００－００００－００００",
+        "fld_postal": "０００ー００００",
+        "fld_katakana": "ｺﾞｳｾｲ",
+        "fld_date": "2028-02-29"
+      },
+      "expected": {
+        "errors": []
+      }
+    },
+    {
+      "name": "formats-missing-optional",
+      "definition": "formats",
+      "values": {},
+      "expected": {
+        "errors": []
+      }
+    },
+    {
+      "name": "email-invalid-0",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "invalid",
+        "fld_tel": "0000000000",
+        "fld_postal": "0000000",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "2028-02-29"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatEmail",
+            "path": "fld_email"
+          }
+        ]
+      }
+    },
+    {
+      "name": "email-invalid-1",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "a@",
+        "fld_tel": "0000000000",
+        "fld_postal": "0000000",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "2028-02-29"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatEmail",
+            "path": "fld_email"
+          }
+        ]
+      }
+    },
+    {
+      "name": "email-invalid-2",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "a@b",
+        "fld_tel": "0000000000",
+        "fld_postal": "0000000",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "2028-02-29"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatEmail",
+            "path": "fld_email"
+          }
+        ]
+      }
+    },
+    {
+      "name": "email-invalid-3",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "a b@example.invalid",
+        "fld_tel": "0000000000",
+        "fld_postal": "0000000",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "2028-02-29"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatEmail",
+            "path": "fld_email"
+          }
+        ]
+      }
+    },
+    {
+      "name": "email-invalid-4",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "a@-example.invalid",
+        "fld_tel": "0000000000",
+        "fld_postal": "0000000",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "2028-02-29"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatEmail",
+            "path": "fld_email"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tel-invalid-0",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "synthetic@example.invalid",
+        "fld_tel": "123",
+        "fld_postal": "0000000",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "2028-02-29"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatPhoneJP",
+            "path": "fld_tel"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tel-invalid-1",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "synthetic@example.invalid",
+        "fld_tel": "1234567890",
+        "fld_postal": "0000000",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "2028-02-29"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatPhoneJP",
+            "path": "fld_tel"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tel-invalid-2",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "synthetic@example.invalid",
+        "fld_tel": "000000000000",
+        "fld_postal": "0000000",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "2028-02-29"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatPhoneJP",
+            "path": "fld_tel"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tel-invalid-3",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "synthetic@example.invalid",
+        "fld_tel": "0abc",
+        "fld_postal": "0000000",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "2028-02-29"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatPhoneJP",
+            "path": "fld_tel"
+          }
+        ]
+      }
+    },
+    {
+      "name": "postal-invalid-0",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "synthetic@example.invalid",
+        "fld_tel": "0000000000",
+        "fld_postal": "000",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "2028-02-29"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatPostalJP",
+            "path": "fld_postal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "postal-invalid-1",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "synthetic@example.invalid",
+        "fld_tel": "0000000000",
+        "fld_postal": "abcdefgh",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "2028-02-29"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatPostalJP",
+            "path": "fld_postal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "postal-invalid-2",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "synthetic@example.invalid",
+        "fld_tel": "0000000000",
+        "fld_postal": "00000000",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "2028-02-29"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatPostalJP",
+            "path": "fld_postal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "katakana-invalid-0",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "synthetic@example.invalid",
+        "fld_tel": "0000000000",
+        "fld_postal": "0000000",
+        "fld_katakana": "abc",
+        "fld_date": "2028-02-29"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatKatakana",
+            "path": "fld_katakana"
+          }
+        ]
+      }
+    },
+    {
+      "name": "katakana-invalid-1",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "synthetic@example.invalid",
+        "fld_tel": "0000000000",
+        "fld_postal": "0000000",
+        "fld_katakana": "合成",
+        "fld_date": "2028-02-29"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatKatakana",
+            "path": "fld_katakana"
+          }
+        ]
+      }
+    },
+    {
+      "name": "katakana-invalid-2",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "synthetic@example.invalid",
+        "fld_tel": "0000000000",
+        "fld_postal": "0000000",
+        "fld_katakana": "ゴウセイ1",
+        "fld_date": "2028-02-29"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatKatakana",
+            "path": "fld_katakana"
+          }
+        ]
+      }
+    },
+    {
+      "name": "date-invalid-0",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "synthetic@example.invalid",
+        "fld_tel": "0000000000",
+        "fld_postal": "0000000",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "2027-02-29"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatDate",
+            "path": "fld_date"
+          }
+        ]
+      }
+    },
+    {
+      "name": "date-invalid-1",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "synthetic@example.invalid",
+        "fld_tel": "0000000000",
+        "fld_postal": "0000000",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "2028-02-30"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatDate",
+            "path": "fld_date"
+          }
+        ]
+      }
+    },
+    {
+      "name": "date-invalid-2",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "synthetic@example.invalid",
+        "fld_tel": "0000000000",
+        "fld_postal": "0000000",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "2026-13-01"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatDate",
+            "path": "fld_date"
+          }
+        ]
+      }
+    },
+    {
+      "name": "date-invalid-3",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "synthetic@example.invalid",
+        "fld_tel": "0000000000",
+        "fld_postal": "0000000",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "1900-02-29"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatDate",
+            "path": "fld_date"
+          }
+        ]
+      }
+    },
+    {
+      "name": "date-invalid-4",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "synthetic@example.invalid",
+        "fld_tel": "0000000000",
+        "fld_postal": "0000000",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "0000-01-01"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatDate",
+            "path": "fld_date"
+          }
+        ]
+      }
+    },
+    {
+      "name": "date-invalid-5",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "synthetic@example.invalid",
+        "fld_tel": "0000000000",
+        "fld_postal": "0000000",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "2101-01-01"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatDate",
+            "path": "fld_date"
+          }
+        ]
+      }
+    },
+    {
+      "name": "date-invalid-6",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "synthetic@example.invalid",
+        "fld_tel": "0000000000",
+        "fld_postal": "0000000",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "2026-1-01"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatDate",
+            "path": "fld_date"
+          }
+        ]
+      }
+    },
+    {
+      "name": "formats-valid-all",
+      "definition": "formats",
+      "current": "stp_review",
+      "values": {
+        "fld_email": "synthetic@example.invalid",
+        "fld_tel": "0000000000",
+        "fld_postal": "0000000",
+        "fld_katakana": "ゴウセイ",
+        "fld_date": "2028-02-29"
+      },
+      "expected": {
+        "errors": []
+      }
+    },
+    {
+      "name": "katakana-hiragana-not-transformed",
+      "definition": "formats",
+      "values": {
+        "fld_katakana": "ごうせい"
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatKatakana",
+            "path": "fld_katakana"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pc-apply-delivery",
+      "definition": "pc-apply-reference",
+      "current": "stp_review",
+      "values": {
+        "fld_category": "note",
+        "fld_title": "Synthetic PC",
+        "fld_cpu": "Synthetic CPU",
+        "fld_memory": "16GB",
+        "fld_os": "Synthetic OS",
+        "fld_boot_check": "正常に起動する",
+        "fld_battery": "normal",
+        "fld_adapter": "yes",
+        "fld_has_original_box": "yes",
+        "fld_pickup_method": "delivery",
+        "fld_delivery_date": "2028-01-01",
+        "fld_delivery_time": "am",
+        "fld_has_box": "yes",
+        "fld_business_domain": "ST-0001",
+        "fld_kana": "ゴウセイ",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "0000000000",
+        "fld_zip": "0000000",
+        "fld_address": "合成市",
+        "fld_agree_policy": true,
+        "fld_screen_size": "13.6",
+        "fld_graphic_card": "Synthetic graphics",
+        "fld_internal_problems": [
+          "noise"
+        ]
+      },
+      "expected": {
+        "errors": []
+      }
+    },
+    {
+      "name": "pc-apply-shop",
+      "definition": "pc-apply-reference",
+      "current": "stp_review",
+      "values": {
+        "fld_category": "note",
+        "fld_title": "Synthetic PC",
+        "fld_cpu": "Synthetic CPU",
+        "fld_memory": "16GB",
+        "fld_os": "Synthetic OS",
+        "fld_boot_check": "正常に起動する",
+        "fld_battery": "normal",
+        "fld_adapter": "yes",
+        "fld_has_original_box": "yes",
+        "fld_pickup_method": "shop",
+        "fld_delivery_date": "2028-01-01",
+        "fld_delivery_time": "am",
+        "fld_has_box": "yes",
+        "fld_business_domain": "ST-0001",
+        "fld_kana": "ゴウセイ",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "0000000000",
+        "fld_zip": "0000000",
+        "fld_address": "合成市",
+        "fld_agree_policy": true,
+        "fld_screen_size": "13.6",
+        "fld_graphic_card": "Synthetic graphics",
+        "fld_internal_problems": [
+          "noise"
+        ]
+      },
+      "expected": {
+        "errors": []
+      }
+    },
+    {
+      "name": "pc-apply-dither-desktop",
+      "definition": "pc-apply-reference",
+      "current": "stp_review",
+      "values": {
+        "fld_category": "desktop",
+        "fld_title": "Synthetic PC",
+        "fld_cpu": "Synthetic CPU",
+        "fld_memory": "16GB",
+        "fld_os": "Synthetic OS",
+        "fld_boot_check": "正常に起動する",
+        "fld_battery": "normal",
+        "fld_adapter": "yes",
+        "fld_has_original_box": "yes",
+        "fld_pickup_method": "dither",
+        "fld_delivery_date": "2028-01-01",
+        "fld_delivery_time": "am",
+        "fld_has_box": "yes",
+        "fld_business_domain": "ST-0001",
+        "fld_kana": "ゴウセイ",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "0000000000",
+        "fld_zip": "0000000",
+        "fld_address": "合成市",
+        "fld_agree_policy": true,
+        "fld_screen_size": "13.6",
+        "fld_graphic_card": "Synthetic graphics",
+        "fld_internal_problems": [
+          "noise"
+        ]
+      },
+      "expected": {
+        "errors": []
+      }
+    },
+    {
+      "name": "pc-apply-email",
+      "definition": "pc-apply-reference",
+      "current": "stp_review",
+      "values": {
+        "fld_category": "note",
+        "fld_title": "Synthetic PC",
+        "fld_cpu": "Synthetic CPU",
+        "fld_memory": "16GB",
+        "fld_os": "Synthetic OS",
+        "fld_boot_check": "正常に起動する",
+        "fld_battery": "normal",
+        "fld_adapter": "yes",
+        "fld_has_original_box": "yes",
+        "fld_pickup_method": "delivery",
+        "fld_delivery_date": "2028-01-01",
+        "fld_delivery_time": "am",
+        "fld_has_box": "yes",
+        "fld_business_domain": "ST-0001",
+        "fld_kana": "ゴウセイ",
+        "fld_email": "bad",
+        "fld_phone_number": "0000000000",
+        "fld_zip": "0000000",
+        "fld_address": "合成市",
+        "fld_agree_policy": true,
+        "fld_screen_size": "13.6",
+        "fld_graphic_card": "Synthetic graphics",
+        "fld_internal_problems": [
+          "noise"
+        ]
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatEmail",
+            "path": "fld_email"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pc-apply-date",
+      "definition": "pc-apply-reference",
+      "current": "stp_review",
+      "values": {
+        "fld_category": "note",
+        "fld_title": "Synthetic PC",
+        "fld_cpu": "Synthetic CPU",
+        "fld_memory": "16GB",
+        "fld_os": "Synthetic OS",
+        "fld_boot_check": "正常に起動する",
+        "fld_battery": "normal",
+        "fld_adapter": "yes",
+        "fld_has_original_box": "yes",
+        "fld_pickup_method": "delivery",
+        "fld_delivery_date": "2027-02-29",
+        "fld_delivery_time": "am",
+        "fld_has_box": "yes",
+        "fld_business_domain": "ST-0001",
+        "fld_kana": "ゴウセイ",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "0000000000",
+        "fld_zip": "0000000",
+        "fld_address": "合成市",
+        "fld_agree_policy": true,
+        "fld_screen_size": "13.6",
+        "fld_graphic_card": "Synthetic graphics",
+        "fld_internal_problems": [
+          "noise"
+        ]
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatDate",
+            "path": "fld_delivery_date"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pc-apply-consent",
+      "definition": "pc-apply-reference",
+      "current": "stp_review",
+      "values": {
+        "fld_category": "note",
+        "fld_title": "Synthetic PC",
+        "fld_cpu": "Synthetic CPU",
+        "fld_memory": "16GB",
+        "fld_os": "Synthetic OS",
+        "fld_boot_check": "正常に起動する",
+        "fld_battery": "normal",
+        "fld_adapter": "yes",
+        "fld_has_original_box": "yes",
+        "fld_pickup_method": "delivery",
+        "fld_delivery_date": "2028-01-01",
+        "fld_delivery_time": "am",
+        "fld_has_box": "yes",
+        "fld_business_domain": "ST-0001",
+        "fld_kana": "ゴウセイ",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "0000000000",
+        "fld_zip": "0000000",
+        "fld_address": "合成市",
+        "fld_agree_policy": false,
+        "fld_screen_size": "13.6",
+        "fld_graphic_card": "Synthetic graphics",
+        "fld_internal_problems": [
+          "noise"
+        ]
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "mustBeTrue",
+            "path": "fld_agree_policy"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pc-apply-postal",
+      "definition": "pc-apply-reference",
+      "current": "stp_review",
+      "values": {
+        "fld_category": "note",
+        "fld_title": "Synthetic PC",
+        "fld_cpu": "Synthetic CPU",
+        "fld_memory": "16GB",
+        "fld_os": "Synthetic OS",
+        "fld_boot_check": "正常に起動する",
+        "fld_battery": "normal",
+        "fld_adapter": "yes",
+        "fld_has_original_box": "yes",
+        "fld_pickup_method": "delivery",
+        "fld_delivery_date": "2028-01-01",
+        "fld_delivery_time": "am",
+        "fld_has_box": "yes",
+        "fld_business_domain": "ST-0001",
+        "fld_kana": "ゴウセイ",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "0000000000",
+        "fld_zip": "bad",
+        "fld_address": "合成市",
+        "fld_agree_policy": true,
+        "fld_screen_size": "13.6",
+        "fld_graphic_card": "Synthetic graphics",
+        "fld_internal_problems": [
+          "noise"
+        ]
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatPostalJP",
+            "path": "fld_zip"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pc-apply-phone",
+      "definition": "pc-apply-reference",
+      "current": "stp_review",
+      "values": {
+        "fld_category": "note",
+        "fld_title": "Synthetic PC",
+        "fld_cpu": "Synthetic CPU",
+        "fld_memory": "16GB",
+        "fld_os": "Synthetic OS",
+        "fld_boot_check": "正常に起動する",
+        "fld_battery": "normal",
+        "fld_adapter": "yes",
+        "fld_has_original_box": "yes",
+        "fld_pickup_method": "delivery",
+        "fld_delivery_date": "2028-01-01",
+        "fld_delivery_time": "am",
+        "fld_has_box": "yes",
+        "fld_business_domain": "ST-0001",
+        "fld_kana": "ゴウセイ",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "123",
+        "fld_zip": "0000000",
+        "fld_address": "合成市",
+        "fld_agree_policy": true,
+        "fld_screen_size": "13.6",
+        "fld_graphic_card": "Synthetic graphics",
+        "fld_internal_problems": [
+          "noise"
+        ]
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatPhoneJP",
+            "path": "fld_phone_number"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pc-apply-kana",
+      "definition": "pc-apply-reference",
+      "current": "stp_review",
+      "values": {
+        "fld_category": "note",
+        "fld_title": "Synthetic PC",
+        "fld_cpu": "Synthetic CPU",
+        "fld_memory": "16GB",
+        "fld_os": "Synthetic OS",
+        "fld_boot_check": "正常に起動する",
+        "fld_battery": "normal",
+        "fld_adapter": "yes",
+        "fld_has_original_box": "yes",
+        "fld_pickup_method": "delivery",
+        "fld_delivery_date": "2028-01-01",
+        "fld_delivery_time": "am",
+        "fld_has_box": "yes",
+        "fld_business_domain": "ST-0001",
+        "fld_kana": "合成",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "0000000000",
+        "fld_zip": "0000000",
+        "fld_address": "合成市",
+        "fld_agree_policy": true,
+        "fld_screen_size": "13.6",
+        "fld_graphic_card": "Synthetic graphics",
+        "fld_internal_problems": [
+          "noise"
+        ]
+      },
+      "expected": {
+        "errors": [
+          {
+            "code": "formatKatakana",
+            "path": "fld_kana"
+          }
+        ]
       }
     }
   ]

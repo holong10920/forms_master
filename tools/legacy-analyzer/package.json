@@ -1,0 +1,12 @@
+{
+  "name": "@fb/legacy-analyzer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "analyze": "node src/analyze.ts"
+  },
+  "devDependencies": {
+    "postcss": "8.5.31"
+  }
+}

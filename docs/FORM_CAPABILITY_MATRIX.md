@@ -1,5 +1,7 @@
 # Form Capability Matrix (P00-04)
 
+> **Checkpoint hiện hành 2026-10-27:** Go + React Workspace đã chạy; source Studio ở `tools/go-auth/studio`. Python/oracle/rollback host cũ đã retire theo yêu cầu user. Xem [CURRENT_STATUS](CURRENT_STATUS.md), [cleanup](evidence/SOURCE-CLEANUP/RESULTS.md), [Go route migration](../tools/go-auth/evidence/migration/ROUTE-MATRIX.md) và [legacy gap matrix](../tools/legacy-analyzer/evidence/CAPABILITY-MATRIX.md). Các bảng/checkpoint lịch sử dưới đây không phải khẳng định hệ thống vẫn ở design-only. T12/K13 vẫn VERIFICATION_PENDING; không nâng toàn bộ legacy thành supported.
+
 > Góc nhìn ở mức capability về các form thu mua legacy. Xây dựng từ audit read-only ngày 2026-10-23.
 > Theo ADR-001, file này **chỉ ở mức trừu tượng**: không có paths, endpoints, tên env, tên library, điểm yếu nội bộ, hay số bundle legacy. Các chi tiết đó nằm trong `docs/internal/`, thư mục bị gitignore.
 > Status: `CONFIRMED` = đã quan sát trong hệ thống legacy · `ASSUMED` = suy luận · `UNKNOWN` = chưa kiểm tra.

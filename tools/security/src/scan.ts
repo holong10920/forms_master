@@ -1,21 +1,18 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { lstatSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, isAbsolute, join } from "node:path";
-import { canonicalJson } from "../../../packages/contracts/src/jcs.ts";
+import { dirname, isAbsolute, join, resolve, relative } from "node:path";
 
-export const SCANNER = "detect-secrets==1.5.0";
-interface RawFinding {
-  type: string;
-  line_number: number;
-  hashed_secret: string;
-}
-interface Baseline {
-  version: string;
-  plugins_used: { name: string }[];
-  results?: Record<string, RawFinding[]>;
-}
+export const SCANNER = "gitleaks==8.30.1";
 export interface Finding {
   file: string;
   line: number;
@@ -25,7 +22,7 @@ export interface Finding {
 }
 export interface ScanReport {
   scanner: string;
-  detectors: number;
+  detectors: null;
   files: number;
   findings: Finding[];
   unresolved: number;
@@ -104,121 +101,45 @@ export function exportSnapshot(
   }
   return manifest;
 }
-function fixtureDigests(root: string, file: string): Set<string> {
-  const computed = new Set<string>();
-  if (file === "contracts/fixtures/jcs/cases.json") {
-    const fixture = JSON.parse(readFileSync(join(root, file), "utf8")) as {
-      cases: { input: string; canonical?: string }[];
-    };
-    for (const c of fixture.cases)
-      if (c.canonical !== undefined) {
-        const value = canonicalJson(JSON.parse(c.input));
-        if (value !== c.canonical) throw new Error("fixture canonical mismatch");
-        computed.add(hash("sha256", value));
-      }
-  } else if (file === "contracts/fixtures/blocks/registry.json") {
-    const registry = JSON.parse(readFileSync(join(root, file), "utf8")) as Record<string, string>;
-    for (const pin of Object.keys(registry)) {
-      if (!/^blk_customer_info@r[12]$/u.test(pin)) continue;
-      computed.add(
-        hash("sha256", readFileSync(join(root, "contracts/fixtures/blocks", pin + ".json"))),
-      );
-    }
-  } else if (file === "contracts/fixtures/digest/sha256-hex.json") {
-    const fixture = JSON.parse(readFileSync(join(root, file), "utf8")) as {
-      rawDigests: { utf8: string }[];
-      jcsDigests: { input: string }[];
-    };
-    for (const c of fixture.rawDigests) computed.add(hash("sha256", c.utf8));
-    for (const c of fixture.jcsDigests)
-      computed.add(hash("sha256", canonicalJson(JSON.parse(c.input))));
-  }
-  return computed;
-}
-// Public test data, not credentials: RFC 7636 Appendix B, checked against the RFC Editor text.
-// https://www.rfc-editor.org/rfc/rfc7636.html#appendix-B
-const PUBLIC_PKCE_VECTORS = [
-  "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
-  "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
-];
-export function scanDirectory(root: string, offline = false): ScanReport {
-  const env = {
-    ...process.env,
-    UV_CACHE_DIR: process.env.UV_CACHE_DIR ?? join(process.cwd(), ".tools/uv-cache"),
-    UV_TOOL_DIR: process.env.UV_TOOL_DIR ?? join(process.cwd(), ".tools/uv-tools"),
-    UV_TOOL_BIN_DIR: process.env.UV_TOOL_BIN_DIR ?? join(process.cwd(), ".tools/uv-bin"),
-  };
-  const result = spawnSync(
-    "uvx",
+export function scanDirectory(root: string): ScanReport {
+  const project = resolve(import.meta.dirname, "../../..");
+  const bundled = join(project, ".tools/bin/gitleaks");
+  const bin = process.env.FB_GITLEAKS_BIN ?? (existsSync(bundled) ? bundled : "gitleaks");
+  const version = spawnSync(bin, ["version"], { encoding: "utf8" });
+  if (version.status !== 0 || version.stdout.trim() !== "8.30.1")
+    throw Error("Gitleaks 8.30.1 required; security gate BLOCKED");
+  // Findings stay in memory; only path/line/rule are returned, never Match/Secret.
+  const scan = spawnSync(
+    bin,
     [
-      ...(offline ? ["--offline"] : []),
-      "--from",
-      SCANNER,
-      "detect-secrets",
-      "scan",
-      "--no-verify",
-      "--all-files",
-      ".",
+      "dir",
+      root,
+      "--config",
+      join(project, ".gitleaks.toml"),
+      "--no-banner",
+      "--log-level",
+      "fatal",
+      "--report-format",
+      "json",
+      "--report-path",
+      "-",
     ],
-    { cwd: root, env, encoding: "utf8", maxBuffer: 16 * 1024 * 1024, timeout: 120_000 },
+    { encoding: "utf8", maxBuffer: 16 * 1024 * 1024, timeout: 120000 },
   );
-  if (result.status !== 0)
-    throw new Error("detect-secrets could not execute; security gate BLOCKED");
-  const baseline = JSON.parse(result.stdout) as Baseline;
-  if (
-    baseline.version !== "1.5.0" ||
-    baseline.plugins_used.length !== 27 ||
-    new Set(baseline.plugins_used.map((p) => p.name)).size !== 27 ||
-    !baseline.results
-  )
-    throw new Error("unexpected scanner coverage");
-  const findings: Finding[] = [];
-  for (const [file, matches] of Object.entries(baseline.results)) {
+  if (scan.status !== 0 && scan.status !== 1)
+    throw Error("Gitleaks could not execute; security gate BLOCKED");
+  const raw = JSON.parse(scan.stdout || "[]") as {
+    File: string;
+    StartLine: number;
+    RuleID: string;
+    Secret: string;
+  }[];
+  const findings: Finding[] = raw.map((f) => {
+    const file = isAbsolute(f.File) ? relative(root, f.File) : f.File;
     safePath(file);
-    const lines = readFileSync(join(root, file), "utf8").split(/\r?\n/);
-    const digests = fixtureDigests(root, file);
-    for (const finding of matches) {
-      let classification: Finding["classification"] = "unreviewed";
-      const line = lines[finding.line_number - 1] ?? "";
-      const digest = (
-        file === "contracts/fixtures/blocks/registry.json"
-          ? /^\s*"blk_customer_info@r[12]": "([a-f0-9]{64})",?\s*$/
-          : /^\s*"sha256": "([a-f0-9]{64})",?\s*$/
-      ).exec(line)?.[1];
-      if (
-        finding.type === "Hex High Entropy String" &&
-        digest &&
-        digests.has(digest) &&
-        hash("sha1", digest) === finding.hashed_secret
-      )
-        classification = "recomputed-fixture-digest";
-      const command = "node tools/security/src/secrets.ts";
-      if (
-        file === "package.json" &&
-        finding.type === "Secret Keyword" &&
-        line.trim() === `"secrets": "${command}",` &&
-        hash("sha1", command) === finding.hashed_secret
-      )
-        classification = "fixed-scan-command";
-      if (
-        ["tools/local_p0/test/oidc.test.ts", "tools/security/src/scan.ts"].includes(file) &&
-        finding.type === "Base64 High Entropy String" &&
-        PUBLIC_PKCE_VECTORS.some(
-          (value) =>
-            line.includes(JSON.stringify(value)) && hash("sha1", value) === finding.hashed_secret,
-        )
-      )
-        classification = "public-rfc7636-vector";
-      findings.push({ file, line: finding.line_number, type: finding.type, classification });
-    }
-  }
-  return {
-    scanner: SCANNER,
-    detectors: 27,
-    files: 0,
-    findings,
-    unresolved: findings.filter((f) => f.classification === "unreviewed").length,
-  };
+    return { file, line: f.StartLine, type: f.RuleID, classification: "unreviewed" };
+  });
+  return { scanner: SCANNER, detectors: null, files: 0, findings, unresolved: findings.length };
 }
 export function scanRepository(root: string) {
   const selected = sourcePaths(root);

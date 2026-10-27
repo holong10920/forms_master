@@ -1,0 +1,29 @@
+Fetching vulnerabilities from the database...
+
+Checking the code against the vulnerabilities...
+
+The package pattern matched the following 6 root packages:
+  forms-master/go-auth/internal/persistence
+  forms-master/go-auth/internal/auth
+  forms-master/go-auth/internal/platform
+  forms-master/go-auth/cmd/api
+  forms-master/go-auth/internal/localidp
+  forms-master/go-auth/cmd/local-idp
+Govulncheck scanned the following 15 modules and the go1.27.3 standard library:
+  forms-master/go-auth
+  github.com/coreos/go-oidc/v3@v3.21.0
+  github.com/dustin/go-humanize@v1.0.1
+  github.com/go-jose/go-jose/v4@v4.1.4
+  github.com/google/uuid@v1.6.0
+  github.com/mattn/go-isatty@v0.0.20
+  github.com/ncruces/go-strftime@v0.1.9
+  github.com/remyoudompheng/bigfft@v0.0.0-20230129092748-24d4a6f8daec
+  golang.org/x/exp@v0.0.0-20250620022241-b7579e27df2b
+  golang.org/x/oauth2@v0.36.0
+  golang.org/x/sys@v0.47.0
+  modernc.org/libc@v1.66.3
+  modernc.org/mathutil@v1.7.1
+  modernc.org/memory@v1.11.0
+  modernc.org/sqlite@v1.38.2
+
+No vulnerabilities found.

@@ -1,0 +1,81 @@
+{
+  "form": "frm_e15a655ed1054ed38b61d94d9916bc75",
+  "review": "review_-aJiAndJ-0SvY6T-jukecZfV",
+  "selfApprovalStatus": 403,
+  "url": "http://127.0.0.1:4183/r/rel_jwfteq3lijpb53sfvltt6vqa6g/index.html",
+  "separateApprover": true,
+  "network": [
+    {
+      "path": "/api/save",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/list",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/contract",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/review",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/history",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/history",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/history",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/approve",
+      "method": "POST",
+      "status": 403,
+      "port": "4180"
+    },
+    {
+      "path": "/api/history",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/publish",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/history",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    }
+  ]
+}

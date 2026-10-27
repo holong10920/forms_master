@@ -34,7 +34,10 @@ export interface Chunk {
 export function audit(
   chunks: Chunk[],
   files: Map<string, Buffer>,
-  profile: { plugin: boolean; motion: boolean } = { plugin: false, motion: false },
+  profile: { plugin: boolean; motion: boolean; enhancements?: boolean } = {
+    plugin: false,
+    motion: false,
+  },
 ): void {
   const modules = chunks.flatMap((c) => c.modules);
   if (modules.some((m) => /\/server\/|\/design\/|fixtures\/|\.py$/u.test(m.id)))
@@ -48,7 +51,7 @@ export function audit(
   )
     throw new Error("E-ARTIFACT-MOTION-OR-STORE");
   for (const c of chunks) {
-    if (c.dynamicImports.length && !profile.plugin && !profile.motion)
+    if (c.dynamicImports.length && !profile.plugin && !profile.motion && !profile.enhancements)
       throw new Error("E-ARTIFACT-UNEXPECTED-DYNAMIC-IMPORT");
     for (const path of c.staticImports) if (!files.has(path)) throw new Error("E-ARTIFACT-IMPORT");
   }
@@ -93,7 +96,7 @@ function moduleId(id: string, generated: string): string {
   if (path === realpathSync(generated)) return "gen:entry.ts";
   if (
     dirname(path) === dirname(realpathSync(generated)) &&
-    ["store.ts", "motion.ts"].includes(path.split("/").at(-1) ?? "")
+    ["store.ts", "motion.ts", "enhancements.ts"].includes(path.split("/").at(-1) ?? "")
   )
     return `gen:${path.split("/").at(-1) ?? "entry"}`;
   const p = relative(root, path).replaceAll("\\", "/");
@@ -187,7 +190,23 @@ export async function compile(
   assertIR(ir);
   localize(ir);
   const resolved = resolveAssets(root, definition as FormDefinitionV1, ir);
-  const profile = { plugin: resolved.plugin, motion: resolved.preset !== "none" };
+  const extended =
+    !!ir.appearance ||
+    !!ir.customerDraft ||
+    ir.nodes.some(
+      (f) =>
+        f.type !== "group" &&
+        (!!f.appearance ||
+          !!f.config?.searchable ||
+          !!f.config?.postalAddressTarget ||
+          !!f.config?.queryParameter ||
+          f.config?.presentation === "native"),
+    );
+  const profile = {
+    plugin: resolved.plugin,
+    motion: resolved.preset !== "none",
+    enhancements: extended,
+  };
   if (
     !/^frm_[a-z0-9_]{1,64}$/u.test(ir.form.formId) ||
     ir.nodes.some(
@@ -195,6 +214,7 @@ export async function compile(
         f.type === "group" ||
         ![
           "number",
+          "date",
           "tel",
           "postal",
           "katakana",
@@ -213,18 +233,30 @@ export async function compile(
     throw new Error("E-RUNTIME-PROFILE-UNSUPPORTED");
   const temp = mkdtempSync(join(tmpdir(), "fb-compiler-"));
   const entry = join(temp, "entry.ts");
+  if (extended)
+    writeFileSync(
+      join(temp, "enhancements.ts"),
+      'export * from "@fb/static-runtime-enhancements";',
+    );
   if (resolved.plugin) writeFileSync(join(temp, "store.ts"), storeEntry);
   if (resolved.preset !== "none")
     writeFileSync(join(temp, "motion.ts"), motionEntry(resolved.preset));
   writeFileSync(
     entry,
-    `import {boot} from "@fb/static-runtime";boot({${resolved.plugin ? 'loadStore:()=>import("./store.ts"),' : ""}${resolved.preset !== "none" ? 'loadMotion:()=>import("./motion.ts"),' : ""}});`,
+    `import {boot} from "@fb/static-runtime";boot({${extended ? 'loadEnhancements:()=>import("./enhancements.ts"),' : ""}${resolved.plugin ? 'loadStore:()=>import("./store.ts"),' : ""}${resolved.preset !== "none" ? 'loadMotion:()=>import("./motion.ts"),' : ""}});`,
   );
   const files = new Map<string, Buffer>();
   const chunks: Chunk[] = [];
   try {
     const proof: Plugin = {
       name: "closed-sports-module-graph",
+      transform(_code, id) {
+        // CSS is already emitted as SRI links; the host verifies every dynamic group
+        // before native import. Retain import failure propagation without a preload layer.
+        if (id === "\0vite/preload-helper.js")
+          return { code: "export const __vitePreload = load => load();", map: null };
+        return null;
+      },
       load(id) {
         moduleId(id, entry);
         return null;
@@ -247,7 +279,16 @@ export async function compile(
     };
     const result = await build({
       configFile: false,
-      define: { __FB_PREVIEW__: preview ? "true" : "false" },
+      define: {
+        __FB_PREVIEW__: preview ? "true" : "false",
+        __FB_MOTION__: JSON.stringify(resolved.preset !== "none"),
+        __FB_EXTENDED__: JSON.stringify(extended),
+        __FB_FORMATS__: JSON.stringify(
+          ir.nodes.some(
+            (f) => f.type !== "group" && f.validators?.some((v) => v.use.startsWith("format")),
+          ),
+        ),
+      },
       envFile: false,
       root: temp,
       publicDir: false,
@@ -259,6 +300,10 @@ export async function compile(
           react: realpathSync(join(root, "tools/compiler/node_modules/react")),
           "react-dom": realpathSync(join(root, "tools/compiler/node_modules/react-dom")),
           "@fb/static-runtime": join(root, "packages/static-runtime/src/index.ts"),
+          "@fb/static-runtime-enhancements": join(
+            root,
+            "packages/static-runtime/src/enhancements.ts",
+          ),
           "@fb/form-engine": join(root, "packages/form-engine/src/index.ts"),
           "@fb/contracts": join(root, "packages/contracts/src/index.ts"),
           "@platform/store-selector/browser": join(
@@ -273,7 +318,7 @@ export async function compile(
         write: false,
         sourcemap: false,
         minify: "oxc",
-        modulePreload: { polyfill: false },
+        modulePreload: false,
         rolldownOptions: {
           input: entry,
           output: {
@@ -286,8 +331,10 @@ export async function compile(
         },
       },
     });
-    if (!("output" in result)) throw new Error("E-BUILD-OUTPUT");
-    for (const item of result.output)
+    if (Array.isArray(result) && result.length !== 1) throw new Error("E-BUILD-OUTPUT");
+    const built = Array.isArray(result) ? result[0] : result;
+    if (!built || !("output" in built)) throw new Error("E-BUILD-OUTPUT");
+    for (const item of built.output)
       files.set(
         item.fileName,
         item.type === "chunk" ? Buffer.from(item.code) : Buffer.from(item.source),
@@ -375,7 +422,8 @@ export async function compile(
       (n, file) => n + gzipSync(files.get(file) ?? Buffer.alloc(0), { level: 9 }).length,
       0,
     );
-    if (initialJS > 12 * 1024) throw new Error("E-PERF-INITIAL-JS");
+    if (initialJS > 12 * 1024)
+      throw Object.assign(new Error("E-PERF-INITIAL-JS"), { bytes: initialJS });
   }
   const closure = (start: string): string[] => {
     const found = new Set<string>();
@@ -401,7 +449,11 @@ export async function compile(
     mode: preview ? "partial-preview" : "local-candidate",
     ...(preview ? { partial: preview } : {}),
     plugin: resolved.plugin,
-    groups: { store: group("store"), motion: group("motion") },
+    groups: {
+      store: group("store"),
+      motion: group("motion"),
+      ...(extended ? { enhancements: group("enhancements") } : {}),
+    },
     assets: manifest.inventory.map((f) => ({ path: f.path, sha256: f.sha256.slice(7) })),
     releaseId: candidateId,
     formId: ir.form.formId,
@@ -420,7 +472,18 @@ export async function compile(
     `sha256-${createHash("sha256")
       .update(files.get(path) ?? Buffer.alloc(0))
       .digest("base64")}`;
-  const html = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${ir.form.formId === "frm_pc_reference" ? "PC" : "Sports"} · Local Synthetic</title>${css.map((f) => `<link rel="stylesheet" href="./${f.path}" integrity="${sri(f.path)}" crossorigin="anonymous">`).join("")}</head><body><main id="app" aria-live="polite">読み込み中…</main><script type="application/json" id="release">${escape(canonicalJson(metadata))}</script><script type="module" src="./${main.path}" integrity="${sri(main.path)}" crossorigin="anonymous"></script></body></html>`;
+  const documentTitle = (
+    ir.texts?.formTitle?.ja ||
+    (ir.form.formId === "frm_pc_reference"
+      ? "PC"
+      : ir.form.formId === "frm_sports"
+        ? "Sports"
+        : "Form Master")
+  )
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+  const html = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${documentTitle} · Local Synthetic</title>${css.map((f) => `<link rel="stylesheet" href="./${f.path}" integrity="${sri(f.path)}" crossorigin="anonymous">`).join("")}</head><body><main id="app" aria-live="polite">読み込み中…</main><script type="application/json" id="release">${escape(canonicalJson(metadata))}</script><script type="module" src="./${main.path}" integrity="${sri(main.path)}" crossorigin="anonymous"></script></body></html>`;
   files.set("index.html", Buffer.from(html));
   if (!profile.plugin && !profile.motion && !preview) {
     const size = [...initial, "index.html", ...css.map((f) => f.path)].reduce(

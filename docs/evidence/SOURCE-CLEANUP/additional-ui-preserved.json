@@ -1,0 +1,9 @@
+{
+  "files": [
+    "index.html",
+    "workflow.js",
+    "admin.js"
+  ],
+  "action": "Preserved current additions; removed only unused dirty import in workflow.js",
+  "backup": "/tmp/cleanup-preserved-ui"
+}

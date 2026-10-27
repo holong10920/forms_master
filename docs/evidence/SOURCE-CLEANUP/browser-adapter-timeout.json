@@ -1,0 +1,8 @@
+{
+  "timeoutMilliseconds": 3340,
+  "loading": true,
+  "errorFeedback": true,
+  "retrySucceeded": true,
+  "lateResponseIgnored": true,
+  "errors": []
+}

@@ -1,10 +1,10 @@
+import { goSubmission } from "../../go-auth/go-tool.ts";
 import { readFileSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { execFileSync } from "node:child_process";
 import { test, expect } from "vitest";
 import { expandBlocks, bindBlocks } from "../src/blocks.ts";
-import { compile, root } from "../src/build.ts";
+import { compile } from "../src/build.ts";
 import { loadDefinition, assertIR, createSession, payloadPreview, snapshot } from "@fb/form-engine";
 import type { FormDefinitionV1 } from "@fb/contracts";
 const definition = (): FormDefinitionV1 => ({
@@ -54,7 +54,7 @@ function instance(d: FormDefinitionV1, n: number) {
   if (!item) throw Error("missing fixture instance");
   return item;
 }
-test("exact shared-block pins, stable instance identities, const inputs and TS/Python nested payload parity", () => {
+test("exact shared-block pins, stable instance identities, const inputs and TS/Go nested payload parity", () => {
   const d = definition(),
     expanded = expandBlocks(d),
     ir = loadDefinition(expanded.definition);
@@ -73,28 +73,14 @@ test("exact shared-block pins, stable instance identities, const inputs and TS/P
     other: { name: "Synthetic Name", email: "synthetic@example.invalid" },
   };
   expect(payloadPreview(ir, state)).toEqual(expected);
-  const python = execFileSync(
-    join(root, ".venv/bin/python"),
-    [
-      "-c",
-      "import sys,json;from fb_engine.core import evaluate_submission;d=json.load(sys.stdin);print(json.dumps(evaluate_submission(d['ir'],d['payload'])))",
-    ],
-    { input: JSON.stringify({ ir, payload: expected }), encoding: "utf8" },
-  );
-  expect(JSON.parse(python)).toMatchObject({ ok: true, payload: expected });
+  expect(goSubmission(ir, expected)).toMatchObject({ ok: true, payload: expected });
   state = { ...state, values: { ...state.values, fld_mode: "no" } };
   expect(payloadPreview(ir, state)).toEqual({ mode: "no" });
   expect(snapshot(ir, state, true).active.size).toBe(1);
-  const bad = JSON.parse(
-    execFileSync(
-      join(root, ".venv/bin/python"),
-      [
-        "-c",
-        "import sys,json;from fb_engine.core import evaluate_submission;d=json.load(sys.stdin);print(json.dumps(evaluate_submission(d['ir'],d['payload'])))",
-      ],
-      { input: JSON.stringify({ ir, payload: { ...expected, mode: "no" } }), encoding: "utf8" },
-    ),
-  ) as { ok: boolean; errors: { code: string }[] };
+  const bad = goSubmission(ir, { ...expected, mode: "no" }) as {
+    ok: boolean;
+    errors: { code: string }[];
+  };
   expect(bad.ok).toBe(false);
   expect(bad.errors[0]?.code).toBe("E-INACTIVE-DATA-PRESENT");
   const second = structuredClone(d);

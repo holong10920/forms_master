@@ -8,19 +8,14 @@ import {
   snapshot,
   type State,
 } from "@fb/form-engine";
-import { restoreDemo } from "./restore.ts";
 import { referenceSuite } from "./reference.ts";
 const [flag, scenario] = process.argv.slice(2);
 if (flag === "--scenario" && scenario === "references") {
   console.log(JSON.stringify(referenceSuite(), null, 2));
   process.exit(0);
 }
-if (flag === "--scenario" && scenario === "restore") {
-  console.log(JSON.stringify(restoreDemo(), null, 2));
-  process.exit(0);
-}
 if (flag !== "--scenario" || scenario !== "pc-branch")
-  throw new Error("usage: --scenario pc-branch | restore | references");
+  throw new Error("usage: --scenario pc-branch | references");
 const fixture: unknown = JSON.parse(
   readFileSync(resolve(import.meta.dirname, "../../../contracts/fixtures/engine/pc.json"), "utf8"),
 );

@@ -1,0 +1,89 @@
+{
+  "form": "frm_e15a655ed1054ed38b61d94d9916bc75",
+  "first": "http://127.0.0.1:4183/r/rel_jwfteq3lijpb53sfvltt6vqa6g/index.html",
+  "second": "http://127.0.0.1:4183/r/rel_c5rldbzpclv4nxi3nctsdtu4wz/index.html",
+  "active": "http://127.0.0.1:4183/r/rel_jwfteq3lijpb53sfvltt6vqa6g/index.html",
+  "rollback": true,
+  "pinnedSecondRelease": true,
+  "errors": [],
+  "network": [
+    {
+      "port": "4180",
+      "path": "/api/save",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/list",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/contract",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/dashboard",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/review",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/history",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/history",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/history",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/publish",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/history",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/rollback",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/history",
+      "status": 200,
+      "method": "POST"
+    }
+  ]
+}

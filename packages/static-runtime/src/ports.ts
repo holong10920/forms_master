@@ -1,6 +1,7 @@
 import { sha256Hex } from "@fb/contracts";
 import type { StoreModule, MotionModule } from "@platform/sdk-browser";
 export interface Bindings {
+  loadEnhancements?: () => Promise<typeof import("./enhancements.ts")>;
   loadStore?: () => Promise<StoreModule>;
   loadMotion?: () => Promise<MotionModule>;
 }

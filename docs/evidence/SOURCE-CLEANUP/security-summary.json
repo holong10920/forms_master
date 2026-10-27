@@ -1,0 +1,15 @@
+{
+  "working": {
+    "scanner": "gitleaks==8.30.1",
+    "detectors": null,
+    "files": 428,
+    "unresolved": 0
+  },
+  "index": {
+    "scanner": "gitleaks==8.30.1",
+    "detectors": null,
+    "files": 308,
+    "unresolved": 0
+  },
+  "stagedCovered": true
+}

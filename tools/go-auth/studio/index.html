@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Form Studio · Synthetic Local P0</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="env-banner" role="note">
+      <span>合成データ専用のローカル環境です · 実データを入力しないでください</span>
+    </div>
+    <header class="topbar">
+      <button id="home-link" class="brand" type="button" aria-label="フォーム一覧へ">
+        <span class="brand-mark" id="brand-mark"></span>
+        <span class="brand-name" translate="no">Form Studio</span>
+      </button>
+      <div class="crumbs" id="crumbs" hidden>
+        <span class="crumb-sep" aria-hidden="true">/</span>
+        <label class="sr-only" for="site">サイト</label>
+        <select id="site" class="select crumb-select"></select>
+        <span class="crumb-sep" id="title-sep" aria-hidden="true" hidden>/</span>
+        <label class="sr-only" for="form-title">フォーム名</label>
+        <input
+          id="form-title"
+          class="input inline-input title-input"
+          maxlength="200"
+          autocomplete="off"
+          translate="no"
+          hidden
+        />
+        <span id="status-chip" class="chip chip-dot" hidden></span>
+      </div>
+      <nav class="modes" id="modes" role="tablist" aria-label="編集モード" hidden></nav>
+      <div class="topbar-actions" id="topbar-actions">
+        <button
+          id="save-state"
+          class="save-state"
+          type="button"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="save-menu"
+          hidden
+        >
+          <span id="save-icon"></span><span id="save-label">保存済み</span
+          ><span id="version" translate="no"></span>
+        </button>
+        <label class="sr-only" for="admin-locale">表示言語</label>
+        <select id="admin-locale" class="select locale-select" translate="no" title="表示言語">
+          <option value="ja" lang="ja-JP">日本語</option>
+          <option value="vi" lang="vi-VN">Tiếng Việt</option>
+        </select>
+        <span id="readonly-badge" class="chip" hidden>閲覧のみ</span>
+        <button
+          id="preview"
+          class="btn btn-collapse"
+          type="button"
+          title="プレビュー"
+          hidden
+        ></button>
+        <button id="primary-cta" class="btn btn-primary" type="button" hidden></button>
+        <button
+          id="more-btn"
+          class="btn btn-ghost btn-icon"
+          type="button"
+          aria-label="その他の操作"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="more-menu"
+          hidden
+        ></button>
+        <button
+          id="identity-btn"
+          class="avatar-btn"
+          type="button"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="user-menu"
+          hidden
+        >
+          <span class="avatar" id="avatar" translate="no"></span>
+          <span class="avatar-meta"
+            ><b id="identity" translate="no"></b><small id="identity-role"></small
+          ></span>
+        </button>
+      </div>
+    </header>
+
+    <div id="session-banner" class="alert-bar" role="alert" hidden>
+      <span class="alert-text"
+        >セッションの有効期限が切れました。未保存の変更はこの画面に残っています。再ログインすると編集を続けられます。</span
+      >
+      <button id="relogin" class="btn btn-sm" type="button">再ログイン</button>
+    </div>
+    <div id="diagnostics" class="alert-bar" role="alert"></div>
+    <section id="conflict" class="conflict-bar" hidden aria-labelledby="conflict-title">
+      <div class="row row-wrap">
+        <h2 id="conflict-title">この下書きは他の場所で更新されました</h2>
+        <span class="spacer"></span>
+        <button id="compare" class="btn btn-sm" type="button">最新版と比較</button>
+        <button id="conflict-reload" class="btn btn-sm" type="button">最新版を読み込む</button>
+      </div>
+      <p>自分の未保存の変更はこの画面に残っています。自動マージは行いません。</p>
+      <div class="conflict-cols" id="conflict-summary"></div>
+      <details>
+        <summary>技術的な詳細</summary>
+        <pre id="conflict-details" translate="no"></pre>
+      </details>
+    </section>
+
+    <main id="signin" class="signin" hidden>
+      <div class="card signin-card">
+        <h1>Form Studio にサインイン</h1>
+        <p>
+          ローカルの Mock IdP（OIDC +
+          PKCE）で合成アカウントを選んでください。役割によって操作できる内容が変わります。
+        </p>
+        <div class="account-list" id="account-list"></div>
+      </div>
+    </main>
+
+    <main id="studio" hidden>
+      <section id="home" class="home" aria-labelledby="home-title">
+        <div class="home-head">
+          <div>
+            <h1 id="home-title">フォーム</h1>
+            <p id="home-sub"></p>
+          </div>
+          <span class="spacer"></span>
+          <div class="search">
+            <span id="search-icon"></span>
+            <label class="sr-only" for="form-search">フォームを検索</label>
+            <input
+              id="form-search"
+              class="input"
+              type="search"
+              placeholder="フォームを検索"
+              autocomplete="off"
+            />
+          </div>
+          <button id="new-form" class="btn btn-primary" type="button">新規フォーム</button>
+        </div>
+        <ul id="forms" class="form-grid" aria-label="フォーム一覧" aria-busy="false"></ul>
+      </section>
+
+      <section id="editor" class="editor" hidden>
+        <div id="mode-build" class="workspace" role="tabpanel" aria-label="作成">
+          <aside class="panel panel-left" id="left-panel" aria-label="構成とフィールド追加">
+            <div class="drawer-head">
+              <strong id="left-panel-title"></strong
+              ><button id="close-left" class="btn btn-sm btn-icon" type="button"></button>
+            </div>
+            <div class="tabs" role="tablist" id="left-tabs" aria-label="左パネル"></div>
+            <div class="panel-body" id="left-body">
+              <div id="steps" role="tabpanel"></div>
+              <div id="palette" role="tabpanel" hidden></div>
+            </div>
+          </aside>
+          <section class="stage" aria-label="キャンバス">
+            <div class="stage-bar">
+              <button
+                id="toggle-left"
+                class="btn btn-sm btn-icon drawer-toggle"
+                type="button"
+                aria-label="構成パネル"
+              ></button>
+              <div class="stepper" id="stepper" role="list" aria-label="ステップ"></div>
+              <div id="device-toggle"></div>
+              <button
+                id="toggle-right"
+                class="btn btn-sm btn-icon drawer-toggle"
+                type="button"
+                aria-label="プロパティパネル"
+              ></button>
+            </div>
+            <div class="stage-scroll" id="stage-scroll">
+              <div class="canvas-frame" id="canvas-frame" data-device="desktop">
+                <div id="canvas"></div>
+              </div>
+            </div>
+          </section>
+          <aside class="panel panel-right" id="right-panel" aria-label="プロパティ">
+            <div class="drawer-head">
+              <strong id="right-panel-title"></strong
+              ><button id="close-right" class="btn btn-sm btn-icon" type="button"></button>
+            </div>
+            <div id="inspector-head"></div>
+            <div class="tabs" role="tablist" id="inspector-tabs" aria-label="プロパティ"></div>
+            <div class="insp-body" id="inspector-body">
+              <form id="inspector" novalidate></form>
+            </div>
+          </aside>
+        </div>
+
+        <div id="mode-flow" class="page" role="tabpanel" aria-label="フロー" hidden>
+          <div class="page-inner">
+            <div class="page-head">
+              <div>
+                <h2>フロー</h2>
+                <p>
+                  ステップの順序と分岐を確認できます（参照用）。分岐の編集は「作成」でステップを選択して行います。
+                </p>
+              </div>
+            </div>
+            <div id="flow-overview"></div>
+          </div>
+        </div>
+
+        <div id="mode-translate" class="page" role="tabpanel" aria-label="翻訳" hidden>
+          <div class="page-inner">
+            <div class="page-head">
+              <div>
+                <h2>翻訳</h2>
+                <p>お客様に表示される文言を日本語とベトナム語で管理します。</p>
+              </div>
+            </div>
+            <div id="translations"></div>
+          </div>
+        </div>
+
+        <div
+          id="mode-preview"
+          class="preview-layout"
+          role="tabpanel"
+          aria-label="プレビュー"
+          hidden
+        >
+          <div class="preview-stage">
+            <div class="row" id="preview-bar"></div>
+            <div class="device" id="preview-device" data-device="desktop">
+              <div class="device-bar">
+                <i></i><i></i><i></i><span translate="no">127.0.0.1:4175 · isolated preview</span>
+              </div>
+              <div id="preview-container">
+                <iframe
+                  id="preview-frame"
+                  title="Interactive isolated preview"
+                  sandbox="allow-scripts allow-same-origin"
+                  src="about:blank"
+                ></iframe>
+              </div>
+              <div id="preview-empty" class="preview-empty" hidden></div>
+            </div>
+          </div>
+          <aside class="side-panel" id="preview-side" aria-label="プレビュー情報"></aside>
+        </div>
+
+        <div id="mode-publish" class="page" role="tabpanel" aria-label="公開" hidden>
+          <div class="page-inner">
+            <div class="page-head">
+              <div>
+                <h2>レビューと公開</h2>
+                <p>
+                  承認済みのスナップショットだけが公開されます。公開後もいつでも以前の版に戻せます。
+                </p>
+              </div>
+            </div>
+            <div id="publish-summary"></div>
+            <div id="history"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="save-menu" class="popover" role="dialog" aria-label="保存" hidden>
+      <div class="menu-block">
+        <label class="switch">
+          <input id="autosave" type="checkbox" role="switch" checked />
+          <span class="switch-track" aria-hidden="true"></span>
+          <span class="switch-text"><b>自動保存</b><small>編集後 1.5 秒で保存します</small></span>
+        </label>
+      </div>
+      <div class="menu-sep"></div>
+      <button id="save" class="menu-item" type="button">
+        今すぐ保存<span class="menu-meta kbd" translate="no">⌘S</span>
+      </button>
+      <button id="load" class="menu-item" type="button">最新版を再読込</button>
+      <div class="menu-sep"></div>
+      <div class="menu-block small muted" id="save-meta"></div>
+    </div>
+    <div id="more-menu" class="popover" role="menu" aria-label="その他の操作" hidden>
+      <button id="validate" class="menu-item" type="button" role="menuitem">診断を実行</button>
+      <button id="shortcuts" class="menu-item" type="button" role="menuitem">キーボード操作</button>
+      <div class="menu-sep"></div>
+      <button id="delete" class="menu-item danger" type="button" role="menuitem">
+        未公開ドラフト削除
+      </button>
+    </div>
+    <div id="user-menu" class="popover" role="menu" aria-label="アカウント" hidden></div>
+
+    <dialog id="new-form-dialog" class="dialog" aria-labelledby="new-form-title">
+      <form method="dialog" id="new-form-form">
+        <div class="dialog-head">
+          <span class="dialog-icon" id="new-form-icon"></span>
+          <div>
+            <h2 class="dialog-title" id="new-form-title">新しいフォーム</h2>
+            <p class="dialog-sub">入力ステップ・確認・完了の 3 ステップで作成されます。</p>
+          </div>
+        </div>
+        <div class="dialog-body">
+          <div class="field">
+            <label class="field-label" for="new-name">フォーム名</label>
+            <input
+              id="new-name"
+              class="input"
+              maxlength="200"
+              placeholder="例：イベント申込"
+              autocomplete="off"
+              translate="no"
+            />
+            <span class="field-hint"
+              >空欄の場合は「無題のフォーム」になります。あとから変更できます。</span
+            >
+          </div>
+        </div>
+        <div class="dialog-foot">
+          <button class="btn" type="button" value="cancel" id="new-form-cancel">キャンセル</button>
+          <button class="btn btn-primary" type="submit" id="create">フォーム作成</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="review-dialog" class="dialog dialog-wide" aria-labelledby="review-title">
+      <div class="dialog-head">
+        <span class="dialog-icon" id="review-icon"></span>
+        <div>
+          <h2 class="dialog-title" id="review-title">レビューを依頼</h2>
+          <p class="dialog-sub">
+            保存済みの版をスナップショットとして固定し、レビュー担当者に承認を依頼します。
+          </p>
+        </div>
+      </div>
+      <div class="dialog-body" id="review-body"></div>
+      <details id="contract" hidden>
+        <summary>Data Contract（技術詳細）</summary>
+        <pre id="contract-diff" translate="no"></pre>
+      </details>
+      <div class="dialog-body">
+        <label class="switch" id="contract-ack-row">
+          <input id="contract-ack" type="checkbox" />
+          <span class="switch-track" aria-hidden="true"></span>
+          <span class="switch-text"
+            ><b>契約変更を確認しました</b
+            ><small>送信データの構造が変わる場合、確認が必要です</small></span
+          >
+        </label>
+      </div>
+      <div class="dialog-foot">
+        <button class="btn" type="button" id="review-cancel">キャンセル</button>
+        <button class="btn btn-primary" type="button" id="review">レビューを依頼する</button>
+      </div>
+    </dialog>
+
+    <div class="toast-host">
+      <div id="notice" class="toast" role="status" aria-live="polite"></div>
+    </div>
+
+    <script type="module" src="/i18n.js"></script>
+    <script type="module" src="/admin.js"></script>
+  </body>
+</html>

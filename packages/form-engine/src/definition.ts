@@ -222,6 +222,17 @@ export function assertIR(ir: EngineIRV1): void {
       f.classification === "public"
     )
       throw new EngineError("E-CLASS-BELOW-MIN", f.id);
+    if (
+      f.type !== "group" &&
+      f.config?.queryParameter &&
+      (f.classification !== "public" || !["choice.radio", "choice.select"].includes(f.type))
+    )
+      throw new EngineError("E-REF-SCOPE", f.id);
+    if (f.type !== "group" && f.config?.postalAddressTarget) {
+      const target = ir.nodes.find((n) => n.id === f.config?.postalAddressTarget);
+      if (f.type !== "postal" || !target || target.type !== "text")
+        throw new EngineError("E-REF-SCOPE", f.id);
+    }
     if (f.type !== "group" && (f.type === "calculated") !== (f.formula !== undefined))
       throw new EngineError("E-FORMULA", f.id);
   }
@@ -402,6 +413,8 @@ export function loadDefinition(value: unknown): EngineIRV1 {
     engineIrRange: ">=1.0.0 <2.0.0",
     form: { schemaVersion: d.schemaVersion, formId: d.formId, siteId: d.siteId },
     nodes: d.fields,
+    ...(d.appearance ? { appearance: d.appearance } : {}),
+    ...(d.customerDraft ? { customerDraft: d.customerDraft } : {}),
     steps: [lowerStep(d.steps[0]), ...d.steps.slice(1).map(lowerStep)],
     conditions: d.conditions ?? {},
     capabilities: Object.fromEntries(

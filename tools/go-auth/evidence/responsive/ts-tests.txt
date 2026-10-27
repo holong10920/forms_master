@@ -1,0 +1,9 @@
+$ vitest run
+
+ RUN  v5.0.5 /Users/hongocbaolong/Documents/marketenterprise/forms_master
+
+
+ Test Files  36 passed (36)
+      Tests  651 passed | 15 expected fail | 1 skipped (667)
+   Start at  11:27:23
+   Duration  10.09s (tests 91%, import 7%, transform 1%)

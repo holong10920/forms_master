@@ -10,3 +10,6 @@ CLAUDE.md
 MASTER_PROMPT_*
 
 .import_linter_cache/
+# Recorded verification output and generated Studio assets are not editable source.
+tools/**/evidence/
+tools/go-auth/web/public/studio/

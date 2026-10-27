@@ -1,0 +1,26 @@
+{
+  "owned_python_source_files": [],
+  "retired_roots_absent": {
+    "python": true,
+    ".venv": true,
+    "pyproject.toml": true,
+    "uv.lock": true,
+    ".python-version": true,
+    "tools/local_p0": true,
+    "spikes": true,
+    ".pnpm-store": true,
+    ".mypy_cache": true,
+    ".ruff_cache": true,
+    ".pytest_cache": true,
+    ".import_linter_cache": true
+  },
+  "kept_live_state": [
+    "var/master",
+    "var/s2-publication",
+    "var/worktree-backups",
+    "output/playwright",
+    "node_modules",
+    ".tools/bin"
+  ],
+  "latest_ui": "owned by concurrent UI writer; no further UI changes by cleanup"
+}

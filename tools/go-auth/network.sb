@@ -1,0 +1,6 @@
+(version 1)
+(allow default)
+(deny network*)
+(allow network-bind (local ip "localhost:*"))
+(allow network-inbound (local ip "localhost:4180") (local ip "localhost:4181") (local ip "localhost:4182") (local ip "localhost:4183") (local ip "localhost:4185"))
+(allow network-outbound (remote ip "localhost:4180") (remote ip "localhost:4181") (remote ip "localhost:4182") (remote ip "localhost:4183") (remote ip "localhost:4185"))

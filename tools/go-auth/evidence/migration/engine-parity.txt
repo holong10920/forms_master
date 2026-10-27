@@ -1,0 +1,481 @@
+=== RUN   TestSharedSemanticFixtures
+=== RUN   TestSharedSemanticFixtures/calculated.json/multiply-and-false
+=== RUN   TestSharedSemanticFixtures/calculated.json/zero-is-present
+=== RUN   TestSharedSemanticFixtures/calculated.json/inactive-does-not-feed-derived
+=== RUN   TestSharedSemanticFixtures/calculated.json/unicode-code-point
+=== RUN   TestSharedSemanticFixtures/calculated.json/unicode-limit
+=== RUN   TestSharedSemanticFixtures/calculated.json/overflow-each-operation
+=== RUN   TestSharedSemanticFixtures/calculated.json/client-calculated-ignored
+=== RUN   TestSharedSemanticFixtures/calculated.json/missing-required
+=== RUN   TestSharedSemanticFixtures/calculated.json/null-rejected
+=== RUN   TestSharedSemanticFixtures/calculated.json/no-coercion
+=== RUN   TestSharedSemanticFixtures/calculated.json/range
+=== RUN   TestSharedSemanticFixtures/calculated.json/choice-count
+=== RUN   TestSharedSemanticFixtures/calculated.json/ecma-trim-bom
+=== RUN   TestSharedSemanticFixtures/calculated.json/no-unicode-normalization
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-0
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-1
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-2
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-3
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-4
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-5
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-6
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-7
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-8
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-9
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-10
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-11
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-12
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-13
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-14
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-15
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-16
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-17
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-18
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-19
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-20
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-21
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-22
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-23
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-24
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-25
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-26
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-27
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-28
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-29
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-30
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-31
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-32
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-33
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-34
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-35
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-36
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-37
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-38
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-39
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-40
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-41
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-42
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-43
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-44
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-45
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-46
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-47
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-48
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-49
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-50
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-51
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-52
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-53
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-54
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-55
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-56
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-57
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-58
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-59
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-60
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-61
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-62
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-63
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-64
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-65
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-66
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-67
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-68
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-69
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-70
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-71
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-72
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-73
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-74
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-75
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-76
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-77
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-78
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-79
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-80
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-81
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-82
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-83
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-84
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-85
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-86
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-87
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-88
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-89
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-90
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-91
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-92
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-93
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-94
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-95
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-96
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-97
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-98
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-99
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-100
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-101
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-102
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-103
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-104
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-105
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-106
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-107
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-108
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-109
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-110
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-111
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-112
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-113
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-114
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-115
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-116
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-117
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-118
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-119
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-120
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-121
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-122
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-123
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-124
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-125
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-126
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-127
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-128
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-129
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-130
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-131
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-132
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-133
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-134
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-135
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-136
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-137
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-138
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-139
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-140
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-141
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-142
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-143
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-144
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-145
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-146
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-147
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-148
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-149
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-150
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-151
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-152
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-153
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-154
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-155
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-156
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-157
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-158
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-159
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-160
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-161
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-162
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-163
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-164
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-165
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-166
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-167
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-168
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-169
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-170
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-171
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-172
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-173
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-174
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-175
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-176
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-177
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-178
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-179
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-180
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-181
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-182
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-183
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-184
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-185
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-186
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-187
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-188
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-189
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-190
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-191
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-192
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-193
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-194
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-195
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-196
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-197
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-198
+=== RUN   TestSharedSemanticFixtures/calculated.json/seed-20261025-199
+=== RUN   TestSharedSemanticFixtures/canonical.json/structured-canonical-v1
+=== RUN   TestSharedSemanticFixtures/canonical.json/unavailable-option-no-active-logic
+=== RUN   TestSharedSemanticFixtures/canonical.json/hiragana-unmodified-by-canonical
+=== RUN   TestSharedSemanticFixtures/groups.json/empty-group
+=== RUN   TestSharedSemanticFixtures/groups.json/group-projection-order
+=== RUN   TestSharedSemanticFixtures/groups.json/group-inactive-not-aggregated
+=== RUN   TestSharedSemanticFixtures/groups.json/group-error-address
+=== RUN   TestSharedSemanticFixtures/groups.json/group-duplicate-id
+=== RUN   TestSharedSemanticFixtures/groups.json/group-missing-boolean-predicate
+=== RUN   TestSharedSemanticFixtures/pc-reference.json/pc-reference-desktop-store
+=== RUN   TestSharedSemanticFixtures/pc-reference.json/pc-reference-desktop-takuhai
+=== RUN   TestSharedSemanticFixtures/pc-reference.json/pc-reference-laptop-store
+=== RUN   TestSharedSemanticFixtures/pc-reference.json/pc-reference-laptop-takuhai
+=== RUN   TestSharedSemanticFixtures/pc-reference.json/pc-reference-tablet-store
+=== RUN   TestSharedSemanticFixtures/pc-reference.json/pc-reference-tablet-takuhai
+=== RUN   TestSharedSemanticFixtures/pc-reference.json/pc-reference-peripheral-store
+=== RUN   TestSharedSemanticFixtures/pc-reference.json/pc-reference-peripheral-takuhai
+=== RUN   TestSharedSemanticFixtures/pc.json/pc-store-no-inactive
+=== RUN   TestSharedSemanticFixtures/sports.json/sports-golf-used
+=== RUN   TestSharedSemanticFixtures/sports.json/sports-golf-junk
+=== RUN   TestSharedSemanticFixtures/sports.json/sports-racket-used
+=== RUN   TestSharedSemanticFixtures/sports.json/sports-racket-junk
+=== NAME  TestSharedSemanticFixtures
+    engine_test.go:79: TS/Go and Python/Go compared 236 cases
+--- PASS: TestSharedSemanticFixtures (1.31s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/multiply-and-false (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/zero-is-present (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/inactive-does-not-feed-derived (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/unicode-code-point (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/unicode-limit (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/overflow-each-operation (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/client-calculated-ignored (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/missing-required (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/null-rejected (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/no-coercion (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/range (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/choice-count (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/ecma-trim-bom (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/no-unicode-normalization (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-0 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-1 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-2 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-3 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-4 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-5 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-6 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-7 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-8 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-9 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-10 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-11 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-12 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-13 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-14 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-15 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-16 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-17 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-18 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-19 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-20 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-21 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-22 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-23 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-24 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-25 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-26 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-27 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-28 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-29 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-30 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-31 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-32 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-33 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-34 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-35 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-36 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-37 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-38 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-39 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-40 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-41 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-42 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-43 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-44 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-45 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-46 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-47 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-48 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-49 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-50 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-51 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-52 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-53 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-54 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-55 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-56 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-57 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-58 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-59 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-60 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-61 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-62 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-63 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-64 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-65 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-66 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-67 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-68 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-69 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-70 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-71 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-72 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-73 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-74 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-75 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-76 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-77 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-78 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-79 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-80 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-81 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-82 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-83 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-84 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-85 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-86 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-87 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-88 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-89 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-90 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-91 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-92 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-93 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-94 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-95 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-96 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-97 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-98 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-99 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-100 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-101 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-102 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-103 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-104 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-105 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-106 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-107 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-108 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-109 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-110 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-111 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-112 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-113 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-114 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-115 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-116 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-117 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-118 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-119 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-120 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-121 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-122 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-123 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-124 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-125 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-126 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-127 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-128 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-129 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-130 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-131 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-132 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-133 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-134 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-135 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-136 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-137 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-138 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-139 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-140 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-141 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-142 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-143 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-144 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-145 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-146 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-147 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-148 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-149 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-150 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-151 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-152 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-153 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-154 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-155 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-156 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-157 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-158 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-159 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-160 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-161 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-162 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-163 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-164 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-165 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-166 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-167 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-168 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-169 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-170 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-171 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-172 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-173 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-174 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-175 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-176 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-177 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-178 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-179 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-180 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-181 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-182 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-183 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-184 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-185 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-186 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-187 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-188 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-189 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-190 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-191 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-192 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-193 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-194 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-195 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-196 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-197 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-198 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/calculated.json/seed-20261025-199 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/canonical.json/structured-canonical-v1 (0.00s)
+    --- PASS: TestSharedSemanticFixtures/canonical.json/unavailable-option-no-active-logic (0.00s)
+    --- PASS: TestSharedSemanticFixtures/canonical.json/hiragana-unmodified-by-canonical (0.00s)
+    --- PASS: TestSharedSemanticFixtures/groups.json/empty-group (0.00s)
+    --- PASS: TestSharedSemanticFixtures/groups.json/group-projection-order (0.00s)
+    --- PASS: TestSharedSemanticFixtures/groups.json/group-inactive-not-aggregated (0.00s)
+    --- PASS: TestSharedSemanticFixtures/groups.json/group-error-address (0.00s)
+    --- PASS: TestSharedSemanticFixtures/groups.json/group-duplicate-id (0.00s)
+    --- PASS: TestSharedSemanticFixtures/groups.json/group-missing-boolean-predicate (0.00s)
+    --- PASS: TestSharedSemanticFixtures/pc-reference.json/pc-reference-desktop-store (0.00s)
+    --- PASS: TestSharedSemanticFixtures/pc-reference.json/pc-reference-desktop-takuhai (0.00s)
+    --- PASS: TestSharedSemanticFixtures/pc-reference.json/pc-reference-laptop-store (0.00s)
+    --- PASS: TestSharedSemanticFixtures/pc-reference.json/pc-reference-laptop-takuhai (0.00s)
+    --- PASS: TestSharedSemanticFixtures/pc-reference.json/pc-reference-tablet-store (0.00s)
+    --- PASS: TestSharedSemanticFixtures/pc-reference.json/pc-reference-tablet-takuhai (0.00s)
+    --- PASS: TestSharedSemanticFixtures/pc-reference.json/pc-reference-peripheral-store (0.00s)
+    --- PASS: TestSharedSemanticFixtures/pc-reference.json/pc-reference-peripheral-takuhai (0.00s)
+    --- PASS: TestSharedSemanticFixtures/pc.json/pc-store-no-inactive (0.00s)
+    --- PASS: TestSharedSemanticFixtures/sports.json/sports-golf-used (0.00s)
+    --- PASS: TestSharedSemanticFixtures/sports.json/sports-golf-junk (0.00s)
+    --- PASS: TestSharedSemanticFixtures/sports.json/sports-racket-used (0.00s)
+    --- PASS: TestSharedSemanticFixtures/sports.json/sports-racket-junk (0.00s)
+=== RUN   TestSubmissionParity
+    engine_test.go:132: Go/Python submission parity: 24 cases
+--- PASS: TestSubmissionParity (3.26s)
+PASS
+ok  	forms-master/go-auth/internal/engine	5.439s

@@ -1,5 +1,7 @@
 # Requirements Traceability
 
+> **Checkpoint hiện hành 2026-10-27:** Go + React Workspace đã chạy; source Studio ở `tools/go-auth/studio`. Python/oracle/rollback host cũ đã retire theo yêu cầu user. Xem [CURRENT_STATUS](CURRENT_STATUS.md), [cleanup](evidence/SOURCE-CLEANUP/RESULTS.md), [Go route migration](../tools/go-auth/evidence/migration/ROUTE-MATRIX.md) và [legacy gap matrix](../tools/legacy-analyzer/evidence/CAPABILITY-MATRIX.md). Các bảng/checkpoint lịch sử dưới đây không phải khẳng định hệ thống vẫn ở design-only. T12/K13 vẫn VERIFICATION_PENDING; không nâng toàn bộ legacy thành supported.
+
 
 > UX-PREMIUM (2026-10-26): F-P0 Admin UX đã được triển khai và kiểm tra local synthetic:
 > shell/structure, Canvas/Inspector, required + AND/OR, reorder, theme/Motion, JA/VI,
@@ -10,31 +12,31 @@
 `Requirement ID → Design → Implementation → Tests → Evidence → Status`
 
 > Bảng này chỉ theo dõi requirement mang tính sản phẩm/kỹ thuật (F-*, UX-*, ARCH-*, BUILD-*, MOTION-*, API-*, PERF-*, TEST-*, SEC-*, CICD-*, DOD-*). Checklist quy trình (CTX/SAFE/GIT/SP/Pxx) theo dõi ở `PROJECT_CHECKLIST.md`.
-> Cột Design trỏ tới spec (PROPOSED, chưa G1). Implementation/Tests/Evidence sau G1. Status `TODO (design)` = đã có thiết kế, chưa có implementation; không dòng nào DONE.
+> Cột Design trỏ tới spec (PROPOSED, chưa G1). Các cột P0 bên dưới đã cập nhật theo local implementation; LOCAL_VERIFIED không phải production/T12/K13 acceptance. Các phần design group lịch sử cần truy vết riêng, không dùng để phủ nhận implementation hiện hành.
 
 ## Tính năng P0
 
 | Req | Design | Implementation | Tests | Evidence | Status |
 |---|---|---|---|---|---|
-| F-P0-01 Site Management | spec #5 §5.1–§5.2, §7.5 | — | — | — | TODO (design) |
-| F-P0-02 Form Management | spec #4 §4–§5; spec #5 §5.4, §7.2 | — | — | — | TODO (design) |
-| F-P0-03 Visual Form Builder | spec #4 §6–§12 | — | — | — | TODO (design) |
-| F-P0-04 Basic Field Library | spec #1 §7; spec #2 §7.1; spec #4 §10 | — | — | — | TODO (design) |
-| F-P0-05 Multi-step Flow | spec #1 §8; spec #4 §11–§12 | — | — | — | TODO (design) |
-| F-P0-06 Validation | spec #1 §11; spec #5 §10.2 | — | — | — | TODO (design) |
-| F-P0-07 Conditional Logic | spec #1 §7.4, §8; spec #4 §11 | — | — | — | TODO (design) |
-| F-P0-08 Theme/Branding | spec #4 §16 (chọn theme; token editor P1) | — | — | — | TODO (design) |
-| F-P0-09 Motion Animation | spec #6 §4, §7, §10 | — | — | — | TODO (design) |
-| F-P0-10 Preview | spec #4 §14; spec #5 §7.3; spec #6 §10 | — | — | — | TODO (design) |
-| F-P0-11 JSON Definitions | spec #1 §7, §7.7 | — | — | — | TODO (design) |
-| F-P0-12 Persistence | spec #5 §5, §11 | — | — | — | TODO (design) |
-| F-P0-13 Basic Auth + Roles | spec #5 §7.5–§7.6 (ADR-056) | — | — | — | TODO (design) |
-| F-P0-14 Publish/Build | spec #3; spec #5 §6, §6.8 | — | — | — | TODO (design) |
-| F-P0-15 Rollback | spec #5 §6.2, §6.5–§6.6 | — | — | — | TODO (design) |
-| F-P0-16 Audit | spec #5 §12 | — | — | — | TODO (design) |
-| F-P0-17 Demo Forms | `docs/discovery/P00_DISCOVERY.md` §4; ADR-003 (đã duyệt ở G0) | — | — | — | TODO (scope đã duyệt) |
-| F-P0-18 Submit Simulation | spec #4 §14.1; spec #5 §7.3 | — | — | — | TODO (design) |
-| F-P0-19 Docs + CI/Tests | test matrix của từng spec; CI sau G9 | — | — | — | TODO (design) |
+| F-P0-01 Site Management | spec #5 §5.1–§5.2, §7.5 | internal/studio/http.go | Go/TS unit + browser logs | tools/go-auth/evidence/migration; SOURCE-CLEANUP | IN_PROGRESS — site membership/listing; chưa có site CRUD |
+| F-P0-02 Form Management | spec #4 §4–§5; spec #5 §5.4, §7.2 | internal/studio/forms.go | Go/TS unit + browser logs | tools/go-auth/evidence/migration; SOURCE-CLEANUP | LOCAL_VERIFIED |
+| F-P0-03 Visual Form Builder | spec #4 §6–§12 | studio/editor.js | Go/TS unit + browser logs | tools/go-auth/evidence/migration; SOURCE-CLEANUP | LOCAL_VERIFIED |
+| F-P0-04 Basic Field Library | spec #1 §7; spec #2 §7.1; spec #4 §10 | studio/editor.js + contracts | Go/TS unit + browser logs | tools/go-auth/evidence/migration; SOURCE-CLEANUP | LOCAL_VERIFIED — core P0; không mọi legacy control |
+| F-P0-05 Multi-step Flow | spec #1 §8; spec #4 §11–§12 | packages/form-engine + internal/engine | Go/TS unit + browser logs | tools/go-auth/evidence/migration; SOURCE-CLEANUP | LOCAL_VERIFIED |
+| F-P0-06 Validation | spec #1 §11; spec #5 §10.2 | internal/engine + packages/form-engine | Go/TS unit + browser logs | tools/go-auth/evidence/migration; SOURCE-CLEANUP | LOCAL_VERIFIED |
+| F-P0-07 Conditional Logic | spec #1 §7.4, §8; spec #4 §11 | studio/rules.js + internal/engine | Go/TS unit + browser logs | tools/go-auth/evidence/migration; SOURCE-CLEANUP | LOCAL_VERIFIED |
+| F-P0-08 Theme/Branding | spec #4 §16 (chọn theme; token editor P1) | studio/appearance.js + tools/compiler | Go/TS unit + browser logs | tools/go-auth/evidence/migration; SOURCE-CLEANUP | LOCAL_VERIFIED — typed bounded style |
+| F-P0-09 Motion Animation | spec #6 §4, §7, §10 | packages/motion-* + studio/editor.js | Go/TS unit + browser logs | tools/go-auth/evidence/migration; SOURCE-CLEANUP | LOCAL_VERIFIED — approved presets |
+| F-P0-10 Preview | spec #4 §14; spec #5 §7.3; spec #6 §10 | internal/studio/public.go + studio/preview.js | Go/TS unit + browser logs | tools/go-auth/evidence/migration; SOURCE-CLEANUP | LOCAL_VERIFIED |
+| F-P0-11 JSON Definitions | spec #1 §7, §7.7 | contracts + tools/legacy-analyzer | Go/TS unit + browser logs | tools/go-auth/evidence/migration; SOURCE-CLEANUP | IN_PROGRESS — validated import; không arbitrary React conversion |
+| F-P0-12 Persistence | spec #5 §5, §11 | internal/studio/forms.go + persistence | Go/TS unit + browser logs | tools/go-auth/evidence/migration; SOURCE-CLEANUP | LOCAL_VERIFIED — SQLite only |
+| F-P0-13 Basic Auth + Roles | spec #5 §7.5–§7.6 (ADR-056) | internal/auth + internal/studio/policy.go | Go/TS unit + browser logs | tools/go-auth/evidence/migration; SOURCE-CLEANUP | LOCAL_VERIFIED |
+| F-P0-14 Publish/Build | spec #3; spec #5 §6, §6.8 | tools/compiler + internal/studio/releases.go | Go/TS unit + browser logs | tools/go-auth/evidence/migration; SOURCE-CLEANUP | LOCAL_VERIFIED — T12/K13 pending |
+| F-P0-15 Rollback | spec #5 §6.2, §6.5–§6.6 | internal/studio/releases.go | Go/TS unit + browser logs | tools/go-auth/evidence/migration; SOURCE-CLEANUP | LOCAL_VERIFIED |
+| F-P0-16 Audit | spec #5 §12 | internal/studio/store.go | Go/TS unit + browser logs | tools/go-auth/evidence/migration; SOURCE-CLEANUP | LOCAL_VERIFIED |
+| F-P0-17 Demo Forms | `docs/discovery/P00_DISCOVERY.md` §4; ADR-003 (đã duyệt ở G0) | contracts/fixtures/engine | Go/TS unit + browser logs | tools/go-auth/evidence/migration; SOURCE-CLEANUP | LOCAL_VERIFIED — synthetic Sports/PC only |
+| F-P0-18 Submit Simulation | spec #4 §14.1; spec #5 §7.3 | internal/studio/public.go | Go/TS unit + browser logs | tools/go-auth/evidence/migration; SOURCE-CLEANUP | LOCAL_VERIFIED — mock effects only |
+| F-P0-19 Docs + CI/Tests | test matrix của từng spec; CI sau G9 | README + tools/go-auth/evidence | Go/TS unit + browser logs | tools/go-auth/evidence/migration; SOURCE-CLEANUP | IN_PROGRESS — local tests; CI/production chưa verified |
 
 ## Architecture / build / motion / API
 

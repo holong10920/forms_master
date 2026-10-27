@@ -1,5 +1,7 @@
 # Project Checklist
 
+> **Checkpoint hiện hành 2026-10-27:** Go + React Workspace đã chạy; source Studio ở `tools/go-auth/studio`. Python/oracle/rollback host cũ đã retire theo yêu cầu user. Xem [CURRENT_STATUS](CURRENT_STATUS.md), [cleanup](evidence/SOURCE-CLEANUP/RESULTS.md), [Go route migration](../tools/go-auth/evidence/migration/ROUTE-MATRIX.md) và [legacy gap matrix](../tools/legacy-analyzer/evidence/CAPABILITY-MATRIX.md). Các bảng/checkpoint lịch sử dưới đây không phải khẳng định hệ thống vẫn ở design-only. T12/K13 vẫn VERIFICATION_PENDING; không nâng toàn bộ legacy thành supported.
+
 
 > UX Premium local synthetic đã kiểm tra ngày 2026-10-26: ba panel, Canvas/Inspector,
 > reorder bằng kéo-thả/bàn phím/nút, JA/VI, theme/Motion và publish/submission/rollback UAT PASS.
@@ -79,25 +81,25 @@
 
 | ID | Requirement (rút gọn) | Status | Evidence | Note |
 |---|---|---|---|---|
-| F-P0-01 | Site Management: tạo/sửa site demo, `siteId`, domain/path metadata, form gắn với site, theme; **không kết nối domain production**. | TODO | | |
-| F-P0-02 | Form Management: tạo, đổi tên, clone, list/search, save draft, formId stable, immutable published version. | TODO | | |
-| F-P0-03 | Visual Form Builder: canvas kéo-thả hoặc reorder field/sections/steps; chọn component, chỉnh properties; tránh chỉ là JSON textbox giả mạ… | TODO | | |
-| F-P0-04 | Basic Field Library: text, textarea, number, email/phone, select, radio, checkbox, section và submit; bổ sung field chuyên biệt chỉ khi p… | TODO | | |
-| F-P0-05 | Multi-step Flow: start step, next/back, branch condition, confirmation/summary, terminal submit/success, prevent invalid loops. | TODO | | |
-| F-P0-06 | Validation: required, length, pattern, cross-field nếu cần, field-level và step-level errors; frontend và backend kiểm tra theo cùng vers… | TODO | | |
-| F-P0-07 | Conditional Logic: show/hide, require/unrequire, transition branch; deterministic evaluation và cycle detection. | TODO | | |
-| F-P0-08 | Theme/Branding: per-site logo (placeholder/mock), colors, typography, spacing, button, responsive layout. | TODO | | |
-| F-P0-09 | Motion Animation: cấu hình từ Admin bằng preset, ít nhất 2 hiệu ứng enter/exit/step, feedback và reduced motion; không nhúng JS tùy ý. | TODO | | |
-| F-P0-10 | Preview: desktop/mobile, thay dữ liệu giả lập, đi qua next/back/branch đầy đủ, preview draft khác bản publish. | TODO | | |
-| F-P0-11 | JSON Definitions: typed schema với `schemaVersion`, validator, JSON import/export an toàn, versioning và format ổn định. | TODO | | |
-| F-P0-12 | Persistence: save draft/load lại sau refresh, versions, optimistic concurrency hoặc conflict prevention; **không chỉ localStorage** ở dem… | TODO | | |
-| F-P0-13 | Basic Auth + Roles: admin login và role tối thiểu (editor vs publisher/viewer tùy thiết kế), server-side enforcement; không frontend-only… | TODO | ADR-004 | giữ P0, xếp lịch sau vertical slice; xác nhận ở G1 |
-| F-P0-14 | Publish/Build: compile JSON của một form thành static artifact tách biệt, giữ dependency tối thiểu, content hash, versioned release; chạy… | TODO | | |
-| F-P0-15 | Rollback: form có thể quay lại release trước an toàn, có evidence không mất artifact cũ. | TODO | | |
-| F-P0-16 | Audit: ghi ai/when/version/action cho create, edit, publish, rollback; không log PII. | TODO | ADR-004 | giữ P0, xếp lịch sau vertical slice; xác nhận ở G1 |
-| F-P0-17 | Demo Forms: tối thiểu **Sports demo và PC demo** (hoặc 2 site khác được phê duyệt), có flow/fields/conditions khác nhau; có thể thêm Gakk… | IN_PROGRESS | ADR-003 | scope đã duyệt ở G0; implement sau G1 |
-| F-P0-18 | Submit Simulation: dữ liệu giả lập, request contract và idempotency; local stub hoặc isolated PoC API, tuyệt đối không gọi submit thật lê… | TODO | ADR-004 | giữ P0, xếp lịch sau vertical slice; xác nhận ở G1 |
-| F-P0-19 | Docs + CI/Tests: architecture, setup, user guide, automated checks, measured bundle report, traceability và rollback runbook. | TODO | ADR-004 | giữ P0, xếp lịch sau vertical slice; xác nhận ở G1 |
+| F-P0-01 | Site Management: tạo/sửa site demo, `siteId`, domain/path metadata, form gắn với site, theme; **không kết nối domain production**. | IN_PROGRESS | Go/React: tools/go-auth/evidence/migration; docs/evidence/SOURCE-CLEANUP | IN_PROGRESS — site membership/listing; chưa có site CRUD; global gates unchanged |
+| F-P0-02 | Form Management: tạo, đổi tên, clone, list/search, save draft, formId stable, immutable published version. | IN_PROGRESS | Go/React: tools/go-auth/evidence/migration; docs/evidence/SOURCE-CLEANUP | LOCAL_VERIFIED; global gates unchanged |
+| F-P0-03 | Visual Form Builder: canvas kéo-thả hoặc reorder field/sections/steps; chọn component, chỉnh properties; tránh chỉ là JSON textbox giả mạ… | IN_PROGRESS | Go/React: tools/go-auth/evidence/migration; docs/evidence/SOURCE-CLEANUP | LOCAL_VERIFIED; global gates unchanged |
+| F-P0-04 | Basic Field Library: text, textarea, number, email/phone, select, radio, checkbox, section và submit; bổ sung field chuyên biệt chỉ khi p… | IN_PROGRESS | Go/React: tools/go-auth/evidence/migration; docs/evidence/SOURCE-CLEANUP | LOCAL_VERIFIED — core P0; không mọi legacy control; global gates unchanged |
+| F-P0-05 | Multi-step Flow: start step, next/back, branch condition, confirmation/summary, terminal submit/success, prevent invalid loops. | IN_PROGRESS | Go/React: tools/go-auth/evidence/migration; docs/evidence/SOURCE-CLEANUP | LOCAL_VERIFIED; global gates unchanged |
+| F-P0-06 | Validation: required, length, pattern, cross-field nếu cần, field-level và step-level errors; frontend và backend kiểm tra theo cùng vers… | IN_PROGRESS | Go/React: tools/go-auth/evidence/migration; docs/evidence/SOURCE-CLEANUP | LOCAL_VERIFIED; global gates unchanged |
+| F-P0-07 | Conditional Logic: show/hide, require/unrequire, transition branch; deterministic evaluation và cycle detection. | IN_PROGRESS | Go/React: tools/go-auth/evidence/migration; docs/evidence/SOURCE-CLEANUP | LOCAL_VERIFIED; global gates unchanged |
+| F-P0-08 | Theme/Branding: per-site logo (placeholder/mock), colors, typography, spacing, button, responsive layout. | IN_PROGRESS | Go/React: tools/go-auth/evidence/migration; docs/evidence/SOURCE-CLEANUP | LOCAL_VERIFIED — typed bounded style; global gates unchanged |
+| F-P0-09 | Motion Animation: cấu hình từ Admin bằng preset, ít nhất 2 hiệu ứng enter/exit/step, feedback và reduced motion; không nhúng JS tùy ý. | IN_PROGRESS | Go/React: tools/go-auth/evidence/migration; docs/evidence/SOURCE-CLEANUP | LOCAL_VERIFIED — approved presets; global gates unchanged |
+| F-P0-10 | Preview: desktop/mobile, thay dữ liệu giả lập, đi qua next/back/branch đầy đủ, preview draft khác bản publish. | IN_PROGRESS | Go/React: tools/go-auth/evidence/migration; docs/evidence/SOURCE-CLEANUP | LOCAL_VERIFIED; global gates unchanged |
+| F-P0-11 | JSON Definitions: typed schema với `schemaVersion`, validator, JSON import/export an toàn, versioning và format ổn định. | IN_PROGRESS | Go/React: tools/go-auth/evidence/migration; docs/evidence/SOURCE-CLEANUP | IN_PROGRESS — validated import; không arbitrary React conversion; global gates unchanged |
+| F-P0-12 | Persistence: save draft/load lại sau refresh, versions, optimistic concurrency hoặc conflict prevention; **không chỉ localStorage** ở dem… | IN_PROGRESS | Go/React: tools/go-auth/evidence/migration; docs/evidence/SOURCE-CLEANUP | LOCAL_VERIFIED — SQLite only; global gates unchanged |
+| F-P0-13 | Basic Auth + Roles: admin login và role tối thiểu (editor vs publisher/viewer tùy thiết kế), server-side enforcement; không frontend-only… | IN_PROGRESS | Go/React: tools/go-auth/evidence/migration; docs/evidence/SOURCE-CLEANUP | LOCAL_VERIFIED; global gates unchanged |
+| F-P0-14 | Publish/Build: compile JSON của một form thành static artifact tách biệt, giữ dependency tối thiểu, content hash, versioned release; chạy… | IN_PROGRESS | Go/React: tools/go-auth/evidence/migration; docs/evidence/SOURCE-CLEANUP | LOCAL_VERIFIED — T12/K13 pending; global gates unchanged |
+| F-P0-15 | Rollback: form có thể quay lại release trước an toàn, có evidence không mất artifact cũ. | IN_PROGRESS | Go/React: tools/go-auth/evidence/migration; docs/evidence/SOURCE-CLEANUP | LOCAL_VERIFIED; global gates unchanged |
+| F-P0-16 | Audit: ghi ai/when/version/action cho create, edit, publish, rollback; không log PII. | IN_PROGRESS | Go/React: tools/go-auth/evidence/migration; docs/evidence/SOURCE-CLEANUP | LOCAL_VERIFIED; global gates unchanged |
+| F-P0-17 | Demo Forms: tối thiểu **Sports demo và PC demo** (hoặc 2 site khác được phê duyệt), có flow/fields/conditions khác nhau; có thể thêm Gakk… | IN_PROGRESS | Go/React: tools/go-auth/evidence/migration; docs/evidence/SOURCE-CLEANUP | LOCAL_VERIFIED — synthetic Sports/PC only; global gates unchanged |
+| F-P0-18 | Submit Simulation: dữ liệu giả lập, request contract và idempotency; local stub hoặc isolated PoC API, tuyệt đối không gọi submit thật lê… | IN_PROGRESS | Go/React: tools/go-auth/evidence/migration; docs/evidence/SOURCE-CLEANUP | LOCAL_VERIFIED — mock effects only; global gates unchanged |
+| F-P0-19 | Docs + CI/Tests: architecture, setup, user guide, automated checks, measured bundle report, traceability và rollback runbook. | IN_PROGRESS | Go/React: tools/go-auth/evidence/migration; docs/evidence/SOURCE-CLEANUP | IN_PROGRESS — local tests; CI/production chưa verified; global gates unchanged |
 
 ## 5.2. P1 — Khả năng mở rộng sau khi MVP đạt
 

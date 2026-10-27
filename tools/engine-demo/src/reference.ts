@@ -1,3 +1,4 @@
+import { goTool } from "../../go-auth/go-tool.ts";
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -67,25 +68,12 @@ export function referenceDemo(name: "sports" | "pc-reference", input: ReferenceI
     const file = join(dir, "ir.json");
     writeFileSync(file, JSON.stringify(ir));
     authoritative = JSON.parse(
-      execFileSync(
-        "uv",
-        [
-          "run",
-          "--locked",
-          "--offline",
-          "python",
-          resolve(import.meta.dirname, "../adapter.py"),
-          "--ir",
-          file,
-          "--submission",
-        ],
-        {
-          cwd: resolve(import.meta.dirname, "../../.."),
-          input: JSON.stringify(preview),
-          encoding: "utf8",
-          timeout: 30000,
-        },
-      ),
+      execFileSync(goTool("engine-oracle"), ["--ir", file, "--submission"], {
+        cwd: resolve(import.meta.dirname, "../../.."),
+        input: JSON.stringify(preview),
+        encoding: "utf8",
+        timeout: 30000,
+      }),
     ) as typeof authoritative;
   } finally {
     rmSync(dir, { recursive: true, force: true });

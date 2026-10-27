@@ -1,0 +1,958 @@
+{
+  "schemaVersion": "1.0.0",
+  "kind": "form",
+  "formId": "frm_pc_apply_reference",
+  "siteId": "site_pc_synthetic",
+  "locale": {
+    "default": "ja",
+    "supported": [
+      "ja",
+      "vi"
+    ]
+  },
+  "customerDraft": {
+    "ttlMinutes": 30
+  },
+  "appearance": {
+    "maxWidth": 600,
+    "padding": 24,
+    "gap": 20,
+    "radius": 8,
+    "background": "#ffffff",
+    "mobile": {
+      "padding": 16,
+      "columns": 1
+    }
+  },
+  "texts": {
+    "formTitle": {
+      "ja": "PC買取申込 — 合成互換プロトタイプ",
+      "vi": "Đăng ký thu mua PC — mẫu tương thích giả lập"
+    },
+    "formDescription": {
+      "ja": "PCデスクトップ・ノート単品。商品カート・他カテゴリ・実送信は未対応。",
+      "vi": "Một PC để bàn hoặc laptop. Chưa có giỏ nhiều sản phẩm hay gửi thực tế."
+    }
+  },
+  "fields": [
+    {
+      "id": "fld_category",
+      "key": "category",
+      "type": "choice.radio",
+      "label": {
+        "ja": "商品カテゴリ"
+      },
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "desktop",
+          "label": {
+            "ja": "デスクトップPC"
+          }
+        },
+        {
+          "value": "note",
+          "label": {
+            "ja": "ノートPC"
+          }
+        }
+      ],
+      "config": {
+        "queryParameter": "category",
+        "presentation": "native"
+      },
+      "appearance": {
+        "columns": 2,
+        "gap": 12,
+        "mobile": {
+          "columns": 2,
+          "gap": 12
+        }
+      }
+    },
+    {
+      "id": "fld_title",
+      "key": "title",
+      "type": "text",
+      "label": {
+        "ja": "メーカー、モデルなど"
+      },
+      "classification": "personal",
+      "persist": "allowed",
+      "required": true,
+      "placeholder": {
+        "ja": "例）合成PC Model A"
+      }
+    },
+    {
+      "id": "fld_cpu",
+      "key": "cpu",
+      "type": "text",
+      "label": {
+        "ja": "CPU"
+      },
+      "classification": "personal",
+      "persist": "allowed",
+      "required": true
+    },
+    {
+      "id": "fld_memory",
+      "key": "memory",
+      "type": "text",
+      "label": {
+        "ja": "メモリ"
+      },
+      "classification": "personal",
+      "persist": "allowed",
+      "required": true
+    },
+    {
+      "id": "fld_os",
+      "key": "os",
+      "type": "text",
+      "label": {
+        "ja": "OS"
+      },
+      "classification": "personal",
+      "persist": "allowed",
+      "required": true
+    },
+    {
+      "id": "fld_boot_check",
+      "key": "boot_check",
+      "type": "choice.radio",
+      "label": {
+        "ja": "動作の可否"
+      },
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "正常に起動する",
+          "label": {
+            "ja": "正常に起動する"
+          }
+        },
+        {
+          "value": "起動しない",
+          "label": {
+            "ja": "起動しない"
+          }
+        }
+      ],
+      "config": {
+        "presentation": "native"
+      },
+      "appearance": {
+        "columns": 2,
+        "gap": 12,
+        "mobile": {
+          "columns": 2,
+          "gap": 12
+        }
+      }
+    },
+    {
+      "id": "fld_battery",
+      "key": "battery",
+      "type": "choice.radio",
+      "label": {
+        "ja": "バッテリーの状態"
+      },
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "normal",
+          "label": {
+            "ja": "問題なし"
+          }
+        },
+        {
+          "value": "degraded",
+          "label": {
+            "ja": "劣化あり"
+          }
+        }
+      ],
+      "config": {
+        "presentation": "native"
+      },
+      "appearance": {
+        "columns": 2,
+        "gap": 12,
+        "mobile": {
+          "columns": 2,
+          "gap": 12
+        }
+      },
+      "visibleWhen": {
+        "op": "eq",
+        "args": [
+          {
+            "ref": "$local:fld_category"
+          },
+          {
+            "const": "note"
+          }
+        ]
+      },
+      "clearOnDeactivate": true
+    },
+    {
+      "id": "fld_adapter",
+      "key": "adapter",
+      "type": "choice.radio",
+      "label": {
+        "ja": "電源コード、ACアダプタの有無"
+      },
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "yes",
+          "label": {
+            "ja": "あり"
+          }
+        },
+        {
+          "value": "no",
+          "label": {
+            "ja": "なし"
+          }
+        }
+      ],
+      "config": {
+        "presentation": "native"
+      },
+      "appearance": {
+        "columns": 2,
+        "gap": 12,
+        "mobile": {
+          "columns": 2,
+          "gap": 12
+        }
+      }
+    },
+    {
+      "id": "fld_has_original_box",
+      "key": "has_original_box",
+      "type": "choice.radio",
+      "label": {
+        "ja": "元箱（外箱）の有無"
+      },
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "yes",
+          "label": {
+            "ja": "箱あり"
+          }
+        },
+        {
+          "value": "no",
+          "label": {
+            "ja": "箱なし"
+          }
+        }
+      ],
+      "config": {
+        "presentation": "native"
+      },
+      "appearance": {
+        "columns": 2,
+        "gap": 12,
+        "mobile": {
+          "columns": 2,
+          "gap": 12
+        }
+      }
+    },
+    {
+      "id": "fld_model_number",
+      "key": "model_number",
+      "type": "text",
+      "label": {
+        "ja": "型番"
+      },
+      "classification": "personal",
+      "persist": "allowed",
+      "required": false
+    },
+    {
+      "id": "fld_storage_type_capacity",
+      "key": "storage_type_capacity",
+      "type": "text",
+      "label": {
+        "ja": "ストレージ種類・容量"
+      },
+      "classification": "personal",
+      "persist": "allowed",
+      "required": false
+    },
+    {
+      "id": "fld_graphic_card",
+      "key": "graphic_card",
+      "type": "text",
+      "label": {
+        "ja": "グラフィックボード"
+      },
+      "classification": "personal",
+      "persist": "allowed",
+      "required": false,
+      "visibleWhen": {
+        "op": "eq",
+        "args": [
+          {
+            "ref": "$local:fld_category"
+          },
+          {
+            "const": "desktop"
+          }
+        ]
+      },
+      "clearOnDeactivate": true
+    },
+    {
+      "id": "fld_screen_size",
+      "key": "screen_size",
+      "type": "text",
+      "label": {
+        "ja": "ディスプレイのサイズ"
+      },
+      "classification": "personal",
+      "persist": "allowed",
+      "required": false,
+      "visibleWhen": {
+        "op": "eq",
+        "args": [
+          {
+            "ref": "$local:fld_category"
+          },
+          {
+            "const": "note"
+          }
+        ]
+      },
+      "clearOnDeactivate": true,
+      "placeholder": {
+        "ja": "例）13.6インチ"
+      }
+    },
+    {
+      "id": "fld_internal_problems",
+      "key": "internal_problems",
+      "type": "choice.checkboxes",
+      "label": {
+        "ja": "故障の有無・症状"
+      },
+      "classification": "public",
+      "persist": "allowed",
+      "required": false,
+      "options": [
+        {
+          "value": "power",
+          "label": {
+            "ja": "電源が入らない"
+          }
+        },
+        {
+          "value": "screen",
+          "label": {
+            "ja": "画面が表示されない"
+          }
+        },
+        {
+          "value": "noise",
+          "label": {
+            "ja": "異音がする"
+          }
+        }
+      ],
+      "config": {
+        "presentation": "native"
+      },
+      "appearance": {
+        "columns": 2,
+        "gap": 12,
+        "mobile": {
+          "columns": 2,
+          "gap": 12
+        }
+      }
+    },
+    {
+      "id": "fld_external_problems",
+      "key": "external_problems",
+      "type": "choice.checkboxes",
+      "label": {
+        "ja": "外観の状態"
+      },
+      "classification": "public",
+      "persist": "allowed",
+      "required": false,
+      "options": [
+        {
+          "value": "scratch",
+          "label": {
+            "ja": "目立つ傷や凹みがある"
+          }
+        },
+        {
+          "value": "broken",
+          "label": {
+            "ja": "破損箇所がある"
+          }
+        },
+        {
+          "value": "dirty",
+          "label": {
+            "ja": "汚れ、シール跡がある"
+          }
+        },
+        {
+          "value": "color",
+          "label": {
+            "ja": "色落ちがある"
+          }
+        }
+      ],
+      "config": {
+        "presentation": "native"
+      },
+      "appearance": {
+        "columns": 2,
+        "gap": 12,
+        "mobile": {
+          "columns": 2,
+          "gap": 12
+        }
+      }
+    },
+    {
+      "id": "fld_pickup_method",
+      "key": "pickup_method",
+      "type": "choice.radio",
+      "label": {
+        "ja": "買取方法"
+      },
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "delivery",
+          "label": {
+            "ja": "宅配買取"
+          }
+        },
+        {
+          "value": "shop",
+          "label": {
+            "ja": "店頭買取"
+          }
+        },
+        {
+          "value": "dither",
+          "label": {
+            "ja": "相談して決める"
+          }
+        }
+      ],
+      "config": {
+        "presentation": "native"
+      },
+      "appearance": {
+        "columns": 2,
+        "gap": 12,
+        "mobile": {
+          "columns": 2,
+          "gap": 12
+        }
+      }
+    },
+    {
+      "id": "fld_delivery_date",
+      "key": "delivery_date",
+      "type": "date",
+      "label": {
+        "ja": "集荷希望日"
+      },
+      "classification": "personal",
+      "persist": "allowed",
+      "required": true,
+      "validators": [
+        {
+          "use": "formatDate"
+        }
+      ],
+      "visibleWhen": {
+        "op": "eq",
+        "args": [
+          {
+            "ref": "$local:fld_pickup_method"
+          },
+          {
+            "const": "delivery"
+          }
+        ]
+      },
+      "clearOnDeactivate": true
+    },
+    {
+      "id": "fld_delivery_time",
+      "key": "delivery_time",
+      "type": "choice.select",
+      "label": {
+        "ja": "集荷時間"
+      },
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "am",
+          "label": {
+            "ja": "午前"
+          }
+        },
+        {
+          "value": "pm",
+          "label": {
+            "ja": "午後"
+          }
+        }
+      ],
+      "config": {
+        "presentation": "native"
+      },
+      "appearance": {
+        "columns": 2,
+        "gap": 12,
+        "mobile": {
+          "columns": 2,
+          "gap": 12
+        }
+      },
+      "visibleWhen": {
+        "op": "eq",
+        "args": [
+          {
+            "ref": "$local:fld_pickup_method"
+          },
+          {
+            "const": "delivery"
+          }
+        ]
+      },
+      "clearOnDeactivate": true
+    },
+    {
+      "id": "fld_has_box",
+      "key": "has_box",
+      "type": "choice.radio",
+      "label": {
+        "ja": "梱包箱はありますか"
+      },
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "yes",
+          "label": {
+            "ja": "あり"
+          }
+        },
+        {
+          "value": "no",
+          "label": {
+            "ja": "なし"
+          }
+        }
+      ],
+      "config": {
+        "presentation": "native"
+      },
+      "appearance": {
+        "columns": 2,
+        "gap": 12,
+        "mobile": {
+          "columns": 2,
+          "gap": 12
+        }
+      },
+      "visibleWhen": {
+        "op": "eq",
+        "args": [
+          {
+            "ref": "$local:fld_pickup_method"
+          },
+          {
+            "const": "delivery"
+          }
+        ]
+      },
+      "clearOnDeactivate": true
+    },
+    {
+      "id": "fld_business_domain",
+      "key": "business_domain",
+      "type": "choice.select",
+      "label": {
+        "ja": "希望店舗（合成）"
+      },
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "ST-0001",
+          "label": {
+            "ja": "合成 東京センター"
+          }
+        },
+        {
+          "value": "ST-0002",
+          "label": {
+            "ja": "合成 大阪センター"
+          }
+        }
+      ],
+      "config": {
+        "searchable": true
+      },
+      "appearance": {
+        "columns": 2,
+        "gap": 12,
+        "mobile": {
+          "columns": 2,
+          "gap": 12
+        }
+      },
+      "visibleWhen": {
+        "op": "eq",
+        "args": [
+          {
+            "ref": "$local:fld_pickup_method"
+          },
+          {
+            "const": "shop"
+          }
+        ]
+      },
+      "clearOnDeactivate": true
+    },
+    {
+      "id": "fld_kana",
+      "key": "kana",
+      "type": "katakana",
+      "label": {
+        "ja": "お名前（カナ）"
+      },
+      "classification": "personal",
+      "persist": "never",
+      "required": true,
+      "validators": [
+        {
+          "use": "formatKatakana"
+        }
+      ]
+    },
+    {
+      "id": "fld_email",
+      "key": "email",
+      "type": "email",
+      "label": {
+        "ja": "メールアドレス"
+      },
+      "classification": "personal",
+      "persist": "never",
+      "required": true,
+      "validators": [
+        {
+          "use": "formatEmail"
+        }
+      ]
+    },
+    {
+      "id": "fld_phone_number",
+      "key": "phone_number",
+      "type": "tel",
+      "label": {
+        "ja": "電話番号"
+      },
+      "classification": "personal",
+      "persist": "never",
+      "required": true,
+      "validators": [
+        {
+          "use": "formatPhoneJP"
+        }
+      ]
+    },
+    {
+      "id": "fld_zip",
+      "key": "zip",
+      "type": "postal",
+      "label": {
+        "ja": "郵便番号"
+      },
+      "classification": "personal",
+      "persist": "never",
+      "required": true,
+      "validators": [
+        {
+          "use": "formatPostalJP"
+        }
+      ],
+      "config": {
+        "postalAddressTarget": "fld_address"
+      },
+      "help": {
+        "ja": "合成データ専用: 0000000。住所は手入力も可能です。"
+      }
+    },
+    {
+      "id": "fld_address",
+      "key": "address",
+      "type": "text",
+      "label": {
+        "ja": "住所"
+      },
+      "classification": "personal",
+      "persist": "never",
+      "required": true,
+      "visibleWhen": {
+        "op": "eq",
+        "args": [
+          {
+            "ref": "$local:fld_pickup_method"
+          },
+          {
+            "const": "delivery"
+          }
+        ]
+      },
+      "clearOnDeactivate": true
+    },
+    {
+      "id": "fld_agree_policy",
+      "key": "agree_policy",
+      "type": "boolean",
+      "label": {
+        "ja": "個人情報保護方針に同意する"
+      },
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "config": {
+        "presentation": "native"
+      },
+      "appearance": {
+        "columns": 2,
+        "gap": 12,
+        "mobile": {
+          "columns": 2,
+          "gap": 12
+        }
+      },
+      "validators": [
+        {
+          "use": "mustBeTrue"
+        }
+      ]
+    },
+    {
+      "id": "fld_subscribe_mm",
+      "key": "subscribe_mm",
+      "type": "boolean",
+      "label": {
+        "ja": "メールマガジンを受け取る"
+      },
+      "classification": "public",
+      "persist": "allowed",
+      "required": false,
+      "config": {
+        "presentation": "native"
+      },
+      "appearance": {
+        "columns": 2,
+        "gap": 12,
+        "mobile": {
+          "columns": 2,
+          "gap": 12
+        }
+      }
+    }
+  ],
+  "conditions": {
+    "cnd_pc": {
+      "label": {
+        "ja": "PC"
+      },
+      "when": {
+        "op": "in",
+        "args": [
+          {
+            "ref": "$local:fld_category"
+          },
+          {
+            "const": [
+              "desktop",
+              "note"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "steps": [
+    {
+      "id": "stp_product",
+      "kind": "form",
+      "title": {
+        "ja": "商品情報",
+        "vi": "Thông tin sản phẩm"
+      },
+      "content": [
+        {
+          "field": "$local:fld_category"
+        },
+        {
+          "field": "$local:fld_title"
+        },
+        {
+          "field": "$local:fld_cpu"
+        },
+        {
+          "field": "$local:fld_memory"
+        },
+        {
+          "field": "$local:fld_os"
+        },
+        {
+          "field": "$local:fld_boot_check"
+        },
+        {
+          "field": "$local:fld_battery"
+        },
+        {
+          "field": "$local:fld_adapter"
+        },
+        {
+          "field": "$local:fld_has_original_box"
+        },
+        {
+          "field": "$local:fld_model_number"
+        },
+        {
+          "field": "$local:fld_storage_type_capacity"
+        },
+        {
+          "field": "$local:fld_graphic_card"
+        },
+        {
+          "field": "$local:fld_screen_size"
+        },
+        {
+          "field": "$local:fld_internal_problems"
+        },
+        {
+          "field": "$local:fld_external_problems"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_pickup"
+        }
+      ]
+    },
+    {
+      "id": "stp_pickup",
+      "kind": "form",
+      "title": {
+        "ja": "買取方法",
+        "vi": "Phương thức thu mua"
+      },
+      "content": [
+        {
+          "field": "$local:fld_pickup_method"
+        },
+        {
+          "field": "$local:fld_delivery_date"
+        },
+        {
+          "field": "$local:fld_delivery_time"
+        },
+        {
+          "field": "$local:fld_has_box"
+        },
+        {
+          "field": "$local:fld_business_domain"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_customer"
+        }
+      ]
+    },
+    {
+      "id": "stp_customer",
+      "kind": "form",
+      "title": {
+        "ja": "お客様情報",
+        "vi": "Thông tin khách hàng"
+      },
+      "content": [
+        {
+          "field": "$local:fld_kana"
+        },
+        {
+          "field": "$local:fld_email"
+        },
+        {
+          "field": "$local:fld_phone_number"
+        },
+        {
+          "field": "$local:fld_zip"
+        },
+        {
+          "field": "$local:fld_address"
+        },
+        {
+          "field": "$local:fld_agree_policy"
+        },
+        {
+          "field": "$local:fld_subscribe_mm"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_review"
+        }
+      ]
+    },
+    {
+      "id": "stp_review",
+      "kind": "review",
+      "transitions": [
+        {
+          "default": "stp_complete"
+        }
+      ]
+    },
+    {
+      "id": "stp_complete",
+      "kind": "complete"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+async(page)=>{
+ const network=[];const errors=[];
+ page.on('pageerror',error=>errors.push(error.message));
+ const listener=r=>{const u=new URL(r.url());if(u.pathname.startsWith('/api/'))network.push({port:u.port,path:u.pathname,method:r.request().method(),status:r.status()})};page.on('response',listener);
+ await page.goto('http://localhost:4180/login?lang=vi');
+ await page.getByRole('link',{name:'Tiếp tục với nhà cung cấp danh tính'}).click();
+ await page.getByRole('button',{name:'Continue as synthetic-admin'}).click();
+ await page.getByText('Chào mừng bạn trở lại.').waitFor();
+ await page.getByRole('link',{name:'Trình tạo biểu mẫu',exact:true}).click();
+ await page.locator('.studio-root #site').waitFor();
+ await page.locator('.studio-root #site option').first().waitFor({state:'attached'});
+ await page.screenshot({path:'output/playwright/master-studio-list.png',fullPage:true});
+ page.off('response',listener);
+ return {path:new URL(page.url()).pathname,errors,network,iframeCount:await page.locator('iframe').count(),sites:await page.locator('.studio-root #site').innerText()};
+}

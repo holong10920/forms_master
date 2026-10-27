@@ -1,0 +1,65 @@
+{
+  "scenario": "Server session expiry → login with expiry feedback → re-login → protected workspace → logout",
+  "expiredPath": "/login",
+  "expiredMessage": "Phiên đã kết thúc. Vui lòng đăng nhập.",
+  "reloginStatus": 200,
+  "finalStatus": 401,
+  "mobileOverflow": false,
+  "network": [
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 401
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/login",
+      "status": 302
+    },
+    {
+      "method": "GET",
+      "path": "/authorize",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/choose",
+      "status": 303
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/callback",
+      "status": 302
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "status": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 401
+    }
+  ]
+}

@@ -3,6 +3,8 @@
 > Nguồn: master prompt §2–§3, §11. Văn bản này tóm tắt; khi mâu thuẫn, master thắng.
 > Trạng thái: **ACTIVE — G0 APPROVED WITH ADJUSTMENTS (2026-10-23)**; xem `docs/DECISIONS.md`.
 
+> Cập nhật triển khai 2026-10-27: local Go modular monolith + React Workspace; TS compiler/runtime được giữ. Python đã retire theo yêu cầu user. Tái tạo capability legacy dùng synthetic fixtures, không migrate website/production backend. Các mục tiêu tổng thể và T12/K13 không được tự nâng PASS. Xem CURRENT_STATUS và README.
+
 ## 1. Mục tiêu
 
 Chứng minh cho PO/PM rằng một nền tảng có thể tạo **≥2 form thu mua khác flow** (mặc định Sports và PC) từ **JSON definition có version**, chỉnh qua Admin UI (kéo-thả, step/branch, validation, theme, Motion), compile thành **artifact static riêng per form** chỉ chứa capability được dùng, publish và **rollback** được — mà không viết React source mới cho từng form trong phạm vi capability registry hỗ trợ.

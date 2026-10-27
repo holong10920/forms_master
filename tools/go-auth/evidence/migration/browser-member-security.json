@@ -1,0 +1,298 @@
+{
+  "adminChecks": {
+    "missingCAS": 400,
+    "crossSite": 403,
+    "missingCSRF": 403
+  },
+  "unauthenticated": 401,
+  "adminNavigation": 0,
+  "createVisible": false,
+  "sites": ["site_pc_synthetic"],
+  "denied": {
+    "read": 200,
+    "save": 403,
+    "publish": 403,
+    "submissions": 403,
+    "crossSite": 403,
+    "adminAPI": 403
+  },
+  "errors": [],
+  "network": [
+    {
+      "port": "4180",
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/session",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/dashboard",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/catalog",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/schema",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/list",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/get",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/history",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/session",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/save",
+      "status": 400,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/get",
+      "status": 403,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/get",
+      "status": 403,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/auth/logout",
+      "status": 204,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/dashboard",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/auth/login",
+      "status": 302,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/auth/callback",
+      "status": 302,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/dashboard",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/session",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/dashboard",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/schema",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/catalog",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/list",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/session",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/dashboard",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/catalog",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/schema",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/list",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/get",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/history",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/session",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/get",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/history",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/save",
+      "status": 403,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/publish",
+      "status": 403,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/submissions.list",
+      "status": 403,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/get",
+      "status": 403,
+      "method": "POST"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/admin/overview",
+      "status": 403,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/admin/overview",
+      "status": 403,
+      "method": "GET"
+    }
+  ]
+}

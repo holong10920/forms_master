@@ -1,0 +1,144 @@
+import { h, field, input, select, btn, L } from "./ui.js";
+import { commit } from "./rules.js";
+let viewport = "desktop";
+const numbers = [
+  ["maxWidth", "最大幅 / Chiều rộng tối đa", 320, 960],
+  ["padding", "内側余白 / Đệm", 0, 64],
+  ["margin", "外側余白 / Lề", 0, 64],
+  ["gap", "間隔 / Khoảng cách", 0, 64],
+  ["columns", "列 / Số cột", 1, 3],
+  ["fontSize", "文字サイズ / Cỡ chữ", 12, 24],
+  ["radius", "角丸 / Bo góc", 0, 32],
+  ["borderWidth", "枠線 / Độ dày viền", 0, 4],
+];
+export function appearanceEditor(owner) {
+  const out = [];
+  out.push(
+    field(
+      "対象画面 / Màn hình",
+      select(
+        [
+          ["desktop", "PC"],
+          ["mobile", "Mobile < 640px"],
+        ],
+        viewport,
+        (v) => {
+          viewport = v;
+          commit();
+        },
+      ),
+    ),
+  );
+  const current = viewport === "mobile" ? owner.appearance?.mobile : owner.appearance;
+  function set(key, value) {
+    owner.appearance ??= {};
+    const values = viewport === "mobile" ? (owner.appearance.mobile ??= {}) : owner.appearance;
+    if (value === "") {
+      const remaining = Object.fromEntries(Object.entries(values).filter(([k]) => k !== key));
+      if (viewport === "mobile") owner.appearance.mobile = remaining;
+      else owner.appearance = remaining;
+    } else values[key] = value;
+    commit();
+  }
+  for (const [key, label, min, max] of numbers)
+    out.push(
+      field(
+        label,
+        input(current?.[key] ?? "", {
+          type: "number",
+          min,
+          max,
+          step: 1,
+          placeholder: L("継承", "Kế thừa"),
+          onCommit: (v, el) => {
+            if (v !== "" && (!Number.isInteger(Number(v)) || Number(v) < min || Number(v) > max)) {
+              el.setAttribute("aria-invalid", "true");
+              return;
+            }
+            set(key, v === "" ? "" : Number(v));
+          },
+        }),
+      ),
+    );
+  for (const [key, label] of [
+    ["color", "文字色 / Màu chữ"],
+    ["background", "背景色 / Nền"],
+    ["borderColor", "枠線色 / Màu viền"],
+  ])
+    out.push(
+      field(
+        label,
+        input(current?.[key] ?? "", {
+          placeholder: "#112233",
+          onCommit: (v, el) => {
+            if (v !== "" && !/^#[0-9a-fA-F]{6}$/.test(v)) {
+              el.setAttribute("aria-invalid", "true");
+              return;
+            }
+            set(key, v);
+          },
+        }),
+      ),
+    );
+  out.push(
+    field(
+      "配置 / Căn lề",
+      select(
+        [
+          ["", "継承 / Kế thừa"],
+          ["left", "左 / Trái"],
+          ["center", "中央 / Giữa"],
+          ["right", "右 / Phải"],
+        ],
+        current?.align ?? "",
+        (v) => set("align", v),
+      ),
+    ),
+  );
+  out.push(
+    field(
+      "文字の太さ / Độ đậm",
+      select(
+        [
+          ["", "継承"],
+          ["400", "400"],
+          ["500", "500"],
+          ["600", "600"],
+          ["700", "700"],
+        ],
+        String(current?.fontWeight ?? ""),
+        (v) => set("fontWeight", v === "" ? "" : Number(v)),
+      ),
+    ),
+  );
+  out.push(
+    field(
+      "影 / Đổ bóng",
+      select(
+        [
+          ["", "継承 / Kế thừa"],
+          ["none", "なし / Không"],
+          ["soft", "柔らかい / Nhẹ"],
+        ],
+        current?.shadow ?? "",
+        (v) => set("shadow", v),
+      ),
+    ),
+  );
+  out.push(
+    btn(
+      "スタイルをリセット / Đặt lại",
+      () => {
+        delete owner.appearance;
+        commit();
+      },
+      { size: "sm" },
+    ),
+    h(
+      "p",
+      { class: "small muted" },
+      "宣言的な値のみ。CSS/JavaScript・任意URLは使用できません。 / Chỉ cho phép giá trị khai báo.",
+    ),
+  );
+  return out;
+}

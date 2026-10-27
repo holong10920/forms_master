@@ -1,0 +1,126 @@
+{
+  "audit": {
+    "schema": "CREATE TABLE audit(id INTEGER PRIMARY KEY,at REAL,actor TEXT,site TEXT,\n form TEXT,action TEXT,target TEXT)",
+    "rows": 470
+  },
+  "block_status": {
+    "schema": "CREATE TABLE block_status(pin TEXT PRIMARY KEY,digest TEXT,state TEXT,version INTEGER)",
+    "rows": 2
+  },
+  "capabilities": {
+    "schema": "CREATE TABLE capabilities(prk TEXT PRIMARY KEY,version INTEGER,ledger TEXT,\n overrides TEXT,m3 INTEGER,fbks TEXT,ledger_seq INTEGER)",
+    "rows": 1
+  },
+  "control_meta": {
+    "schema": "CREATE TABLE control_meta(key TEXT PRIMARY KEY)",
+    "rows": 3
+  },
+  "deployments": {
+    "schema": "CREATE TABLE deployments(id TEXT PRIMARY KEY,version INTEGER,adapters TEXT)",
+    "rows": 1
+  },
+  "drafts": {
+    "schema": "CREATE TABLE drafts(site TEXT,form TEXT,version INTEGER,definition TEXT,author TEXT,\n PRIMARY KEY(site,form))",
+    "rows": 55
+  },
+  "form_meta": {
+    "schema": "CREATE TABLE form_meta(site TEXT,form TEXT,title TEXT,cloned_from TEXT,PRIMARY KEY(site,form))",
+    "rows": 40
+  },
+  "gate_intents": {
+    "schema": "CREATE TABLE gate_intents(prk TEXT PRIMARY KEY)",
+    "rows": 0
+  },
+  "gates": {
+    "schema": "CREATE TABLE gates(key TEXT PRIMARY KEY,blockers TEXT)",
+    "rows": 111
+  },
+  "identity_types": {
+    "schema": "CREATE TABLE identity_types(site TEXT,form TEXT,identity TEXT,type TEXT,PRIMARY KEY(site,form,identity))",
+    "rows": 93
+  },
+  "key_ledger": {
+    "schema": "CREATE TABLE key_ledger(site TEXT,form TEXT,path TEXT,identity TEXT,PRIMARY KEY(site,form,path))",
+    "rows": 93
+  },
+  "local_active": {
+    "schema": "CREATE TABLE local_active (site_id TEXT NOT NULL, form_id TEXT NOT NULL, candidate_id TEXT NOT NULL REFERENCES local_releases(candidate_id), version INTEGER NOT NULL, PRIMARY KEY (site_id,form_id)) STRICT",
+    "rows": 25
+  },
+  "local_publication_audit": {
+    "schema": "CREATE TABLE local_publication_audit (sequence INTEGER PRIMARY KEY, action TEXT NOT NULL, candidate_id TEXT NOT NULL, actor TEXT NOT NULL) STRICT",
+    "rows": 21
+  },
+  "local_releases": {
+    "schema": "CREATE TABLE local_releases (candidate_id TEXT PRIMARY KEY, site_id TEXT NOT NULL, form_id TEXT NOT NULL) STRICT",
+    "rows": 67
+  },
+  "managed_releases": {
+    "schema": "CREATE TABLE managed_releases(id TEXT PRIMARY KEY,site TEXT,form TEXT,review TEXT,\n fbks TEXT,at REAL)",
+    "rows": 53
+  },
+  "memberships": {
+    "schema": "CREATE TABLE memberships(user TEXT,site TEXT,roles TEXT,PRIMARY KEY(user,site))",
+    "rows": 11
+  },
+  "mock_effects": {
+    "schema": "CREATE TABLE mock_effects(id TEXT PRIMARY KEY,submission TEXT UNIQUE,at REAL)",
+    "rows": 58
+  },
+  "object_security": {
+    "schema": "CREATE TABLE object_security(key TEXT PRIMARY KEY,version INTEGER,sources TEXT)",
+    "rows": 108
+  },
+  "oidc_codes": {
+    "schema": "CREATE TABLE oidc_codes(id TEXT PRIMARY KEY,user TEXT,nonce TEXT,challenge TEXT,\n redirect TEXT,expires REAL)",
+    "rows": 0
+  },
+  "oidc_states": {
+    "schema": "CREATE TABLE oidc_states(id TEXT PRIMARY KEY,document TEXT,expires REAL)",
+    "rows": 0
+  },
+  "oidc_tokens": {
+    "schema": "CREATE TABLE oidc_tokens(session TEXT PRIMARY KEY,envelope TEXT)",
+    "rows": 24
+  },
+  "operations": {
+    "schema": "CREATE TABLE operations(id TEXT PRIMARY KEY,review TEXT,site TEXT,form TEXT,\n state TEXT,version INTEGER,candidate TEXT,error TEXT,updated REAL,base INTEGER,platform TEXT)",
+    "rows": 37
+  },
+  "outbox": {
+    "schema": "CREATE TABLE outbox(id TEXT PRIMARY KEY,submission TEXT UNIQUE,state TEXT)",
+    "rows": 58
+  },
+  "previews": {
+    "schema": "CREATE TABLE previews(token TEXT PRIMARY KEY,session TEXT,site TEXT,form TEXT,\n version INTEGER,candidate TEXT,expires REAL)",
+    "rows": 13
+  },
+  "review_contracts": {
+    "schema": "CREATE TABLE review_contracts(id TEXT PRIMARY KEY,document TEXT)",
+    "rows": 37
+  },
+  "review_meta": {
+    "schema": "CREATE TABLE review_meta(id TEXT PRIMARY KEY,platform TEXT,stale_reason TEXT)",
+    "rows": 37
+  },
+  "reviews": {
+    "schema": "CREATE TABLE reviews(id TEXT PRIMARY KEY,site TEXT,form TEXT,version INTEGER,\n definition TEXT,digest TEXT,author TEXT,approver TEXT,state TEXT,base INTEGER)",
+    "rows": 54
+  },
+  "schema_migrations": {
+    "schema": "CREATE TABLE schema_migrations (\n  version TEXT PRIMARY KEY,\n  sha256 TEXT NOT NULL,\n  applied_at TEXT NOT NULL\n) STRICT",
+    "rows": 1
+  },
+  "sessions": {
+    "schema": "CREATE TABLE sessions(token TEXT PRIMARY KEY,user TEXT,csrf TEXT,\n created REAL,seen REAL)",
+    "rows": 72
+  },
+  "submissions": {
+    "schema": "CREATE TABLE submissions(id TEXT PRIMARY KEY,site TEXT,form TEXT,release TEXT,\n idem TEXT,hash TEXT,payload TEXT,receipt TEXT,UNIQUE(site,form,idem))",
+    "rows": 58
+  },
+  "trusted_ledger": {
+    "schema": "CREATE TABLE trusted_ledger(prk TEXT PRIMARY KEY,seq INTEGER,state TEXT,commit_id TEXT)",
+    "rows": 1
+  }
+}

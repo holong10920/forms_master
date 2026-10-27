@@ -1,0 +1,8 @@
+
+ RUN  v5.0.5 /Users/hongocbaolong/Documents/marketenterprise/forms_master
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  23:12:00
+   Duration  247ms (tests 72%, transform 14%, import 11%, setup 2%, worker 2%)

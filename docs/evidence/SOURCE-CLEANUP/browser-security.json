@@ -1,0 +1,23 @@
+{
+  "checks": {
+    "invalidEmail": 422,
+    "invalidEmailCodes": [
+      "formatEmail"
+    ],
+    "invalidDate": 422,
+    "invalidDateCodes": [
+      "formatDate"
+    ],
+    "forged": 422,
+    "valid": 200,
+    "replay": 200,
+    "conflict": 409,
+    "undeclaredPostal": 403,
+    "receipt": "synthetic_0yWujcqIWkpNQS3PNF2eRZcr"
+  },
+  "importVisible": false,
+  "templateVisible": false,
+  "memberAPI": 403,
+  "styleRejected": 422,
+  "errors": []
+}

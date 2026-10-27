@@ -23,6 +23,17 @@ export const systemTexts = {
     vi: "Không có đăng ký thực tế hay gửi dữ liệu ra bên ngoài.",
   },
   invalidNumber: { ja: "安全な整数を入力してください", vi: "Vui lòng nhập một số nguyên hợp lệ" },
+  formatEmail: { ja: "メールアドレスの形式を確認してください", vi: "Email không hợp lệ" },
+  formatPhoneJP: {
+    ja: "0から始まる10〜11桁で入力してください",
+    vi: "Nhập số điện thoại 10–11 chữ số bắt đầu bằng 0",
+  },
+  formatPostalJP: { ja: "郵便番号を7桁で入力してください", vi: "Nhập mã bưu điện 7 chữ số" },
+  formatKatakana: { ja: "全角カタカナで入力してください", vi: "Nhập Katakana toàn chiều rộng" },
+  formatDate: {
+    ja: "有効な日付を入力してください (1900–2100)",
+    vi: "Nhập ngày hợp lệ (1900–2100)",
+  },
   required: { ja: "必須項目です", vi: "Đây là mục bắt buộc" },
   mustBeTrue: { ja: "同意が必要です", vi: "Bạn cần đồng ý để tiếp tục" },
   minLength: { ja: "{n}文字以上で入力してください", vi: "Vui lòng nhập ít nhất {n} ký tự" },

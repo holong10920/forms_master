@@ -319,6 +319,18 @@ importers:
         specifier: workspace:*
         version: link:../../packages/form-engine
 
+  tools/go-auth:
+    devDependencies:
+      vite:
+        specifier: 8.3.5
+        version: 8.3.5(@types/node@24.19.2)
+
+  tools/legacy-analyzer:
+    devDependencies:
+      postcss:
+        specifier: 8.5.31
+        version: 8.5.31
+
   tools/lint-fixtures: {}
 
   tools/perf: {}

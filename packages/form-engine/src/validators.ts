@@ -1,3 +1,5 @@
+declare const __FB_FORMATS__: boolean;
+import { validFormat } from "./formats.ts";
 import type { EngineField, EngineIRV1 } from "@fb/contracts";
 import { evaluate, type Read } from "./expression.ts";
 import { EngineError } from "./model.ts";
@@ -28,6 +30,16 @@ export function fieldIssues(f: EngineField, v: Cell | undefined, required: boole
     const limit = validator.params?.value ?? 0;
     let ok = true;
     switch (validator.use) {
+      case "formatEmail":
+      case "formatPhoneJP":
+      case "formatPostalJP":
+      case "formatKatakana":
+      case "formatDate":
+        ok =
+          typeof __FB_FORMATS__ === "undefined" || __FB_FORMATS__
+            ? validFormat(validator.use, v)
+            : false;
+        break;
       case "required":
         break;
       case "mustBeTrue":

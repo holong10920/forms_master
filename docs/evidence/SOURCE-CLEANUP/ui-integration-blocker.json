@@ -1,0 +1,10 @@
+{
+  "status": "BLOCKED_BY_CONCURRENT_UI_CHANGES",
+  "user_direction": "Preserve current UI; finish independent cleanup only",
+  "observed": [
+    "tools/go-auth/studio/i18n.js was removed while generator still injects its import",
+    "tools/go-auth/studio/index.html no longer contains admin-locale, but admin.js still registers its change handler"
+  ],
+  "latest_browser": "Studio mount error; no latest-UI PASS claimed",
+  "previous_backend_flow": "Clone/Preview/review/separate approval/publish/customer submit passed before subsequent UI changes"
+}

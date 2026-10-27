@@ -1,0 +1,4 @@
+=== RUN   TestMigratedFormsCASAndPermissions
+--- PASS: TestMigratedFormsCASAndPermissions (10.37s)
+PASS
+ok  	forms-master/go-auth/internal/studio	10.993s

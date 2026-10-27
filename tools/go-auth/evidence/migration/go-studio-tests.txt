@@ -1,0 +1,5 @@
+--- FAIL: TestMigratedFormsCASAndPermissions (10.39s)
+    studio_test.go:58: no migrated PC forms
+FAIL
+FAIL	forms-master/go-auth/internal/studio	42.210s
+FAIL

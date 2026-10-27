@@ -1,0 +1,17 @@
+async(page)=>{
+ const network=[];const errors=[];page.on('pageerror',e=>errors.push(e.message));const listener=r=>{const u=new URL(r.url());if(u.pathname.startsWith('/api/'))network.push({port:u.port,path:u.pathname,method:r.request().method(),status:r.status()})};page.on('response',listener);
+ await page.locator('.studio-root #site').selectOption('site_sports_synthetic');
+ await page.locator('.studio-root button[data-form-id="frm_sports"]').waitFor();
+ await page.screenshot({path:'output/playwright/master-sports-list.png',fullPage:true});
+ await page.locator('.studio-root #site').selectOption('site_pc_synthetic');
+ await page.locator('.studio-root button[data-form-id="frm_pc_reference"]').click();
+ await page.locator('.studio-root #form-title').waitFor({state:'visible'});
+ await page.waitForURL('**/studio/sites/site_pc_synthetic/forms/frm_pc_reference?lang=vi');
+ await page.screenshot({path:'output/playwright/master-existing-editor.png',fullPage:true});
+ await page.reload();await page.locator('.studio-root #form-title').waitFor({state:'visible'});
+ const deepLink=new URL(page.url()).pathname;
+ await page.getByRole('link',{name:'Tổng quan',exact:true}).click();await page.getByText('Chào mừng bạn trở lại.').waitFor();
+ await page.goBack();await page.locator('.studio-root #form-title').waitFor({state:'visible'});
+ await page.locator('.studio-root #home-link').click();await page.locator('.studio-root #new-form').click();
+ page.off('response',listener);return {deepLink,backForward:true,errors,network};
+}

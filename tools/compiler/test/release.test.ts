@@ -1,3 +1,4 @@
+import { goTool } from "../../go-auth/go-tool.ts";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
@@ -6,7 +7,7 @@ import { expect, test } from "vitest";
 import { compileRelease } from "../src/release.ts";
 import { root } from "../src/build.ts";
 import { canonicalJson } from "@fb/contracts";
-test("host K13 yields stable canonical release bytes, immutable manifests, semantic parity and publication/rollback", async () => {
+test("host K13 yields stable canonical release bytes, immutable manifests, semantic parity and Go integrity rejection", async () => {
   const dir = mkdtempSync(join(tmpdir(), "fb-release-proof-"));
   try {
     const definition = JSON.parse(
@@ -36,28 +37,13 @@ test("host K13 yields stable canonical release bytes, immutable manifests, seman
     expect((await compileRelease(definition, join(dir, "a"))).candidateId).toBe(a.candidateId);
     const changed = { ...definition, locale: { default: "ja", supported: ["ja", "vi"] } };
     const c = await compileRelease(changed, join(dir, "a"));
-    const output = execFileSync(
-      join(root, ".venv/bin/python"),
-      [
-        "-c",
-        'import sys,json,os;from pathlib import Path;from tools.compiler.local_publish import LocalPublisher;p=LocalPublisher(Path(sys.argv[1]));a=Path(sys.argv[2]);b=Path(sys.argv[3]);p.publish(a,0,os.getuid());p.publish(b,1,os.getuid());m=json.loads((a.parent.parent/"private"/a.name/"lrm.json").read_text());p.rollback(m["form"]["siteId"],m["form"]["formId"],a.name,2,os.getuid());print(json.dumps(p.active(m["form"]["siteId"],m["form"]["formId"])));p.close()',
-        join(dir, "published"),
-        a.directory,
-        c.directory,
-      ],
-      { cwd: root, encoding: "utf8" },
-    );
-    expect(JSON.parse(output)).toMatchObject({ candidateId: a.candidateId, version: 3 });
     const verifyCandidate = () =>
-      execFileSync(
-        join(root, ".venv/bin/python"),
-        [
-          "-c",
-          "import sys;from pathlib import Path;from tools.compiler.server_adapter import candidate;candidate(Path(sys.argv[1]))",
-          a.directory,
-        ],
-        { cwd: root, stdio: "pipe" },
-      );
+      execFileSync(goTool("artifact-check"), ["--candidate", a.directory], {
+        cwd: root,
+        stdio: "pipe",
+      });
+    expect((JSON.parse(verifyCandidate().toString()) as { lrmFormat: number }).lrmFormat).toBe(1);
+    expect(c.candidateId).not.toBe(a.candidateId);
     const lrm = readFileSync(join(privateDir, "lrm.json"));
     writeFileSync(join(privateDir, "lrm.json"), Buffer.concat([lrm, Buffer.from("\n")]));
     expect(verifyCandidate).toThrow();
@@ -67,17 +53,7 @@ test("host K13 yields stable canonical release bytes, immutable manifests, seman
     expect(verifyCandidate).toThrow();
     writeFileSync(join(privateDir, "attestation.json"), attestation);
     writeFileSync(join(a.directory, "index.html"), "corrupted");
-    expect(() =>
-      execFileSync(
-        join(root, ".venv/bin/python"),
-        [
-          "-c",
-          "import sys;from pathlib import Path;from tools.compiler.server_adapter import candidate;candidate(Path(sys.argv[1]))",
-          a.directory,
-        ],
-        { cwd: root, stdio: "pipe" },
-      ),
-    ).toThrow();
+    expect(verifyCandidate).toThrow();
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

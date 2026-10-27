@@ -1,0 +1,45 @@
+{
+  "mode": "dry-run",
+  "entries": [
+    {
+      "path": ".import_linter_cache",
+      "action": "would remove"
+    },
+    {
+      "path": ".mypy_cache",
+      "action": "would remove"
+    },
+    {
+      "path": ".pytest_cache",
+      "action": "would remove"
+    },
+    {
+      "path": ".ruff_cache",
+      "action": "would remove"
+    },
+    {
+      "path": ".playwright-cli",
+      "action": "would remove"
+    },
+    {
+      "path": ".pnpm-store",
+      "action": "would remove"
+    },
+    {
+      "path": "spikes/compiler-feasibility/gen",
+      "action": "would remove"
+    },
+    {
+      "path": "spikes/compiler-feasibility/out",
+      "action": "would remove"
+    },
+    {
+      "path": "spikes/compiler-feasibility/node_modules",
+      "action": "would remove"
+    },
+    {
+      "path": "spikes/compiler-feasibility/test-results",
+      "action": "would remove"
+    }
+  ]
+}

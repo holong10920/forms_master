@@ -1,0 +1,20 @@
+{
+  "T12_K13": "VERIFICATION_PENDING",
+  "business_authority": "Go",
+  "current_rows": {
+    "audit": 3,
+    "drafts": 3,
+    "local_active": 0,
+    "local_releases": 0,
+    "managed_releases": 0,
+    "mock_effects": 0,
+    "outbox": 0,
+    "reviews": 0,
+    "submissions": 0
+  },
+  "latest_mock_effects": [],
+  "legacy_immutable_tree_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+  "migrated_original_files_unchanged": true,
+  "sqlite_integrity": "ok",
+  "verified_original_files": 0
+}

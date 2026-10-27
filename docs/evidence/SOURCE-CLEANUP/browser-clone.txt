@@ -1,0 +1,6 @@
+async(page)=>{
+ await page.goto('http://localhost:4180/studio?lang=ja');await page.locator('#site').waitFor();
+ const result=await page.evaluate(async()=>{const s=await(await fetch('/api/session')).json();const headers={'Content-Type':'application/json','X-CSRF-Token':s.csrf};const form='frm_go_only_'+crypto.randomUUID().replaceAll('-','');const r=await fetch('/api/clone',{method:'POST',headers,body:JSON.stringify({site:'site_pc_synthetic',form,release:'rel_ssutfxfa6n3ye3ssq47tuund5t',title:'Go-only cleanup verification'})});if(!r.ok)throw Error('Clone '+r.status);return{form,version:(await r.json()).version}});
+ await page.goto('http://localhost:4180/studio/sites/site_pc_synthetic/forms/'+result.form+'?lang=ja');await page.locator('#canvas .cv-block').first().waitFor();
+ const response=page.waitForResponse(r=>r.url().endsWith('/api/preview')&&r.request().method()==='POST');await page.locator('#preview').click();const preview=await response;const body=await preview.json();if(preview.status()!==200)throw Error('Preview failed '+JSON.stringify(body));await page.frameLocator('#preview-frame').locator('#app').waitFor();await page.screenshot({path:'output/playwright/cleanup-go-only-preview.png'});await page.locator('#modes [data-mode="build"]').click();return{...result,previewStatus:preview.status(),previewOrigin:'http://127.0.0.1:4185',pythonRuntime:false};
+}

@@ -1,0 +1,12 @@
+async(page)=>{
+ const errors=[];const network=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{const u=new URL(r.url());if(u.pathname.startsWith('/api/'))network.push({path:u.pathname,method:r.request().method(),status:r.status()})});
+ await page.goto('http://localhost:4180/dashboard?lang=ja');
+ const logout=page.getByRole('button',{name:'ログアウト',exact:true});
+ await page.waitForTimeout(1000);
+ if(await logout.count())await logout.click();
+ await page.getByRole('link',{name:'IDプロバイダーで続ける'}).click();await page.getByRole('button',{name:'Continue as synthetic-admin'}).click();await page.getByText('おかえりなさい。').waitFor();
+ await page.goto('http://localhost:4180/studio/sites/site_pc_synthetic/forms/frm_e15a655ed1054ed38b61d94d9916bc75?lang=ja');await page.locator('#form-title').waitFor({state:'visible'});
+ const status=await page.evaluate(async()=>{const s=await(await fetch('/api/session')).json();const r=await fetch('/api/validate',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':s.csrf},body:JSON.stringify({site:'site_pc_synthetic',form:'frm_e15a655ed1054ed38b61d94d9916bc75'})});return r.status});
+ await page.screenshot({path:'output/playwright/master-final-workspace.png',fullPage:true});
+ if(status!==200||errors.length)throw Error(JSON.stringify({status,errors}));return{postCompilerSessionRevalidation:status,errors,network};
+}

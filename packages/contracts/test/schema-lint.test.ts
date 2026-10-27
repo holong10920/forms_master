@@ -141,3 +141,25 @@ describe("schema keyword allowlist", () => {
     expect(lintSchemaFile(contractsDir, "payload-ref/v1.schema.json")).toEqual([]);
   });
 });
+
+test("only fixed host token patterns are permitted in their exact schema locations", () => {
+  const schema = {
+    ...root,
+    $id: "https://schemas.forms-poc.invalid/form-definition/v1.schema.json",
+    type: "object",
+    $defs: {
+      Appearance: {
+        type: "object",
+        properties: { color: { type: "string", pattern: "^#[a-fA-F0-9]{6}$" } },
+      },
+    },
+  };
+  expect(lintSchemaObject(schema, "form-definition/v1.schema.json")).toEqual([]);
+  expect(
+    lintSchemaObject(schema, "untrusted/v1.schema.json").some((i) => i.keyword === "pattern"),
+  ).toBe(true);
+  schema.$defs.Appearance.properties.color.pattern = ".*";
+  expect(
+    lintSchemaObject(schema, "form-definition/v1.schema.json").some((i) => i.keyword === "pattern"),
+  ).toBe(true);
+});

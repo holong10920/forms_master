@@ -1,0 +1,16 @@
+{
+  "deepLink": true,
+  "studioNavigationActive": true,
+  "independentScroll": {
+    "viewport": 800,
+    "stageBottom": 800,
+    "studioScroll": 0,
+    "bodyScroll": 0
+  },
+  "dashboardAndBack": true,
+  "locales": [
+    "ja",
+    "vi"
+  ],
+  "errors": []
+}

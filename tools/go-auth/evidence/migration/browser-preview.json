@@ -1,0 +1,135 @@
+{
+  "conditionalPayload": "{\n  \"attendance\": \"no\"\n}",
+  "partialSubmitButtons": 0,
+  "options": [
+    {
+      "value": "",
+      "text": "未設定"
+    },
+    {
+      "value": "stp_ce51508811",
+      "text": "ステップ 2"
+    },
+    {
+      "value": "stp_review",
+      "text": "確認画面"
+    }
+  ],
+  "errors": [],
+  "network": [
+    {
+      "port": "4180",
+      "path": "/api/preview",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "port": "4185",
+      "path": "/",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4185",
+      "path": "/preview.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4185",
+      "path": "/api/preview/bootstrap",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4185",
+      "path": "/r/dev_2z3jjdzsn32n3ebuxxaxaouuo5/assets/entry.c9ed9d8ab25e.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4185",
+      "path": "/r/dev_2z3jjdzsn32n3ebuxxaxaouuo5/assets/entry.21f135d0a9ba.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4185",
+      "path": "/r/dev_2z3jjdzsn32n3ebuxxaxaouuo5/assets/theme.8ac0a72a3f3c71d9c03c2f0665b6c55672a9bffec6be60f624feb58cb84ee4cd.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4185",
+      "path": "/r/dev_2z3jjdzsn32n3ebuxxaxaouuo5/assets/form-ir.6c4a9c2a2860e11e39e3f55953e12ae832efea8afcaf3fd45a3eb918a1850e46.json",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4180",
+      "path": "/api/save",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "port": "4180",
+      "path": "/api/list",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "port": "4180",
+      "path": "/api/preview",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "port": "4185",
+      "path": "/",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4185",
+      "path": "/preview.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4185",
+      "path": "/api/preview/bootstrap",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4185",
+      "path": "/r/dev_mw7vegvvoltxv23ihea3wnvhef/assets/entry.c9ed9d8ab25e.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4185",
+      "path": "/r/dev_mw7vegvvoltxv23ihea3wnvhef/assets/theme.8ac0a72a3f3c71d9c03c2f0665b6c55672a9bffec6be60f624feb58cb84ee4cd.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4185",
+      "path": "/r/dev_mw7vegvvoltxv23ihea3wnvhef/assets/entry.1e17638992ee.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4185",
+      "path": "/r/dev_mw7vegvvoltxv23ihea3wnvhef/assets/form-ir.569d5ee89c52855d3d0adddef89e70a4e7bc9dce58faa5408628b7dbd34ff806.json",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4180",
+      "path": "/api/preview.status",
+      "method": "POST",
+      "status": 200
+    }
+  ]
+}

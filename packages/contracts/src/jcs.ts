@@ -1,7 +1,7 @@
 import canonicalize from "canonicalize";
 
 /** RFC 8785 (JCS) canonical JSON. Serialization is delegated to `canonicalize`; this module only
- * enforces the S0 value domain so that TS and Python accept and reject the same inputs. */
+ * enforces the S0 value domain so that TypeScript and Go accept and reject the same inputs. */
 
 const MAX_SAFE_MAGNITUDE = Number.MAX_SAFE_INTEGER; // 2^53 - 1
 /** Maximum container nesting (root container = depth 1). Same limit in fb_contracts.jcs. */

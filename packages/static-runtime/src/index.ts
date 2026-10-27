@@ -1,3 +1,5 @@
+declare const __FB_MOTION__: boolean;
+declare const __FB_EXTENDED__: boolean;
 declare const __FB_PREVIEW__: boolean;
 import "./style.css";
 import { verifiedLoad, type Bindings, type Asset } from "./ports.ts";
@@ -20,7 +22,7 @@ interface Pin {
   partial?: { stops: string[]; blockedFields: string[]; diagnostics: { code: string }[] };
   plugin?: boolean;
   assets?: Asset[];
-  groups?: { store: string[]; motion: string[] };
+  groups?: { store: string[]; motion: string[]; enhancements?: string[] };
   releaseId: string;
   formId: string;
   siteId: string;
@@ -62,6 +64,13 @@ export async function start(bindings: Bindings = {}): Promise<void> {
   if (ir.form.formId !== pin.formId || ir.form.siteId !== pin.siteId)
     throw new EngineError("E-RELEASE-PIN");
   assertIR(ir);
+  const enhancements = __FB_EXTENDED__
+    ? await verifiedLoad(pin.groups?.enhancements ?? [], pin.assets ?? [], () => {
+        if (!bindings.loadEnhancements) throw Error("E-ENHANCEMENTS-UNAVAILABLE");
+        return bindings.loadEnhancements();
+      })
+    : undefined;
+  enhancements?.applyAppearance(host, ir.appearance);
   const locales: Locale[] = ir.locale?.supported ?? ["ja"];
   const pick = (v?: string | null) => locales.find((l) => l === v?.slice(0, 2));
   const remember = (value?: Locale) => {
@@ -94,14 +103,17 @@ export async function start(bindings: Bindings = {}): Promise<void> {
       )
       .map((s) => [s.id, ["store-browser"]]),
   );
-  let state = createSession(
-    ir,
-    {},
-    {
-      idempotencyKey: `synthetic-${pin.releaseId}-${crypto.randomUUID()}`,
-      capabilities: capabilitySteps,
-    },
-  );
+  const initial = enhancements?.initial(ir, location.search) ?? {};
+  const ports = {
+    idempotencyKey: `synthetic-${pin.releaseId}-${crypto.randomUUID()}`,
+    capabilities: capabilitySteps,
+  };
+  let state = enhancements
+    ? enhancements.restore(ir, pin, initial, ports, __FB_PREVIEW__)
+    : createSession(ir, initial, ports);
+  function persistDraft() {
+    enhancements?.persist(ir, pin, state, __FB_PREVIEW__);
+  }
   let storeModule: StoreModule | undefined,
     storeOptions: StoreOption[] = [];
   let disposeStore: (() => void) | undefined, motion: ReturnType<MotionModule["mount"]> | undefined;
@@ -109,7 +121,7 @@ export async function start(bindings: Bindings = {}): Promise<void> {
   host.replaceChildren(viewRoot);
   let previousStep = state.current,
     previousActive = "";
-  const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+  const reduced = __FB_MOTION__ ? matchMedia("(prefers-reduced-motion: reduce)") : undefined;
   const stopMotion = () => {
     if (motion) {
       motion.unmount();
@@ -118,7 +130,7 @@ export async function start(bindings: Bindings = {}): Promise<void> {
       render();
     }
   };
-  reduced.addEventListener("change", (e) => {
+  reduced?.addEventListener("change", (e) => {
     if (e.matches) stopMotion();
     else void enableMotion();
   });
@@ -198,6 +210,7 @@ export async function start(bindings: Bindings = {}): Promise<void> {
     viewRoot.querySelector<HTMLElement>(`[data-locale="${next}"]`)?.focus();
   }
   function render(localeOnly = false) {
+    persistDraft();
     if (!host) return;
     disposeStore?.();
     disposeStore = undefined;
@@ -244,12 +257,7 @@ export async function start(bindings: Bindings = {}): Promise<void> {
         p.className = key;
         viewRoot.append(p);
       }
-    viewRoot.append(
-      el(
-        "p",
-        `${ir.form.formId === "frm_sports" ? "Sports" : ir.form.formId === "frm_pc_reference" ? "PC" : ir.form.formId} · ${msg("syntheticNotice")}`,
-      ),
-    );
+    viewRoot.append(el("p", msg("syntheticNotice")));
     if (state.status === "complete") {
       viewRoot.append(
         tr(el("h1"), texts.completeTitle, "completeTitle"),
@@ -288,6 +296,9 @@ export async function start(bindings: Bindings = {}): Promise<void> {
         el("pre", JSON.stringify(payloadPreview(ir, state), null, 2)),
       );
     } else {
+      const content = el("div");
+      content.className = "form-fields";
+      viewRoot.append(content);
       const view = snapshot(ir, state);
       for (const f of ir.nodes) {
         if (
@@ -302,6 +313,7 @@ export async function start(bindings: Bindings = {}): Promise<void> {
         if (f.type === "group") throw new EngineError("E-RUNTIME-UNSUPPORTED", f.id);
         const wrap = el("div");
         wrap.className = "field";
+        enhancements?.applyAppearance(wrap, f.appearance, "field");
         const label = tr(el("label"), f.label, f.key);
         label.htmlFor = f.id;
         wrap.append(label);
@@ -310,7 +322,7 @@ export async function start(bindings: Bindings = {}): Promise<void> {
           label.id = `${f.id}-label`;
           const target = el("div");
           wrap.append(target);
-          viewRoot.append(wrap);
+          content.append(wrap);
           disposeStore = storeModule.mount(target, {
             value:
               typeof state.values[f.id] === "string" ? (state.values[f.id] as string) : undefined,
@@ -335,20 +347,45 @@ export async function start(bindings: Bindings = {}): Promise<void> {
         }
         if (f.type === "calculated") {
           wrap.append(el("output", JSON.stringify(view.effective[f.id])));
-          viewRoot.append(wrap);
+          content.append(wrap);
           continue;
         }
         const value = state.values[f.id];
+        const availableOptions = enhancements
+          ? enhancements.availableOptions(f, view.effective, ir.conditions)
+          : (f.options ?? []);
+        if (
+          enhancements &&
+          f.config?.presentation === "native" &&
+          (f.type === "choice.radio" || f.type === "choice.checkboxes")
+        ) {
+          label.remove();
+          wrap.append(
+            enhancements.choices(
+              f,
+              availableOptions,
+              value,
+              text,
+              state.status === "pending",
+              errors.some((e) => e.path === f.id),
+              (v) => {
+                send({ type: "commit", field: f.id, value: v });
+              },
+            ),
+          );
+          content.append(wrap);
+          continue;
+        }
         let input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
         if (f.options) {
           const select = el("select");
           select.append(new Option(msg("selectPrompt"), ""));
-          for (const option of f.options)
+          for (const option of availableOptions)
             select.append(new Option(text(option.label, option.value), option.value));
           if (f.type === "choice.checkboxes") {
             select.multiple = true;
-            for (const option of select.options)
-              option.selected = Array.isArray(value) && value.includes(option.value);
+            for (const o of select.options)
+              o.selected = Array.isArray(value) && value.includes(o.value);
           } else select.value = typeof value === "string" ? value : "";
           input = select;
         } else if (f.type === "textarea") {
@@ -361,9 +398,13 @@ export async function start(bindings: Bindings = {}): Promise<void> {
               ? "checkbox"
               : f.type === "email"
                 ? "email"
-                : f.type === "number"
-                  ? "text"
-                  : "text";
+                : f.type === "tel"
+                  ? "tel"
+                  : f.type === "date"
+                    ? "date"
+                    : f.type === "number"
+                      ? "text"
+                      : "text";
           if (f.type === "boolean") control.checked = value === true;
           else
             control.value =
@@ -371,6 +412,9 @@ export async function start(bindings: Bindings = {}): Promise<void> {
           input = control;
         }
         input.id = f.id;
+        enhancements?.inputMetadata(input, f.type);
+        if (enhancements && f.config?.searchable && input instanceof HTMLSelectElement)
+          wrap.append(enhancements.searchable(input, text(f.label, f.key)));
         input.name = f.key;
         if (f.placeholder && !(input instanceof HTMLSelectElement))
           input.placeholder = text(f.placeholder, "");
@@ -408,12 +452,34 @@ export async function start(bindings: Bindings = {}): Promise<void> {
         });
         input.addEventListener("change", () => {
           state = dispatch(ir, state, { type: "commit", field: f.id, value: currentValue() }).state;
+          const normalized = state.values[f.id];
+          if (typeof normalized === "string") input.value = normalized;
           if (f.options || f.type === "boolean") render();
         });
         input.addEventListener("blur", () => {
           state = dispatch(ir, state, { type: "blur", field: f.id }).state;
         });
         wrap.append(input);
+        if (enhancements && f.type === "postal" && f.config?.postalAddressTarget) {
+          const target = ir.nodes.find((n) => n.id === f.config?.postalAddressTarget);
+          wrap.append(
+            enhancements.postal(
+              input,
+              () => snapshot(ir, state).active.has(f.id),
+              (address) => {
+                if (!target || target.type !== "text" || !snapshot(ir, state).active.has(target.id))
+                  return false;
+                state = dispatch(ir, state, {
+                  type: "commit",
+                  field: target.id,
+                  value: address,
+                }).state;
+                render();
+                return true;
+              },
+            ),
+          );
+        }
         if (text(f.help, "")) {
           const help = tr(el("p"), f.help, "");
           help.className = "help";
@@ -421,7 +487,7 @@ export async function start(bindings: Bindings = {}): Promise<void> {
           input.setAttribute("aria-describedby", help.id);
           wrap.append(help);
         }
-        viewRoot.append(wrap);
+        content.append(wrap);
       }
     }
     const actions = el("div");
@@ -491,20 +557,23 @@ export async function start(bindings: Bindings = {}): Promise<void> {
     actions.append(next);
     viewRoot.append(actions);
     if (localeOnly) return;
-    const active = [...snapshot(ir, state).active].sort().join(",");
-    const kind =
-      state.current !== previousStep
-        ? "step"
-        : state.errors.length
-          ? "validation"
-          : active !== previousActive
-            ? "reveal"
-            : "submit";
-    motion?.update({
-      sequence: state.stateVersion,
-      kind,
-      direction: state.current === previousStep ? 0 : 1,
-    });
+    if (__FB_MOTION__) {
+      const active = [...snapshot(ir, state).active].sort().join(",");
+      const kind =
+        state.current !== previousStep
+          ? "step"
+          : state.errors.length
+            ? "validation"
+            : active !== previousActive
+              ? "reveal"
+              : "submit";
+      motion?.update({
+        sequence: state.stateVersion,
+        kind,
+        direction: state.current === previousStep ? 0 : 1,
+      });
+      previousActive = active;
+    }
     if (state.current !== previousStep) {
       const heading = viewRoot.querySelector("h1");
       if (heading) {
@@ -513,14 +582,13 @@ export async function start(bindings: Bindings = {}): Promise<void> {
       }
     }
     previousStep = state.current;
-    previousActive = active;
   }
   render();
   performance.mark("form:visible");
   performance.mark("form:ready");
-  const canAnimate = (): boolean => !reduced.matches && !motion;
+  const canAnimate = (): boolean => __FB_MOTION__ && !reduced?.matches && !motion;
   async function enableMotion() {
-    if (!host) return;
+    if (!__FB_MOTION__ || !host) return;
     if (!bindings.loadMotion || !canAnimate()) return;
     try {
       const module = await verifiedLoad(

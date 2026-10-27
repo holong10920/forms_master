@@ -1,0 +1,18 @@
+{
+  "from": "tools/local_p0/web",
+  "to": "tools/go-auth/studio",
+  "all_bytes_unchanged": true,
+  "files": {
+    "ui.js": "55e1ca0fab4fff84535f84be184a82f35fd4d59c053039492030dfb6957ab6e8",
+    "index.html": "19930ccfaf66256caaac7807a41384e5939dda13226736784b9c2387b0d8d00b",
+    "rules.js": "0dad9790aba12104937b7c82b4f048b79ef598d06752a5cd3d0f1715a58197aa",
+    "preview.js": "d077e9095113a37944eac04f831937e01f9b466cd63606f9c9c352f75bae5c38",
+    "editor.js": "db1f5ab12982169bdf601a940e24c04a948d9cad05a0bdbb669e029b829c05be",
+    "workflow.js": "c93c9640d7bf3a94647bb3416575c7e442214e2b6fec9e86261b42d22769fcd7",
+    "appearance.js": "c51c1e740d446ad13f22a51b63e57ff2bccd67f7d272d20086327fbbef0e1639",
+    "state.js": "f5a0818be4b123b7200e48eda386b0e7b5164b0c3c8585a5653bd204dac754cf",
+    "style.css": "dcd921cedbcdba48805feb56bbd31240c6407d77699df7991edcf1065afa41aa",
+    "admin.js": "6cf11ce007947f1b5dbc8e9deee8948980781710c93a95125a2f2a9f7bca70bb",
+    "i18n.js": "4c55ca83b03e4c9732a87fd618f9ba20ee17437ae7b74263671c447e54a588f1"
+  }
+}

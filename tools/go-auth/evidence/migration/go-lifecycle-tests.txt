@@ -1,0 +1,6 @@
+=== RUN   TestPublishFourEyesRollbackSubmission
+--- PASS: TestPublishFourEyesRollbackSubmission (13.61s)
+=== RUN   TestPreviewExpirationAndRevocation
+--- PASS: TestPreviewExpirationAndRevocation (10.32s)
+PASS
+ok  	forms-master/go-auth/internal/studio	24.475s

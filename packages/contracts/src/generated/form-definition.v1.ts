@@ -140,6 +140,15 @@ export interface FormDefinitionV1 {
     maxItems?: LocalizedOverride;
     exclusiveOption?: LocalizedOverride;
     syntheticNotice?: LocalizedOverride;
+    formatEmail?: LocalizedOverride;
+    formatPhoneJP?: LocalizedOverride;
+    formatPostalJP?: LocalizedOverride;
+    formatKatakana?: LocalizedOverride;
+    formatDate?: LocalizedOverride;
+  };
+  appearance?: Appearance;
+  customerDraft?: {
+    ttlMinutes: number;
   };
 }
 export interface Field {
@@ -158,7 +167,8 @@ export interface Field {
     | "tel"
     | "postal"
     | "katakana"
-    | "plugin:storeSel";
+    | "plugin:storeSel"
+    | "date";
   label?: {
     ja: string;
     vi?: string;
@@ -190,7 +200,12 @@ export interface Field {
       | "minItems"
       | "maxItems"
       | "exclusiveOption"
-      | "mustBeTrue";
+      | "mustBeTrue"
+      | "formatEmail"
+      | "formatPhoneJP"
+      | "formatPostalJP"
+      | "formatKatakana"
+      | "formatDate";
     params?: {
       value?: number;
     };
@@ -198,13 +213,51 @@ export interface Field {
   config?: {
     filterByPrefecture?: boolean;
     placeholder?: string;
+    searchable?: boolean;
+    postalAddressTarget?: string;
+    queryParameter?: string;
+    presentation?: "native" | "compact";
   };
   placeholder?: LocalizedOverride;
   help?: LocalizedOverride;
+  appearance?: Appearance;
 }
 export interface LocalizedOverride {
   ja?: string;
   vi?: string;
+}
+export interface Appearance {
+  maxWidth?: number;
+  padding?: number;
+  margin?: number;
+  gap?: number;
+  columns?: number;
+  fontSize?: number;
+  fontWeight?: 400 | 500 | 600 | 700;
+  align?: "left" | "center" | "right";
+  color?: string;
+  background?: string;
+  borderColor?: string;
+  borderWidth?: number;
+  radius?: number;
+  shadow?: "none" | "soft";
+  mobile?: AppearanceValues;
+}
+export interface AppearanceValues {
+  maxWidth?: number;
+  padding?: number;
+  margin?: number;
+  gap?: number;
+  columns?: number;
+  fontSize?: number;
+  fontWeight?: 400 | 500 | 600 | 700;
+  align?: "left" | "center" | "right";
+  color?: string;
+  background?: string;
+  borderColor?: string;
+  borderWidth?: number;
+  radius?: number;
+  shadow?: "none" | "soft";
 }
 export interface Group {
   id: string;

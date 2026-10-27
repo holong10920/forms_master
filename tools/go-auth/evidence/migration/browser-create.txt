@@ -1,0 +1,21 @@
+async(page)=>{
+ const network=[];const errors=[];const listen=r=>{const u=new URL(r.url());if(u.pathname.startsWith('/api/'))network.push({path:u.pathname,method:r.request().method(),status:r.status(),port:u.port})};page.on('response',listen);page.on('pageerror',e=>errors.push(e.message));
+ if(await page.locator('#form-title').isVisible()){await page.locator('#save-state[data-state="saved"]').waitFor();await page.locator('#home-link').click();}
+ if(await page.locator('#new-form-dialog[open]').count())await page.locator('#new-form-cancel').click();
+ await page.getByRole('combobox',{name:'Language / 言語 / Ngôn ngữ'}).selectOption('ja');
+ await page.locator('.studio-root #new-form').click();await page.locator('#new-name').fill('合成 Go 統合受付');await page.locator('#create').click();
+ await page.locator('#form-title').waitFor({state:'visible'});
+ const form=new URL(page.url()).pathname.split('/').at(-1);
+ const add=async type=>{await page.locator('#left-tabs [data-tab="add"]').click();await page.locator('#palette [data-add-type="'+type+'"]').click()};
+ const tab=async key=>{await page.locator('#inspector-tabs [data-tab="'+key+'"]').click()};
+ await add('choice.radio');await page.getByLabel('表示名',{exact:true}).fill('参加方法');await page.getByLabel('表示名',{exact:true}).press('Tab');await tab('validation');if(!await page.getByLabel('必須',{exact:true}).isChecked()){await page.getByLabel('必須',{exact:true}).focus();await page.getByLabel('必須',{exact:true}).press('Space');}await tab('advanced');await page.getByLabel('データキー',{exact:true}).fill('attendance');await page.getByLabel('データキー',{exact:true}).press('Tab');
+ await page.locator('#left-tabs [data-tab="outline"]').click();await page.getByRole('button',{name:'ステップを追加',exact:true}).click();await add('text');await page.getByLabel('表示名',{exact:true}).fill('合成ニックネーム');await page.getByLabel('表示名',{exact:true}).press('Tab');await tab('validation');if(!await page.getByLabel('必須',{exact:true}).isChecked()){await page.getByLabel('必須',{exact:true}).focus();await page.getByLabel('必須',{exact:true}).press('Space');}await tab('advanced');await page.getByLabel('データキー',{exact:true}).fill('syntheticNickname');await page.getByLabel('データキー',{exact:true}).press('Tab');
+ await page.locator('#left-tabs [data-tab="outline"]').click();await page.locator('#steps [data-focus-key="ol-step:stp_details"]').click();await tab('branches');await page.getByRole('button',{name:'条件分岐を追加',exact:true}).click();await page.getByRole('combobox',{name:'等しい値',exact:true}).selectOption('no');
+ // Use the established save menu. Autosave remains enabled and shares the CAS queue.
+ await page.locator('#save-state').click();await page.locator('#save').click();await page.locator('#save-menu').waitFor({state:'hidden'}).catch(()=>{});
+ await page.locator('#save-state[data-state="saved"]').waitFor({timeout:15000});
+ await page.screenshot({path:'output/playwright/master-created-conditional-form.png',fullPage:true});
+ await page.reload();await page.locator('#form-title').waitFor({state:'visible'});
+ const result=await page.evaluate(async(form)=>{const session=await(await fetch('/api/session')).json();const r=await fetch('/api/get',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':session.csrf},body:JSON.stringify({site:'site_pc_synthetic',form})});const d=await r.json();return {status:r.status,version:d.version,fields:d.definition.fields.map(f=>f.key),steps:d.definition.steps.length,branches:d.definition.steps[0].transitions}},form);
+ page.off('response',listen);return {form,path:new URL(page.url()).pathname,result,errors,network};
+}

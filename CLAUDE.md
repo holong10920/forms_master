@@ -1,5 +1,7 @@
 # CLAUDE.md — Multi-Site Form Builder PoC
 
+Trạng thái vận hành mới nhất: [README](README.md), [CURRENT_STATUS](docs/CURRENT_STATUS.md). Go + React là đường chạy hiện hành; Python đã được gỡ ngày 2026-10-27 theo yêu cầu user. Tài liệu/spec/evidence cũ chỉ mô tả thời điểm lịch sử. User instructions hiện hành có ưu tiên cao hơn các ghi chú dưới đây.
+
 Master contract: [MASTER_PROMPT_MULTI_SITE_FORM_BUILDER_AWS_TRAINING.md](MASTER_PROMPT_MULTI_SITE_FORM_BUILDER_AWS_TRAINING.md). Không sửa mục tiêu trong master; thay đổi scope phải qua ADR + user approval.
 
 ## Bắt buộc mỗi phiên (CTX-10)
@@ -21,7 +23,8 @@ Master contract: [MASTER_PROMPT_MULTI_SITE_FORM_BUILDER_AWS_TRAINING.md](MASTER_
 
 - **AWS: read-only** (`describe/list/get/logs`, `sts get-caller-identity`). Cấm `deploy/apply/bootstrap/s3 sync/create-*/put-*/delete-*/invalidation` trước G10. Không in credentials. Không chạm tài nguyên sẵn có trong account (master §3.1).
 - **Không đoán AWS account từ tên profile.** Máy có 3 local profiles (tên trong `docs/internal/evidence/P00/`), không profile nào tên `aws-training`; user xác nhận trước G10 (ADR-006).
-- **GitHub:** chỉ đọc (`gh ... view/list`, `gh api` GET). **Local commits được phép** nếu nội dung an toàn (không chi tiết nội bộ công ty, không secrets, không code công ty) — ADR-007; làm trên branch local, không phải `main`. Không push/tạo PR/đổi remote/repo settings trước G9. Remote hiện **PUBLIC**.
+- **Git/GitHub:** cấm toàn bộ truy cập GitHub và Git mutation theo chỉ thị hiện hành của user. Không `gh`, GitHub API/website, fetch/pull/push, commit/stage/branch/worktree/reset/stash. Local read-only Git inspection chỉ khi user đã yêu cầu trong cuộc hội thoại. Ngoại lệ lịch sử không phải quyền thường trực.
+
 - **Company source/IP:** chỉ đọc repo công ty để audit capability; không copy code. Chi tiết nội bộ (paths, APIs, tên thư viện, điểm yếu hệ thống cũ, số bundle cũ) chỉ đặt trong `docs/internal/` (gitignored) — ADR-001. File master prompt cũng gitignored chờ user review.
 - **MVP:** vertical slice (ADR-004); undo/redo là P1. **Performance:** chỉ số đo trên artifact thật (ADR-005).
 - **Data:** chỉ mock/dữ liệu giả; không gọi API thu mua thật, không PII. Store/center data trong PoC là mock hư cấu hoàn toàn; không gọi endpoint center/shop list thật.

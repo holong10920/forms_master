@@ -1,0 +1,26 @@
+async (page) => {
+ const network=[];
+ const listener=response=>{const u=new URL(response.url());if(u.pathname.startsWith('/api/') || ['/authorize','/choose'].includes(u.pathname))network.push({method:response.request().method(),path:u.pathname,status:response.status()});};
+ page.on('response',listener);
+ await page.goto('http://localhost:4180/login?lang=vi');
+ await page.getByRole('link',{name:'Tiếp tục với nhà cung cấp danh tính'}).click();
+ await page.getByRole('button',{name:'Continue as synthetic-member'}).click();
+ await page.getByText('Chào mừng bạn trở lại.').waitFor();
+ const adminNavigationCount=await page.getByRole('link',{name:'Quản trị',exact:true}).count();
+ await page.screenshot({path:'output/playwright/go-auth-member-dashboard.png'});
+ await page.reload();await page.getByText('Chào mừng bạn trở lại.').waitFor();
+ const role=await page.evaluate(async()=>{const r=await fetch('/api/v1/auth/me');return (await r.json()).user.role});
+ const directAdminStatus=await page.evaluate(async()=>(await fetch('/api/v1/admin/overview',{headers:{'X-Role':'admin','X-User-Role':'admin'}})).status);
+ await page.goto('http://localhost:4180/admin?lang=vi');
+ await page.getByRole('alert').filter({hasText:'Bạn không có quyền truy cập trang này.'}).waitFor();
+ await page.screenshot({path:'output/playwright/go-auth-member-denied.png'});
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('http://localhost:4180/dashboard?lang=vi');
+ await page.getByText('Chào mừng bạn trở lại.').waitFor();
+ await page.screenshot({path:'output/playwright/go-auth-member-mobile.png',fullPage:true});
+ const mobileOverflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
+ await page.setViewportSize({width:1440,height:1000});
+ page.off('response',listener);
+ if(role!=='member'||adminNavigationCount!==0||directAdminStatus!==403||mobileOverflow)throw new Error('Member checks failed');
+ return {scenario:'Member login → dashboard → refresh → manual Admin URL denied → direct Admin API denied → mobile',role,adminNavigationCount,directAdminStatus,mobileOverflow,network};
+}

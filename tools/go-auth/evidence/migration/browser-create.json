@@ -1,0 +1,158 @@
+{
+  "form": "frm_e15a655ed1054ed38b61d94d9916bc75",
+  "path": "/studio/sites/site_pc_synthetic/forms/frm_e15a655ed1054ed38b61d94d9916bc75",
+  "result": {
+    "status": 200,
+    "version": 2,
+    "fields": ["attendance", "syntheticNickname"],
+    "steps": 4,
+    "branches": [
+      {
+        "to": "stp_review",
+        "when": {
+          "args": [
+            {
+              "ref": "$local:fld_d3ce631ad3ce"
+            },
+            {
+              "const": "no"
+            }
+          ],
+          "op": "eq"
+        }
+      },
+      {
+        "default": "stp_ce51508811"
+      }
+    ]
+  },
+  "errors": [],
+  "network": [
+    {
+      "path": "/api/list",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "method": "GET",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/v1/dashboard",
+      "method": "GET",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/save",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/list",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/history",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "method": "GET",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/v1/dashboard",
+      "method": "GET",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/save",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/list",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "method": "GET",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "method": "GET",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/v1/dashboard",
+      "method": "GET",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/schema",
+      "method": "GET",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/catalog",
+      "method": "GET",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/list",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/get",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/history",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "port": "4180"
+    },
+    {
+      "path": "/api/get",
+      "method": "POST",
+      "status": 200,
+      "port": "4180"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "@fb/master",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "vite": "8.3.5"
+  },
+  "volta": {
+    "extends": "../../package.json"
+  }
+}

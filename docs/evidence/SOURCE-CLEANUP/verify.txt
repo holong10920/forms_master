@@ -1,0 +1,97 @@
+$ pnpm preflight && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm gen:check && pnpm schemas:lint && pnpm boundaries && pnpm synthetic:check && pnpm secrets
+$ node tools/verify/src/preflight.ts
+preflight PASS: Node 24.22.1, pnpm 12.15.0
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ eslint . --max-warnings=0
+$ pnpm -r --if-present typecheck
+tools/boundaries typecheck$ tsc -p tsconfig.json
+packages/sdk-browser typecheck$ tsc -p tsconfig.json
+packages/motion-presets typecheck$ tsc -p tsconfig.json
+packages/contracts typecheck$ tsc -p tsconfig.json && tsc -p scripts/tsconfig.json
+packages/motion-presets typecheck: Done
+tools/go-auth typecheck$ tsc -p tsconfig.json
+packages/sdk-browser typecheck: Done
+tools/legacy-analyzer typecheck$ tsc -p tsconfig.json
+packages/contracts typecheck: Done
+tools/lint-fixtures typecheck$ tsc -p tsconfig.json
+tools/boundaries typecheck: Done
+tools/perf typecheck$ tsc -p tsconfig.json
+tools/go-auth typecheck: Done
+tools/security typecheck$ tsc -p tsconfig.json
+tools/legacy-analyzer typecheck: Done
+tools/verify typecheck$ tsc -p tsconfig.json
+tools/lint-fixtures typecheck: Done
+packages/motion-adapter typecheck$ tsc -p tsconfig.json
+tools/perf typecheck: Done
+plugins/store-selector typecheck$ tsc -p tsconfig.json
+tools/security typecheck: Done
+packages/form-engine typecheck$ tsc -p tsconfig.json
+tools/verify typecheck: Done
+plugins/store-selector typecheck: Done
+packages/motion-adapter typecheck: Done
+packages/form-engine typecheck: Done
+tools/engine-demo typecheck$ tsc -p tsconfig.json
+tools/compiler typecheck$ tsc -p tsconfig.json
+packages/static-runtime typecheck$ tsc -p tsconfig.json
+tools/engine-demo typecheck: Done
+packages/static-runtime typecheck: Done
+tools/compiler typecheck: Done
+$ vitest run
+
+ RUN  v5.0.5 /Users/hongocbaolong/Documents/marketenterprise/forms_master
+
+
+ Test Files  36 passed (36)
+      Tests  648 passed | 15 expected fail (663)
+   Start at  13:42:46
+   Duration  4.23s (tests 84%, import 11%, transform 4%, setup 1%)
+
+    Isolate  36 workers spawned · ~97ms startup each (spawn + environment, per file)
+             at least ~401ms faster with isolate: false — reuses workers across files instead of one per file
+
+$ pnpm --filter @fb/contracts gen:check
+$ node scripts/gen.ts --check
+gen:check OK (4 generated files)
+$ pnpm --filter @fb/contracts lint:schemas
+$ node scripts/lint-schemas.ts
+schemas:lint OK (3 schema files)
+$ depcruise packages tools plugins --config .dependency-cruiser.cjs --output-type err
+
+✔ no dependency violations found (158 modules, 419 dependencies cruised)
+
+$ node tools/security/src/synthetic-data-check.ts contracts/fixtures
+{
+  "findings": []
+}
+$ node tools/security/src/secrets.ts
+{
+  "working": {
+    "scanner": "gitleaks==8.30.1",
+    "detectors": null,
+    "files": 428,
+    "findings": [],
+    "unresolved": 0
+  },
+  "index": {
+    "scanner": "gitleaks==8.30.1",
+    "detectors": null,
+    "files": 308,
+    "findings": [],
+    "unresolved": 0
+  },
+  "stagedFiles": 0,
+  "stagedCovered": true,
+  "exclusions": [
+    "docs (governance/evidence, not source)",
+    "contracts/vendor (third party)",
+    "lockfiles",
+    "CLAUDE.md",
+    "untracked spikes and Git-ignored files"
+  ],
+  "manifest_counts": {
+    "working": 428,
+    "index": 308
+  }
+}

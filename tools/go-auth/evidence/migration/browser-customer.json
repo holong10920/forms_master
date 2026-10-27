@@ -1,0 +1,66 @@
+{
+  "url": "http://127.0.0.1:4183/r/rel_jwfteq3lijpb53sfvltt6vqa6g/index.html",
+  "status": 200,
+  "receipt": "synthetic_IvGY1O84vikKsm548RKv02Jz",
+  "synthetic": true,
+  "replayStatus": 200,
+  "conflictStatus": 409,
+  "customerCookieNames": [],
+  "errors": [],
+  "network": [
+    {
+      "port": "4183",
+      "path": "/r/rel_jwfteq3lijpb53sfvltt6vqa6g/index.html",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4183",
+      "path": "/r/rel_jwfteq3lijpb53sfvltt6vqa6g/assets/entry.c9ed9d8ab25e.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4183",
+      "path": "/r/rel_jwfteq3lijpb53sfvltt6vqa6g/assets/theme.8ac0a72a3f3c71d9c03c2f0665b6c55672a9bffec6be60f624feb58cb84ee4cd.css",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4183",
+      "path": "/r/rel_jwfteq3lijpb53sfvltt6vqa6g/assets/bootstrap.b44f7c1c75642bfe86a3c4935f318fcdbe03076ba77626a3b53385275f7f5727.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4183",
+      "path": "/r/rel_jwfteq3lijpb53sfvltt6vqa6g/assets/entry.21f135d0a9ba.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4183",
+      "path": "/r/rel_jwfteq3lijpb53sfvltt6vqa6g/assets/form-ir.6c4a9c2a2860e11e39e3f55953e12ae832efea8afcaf3fd45a3eb918a1850e46.json",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4183",
+      "path": "/r/rel_jwfteq3lijpb53sfvltt6vqa6g/api/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "port": "4183",
+      "path": "/r/rel_jwfteq3lijpb53sfvltt6vqa6g/api/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "port": "4183",
+      "path": "/r/rel_jwfteq3lijpb53sfvltt6vqa6g/api/submit",
+      "method": "POST",
+      "status": 409
+    }
+  ]
+}

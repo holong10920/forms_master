@@ -54,7 +54,7 @@ export function resolveAssets(root: string, d: FormDefinitionV1, ir: EngineIRV1)
     readFileSync(join(root, "plugins/store-selector/browser/index.tsx")),
   );
   const serverDigest = digest(
-    readFileSync(join(root, "plugins/store-selector/server/store_selector_server.py")),
+    readFileSync(join(root, "tools/go-auth/internal/studio/store_adapter.go")),
   );
   const pluginManifestDigest = digest(readFileSync(manifestPath));
   const lock = plugin

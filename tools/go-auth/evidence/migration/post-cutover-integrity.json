@@ -1,0 +1,46 @@
+{
+  "T12_K13": "VERIFICATION_PENDING",
+  "business_authority": "Go",
+  "current_rows": {
+    "audit": 488,
+    "drafts": 57,
+    "local_active": 26,
+    "local_releases": 69,
+    "managed_releases": 55,
+    "mock_effects": 59,
+    "outbox": 59,
+    "reviews": 56,
+    "submissions": 59
+  },
+  "latest_mock_effects": [
+    {
+      "id": "synthetic_IvGY1O84vikKsm548RKv02Jz",
+      "state": "DONE",
+      "submission": "synthetic_IvGY1O84vikKsm548RKv02Jz"
+    },
+    {
+      "id": "synthetic_0a05726c3551bfbf27bba123",
+      "state": "DONE",
+      "submission": "synthetic_0a05726c3551bfbf27bba123"
+    },
+    {
+      "id": "synthetic_32682052368d7093184fdb9f",
+      "state": "DONE",
+      "submission": "synthetic_32682052368d7093184fdb9f"
+    },
+    {
+      "id": "synthetic_f937ff3573b43367a13bf2e8",
+      "state": "DONE",
+      "submission": "synthetic_f937ff3573b43367a13bf2e8"
+    },
+    {
+      "id": "synthetic_d5e078f2878049723d904b9f",
+      "state": "DONE",
+      "submission": "synthetic_d5e078f2878049723d904b9f"
+    }
+  ],
+  "legacy_immutable_tree_digest": "5411e462b2c12f849f386a3a4f027b0eec7e5069d8fc3479a7738ca18033a1d8",
+  "migrated_original_files_unchanged": true,
+  "sqlite_integrity": "ok",
+  "verified_original_files": 902
+}

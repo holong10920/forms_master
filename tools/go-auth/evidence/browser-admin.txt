@@ -1,0 +1,26 @@
+async (page) => {
+ const network=[];
+ const listener=response=>{const u=new URL(response.url());if(u.pathname.startsWith('/api/') || ['/authorize','/choose'].includes(u.pathname))network.push({method:response.request().method(),path:u.pathname,status:response.status()});};
+ page.on('response',listener);
+ await page.goto('http://localhost:4180/login?lang=vi');
+ await page.getByRole('link',{name:'Tiếp tục với nhà cung cấp danh tính'}).click();
+ await page.getByRole('button',{name:'Continue as synthetic-admin'}).click();
+ await page.getByText('Chào mừng bạn trở lại.').waitFor();
+ await page.screenshot({path:'output/playwright/go-auth-admin-dashboard.png'});
+ const role=await page.evaluate(async()=>{const r=await fetch('/api/v1/auth/me');const j=await r.json();return j.user.role;});
+ await page.getByRole('link',{name:'Quản trị',exact:true}).click();
+ await page.getByText('Không gian dành riêng cho quản trị viên. Tính năng quản lý người dùng sẽ được bổ sung sau.').waitFor();
+ await page.screenshot({path:'output/playwright/go-auth-admin-page.png'});
+ const adminStatus=await page.evaluate(async()=>(await fetch('/api/v1/admin/overview')).status);
+ await page.reload();
+ await page.getByText('Không gian dành riêng cho quản trị viên. Tính năng quản lý người dùng sẽ được bổ sung sau.').waitFor();
+ const refreshed=true;
+ const cookies=(await page.context().cookies()).filter(c=>c.name==='fm_local_session').map(({name,httpOnly,secure,sameSite})=>({name,httpOnly,secure,sameSite}));
+ const browserStorage=await page.evaluate(()=>({localStorageKeys:Object.keys(localStorage),sessionStorageKeys:Object.keys(sessionStorage)}));
+ await page.getByRole('button',{name:'Đăng xuất',exact:true}).click();
+ await page.getByRole('link',{name:'Tiếp tục với nhà cung cấp danh tính'}).waitFor();
+ const afterLogout=await page.evaluate(async()=>(await fetch('/api/v1/auth/me')).status);
+ page.off('response',listener);
+ if(role!=='admin'||adminStatus!==200||afterLogout!==401)throw new Error('Admin flow failed');
+ return {scenario:'Admin login → dashboard → admin page → refresh → logout',role,adminStatus,refreshed,afterLogout,cookies,browserStorage,network};
+}

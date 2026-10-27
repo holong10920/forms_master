@@ -1,0 +1,4 @@
+{
+  "scenario": "Go API restart then browser refresh",
+  "authenticatedStatus": 200
+}

@@ -1,0 +1,363 @@
+[
+  {
+    "s": "html",
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "w": 1425,
+      "h": 964
+    },
+    "scroll": {
+      "w": 1425,
+      "h": 964
+    },
+    "display": "block",
+    "minWidth": "0px",
+    "minHeight": "0px",
+    "overflow": "visible",
+    "gap": "normal",
+    "padding": "0px"
+  },
+  {
+    "s": "body",
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "w": 1425,
+      "h": 964
+    },
+    "scroll": {
+      "w": 1425,
+      "h": 964
+    },
+    "display": "block",
+    "minWidth": "0px",
+    "minHeight": "0px",
+    "overflow": "visible",
+    "gap": "normal",
+    "padding": "0px"
+  },
+  {
+    "s": "#root",
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "w": 1425,
+      "h": 964
+    },
+    "scroll": {
+      "w": 1425,
+      "h": 964
+    },
+    "display": "block",
+    "minWidth": "0px",
+    "minHeight": "0px",
+    "overflow": "visible",
+    "gap": "normal",
+    "padding": "0px"
+  },
+  {
+    "s": ".brand-header",
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "w": 1425,
+      "h": 90
+    },
+    "scroll": {
+      "w": 1425,
+      "h": 89
+    },
+    "display": "flex",
+    "minWidth": "0px",
+    "minHeight": "0px",
+    "overflow": "visible",
+    "gap": "normal",
+    "padding": "0px 57px"
+  },
+  {
+    "s": ".shell",
+    "rect": {
+      "x": 0,
+      "y": 90,
+      "w": 1425,
+      "h": 874
+    },
+    "scroll": {
+      "w": 1425,
+      "h": 874
+    },
+    "display": "grid",
+    "minWidth": "0px",
+    "minHeight": "810px",
+    "overflow": "visible",
+    "gap": "normal",
+    "padding": "0px"
+  },
+  {
+    "s": ".workspace-content",
+    "rect": {
+      "x": 240,
+      "y": 90,
+      "w": 1185,
+      "h": 874
+    },
+    "scroll": {
+      "w": 1185,
+      "h": 874
+    },
+    "display": "block",
+    "minWidth": "0px",
+    "minHeight": "auto",
+    "overflow": "visible",
+    "gap": "normal",
+    "padding": "0px"
+  },
+  {
+    "s": ".studio-panel",
+    "rect": {
+      "x": 240,
+      "y": 90,
+      "w": 1185,
+      "h": 874
+    },
+    "scroll": {
+      "w": 1185,
+      "h": 874
+    },
+    "display": "block",
+    "minWidth": "0px",
+    "minHeight": "0px",
+    "overflow": "visible",
+    "gap": "normal",
+    "padding": "0px"
+  },
+  {
+    "s": ".studio-root",
+    "rect": {
+      "x": 240,
+      "y": 90,
+      "w": 1185,
+      "h": 874
+    },
+    "scroll": {
+      "w": 1185,
+      "h": 874
+    },
+    "display": "block",
+    "minWidth": "0px",
+    "minHeight": "675px",
+    "overflow": "visible",
+    "gap": "normal",
+    "padding": "0px"
+  },
+  {
+    "s": "#studio",
+    "rect": {
+      "x": 240,
+      "y": 146,
+      "w": 1185,
+      "h": 818
+    },
+    "scroll": {
+      "w": 1185,
+      "h": 818
+    },
+    "display": "block",
+    "minWidth": "0px",
+    "minHeight": "0px",
+    "overflow": "visible",
+    "gap": "normal",
+    "padding": "0px"
+  },
+  {
+    "s": ".editor",
+    "rect": {
+      "x": 240,
+      "y": 146,
+      "w": 1185,
+      "h": 818
+    },
+    "scroll": {
+      "w": 1185,
+      "h": 818
+    },
+    "display": "flex",
+    "minWidth": "0px",
+    "minHeight": "480px",
+    "overflow": "visible",
+    "gap": "normal",
+    "padding": "0px"
+  },
+  {
+    "s": ".workspace",
+    "rect": {
+      "x": 240,
+      "y": 146,
+      "w": 1185,
+      "h": 818
+    },
+    "scroll": {
+      "w": 1185,
+      "h": 818
+    },
+    "display": "grid",
+    "minWidth": "auto",
+    "minHeight": "0px",
+    "overflow": "visible",
+    "gap": "normal",
+    "padding": "0px"
+  },
+  {
+    "s": ".panel-left",
+    "rect": {
+      "x": 240,
+      "y": 146,
+      "w": 272,
+      "h": 818
+    },
+    "scroll": {
+      "w": 271,
+      "h": 818
+    },
+    "display": "flex",
+    "minWidth": "auto",
+    "minHeight": "0px",
+    "overflow": "visible",
+    "gap": "normal",
+    "padding": "35px 22px"
+  },
+  {
+    "s": ".panel-body",
+    "rect": {
+      "x": 262,
+      "y": 220,
+      "w": 227,
+      "h": 709
+    },
+    "scroll": {
+      "w": 284,
+      "h": 1088
+    },
+    "display": "block",
+    "minWidth": "auto",
+    "minHeight": "0px",
+    "overflow": "auto",
+    "gap": "normal",
+    "padding": "12px"
+  },
+  {
+    "s": ".stage",
+    "rect": {
+      "x": 512,
+      "y": 146,
+      "w": 573,
+      "h": 818
+    },
+    "scroll": {
+      "w": 573,
+      "h": 818
+    },
+    "display": "flex",
+    "minWidth": "0px",
+    "minHeight": "0px",
+    "overflow": "visible",
+    "gap": "normal",
+    "padding": "0px"
+  },
+  {
+    "s": ".stage-scroll",
+    "rect": {
+      "x": 512,
+      "y": 204,
+      "w": 573,
+      "h": 760
+    },
+    "scroll": {
+      "w": 558,
+      "h": 2812
+    },
+    "display": "block",
+    "minWidth": "auto",
+    "minHeight": "0px",
+    "overflow": "auto",
+    "gap": "normal",
+    "padding": "28px 24px 96px"
+  },
+  {
+    "s": ".form-page",
+    "rect": {
+      "x": 536,
+      "y": 232,
+      "w": 510,
+      "h": 2687.671875
+    },
+    "scroll": {
+      "w": 510,
+      "h": 2688
+    },
+    "display": "block",
+    "minWidth": "0px",
+    "minHeight": "0px",
+    "overflow": "hidden",
+    "gap": "normal",
+    "padding": "24px"
+  },
+  {
+    "s": ".cv-block",
+    "rect": {
+      "x": 588,
+      "y": 480.84375,
+      "w": 406,
+      "h": 101.53125
+    },
+    "scroll": {
+      "w": 404,
+      "h": 100
+    },
+    "display": "block",
+    "minWidth": "auto",
+    "minHeight": "auto",
+    "overflow": "visible",
+    "gap": "normal",
+    "padding": "12px"
+  },
+  {
+    "s": ".cv-insert",
+    "rect": {
+      "x": 588,
+      "y": 446.84375,
+      "w": 406,
+      "h": 14
+    },
+    "scroll": {
+      "w": 406,
+      "h": 18
+    },
+    "display": "flex",
+    "minWidth": "auto",
+    "minHeight": "auto",
+    "overflow": "visible",
+    "gap": "normal",
+    "padding": "0px"
+  },
+  {
+    "s": ".panel-right",
+    "rect": {
+      "x": 1085,
+      "y": 146,
+      "w": 340,
+      "h": 818
+    },
+    "scroll": {
+      "w": 338,
+      "h": 818
+    },
+    "display": "flex",
+    "minWidth": "auto",
+    "minHeight": "0px",
+    "overflow": "visible",
+    "gap": "normal",
+    "padding": "35px 22px"
+  }
+]

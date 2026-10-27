@@ -1308,3 +1308,11 @@ Chỉ ADR được đánh dấu `ACCEPTED` với người duyệt là user mới
 - **Evaluation:** `docs/evidence/L10N-JA-VI/RESULTS.md`. Browser E2E 9 kịch bản PASS; unit TS/Python PASS; regression Sports/PC/Admin PASS. Sports Motion-none JS gzip 12,154 B (giới hạn 12,288), 0 Motion.
 - **Đánh đổi:** headroom JS Sports chỉ còn 134 B. Label shared block, fixture Sports/PC, plugin store-selector và boot error vẫn chỉ ja (fallback). Chọn provider dịch tự động cần ADR riêng + user approval (API key, dữ liệu gửi ra ngoài).
 - **Người duyệt:** User yêu cầu tính năng; kết quả chờ user review. **Ngày:** 2026-10-26.
+
+## Implementation checkpoint — 2026-10-27: Go Workspace và retire Python
+
+User yêu cầu triển khai Go + React unified Workspace, mở rộng capability legacy và sau đó dọn source; user xác nhận Claude đã ngừng ghi cùng checkout. User chỉ thị rõ không giữ Python để đối chiếu/rollback. Python packages, old host/adapters, uv environment/config và các test chỉ dành cho runtime đã retire được gỡ; current semantic/release checks dùng Go. Secret scanner chuyển từ Python detect-secrets sang native Gitleaks 8.30.1 đã có và đã kiểm chứng. Không khẳng định hai scanner tương đương hoặc đã port một-một toàn bộ 798 Python tests.
+
+Source editor được chuyển byte-preserving sang `tools/go-auth/studio`; các chỉnh sửa UI bổ sung được giữ. Go khởi tạo được store synthetic mới và từ chối overwrite. Database/release/audit cũ được giữ nguyên. Application release rollback vẫn là feature Go; Python-host rollback đã bị bỏ.
+
+Evidence: `docs/evidence/SOURCE-CLEANUP/RESULTS.md`. Không Git mutation/GitHub/AWS. T12/K13 không đổi. Đây là ghi nhận yêu cầu và implementation, không phải phê duyệt production hoặc đóng toàn bộ legacy gap matrix.

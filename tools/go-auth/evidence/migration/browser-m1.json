@@ -1,0 +1,80 @@
+{
+  "path": "/studio",
+  "errors": [],
+  "network": [
+    {
+      "port": "4180",
+      "path": "/api/v1/auth/me",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/auth/login",
+      "method": "GET",
+      "status": 302
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/auth/callback",
+      "method": "GET",
+      "status": 302
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/auth/me",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/auth/me",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/dashboard",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/auth/me",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4180",
+      "path": "/api/v1/dashboard",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4180",
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4180",
+      "path": "/api/schema",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4180",
+      "path": "/api/catalog",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "port": "4180",
+      "path": "/api/list",
+      "method": "POST",
+      "status": 200
+    }
+  ],
+  "iframeCount": 1,
+  "sites": "Trang PC (giả lập)\nTrang Sports (giả lập)"
+}

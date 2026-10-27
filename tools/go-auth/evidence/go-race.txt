@@ -1,0 +1,6 @@
+?   	forms-master/go-auth/cmd/api	[no test files]
+?   	forms-master/go-auth/cmd/local-idp	[no test files]
+ok  	forms-master/go-auth/internal/auth	3.527s
+?   	forms-master/go-auth/internal/localidp	[no test files]
+?   	forms-master/go-auth/internal/persistence	[no test files]
+?   	forms-master/go-auth/internal/platform	[no test files]
