@@ -1,0 +1,6 @@
+### Result
+{"saved":"保存済み\n· v12","review":"レビュー中\nreview_Q__9rylt8uhQQhE1IAHWvhYA · OPEN · synthetic-admin\n内容を確認\n承認対象をプレビュー\n承認 (Data Contract 確認)\n差し戻し"}
+### Ran Playwright code
+```js
+await (async(page)=>{await page.getByRole("button",{name:"プレビューを更新",exact:true}).click();const f=page.frameLocator("iframe[title=\"Interactive isolated preview\"]");await f.locator("#grp_products-fld_category").waitFor();await page.getByRole("button",{name:"レビュー依頼",exact:true}).click();await page.getByRole("button",{name:"レビューを依頼する",exact:true}).click();const row=page.getByRole("listitem").filter({hasText:/OPEN/}).first();await row.waitFor();return{saved:await page.getByRole("button",{name:/保存済み/}).innerText(),review:await row.innerText()};})(page);
+```

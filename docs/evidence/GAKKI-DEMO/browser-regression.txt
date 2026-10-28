@@ -1,0 +1,6 @@
+### Result
+[{"name":"pc","release":"rel_ayic5cin2i4bsabicpnzewvuw5","http":200,"controls":1,"validation":true,"pageErrors":[]},{"name":"sports","release":"rel_pfjwsj2ma3eljl2ijvjord2hvf","http":200,"controls":1,"validation":true,"pageErrors":[]}]
+### Ran Playwright code
+```js
+await (async (page) => { const result=[]; for(const [name,release] of [["pc","rel_ayic5cin2i4bsabicpnzewvuw5"],["sports","rel_pfjwsj2ma3eljl2ijvjord2hvf"]]){ const p=await page.context().newPage(); await p.setViewportSize({width:1440,height:900}); const errors=[]; p.on("pageerror",e=>errors.push(e.message)); const r=await p.goto("http://127.0.0.1:4183/r/"+release+"/index.html"); await p.getByRole("main").waitFor(); await p.locator("input,select,textarea").first().waitFor(); const controls=await p.locator("input,select,textarea").count(); await p.getByRole("button",{name:"次へ",exact:true}).click(); await p.getByRole("alert").waitFor(); await p.screenshot({path:"output/playwright/gakki-regression-"+name+".png"}); if(r.status()!==200||errors.length) throw Error(name+" regression"); result.push({name,release,http:r.status(),controls,validation:true,pageErrors:errors}); await p.close(); } return result; })(page);
+```

@@ -1,0 +1,6 @@
+### Result
+{"version":13,"review":"レビュー中\nreview_OTM-uceh2EqCkPx0RsZbcW8e · OPEN · synthetic-admin\n内容を確認\n承認対象をプレビュー\n承認 (Data Contract 確認)\n差し戻し"}
+### Ran Playwright code
+```js
+await (async(page)=>{await page.getByRole("button",{name:"レビュー依頼",exact:true}).click();await page.getByRole("button",{name:"レビューを依頼する",exact:true}).click();const row=page.getByRole("listitem").filter({hasText:/OPEN/}).first();await row.waitFor();return{version:13,review:await row.innerText()};})(page);
+```

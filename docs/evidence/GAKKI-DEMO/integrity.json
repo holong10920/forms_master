@@ -1,0 +1,46 @@
+{
+  "T12_K13": "VERIFICATION_PENDING",
+  "business_authority": "Go",
+  "current_rows": {
+    "audit": 563,
+    "drafts": 67,
+    "local_active": 31,
+    "local_releases": 77,
+    "managed_releases": 63,
+    "mock_effects": 88,
+    "outbox": 88,
+    "reviews": 64,
+    "submissions": 88
+  },
+  "latest_mock_effects": [
+    {
+      "id": "synthetic_Ig7kAuPSP6KgxXAlCOTT6Pn_",
+      "state": "DONE",
+      "submission": "synthetic_Ig7kAuPSP6KgxXAlCOTT6Pn_"
+    },
+    {
+      "id": "synthetic_CVY5tEpGDqhxHxBjhuH0ue5E",
+      "state": "DONE",
+      "submission": "synthetic_CVY5tEpGDqhxHxBjhuH0ue5E"
+    },
+    {
+      "id": "synthetic_DyjUbYWhnp6fpOTMcC5yD73H",
+      "state": "DONE",
+      "submission": "synthetic_DyjUbYWhnp6fpOTMcC5yD73H"
+    },
+    {
+      "id": "synthetic_pGpf5ykY-U3Lzkhj8c5Z454s",
+      "state": "DONE",
+      "submission": "synthetic_pGpf5ykY-U3Lzkhj8c5Z454s"
+    },
+    {
+      "id": "synthetic_1WPanNGwpS0xVBWVskyLLwbE",
+      "state": "DONE",
+      "submission": "synthetic_1WPanNGwpS0xVBWVskyLLwbE"
+    }
+  ],
+  "legacy_immutable_tree_digest": "5411e462b2c12f849f386a3a4f027b0eec7e5069d8fc3479a7738ca18033a1d8",
+  "migrated_original_files_unchanged": true,
+  "sqlite_integrity": "ok",
+  "verified_original_files": 902
+}

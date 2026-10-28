@@ -1,0 +1,38 @@
+{
+  "checkedViewports": [
+    1440,
+    1280,
+    768,
+    390
+  ],
+  "differences": [
+    {
+      "viewport": 1440,
+      "selector": "#canvas-frame",
+      "property": "height",
+      "before": 2143,
+      "after": 2129
+    },
+    {
+      "viewport": 1280,
+      "selector": "#canvas-frame",
+      "property": "height",
+      "before": 2143,
+      "after": 2129
+    },
+    {
+      "viewport": 768,
+      "selector": "#canvas-frame",
+      "property": "height",
+      "before": 2143,
+      "after": 2129
+    },
+    {
+      "viewport": 390,
+      "selector": "#canvas-frame",
+      "property": "height",
+      "before": 2269,
+      "after": 2255
+    }
+  ]
+}

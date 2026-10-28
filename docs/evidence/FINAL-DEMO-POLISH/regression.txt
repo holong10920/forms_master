@@ -1,0 +1,6 @@
+### Result
+[{"name":"PC","status":200,"validation":true,"errors":[]},{"name":"Sports","status":200,"validation":true,"errors":[]}]
+### Ran Playwright code
+```js
+await (async(page)=>{const out=[];for(const [name,id]of [["PC","rel_ayic5cin2i4bsabicpnzewvuw5"],["Sports","rel_pfjwsj2ma3eljl2ijvjord2hvf"]]){const p=await page.context().newPage();const errors=[];p.on("pageerror",e=>errors.push(e.message));const r=await p.goto("http://127.0.0.1:4183/r/"+id+"/index.html");await p.locator("input,select,textarea").first().waitFor();await p.getByRole("button",{name:"次へ",exact:true}).click();await p.getByRole("alert").waitFor();if(r.status()!==200||errors.length)throw Error(name+" regression");out.push({name,status:200,validation:true,errors});await p.close();}return out;})(page);
+```

@@ -1,0 +1,6 @@
+### Result
+{"submission":200,"replay":200,"changedPayload":409,"syntheticOnly":true}
+### Ran Playwright code
+```js
+await (async (page) => { const req=(await page.requests()).filter(r=>r.url().endsWith("/api/submit")&&r.method()==="POST").at(-1); if(!req) throw Error("request history unavailable"); const body=req.postDataJSON(); const repeat=await page.request.post(req.url(),{data:body,headers:{Origin:"http://127.0.0.1:4183"}}); if(repeat.status()!==200) throw Error("replay failed"); const conflict=await page.request.post(req.url(),{data:{...body,payload:{...body.payload,title:"別の合成楽器"}},headers:{Origin:"http://127.0.0.1:4183"}}); if(conflict.status()!==409) throw Error("conflict not rejected"); return {submission:200,replay:repeat.status(),changedPayload:conflict.status(),syntheticOnly:true}; })(page);
+```

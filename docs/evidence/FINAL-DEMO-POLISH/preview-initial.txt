@@ -1,0 +1,6 @@
+### Result
+"商品情報\n商品確認\nお客様情報\n商品情報を入力\n商品カテゴリ必須\n選択してください\n洗濯機、乾燥機\n冷蔵庫、冷凍庫\n冷暖房、空調\nキッチン家電\nテレビ、周辺機器\n美容、健康器具\nPC、スマホ、タブレット\nカメラ、光学機器\nオーディオ\n楽器\nスポーツ・アウトドア\nその他\n商品カテゴリ詳細必須\n選択してください\nギター、ベース\nピアノ、エレクトーン\nキーボード、電子ピアノ\n管楽器・弦楽器・打楽器\nDTM・DJ・音響機器\n周辺機器・アクセサリー\nその他\n商品を確認\n\n合成データのみ"
+### Ran Playwright code
+```js
+await (async(page)=>{await page.getByRole("button",{name:"プレビューを更新",exact:true}).click();const f=page.frameLocator("iframe[title=\"Interactive isolated preview\"]");await f.locator("#grp_products-fld_category").waitFor();await page.screenshot({path:"output/playwright/final-polish/admin-preview-initial.png"});return await f.locator("body").innerText();})(page);
+```

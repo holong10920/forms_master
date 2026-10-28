@@ -1,0 +1,60 @@
+### Ran Playwright code
+```js
+await (async (page) => {
+  const errors=[]; page.on('pageerror',e=>errors.push(e.message));
+  await page.setViewportSize({width:1440,height:900});
+  const category=()=>page.getByRole('combobox',{name:'商品カテゴリ 必須',exact:true});
+  await category().waitFor();
+  await page.screenshot({path:'output/playwright/gakki-desktop-initial.png'});
+  await page.getByRole('button',{name:'次へ',exact:true}).click();
+  if(!await page.getByRole('alert').count()) throw Error('missing initial validation');
+  await page.screenshot({path:'output/playwright/gakki-desktop-validation.png'});
+  const tested=[];
+  for(const c of ['guitar-bass','piano','keyboard','inst','dtm-dj','gakki-accessories','gakki-o']) {
+    await category().selectOption(c);
+    const title=page.getByRole('textbox',{name:'メーカー、モデル、型番など 必須',exact:true});
+    if(await title.inputValue()!=='') throw Error('category did not reset title: '+c);
+    await title.fill('合成楽器 Model A');
+    await page.getByRole('radio',{name:'中古',exact:true}).check();
+    if(c==='piano') {
+      const floor=page.getByRole('combobox',{name:'建物の何階に設置していますか？ 必須',exact:true});
+      await floor.selectOption('2～3階');
+      await page.getByRole('button',{name:'次へ',exact:true}).click();
+      if(!await page.getByRole('heading',{name:'商品情報を入力',exact:true}).count()) throw Error('missing carryout validation');
+      await page.getByRole('combobox',{name:'搬出について 必須',exact:true}).selectOption('階段作業が必要');
+      await page.screenshot({path:'output/playwright/gakki-desktop-piano.png'});
+      await floor.selectOption('1階');
+      if(await page.getByRole('combobox',{name:'搬出について 必須',exact:true}).count()) throw Error('carryout not hidden');
+    } else if(await page.getByRole('combobox',{name:'建物の何階に設置していますか？ 必須',exact:true}).count()) throw Error('non-piano floor visible');
+    await page.getByRole('textbox',{name:'補足事項 任意',exact:true}).fill('合成ケース付き');
+    await page.getByRole('button',{name:'次へ',exact:true}).click();
+    await page.getByRole('heading',{name:'お客様情報',exact:true}).waitFor();
+    await page.getByRole('button',{name:'戻る',exact:true}).click();
+    if(await title.inputValue()!=='合成楽器 Model A') throw Error('back lost value');
+    tested.push(c);
+  }
+  await page.evaluate(()=>window.scrollTo(0,0));
+  await page.screenshot({path:'output/playwright/gakki-desktop.png'});
+  if(await page.evaluate(()=>document.documentElement.scrollWidth)>1440) throw Error('desktop horizontal overflow');
+  await page.setViewportSize({width:390,height:844});
+  await page.reload(); await category().waitFor();
+  await page.screenshot({path:'output/playwright/gakki-mobile-initial.png'});
+  await category().selectOption('piano');
+  await page.getByRole('textbox',{name:'メーカー、モデル、型番など 必須',exact:true}).fill('合成楽器 Model A');
+  await page.getByRole('radio',{name:'中古',exact:true}).check();
+  await page.getByRole('combobox',{name:'建物の何階に設置していますか？ 必須',exact:true}).selectOption('4階以上');
+  await page.getByRole('combobox',{name:'搬出について 必須',exact:true}).selectOption('階段作業が必要');
+  await page.getByRole('textbox',{name:'補足事項 任意',exact:true}).fill('合成ケース付き');
+  if(await page.evaluate(()=>document.documentElement.scrollWidth)>390) throw Error('mobile horizontal overflow');
+  await page.evaluate(()=>window.scrollTo(0,0));
+  await page.screenshot({path:'output/playwright/gakki-mobile.png'});
+  await page.screenshot({path:'output/playwright/gakki-mobile-full.png',fullPage:true});
+  await page.getByRole('button',{name:'次へ',exact:true}).click();
+  await page.getByRole('heading',{name:'お客様情報',exact:true}).waitFor();
+  console.log(JSON.stringify({result:'PASS',categories:tested,desktop:{width:1440,height:900},mobile:{width:390,height:844},horizontalOverflow:false,pageErrors:errors}));
+  if(errors.length) throw Error('runtime page error');
+})(page);
+```
+### Page
+- Page URL: http://127.0.0.1:4183/r/rel_lrn673wjhmxfxe3srrnnixketf/index.html
+- Page Title: 楽器買取のお申し込み · Local Synthetic

@@ -1,0 +1,243 @@
+{
+  "branch": "main",
+  "head": "2456704",
+  "baseline": "Actual preserved working tree at start of FINAL DEMO POLISH",
+  "prior33PathsMatchedManifest": true,
+  "sourceFiles": 19,
+  "files": [
+    {
+      "path": "packages/contracts/scripts/lint-schemas.ts",
+      "absolutePath": "/Users/hongocbaolong/Documents/marketenterprise/forms_master/packages/contracts/scripts/lint-schemas.ts",
+      "status": "modified",
+      "baselineSha256": "2f47c455e4f583c3cc8d684c188405adf25be36eb3030089b8d9010a35314edf",
+      "sha256": "f3209b3c4cfa229f34cccd4d97ce8a6d58e1fca41a96540ded22ae5e36bbe8cb"
+    },
+    {
+      "path": "packages/contracts/src/generated/engine-ir.v1.ts",
+      "absolutePath": "/Users/hongocbaolong/Documents/marketenterprise/forms_master/packages/contracts/src/generated/engine-ir.v1.ts",
+      "status": "modified",
+      "baselineSha256": "28866ee6c7366937c9a85503b1617c79feb6cdf35bcf727039602f22be7781c0",
+      "sha256": "4e9f4352487934f3fc4c9c07da5ac2fa9a113a000645fa57bce4d386bc461b4c"
+    },
+    {
+      "path": "packages/contracts/src/generated/form-definition.v1.ts",
+      "absolutePath": "/Users/hongocbaolong/Documents/marketenterprise/forms_master/packages/contracts/src/generated/form-definition.v1.ts",
+      "status": "modified",
+      "baselineSha256": "54775ef17bc7e1a1b0b17de5d5cea5483a19c495052cee915cb9605e261956a9",
+      "sha256": "31ff4353e17af9aaca933b0c75e244ea89a34a4f3031b284482d941553c62ccd"
+    },
+    {
+      "path": "packages/contracts/src/generated/schemas.ts",
+      "absolutePath": "/Users/hongocbaolong/Documents/marketenterprise/forms_master/packages/contracts/src/generated/schemas.ts",
+      "status": "modified",
+      "baselineSha256": "61a6ee431c8c1a1c713b7192685b1ec3fe7fb82eb28d46228df2d19b0fcc88bf",
+      "sha256": "81a74ded3960228dcd0498f78709d6ff984c6ab7fb10681522f841d9aea17cb3"
+    },
+    {
+      "path": "packages/form-engine/src/definition.ts",
+      "absolutePath": "/Users/hongocbaolong/Documents/marketenterprise/forms_master/packages/form-engine/src/definition.ts",
+      "status": "modified",
+      "baselineSha256": "8c4ca776530c514646a3a41def3833d4f4f608f77f05532e00190319dc4de150",
+      "sha256": "9fb5d4299d7cddf9bc6cc607a6c560cb5ac0f7f0508db126072b664c960c6bc5"
+    },
+    {
+      "path": "packages/static-runtime/src/appearance.ts",
+      "absolutePath": "/Users/hongocbaolong/Documents/marketenterprise/forms_master/packages/static-runtime/src/appearance.ts",
+      "status": "modified",
+      "baselineSha256": "20a84feee9482a9dc2b18ffccd4fb0bbcf3aa905e35f0cf21f10c02beda3d8ad",
+      "sha256": "7e835beb6da7feb3303e85a025f57c4fa3798d6fc24554c8bfdf961dd549ec32"
+    },
+    {
+      "path": "packages/static-runtime/src/cart.ts",
+      "absolutePath": "/Users/hongocbaolong/Documents/marketenterprise/forms_master/packages/static-runtime/src/cart.ts",
+      "status": "modified",
+      "baselineSha256": "975e00cf8e8f18e422ecae9eb30d60e5a67eef6acea61697a2b322fd9c31b898",
+      "sha256": "504b1efd8d98f2446f4219b2880c8264608db9ffd2efe29b0e213201cdce9eb5"
+    },
+    {
+      "path": "packages/static-runtime/src/enhancements.ts",
+      "absolutePath": "/Users/hongocbaolong/Documents/marketenterprise/forms_master/packages/static-runtime/src/enhancements.ts",
+      "status": "modified",
+      "baselineSha256": "fa59beff48b074ab48afe1df79a8a4718643ebbc2735fbcb3f7eb5ff49cf5707",
+      "sha256": "70cb159621ad1365f2c6b75eceda267ec787e876022fe2ce7b505ffc2aba9970"
+    },
+    {
+      "path": "packages/static-runtime/src/index.ts",
+      "absolutePath": "/Users/hongocbaolong/Documents/marketenterprise/forms_master/packages/static-runtime/src/index.ts",
+      "status": "modified",
+      "baselineSha256": "31c48e0c3e1cc4306f70e2a96b3bc0bd0b83ae09b72a7e545376d51f00ec5f5f",
+      "sha256": "c35e37ecfd23ebddc8a2ed7f29a360763d3259f2d3ff29b85623ea315bc1d35f"
+    },
+    {
+      "path": "packages/static-runtime/src/journey.ts",
+      "absolutePath": "/Users/hongocbaolong/Documents/marketenterprise/forms_master/packages/static-runtime/src/journey.ts",
+      "status": "new",
+      "baselineSha256": null,
+      "sha256": "fe915a38f13fb9abf3a548583e5ca0350f005698cb651a48621363b36ea050d8"
+    },
+    {
+      "path": "packages/static-runtime/src/recipes.ts",
+      "absolutePath": "/Users/hongocbaolong/Documents/marketenterprise/forms_master/packages/static-runtime/src/recipes.ts",
+      "status": "modified",
+      "baselineSha256": "46d64f98d9e0bf86e69de082e41d0e4eb06ce385d4cd519cbcd5b2caf5675144",
+      "sha256": "f6f71a86d2f839a230805a6521b41a464b51ca5be76bbd3671facfab32bf3bc3"
+    },
+    {
+      "path": "contracts/schemas/engine-ir/v1.schema.json",
+      "absolutePath": "/Users/hongocbaolong/Documents/marketenterprise/forms_master/contracts/schemas/engine-ir/v1.schema.json",
+      "status": "modified",
+      "baselineSha256": "0c5512b325f5632b009cea85f47f7ffda4c216cdfdeba6f27ca363b9bbd7e1b8",
+      "sha256": "164484e883dd6f6dc3ed5b611a091e978f18e7fb8e08ae8fb76e54c4c3f22740"
+    },
+    {
+      "path": "contracts/schemas/form-definition/v1.schema.json",
+      "absolutePath": "/Users/hongocbaolong/Documents/marketenterprise/forms_master/contracts/schemas/form-definition/v1.schema.json",
+      "status": "modified",
+      "baselineSha256": "b2ce9abd7d0e55ad1306d1d299394ee8b511880d3689417a0d9a516cd6c46df6",
+      "sha256": "f0d0bd46b81664d2d305534a124678252381bbb0b2da06ee2dae9e182f073210"
+    },
+    {
+      "path": "tools/compiler/src/build.ts",
+      "absolutePath": "/Users/hongocbaolong/Documents/marketenterprise/forms_master/tools/compiler/src/build.ts",
+      "status": "modified",
+      "baselineSha256": "7b0263e4e3c086b2ac70e1c09958c89aaae5996b7f0b4d38583530bc700042a6",
+      "sha256": "961b19632f109b7c9d9e2c7e45ac704762d61f4c31476c13bde8a6a0514afa0d"
+    },
+    {
+      "path": "tools/compiler/src/tailwind.ts",
+      "absolutePath": "/Users/hongocbaolong/Documents/marketenterprise/forms_master/tools/compiler/src/tailwind.ts",
+      "status": "modified",
+      "baselineSha256": "3e1b469d86ce7441727dd60167479bef39e9339e944eec80e766b9fd27202a10",
+      "sha256": "3d3848f72d0ee7a30d3ad9cb42cbbab0d07996c03858070c883e7a6dd19a55b1"
+    },
+    {
+      "path": "tools/compiler/test/polish.test.ts",
+      "absolutePath": "/Users/hongocbaolong/Documents/marketenterprise/forms_master/tools/compiler/test/polish.test.ts",
+      "status": "new",
+      "baselineSha256": null,
+      "sha256": "4b9f50be8dd14158868a8354d03ab0370ab630f0e1da868b880f2dad38b44d4d"
+    },
+    {
+      "path": "tools/go-auth/studio/appearance.js",
+      "absolutePath": "/Users/hongocbaolong/Documents/marketenterprise/forms_master/tools/go-auth/studio/appearance.js",
+      "status": "modified",
+      "baselineSha256": "d93dba534683cd71ee9eb6fa515938f9795673cbbcac9aeca78ced7e46f8171b",
+      "sha256": "de6c80243dd0ec45f407b62d02a88ae46fe383f1e4d4351eb0a9de859447c94d"
+    },
+    {
+      "path": "tools/go-auth/studio/cart-editor.js",
+      "absolutePath": "/Users/hongocbaolong/Documents/marketenterprise/forms_master/tools/go-auth/studio/cart-editor.js",
+      "status": "modified",
+      "baselineSha256": "7851fe5bedf853078c3f5159a5d478a18f84a364f54b8a19aa5105e278f3d3e1",
+      "sha256": "df7e99f544a4863dd6c2e9fbfc9d6704101801ac095c75f6c78ee94e2374dbf9"
+    },
+    {
+      "path": "tools/legacy-analyzer/test/journey.test.ts",
+      "absolutePath": "/Users/hongocbaolong/Documents/marketenterprise/forms_master/tools/legacy-analyzer/test/journey.test.ts",
+      "status": "new",
+      "baselineSha256": null,
+      "sha256": "3e7d0430dd9849ce99835aa8f61b228fd5a05aa96ee82d205208355ed8df51a3"
+    }
+  ],
+  "newDeletions": [],
+  "stagedFiles": [],
+  "noCommit": true,
+  "noGitHubAccess": true,
+  "noAWSWrites": true,
+  "proposedPolishCommit": "feat: configure compact customer branding and staged journey presentation",
+  "separation": "Keep pre-existing cleanup/refactor work separate. Prior multi-product parity delta is CLOSE-LEGACY-PARITY/incremental.patch. This incremental.patch contains only the final polish delta against that preserved state. Do not stage whole shared files.",
+  "documentationFiles": [
+    "docs/CURRENT_STATUS.md",
+    "docs/CONTEXT_HANDOFF.md",
+    "docs/PROJECT_CHECKLIST.md",
+    "docs/REQUIREMENTS_TRACEABILITY.md"
+  ],
+  "evidenceFiles": [
+    "docs/evidence/FINAL-DEMO-POLISH/RESULTS.md",
+    "docs/evidence/FINAL-DEMO-POLISH/admin-clean-content.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/admin-label-access.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/admin-style.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/approved-final.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/approved.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/boundaries.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/browser-comparison-final.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/browser-comparison.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/build.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/change-scope.json",
+    "docs/evidence/FINAL-DEMO-POLISH/format.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/gen-check.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/go-race.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/go-vet.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/incremental.patch",
+    "docs/evidence/FINAL-DEMO-POLISH/lint.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/parity.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/performance.json",
+    "docs/evidence/FINAL-DEMO-POLISH/polish-recheck.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/preflight.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/preview-flow.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/preview-initial.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/published-final.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/published-ir.json",
+    "docs/evidence/FINAL-DEMO-POLISH/published.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/react-tests.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/recheck.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/reference-readonly.json",
+    "docs/evidence/FINAL-DEMO-POLISH/regression.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/review-final.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/review.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/scenarios.json",
+    "docs/evidence/FINAL-DEMO-POLISH/schema-lint.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/secrets.json",
+    "docs/evidence/FINAL-DEMO-POLISH/synthetic.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/targeted-tests.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/targeted.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/ts-tests.txt",
+    "docs/evidence/FINAL-DEMO-POLISH/typecheck.txt"
+  ],
+  "screenshots": [
+    "output/playwright/final-polish/admin-preview-filled.png",
+    "output/playwright/final-polish/admin-preview-initial.png",
+    "output/playwright/final-polish/admin-published-final.png",
+    "output/playwright/final-polish/admin-published.png",
+    "output/playwright/final-polish/legacy-desktop-back.png",
+    "output/playwright/final-polish/legacy-desktop-cart-full.png",
+    "output/playwright/final-polish/legacy-desktop-cart.png",
+    "output/playwright/final-polish/legacy-desktop-confirmation.png",
+    "output/playwright/final-polish/legacy-desktop-customer.png",
+    "output/playwright/final-polish/legacy-desktop-edit.png",
+    "output/playwright/final-polish/legacy-desktop-filled-full.png",
+    "output/playwright/final-polish/legacy-desktop-filled.png",
+    "output/playwright/final-polish/legacy-desktop-initial.png",
+    "output/playwright/final-polish/legacy-desktop-validation.png",
+    "output/playwright/final-polish/legacy-mobile-back.png",
+    "output/playwright/final-polish/legacy-mobile-cart-full.png",
+    "output/playwright/final-polish/legacy-mobile-cart.png",
+    "output/playwright/final-polish/legacy-mobile-confirmation.png",
+    "output/playwright/final-polish/legacy-mobile-customer.png",
+    "output/playwright/final-polish/legacy-mobile-edit.png",
+    "output/playwright/final-polish/legacy-mobile-filled-full.png",
+    "output/playwright/final-polish/legacy-mobile-filled.png",
+    "output/playwright/final-polish/legacy-mobile-initial.png",
+    "output/playwright/final-polish/legacy-mobile-validation.png",
+    "output/playwright/final-polish/master-desktop-back.png",
+    "output/playwright/final-polish/master-desktop-cart-full.png",
+    "output/playwright/final-polish/master-desktop-cart.png",
+    "output/playwright/final-polish/master-desktop-confirmation.png",
+    "output/playwright/final-polish/master-desktop-customer.png",
+    "output/playwright/final-polish/master-desktop-edit.png",
+    "output/playwright/final-polish/master-desktop-filled-full.png",
+    "output/playwright/final-polish/master-desktop-filled.png",
+    "output/playwright/final-polish/master-desktop-initial.png",
+    "output/playwright/final-polish/master-desktop-validation.png",
+    "output/playwright/final-polish/master-mobile-back.png",
+    "output/playwright/final-polish/master-mobile-cart-full.png",
+    "output/playwright/final-polish/master-mobile-cart.png",
+    "output/playwright/final-polish/master-mobile-confirmation.png",
+    "output/playwright/final-polish/master-mobile-customer.png",
+    "output/playwright/final-polish/master-mobile-edit.png",
+    "output/playwright/final-polish/master-mobile-filled-full.png",
+    "output/playwright/final-polish/master-mobile-filled.png",
+    "output/playwright/final-polish/master-mobile-initial.png",
+    "output/playwright/final-polish/master-mobile-validation.png"
+  ]
+}

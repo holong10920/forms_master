@@ -1,0 +1,8 @@
+### Result
+{"url":"http://127.0.0.1:4183/r/rel_ckzoawdxgnwqnusqfgkvdecnhz/index.html","version":13,"review":"review_OTM-uceh2EqCkPx0RsZbcW8e"}
+### Ran Playwright code
+```js
+await (async(page)=>{await page.reload();await page.getByRole("tab",{name:"公開",exact:true}).click();const row=page.getByRole("listitem").filter({hasText:"review_OTM-uceh2EqCkPx0RsZbcW8e"});await row.getByRole("button",{name:"ローカル公開",exact:true}).click();await page.getByRole("button",{name:"公開する",exact:true}).click();await row.getByText("公開済み",{exact:true}).waitFor();const url=await page.getByRole("link",{name:"公開中のフォームを新しいタブで開く",exact:true}).getAttribute("href");await page.screenshot({path:"output/playwright/final-polish/admin-published-final.png"});return{url,version:13,review:"review_OTM-uceh2EqCkPx0RsZbcW8e"};})(page);
+```
+### Events
+- New console entries: .playwright-cli/console-2026-10-28T01-58-48-447Z.log#L53-L55

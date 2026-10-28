@@ -1,0 +1,17 @@
+async(page)=>{
+ await page.setViewportSize({width:1440,height:900});
+ const scoped='/sites/site_pc_synthetic/forms/frm_locale_cff3b217c3fd4e3a9d51c5d806c677eb';await page.goto('http://localhost:4180/studio'+scoped+'?lang=vi');await page.locator('#canvas .cv-block').first().waitFor();
+ await page.locator('aside .sidebar-locale select').selectOption('ja');
+ await page.locator('#preview').click();const f=page.frameLocator('#preview-frame');await f.locator('#app h1').waitFor();
+ const rendered=await f.locator('html').evaluate(e=>{
+  const main=document.querySelector('main'),fields=document.querySelector('.form-fields'),field=document.querySelector('.field');
+  const before={padding:getComputedStyle(main).padding,background:getComputedStyle(main).backgroundColor,bodyMargin:getComputedStyle(document.body).margin,utilityAliases:[...e.classList].filter(c=>c.startsWith('tw_')).length};
+  main.style.setProperty('--fb-padding','48px');main.style.setProperty('--fb-background','#fef3c7');main.style.setProperty('--fb-columns','2');field.style.setProperty('--fb-field-padding','20px');
+  const after={padding:getComputedStyle(main).padding,background:getComputedStyle(main).backgroundColor,columns:getComputedStyle(fields).gridTemplateColumns,fieldPadding:getComputedStyle(field).padding};
+  return{before,after};
+ });
+ if(rendered.before.utilityAliases<20||rendered.before.bodyMargin!=='0px'||rendered.after.padding!=='48px'||rendered.after.fieldPadding!=='20px'||rendered.after.background!=='rgb(254, 243, 199)'||rendered.after.columns.split(' ').length!==2)throw Error('Typed style variable regression '+JSON.stringify(rendered));
+ if(await page.locator('link[href="/studio/studio.css"]').count())throw Error('Legacy stylesheet remains');
+ await page.locator('#modes [data-mode="build"]').click();await page.setViewportSize({width:390,height:844});await page.locator('#toggle-left').click();if(!await page.locator('#left-panel').isVisible())throw Error('Structure drawer missing');await page.locator('#close-left').click();await page.locator('#toggle-right').click();if(!await page.locator('#right-panel').isVisible())throw Error('Inspector drawer missing');await page.locator('#close-right').click();
+ await page.screenshot({path:'output/playwright/tailwind-builder-mobile.png'});await page.setViewportSize({width:1440,height:900});return{rendered,legacyStudioCSS:false,mobileStructureDrawer:true,mobileInspectorDrawer:true};
+}

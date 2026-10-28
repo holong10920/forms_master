@@ -1,0 +1,7 @@
+### Result
+{"publishedVietnamese":true,"mobile":true,"errors":[]}
+### Ran Playwright code
+```js
+await (async(page)=>{const c=await page.context().browser().newContext({viewport:{width:390,height:844}});const p=await c.newPage();const errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto('http://127.0.0.1:4183/r/rel_kzrz7awpwrsmkbqvsosrnhihsp/index.html?lang=vi');await p.locator('#app h1').waitFor();if(await p.locator('html').getAttribute('lang')!=='vi-VN')throw Error('VI missing');if(!await p.locator('.formTitle').innerText().then(t=>t.includes('Biểu mẫu kiểm chứng')))throw Error('VI title missing');if(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Overflow');await p.screenshot({path:'output/playwright/tailwind-customer-vi.png',fullPage:true});await c.close();if(errors.length)throw Error(errors.join(','));return{publishedVietnamese:true,mobile:true,errors};}
+)(page);
+```

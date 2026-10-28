@@ -1,0 +1,27 @@
+{
+  "goTests": "PASS -count=1",
+  "goRace": "PASS -race -count=1",
+  "goVet": "PASS",
+  "rootTests": {
+    "passed": 654,
+    "expectedFailures": 15,
+    "files": 38,
+    "maxWorkers": 2
+  },
+  "reactTests": 17,
+  "reactBuild": "PASS",
+  "semanticParity": 284,
+  "formatLintTypecheckGeneratedSchemaBoundariesSynthetic": "PASS",
+  "gitleaksWorkingUnresolved": 0,
+  "gitleaksIndexUnresolved": 0,
+  "govulncheck": "No vulnerabilities found",
+  "sqliteIntegrity": "ok",
+  "immutableOriginalFiles": 902,
+  "originalFilesUnchanged": true,
+  "browser": "PASS; see browser.json",
+  "legacyBrowserParity": "NOT_VERIFIED",
+  "T12_K13": "VERIFICATION_PENDING",
+  "gitMutations": false,
+  "githubAccess": false,
+  "awsWrites": false
+}

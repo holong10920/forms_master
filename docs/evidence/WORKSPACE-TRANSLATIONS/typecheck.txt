@@ -1,0 +1,33 @@
+$ pnpm -r --if-present typecheck
+tools/boundaries typecheck$ tsc -p tsconfig.json
+packages/motion-presets typecheck$ tsc -p tsconfig.json
+packages/sdk-browser typecheck$ tsc -p tsconfig.json
+packages/contracts typecheck$ tsc -p tsconfig.json && tsc -p scripts/tsconfig.json
+packages/motion-presets typecheck: Done
+tools/go-auth typecheck$ tsc -p tsconfig.json
+tools/boundaries typecheck: Done
+tools/legacy-analyzer typecheck$ tsc -p tsconfig.json
+packages/sdk-browser typecheck: Done
+tools/lint-fixtures typecheck$ tsc -p tsconfig.json
+packages/contracts typecheck: Done
+tools/perf typecheck$ tsc -p tsconfig.json
+tools/lint-fixtures typecheck: Done
+tools/security typecheck$ tsc -p tsconfig.json
+tools/go-auth typecheck: Done
+tools/verify typecheck$ tsc -p tsconfig.json
+tools/legacy-analyzer typecheck: Done
+packages/motion-adapter typecheck$ tsc -p tsconfig.json
+tools/perf typecheck: Done
+plugins/store-selector typecheck$ tsc -p tsconfig.json
+tools/security typecheck: Done
+packages/form-engine typecheck$ tsc -p tsconfig.json
+tools/verify typecheck: Done
+plugins/store-selector typecheck: Done
+packages/motion-adapter typecheck: Done
+packages/form-engine typecheck: Done
+tools/compiler typecheck$ tsc -p tsconfig.json
+tools/engine-demo typecheck$ tsc -p tsconfig.json
+packages/static-runtime typecheck$ tsc -p tsconfig.json
+tools/engine-demo typecheck: Done
+packages/static-runtime typecheck: Done
+tools/compiler typecheck: Done

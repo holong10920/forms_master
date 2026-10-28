@@ -1,0 +1,32 @@
+[
+  {
+    "form": "frm_gakki_apply_reference",
+    "release": "rel_qbjvmdwd4wkeaq56cqkc2jihew",
+    "initialJS": 10660,
+    "totalJS": 15783,
+    "initialFiles": [
+      "assets/bootstrap.5f646031949f77778abd4965985083296a2bdf3b2bf4c570bcaa7b47c8dffe96.js",
+      "assets/entry.fd8f68215aba.js"
+    ]
+  },
+  {
+    "form": "frm_pc_apply_reference",
+    "release": "rel_zzohiz5dtsrxon4izco2vwm5lj",
+    "initialJS": 10604,
+    "totalJS": 15727,
+    "initialFiles": [
+      "assets/bootstrap.5f646031949f77778abd4965985083296a2bdf3b2bf4c570bcaa7b47c8dffe96.js",
+      "assets/entry.1931dd6e5a0f.js"
+    ]
+  },
+  {
+    "form": "frm_sports",
+    "release": "rel_slb6q6fpzsiyyj3o4ginhalfak",
+    "initialJS": 11423,
+    "totalJS": 11423,
+    "initialFiles": [
+      "assets/bootstrap.5f646031949f77778abd4965985083296a2bdf3b2bf4c570bcaa7b47c8dffe96.js",
+      "assets/entry.bcacd471b397.js"
+    ]
+  }
+]

@@ -1,0 +1,4 @@
+$ node tools/security/src/synthetic-data-check.ts contracts/fixtures
+{
+  "findings": []
+}

@@ -1,0 +1,3 @@
+$ pnpm --filter @fb/contracts gen:check
+$ node scripts/gen.ts --check
+gen:check OK (4 generated files)

@@ -1,0 +1,74 @@
+{
+  "result": "PASS",
+  "formId": "frm_f40a425abd0b4524844001c78f67e850",
+  "version": 3,
+  "reviewId": "review_s9dS1Qf6PmU8B9AF6ik-FrBU",
+  "author": "synthetic-admin",
+  "approver": "synthetic-approver",
+  "state": "PUBLISHED",
+  "releaseId": "rel_lrn673wjhmxfxe3srrnnixketf",
+  "demoUrl": "http://127.0.0.1:4183/r/rel_lrn673wjhmxfxe3srrnnixketf/index.html",
+  "adminUrl": "http://localhost:4180/studio/sites/site_pc_synthetic/forms/frm_f40a425abd0b4524844001c78f67e850?lang=ja",
+  "viewportChecks": {
+    "desktop": [
+      1440,
+      900
+    ],
+    "mobile": [
+      390,
+      844
+    ],
+    "horizontalOverflow": false
+  },
+  "scenarios": [
+    "No-Code import",
+    "Inspector help edit and reset toggle via keyboard",
+    "Save v3",
+    "Isolated Preview",
+    "Four-eyes review / recheck / approve / publish",
+    "All seven category values",
+    "Required validation",
+    "Piano floor → carry-out",
+    "Ground floor hides and clears carry-out",
+    "Category resets maker/condition/notes",
+    "Next/Back preserves answers",
+    "Published desktop/mobile",
+    "Synthetic submission complete",
+    "Idempotency replay 200 / changed payload 409",
+    "Existing PC and Sports browser load + validation"
+  ],
+  "pageErrors": [],
+  "nonBlockingConsoleEvents": [
+    "Customer favicon.ico request returns 404; no runtime exception.",
+    "Admin iframe sandbox warning; Preview is on a separate checked origin."
+  ],
+  "legacyBrowserParity": "NOT_VERIFIED: reference native Rollup dependency unavailable; no reference files modified.",
+  "submission": {
+    "status": 200,
+    "replay": 200,
+    "changedPayload": 409,
+    "dataMode": "synthetic"
+  },
+  "logs": [
+    "browser-customer.txt",
+    "browser-submission.txt",
+    "browser-regression.txt"
+  ],
+  "screenshots": [
+    "output/playwright/gakki-approved.png",
+    "output/playwright/gakki-desktop-initial.png",
+    "output/playwright/gakki-desktop-piano.png",
+    "output/playwright/gakki-desktop-validation.png",
+    "output/playwright/gakki-desktop.png",
+    "output/playwright/gakki-mobile-full.png",
+    "output/playwright/gakki-mobile-initial.png",
+    "output/playwright/gakki-mobile.png",
+    "output/playwright/gakki-preview-piano-desktop.png",
+    "output/playwright/gakki-preview-reset-desktop.png",
+    "output/playwright/gakki-preview-validation-desktop.png",
+    "output/playwright/gakki-published-admin.png",
+    "output/playwright/gakki-regression-pc.png",
+    "output/playwright/gakki-regression-sports.png",
+    "output/playwright/gakki-submission-complete.png"
+  ]
+}

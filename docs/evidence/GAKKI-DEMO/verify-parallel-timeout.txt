@@ -1,0 +1,90 @@
+$ pnpm preflight && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm gen:check && pnpm schemas:lint && pnpm boundaries && pnpm synthetic:check && pnpm secrets
+$ node tools/verify/src/preflight.ts
+preflight PASS: Node 24.22.1, pnpm 12.15.0
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ eslint . --max-warnings=0
+$ pnpm -r --if-present typecheck
+packages/motion-presets typecheck$ tsc -p tsconfig.json
+packages/ui-styles typecheck$ tsc -p tsconfig.json
+packages/contracts typecheck$ tsc -p tsconfig.json && tsc -p scripts/tsconfig.json
+packages/sdk-browser typecheck$ tsc -p tsconfig.json
+packages/motion-presets typecheck: Done
+tools/boundaries typecheck$ tsc -p tsconfig.json
+packages/ui-styles typecheck: Done
+tools/go-auth typecheck$ tsc -p tsconfig.json
+packages/sdk-browser typecheck: Done
+tools/legacy-analyzer typecheck$ tsc -p tsconfig.json
+packages/contracts typecheck: Done
+tools/lint-fixtures typecheck$ tsc -p tsconfig.json
+tools/boundaries typecheck: Done
+tools/perf typecheck$ tsc -p tsconfig.json
+tools/go-auth typecheck: Done
+tools/security typecheck$ tsc -p tsconfig.json
+tools/lint-fixtures typecheck: Done
+tools/verify typecheck$ tsc -p tsconfig.json
+tools/legacy-analyzer typecheck: Done
+packages/motion-adapter typecheck$ tsc -p tsconfig.json
+tools/perf typecheck: Done
+plugins/store-selector typecheck$ tsc -p tsconfig.json
+tools/security typecheck: Done
+packages/form-engine typecheck$ tsc -p tsconfig.json
+tools/verify typecheck: Done
+plugins/store-selector typecheck: Done
+packages/motion-adapter typecheck: Done
+packages/form-engine typecheck: Done
+tools/compiler typecheck$ tsc -p tsconfig.json
+packages/static-runtime typecheck$ tsc -p tsconfig.json
+tools/engine-demo typecheck$ tsc -p tsconfig.json
+tools/engine-demo typecheck: Done
+packages/static-runtime typecheck: Done
+tools/compiler typecheck: Done
+$ vitest run
+
+ RUN  v5.0.5 /Users/hongocbaolong/Documents/marketenterprise/forms_master
+
+ ❯ packages/form-engine/test/purity.test.ts (1 test | 1 failed) 6180ms
+   × engine lint rejects clock and randomness globals 6179ms
+ ❯ tools/lint-fixtures/test/lint-fixtures.test.ts (2 tests | 1 failed) 9135ms
+   × ESLint rejects eval and new Function 5661ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/form-engine/test/purity.test.ts > engine lint rejects clock and randomness globals
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ packages/form-engine/test/purity.test.ts:4:1
+      2| import { ESLint } from "eslint";
+      3| import { expect, test } from "vitest";
+      4| test("engine lint rejects clock and randomness globals", async () => {
+       | ^
+      5|   const eslint = new ESLint({ cwd: resolve(import.meta.dirname, "../..…
+      6|   const results = await eslint.lintText(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tools/lint-fixtures/test/lint-fixtures.test.ts > ESLint rejects eval and new Function
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tools/lint-fixtures/test/lint-fixtures.test.ts:10:1
+      8| const repoRoot = resolve(import.meta.dirname, "../../..");
+      9|
+     10| test("ESLint rejects eval and new Function", async () => {
+       | ^
+     11|   const eslint = new ESLint({ cwd: repoRoot, ignore: false });
+     12|   const [result] = await eslint.lintFiles([
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 36 passed (38)
+      Tests  2 failed | 652 passed | 15 expected fail (669)
+   Start at  23:12:28
+   Duration  11.40s (tests 83%, import 13%, transform 4%)
+
+    Isolate  38 workers spawned · ~177ms startup each (spawn + environment, per file)
+             at least ~786ms faster with isolate: false — reuses workers across files instead of one per file
+
+[ELIFECYCLE] Test failed. See above for more details.
+[ELIFECYCLE] Command failed with exit code 1.

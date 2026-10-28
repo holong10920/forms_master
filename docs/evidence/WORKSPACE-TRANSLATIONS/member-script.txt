@@ -1,0 +1,11 @@
+async(page)=>{
+ const browser=page.context().browser();const context=await browser.newContext();const p=await context.newPage();const errors=[];p.on('pageerror',e=>errors.push(e.message));
+ const form='frm_locale_cff3b217c3fd4e3a9d51c5d806c677eb';const path='/translations/sites/site_pc_synthetic/forms/'+form;
+ await p.goto('http://localhost:4180/login?lang=vi&return_to='+encodeURIComponent(path));
+ await p.getByRole('link',{name:/Tiếp tục/}).click();await p.getByRole('button',{name:'Continue as synthetic-member'}).click();await p.locator('#mode-translate:not([hidden]) .tr-table').waitFor();
+ const inputs=p.locator('.tr-table input');if(await inputs.count()===0)throw Error('Missing translations');for(const input of await inputs.all()){if(!await input.getAttribute('readonly')&&await input.getAttribute('readonly')!== '')throw Error('Member can edit');}
+ if(await p.locator('header.brand-header').count())throw Error('Header remains');if(await p.locator('.tr-table button').count())throw Error('Member translation action');
+ const status=await p.evaluate(async(form)=>{const s=await(await fetch('/api/session')).json();const r=await fetch('/api/save',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':s.csrf,'X-Role':'admin'},body:JSON.stringify({site:'site_pc_synthetic',form,expected:1,definition:{},role:'admin'})});return r.status;},form);
+ if(status!==403)throw Error('Member save not denied '+status);
+ await p.screenshot({path:'output/playwright/translation-fix-member.png'});await context.close();return{translationDeepLinkAfterOIDC:true,memberReadonly:true,forgedAdminSaveStatus:status,errors};
+}

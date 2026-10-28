@@ -1,0 +1,38 @@
+$ vitest run
+
+ RUN  v5.0.5 /Users/hongocbaolong/Documents/marketenterprise/forms_master
+
+ ❯ tools/security/test/gitleaks.test.ts (2 tests | 1 failed) 166ms
+   × Gitleaks detects a generated synthetic AWS credential and accepts clean input (requires CLI 8.30.1) 165ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tools/security/test/gitleaks.test.ts > Gitleaks detects a generated synthetic AWS credential and accepts clean input (requires CLI 8.30.1)
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ tools/security/test/gitleaks.test.ts:24:54
+     22|       );
+     23|       // Redacted wrapper output is never printed by this test.
+     24|       expect(spawnSync("sh", [wrapper, dir]).status).toBe(1);
+       |                                                      ^
+     25|     } finally {
+     26|       rmSync(dir, { recursive: true, force: true });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 35 passed (36)
+      Tests  1 failed | 647 passed | 15 expected fail (663)
+   Start at  14:36:37
+   Duration  6.83s (tests 86%, import 8%, transform 4%, setup 1%)
+
+    Isolate  36 workers spawned · ~105ms startup each (spawn + environment, per file)
+             at least ~434ms faster with isolate: false — reuses workers across files instead of one per file
+
+[ELIFECYCLE] Test failed. See above for more details.

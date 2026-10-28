@@ -1,0 +1,12 @@
+### Result
+{"cleaned":true,"summaryConfigured":true,"saved":"保存済み\n· v11"}
+### Ran Playwright code
+```js
+await (async(page)=>{await page.getByRole("list",{name:"フォームの構成"}).getByRole("button",{name:/商品情報 ·/}).click();const open=async(name)=>{const d=page.locator("#inspector details").filter({has:page.locator("summary").filter({hasText:name})}).first();if(!await d.evaluate(e=>e.open))await d.locator("summary").first().click();};const set=async(name,value)=>{const e=page.getByRole("textbox",{name,exact:true});await e.fill(value);await e.press("Tab");};await open("メーカー、モデル、型番など（QA）");await set("項目ラベル · title","メーカー、モデル、型番など");await set("プレースホルダー · title","例）メーカー名・型番");await set("補足説明 · title","");await open("商品の状態");await set("選択肢 3 · condition","未使用");await open("商品カテゴリ詳細");await set("選択肢 1 · category","ドラム式洗濯機");await open("補足事項（QA）");await set("項目ラベル · item_comment","補足事項");await set("補足説明 · item_comment","");await page.getByRole("combobox",{name:"一覧の主見出し",exact:true}).selectOption("fld_title");await page.getByRole("combobox",{name:"一覧の補助情報",exact:true}).selectOption("fld_category");await set("商品確認の見出し","商品確認");await page.getByRole("button",{name:/保存済み/}).waitFor();return{cleaned:true,summaryConfigured:true,saved:await page.getByRole("button",{name:/保存済み/}).innerText()};})(page);
+```
+### Page
+- Page URL: http://localhost:4180/studio/sites/site_pc_synthetic/forms/frm_330b2755e02d458c8420f072204ed44f?lang=ja
+- Page Title: Form Master · Workspace
+- Console: 0 errors, 3 warnings
+### Events
+- New console entries: .playwright-cli/console-2026-10-28T01-58-48-447Z.log#L21-L22

@@ -1,0 +1,10 @@
+$ vitest run
+
+ RUN  v5.0.5 /Users/hongocbaolong/Documents/marketenterprise/forms_master/tools/go-auth/web
+
+
+ Test Files  2 passed (2)
+      Tests  16 passed (16)
+   Start at  14:40:40
+   Duration  1.75s (environment 58%, tests 24%, import 10%, transform 7%)
+

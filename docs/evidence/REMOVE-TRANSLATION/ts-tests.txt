@@ -1,0 +1,13 @@
+$ vitest run
+
+ RUN  v5.0.5 /Users/hongocbaolong/Documents/marketenterprise/forms_master
+
+
+ Test Files  37 passed (37)
+      Tests  651 passed | 15 expected fail (666)
+   Start at  15:34:38
+   Duration  7.12s (tests 81%, import 13%, transform 5%, setup 1%)
+
+    Isolate  37 workers spawned · ~120ms startup each (spawn + environment, per file)
+             at least ~515ms faster with isolate: false — reuses workers across files instead of one per file
+

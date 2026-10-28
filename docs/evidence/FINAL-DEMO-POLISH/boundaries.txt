@@ -1,0 +1,4 @@
+$ depcruise packages tools plugins --config .dependency-cruiser.cjs --output-type err
+
+✔ no dependency violations found (181 modules, 495 dependencies cruised)
+

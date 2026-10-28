@@ -1,0 +1,8 @@
+### Result
+{"rechecked":true}
+### Ran Playwright code
+```js
+await (async(page)=>{await page.reload();await page.getByRole("tab",{name:"公開",exact:true}).click();const row=page.getByRole("listitem").filter({hasText:"review_Q__9rylt8uhQQhE1IAHWvhYA"});const r=row.getByRole("button",{name:"再チェック",exact:true});if(await r.count())await r.click();await row.getByRole("button",{name:"承認 (Data Contract 確認)",exact:true}).waitFor();return{rechecked:true};})(page);
+```
+### Events
+- New console entries: .playwright-cli/console-2026-10-28T01-58-48-447Z.log#L40-L42

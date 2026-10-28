@@ -1,0 +1,10 @@
+async(page)=>{
+ const form='frm_locale_cff3b217c3fd4e3a9d51c5d806c677eb';const path='/translations/sites/site_pc_synthetic/forms/'+form;
+ await page.goto('http://localhost:4180'+path+'?lang=vi');await page.locator('.tr-table').waitFor();
+ const input=page.locator('.tr-table input[data-row^="field:"][data-row$=":label"][data-lang="ja"]').first();const original=await input.inputValue();await input.fill('');
+ if(await input.getAttribute('aria-invalid')!=='true')throw Error('Invalid JA not marked');
+ await page.getByRole('link',{name:'Trình tạo biểu mẫu',exact:true}).click();
+ if(!page.url().includes(path))throw Error('Invalid edit silently discarded');
+ await input.fill(original);await page.getByRole('link',{name:'Trình tạo biểu mẫu',exact:true}).click();await page.locator('#mode-build:not([hidden])').waitFor();
+ return{invalidJapaneseRejected:true,navigationBlockedUntilCorrected:true,correctedSave:true};
+}

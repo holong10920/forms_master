@@ -1,0 +1,35 @@
+### Result
+{"menuRemoved":true,"pageRemoved":true,"oldURLRedirectsDashboard":true,"applicationLocales":["ja","vi"],"builderStillWorks":true,"translateStatus":404,"removedLoginTargetStatus":400,"featureBundled":false,"errors":[]}
+### Ran Playwright code
+```js
+await (async(page)=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.setViewportSize({width:1440,height:900});
+ await page.goto('http://localhost:4180/translations/sites/site_pc_synthetic/forms/frm_0af7cf8706f041a198d0d07da6595e54?lang=vi');
+ await page.getByRole('link',{name:'Trình tạo biểu mẫu',exact:true}).waitFor();
+ if(new URL(page.url()).pathname!=='/dashboard')throw Error('Removed route still active');
+ if(await page.getByRole('link',{name:'Dịch',exact:true}).count())throw Error('Menu remains');
+ if(await page.locator('#translations,#mode-translate').count())throw Error('Translation UI remains');
+ const api=await page.evaluate(async()=>{
+  const s=await(await fetch('/api/session')).json();
+  const response=await fetch('/api/translate',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':s.csrf},body:JSON.stringify({source:'ja',target:'vi',texts:[]})});
+  const login=await fetch('/api/v1/auth/login?return_to='+encodeURIComponent('/translations/sites/site_pc_synthetic/forms/frm_test'),{redirect:'manual'});
+  const js=await(await fetch('/studio/studio.js')).text();
+  return{translateStatus:response.status,removedLoginTargetStatus:login.status,featureBundled:/renderTranslations|TRANSLATION_PROVIDER_UNAVAILABLE|mode-translate/.test(js)};
+ });
+ if(api.translateStatus!==404||api.removedLoginTargetStatus!==400||api.featureBundled)throw Error(JSON.stringify(api));
+ await page.goto('http://localhost:4180/studio/sites/site_pc_synthetic/forms/frm_locale_cff3b217c3fd4e3a9d51c5d806c677eb?lang=vi');await page.locator('#canvas .cv-block').first().waitFor();
+ if(await page.locator('#translations,#mode-translate,[data-mode="translate"]').count())throw Error('Editor feature remains');
+ const picker=page.locator('aside .sidebar-locale select');await picker.selectOption('ja');await page.waitForFunction(()=>document.querySelector('.studio-root').lang==='ja-JP');await picker.selectOption('vi');await page.waitForFunction(()=>document.querySelector('.studio-root').lang==='vi-VN');
+ await page.screenshot({path:'output/playwright/translation-removed-desktop.png'});
+ await page.setViewportSize({width:390,height:844});if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Overflow');await page.screenshot({path:'output/playwright/translation-removed-mobile.png'});await page.setViewportSize({width:1440,height:900});
+ if(errors.length)throw Error(errors.join(','));return{menuRemoved:true,pageRemoved:true,oldURLRedirectsDashboard:true,applicationLocales:['ja','vi'],builderStillWorks:true,...api,errors};
+}
+)(page);
+```
+### Page
+- Page URL: http://localhost:4180/studio/sites/site_pc_synthetic/forms/frm_locale_cff3b217c3fd4e3a9d51c5d806c677eb?lang=vi
+- Page Title: Form Master · Workspace
+- Console: 0 errors, 2 warnings
+### Events
+- New console entries: .playwright-cli/console-2026-10-27T07-58-44-631Z.log#L94-L123

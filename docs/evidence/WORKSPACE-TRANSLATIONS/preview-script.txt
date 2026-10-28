@@ -1,0 +1,20 @@
+async(page)=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const scoped='/sites/site_pc_synthetic/forms/frm_locale_cff3b217c3fd4e3a9d51c5d806c677eb';
+ await page.goto('http://localhost:4180/studio'+scoped+'?lang=vi');await page.locator('#mode-build:not([hidden])').waitFor();
+ const previews=[];
+ for(const locale of ['vi','ja']){
+  await page.locator('aside .sidebar-locale select').selectOption(locale);
+  const response=page.waitForResponse(r=>r.url().endsWith('/api/preview')&&r.request().method()==='POST');await page.locator('#preview').click();const r=await response;if(r.status()!==200)throw Error('Preview '+r.status()+' '+JSON.stringify(await r.json()));
+  const frame=page.frameLocator('#preview-frame');await frame.locator('#app h1').waitFor();
+  const lang=await frame.locator('html').getAttribute('lang');const title=await frame.locator('#app h1').innerText();
+  const buttons=await frame.locator('button').allTextContents();if(buttons.some(t=>/^(日本語|Tiếng Việt)$/.test(t.trim())))throw Error('Preview language controls remain');
+  if(lang!==(locale==='vi'?'vi-VN':'ja-JP'))throw Error('Preview wrong locale '+lang);
+  if(locale==='vi'&&!(await frame.locator('#app').innerText()).includes('Biểu mẫu kiểm chứng JA/VI'))throw Error('Translation missing '+title);
+  const origin=new URL(await frame.locator('html').evaluate(()=>location.href)).origin;if(origin!=='http://127.0.0.1:4185')throw Error('Preview origin changed');
+  const cookies=await frame.locator('html').evaluate(()=>document.cookie);if(cookies)throw Error('Admin cookies exposed');
+  await page.screenshot({path:'output/playwright/translation-fix-preview-'+locale+'.png'});previews.push({locale,lang,title,status:r.status(),origin,languageButtons:false,cookies:false});
+  await page.locator('#modes [data-mode="build"]').click();
+ }
+ return{previews,errors};
+}

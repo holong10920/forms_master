@@ -1,0 +1,9 @@
+{
+  "mode": "dry-run",
+  "entries": [
+    {
+      "path": ".playwright-cli",
+      "action": "would remove"
+    }
+  ]
+}

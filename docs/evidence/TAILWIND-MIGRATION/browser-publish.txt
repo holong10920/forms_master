@@ -1,0 +1,27 @@
+### Result
+{"form":"frm_locale_cff3b217c3fd4e3a9d51c5d806c677eb","review":"review_O7OZePx4NhtIj5r192mVPWSS","selfApprovalStatus":403,"url":"http://127.0.0.1:4183/r/rel_kzrz7awpwrsmkbqvsosrnhihsp/index.html","separateApprover":true,"network":[{"path":"/api/contract","method":"POST","status":200,"port":"4180"},{"path":"/api/review","method":"POST","status":200,"port":"4180"},{"path":"/api/history","method":"POST","status":200,"port":"4180"},{"path":"/api/history","method":"POST","status":200,"port":"4180"},{"path":"/api/session","method":"GET","status":200,"port":"4180"},{"path":"/api/history","method":"POST","status":200,"port":"4180"},{"path":"/api/approve","method":"POST","status":403,"port":"4180"},{"path":"/api/history","method":"POST","status":200,"port":"4180"},{"path":"/api/publish","method":"POST","status":200,"port":"4180"},{"path":"/api/history","method":"POST","status":200,"port":"4180"}]}
+### Ran Playwright code
+```js
+await (async(page)=>{
+ const network=[];const listener=r=>{const u=new URL(r.url());if(u.pathname.startsWith('/api/'))network.push({path:u.pathname,method:r.request().method(),status:r.status(),port:u.port})};page.on('response',listener);
+ await page.getByRole('button',{name:'レビュー依頼',exact:true}).click();await page.locator('#review-dialog').waitFor({state:'visible'});await page.locator('#review').click();
+ await page.locator('#history').filter({hasText:/OPEN/}).waitFor({timeout:30000});
+ const form=new URL(page.url()).pathname.split('/').at(-1);
+ const self=await page.evaluate(async(form)=>{const s=await(await fetch('/api/session')).json();const api=async(op,b)=>{const r=await fetch('/api/'+op,{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':s.csrf},body:JSON.stringify(b)});return{status:r.status,body:await r.json()}};const history=await api('history',{site:'site_pc_synthetic',form});const id=history.body.reviews[0].id;const denied=await api('approve',{id,dataContractAck:true});return {id,status:denied.status}},form);
+ await page.screenshot({path:'output/playwright/tailwind-review-open.png',fullPage:true});
+ // Separate reviewer identity through the same Go OIDC authority, in a separate context.
+ const context=await page.context().browser().newContext();const reviewer=await context.newPage();
+ await reviewer.goto('http://localhost:4180/login?lang=ja&return_to='+encodeURIComponent('/studio/sites/site_pc_synthetic/forms/'+form));
+ await reviewer.getByRole('link',{name:'IDプロバイダーで続ける'}).click();await reviewer.getByRole('button',{name:'Continue as synthetic-approver'}).click();await reviewer.locator('#form-title').waitFor({state:'visible'});await reviewer.locator('#modes [data-mode="publish"]').click();await reviewer.getByRole('button',{name:'承認 (Data Contract 確認)',exact:true}).first().click();await reviewer.locator('dialog[data-confirm][open]').getByRole('button',{name:'承認する',exact:true}).click();await reviewer.locator('#history').filter({hasText:/APPROVED/}).waitFor({timeout:30000});await reviewer.screenshot({path:'output/playwright/tailwind-review-approved.png',fullPage:true});await context.close();
+ await page.locator('#modes [data-mode="publish"]').click();await page.locator('#history').filter({hasText:/APPROVED/}).waitFor({timeout:15000});
+ const publishing=page.waitForResponse(r=>r.url().endsWith('/api/publish')&&r.request().method()==='POST');await page.getByRole('button',{name:'ローカル公開',exact:true}).first().click();await page.locator('dialog[data-confirm][open]').getByRole('button',{name:'公開する',exact:true}).click();const published=await publishing;if(published.status()!==200)throw Error('Publish refused');const outcome=await published.json();const url=outcome.url;await page.locator('#history a[href="'+url+'"]').first().waitFor({timeout:60000});await page.screenshot({path:'output/playwright/tailwind-published.png',fullPage:true});
+ page.off('response',listener);if(self.status!==403)throw Error('Self approval was not denied');return {form,review:self.id,selfApprovalStatus:self.status,url,separateApprover:true,network};
+}
+)(page);
+```
+### Page
+- Page URL: http://localhost:4180/studio/sites/site_pc_synthetic/forms/frm_locale_cff3b217c3fd4e3a9d51c5d806c677eb?lang=ja
+- Page Title: Form Master · Workspace
+- Console: 1 errors, 2 warnings
+### Events
+- New console entries: .playwright-cli/console-2026-10-27T07-58-44-631Z.log#L84-L90

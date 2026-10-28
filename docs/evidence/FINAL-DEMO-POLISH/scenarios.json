@@ -1,0 +1,230 @@
+{
+  "recommendation": "READY_FOR_INTERNAL_DEMO",
+  "scope": "Gakki multi-product internal demo; not full legacy/specialist/PII parity",
+  "version": 13,
+  "releaseId": "rel_ckzoawdxgnwqnusqfgkvdecnhz",
+  "url": "http://127.0.0.1:4183/r/rel_ckzoawdxgnwqnusqfgkvdecnhz/index.html",
+  "browser": {
+    "pass": 14,
+    "fail": 0,
+    "viewports": [
+      [
+        1440,
+        900
+      ],
+      [
+        390,
+        844
+      ]
+    ],
+    "touch": true
+  },
+  "noCode": {
+    "fully": 11,
+    "denominator": 12,
+    "partial": "public-only restore"
+  },
+  "results": [
+    {
+      "app": "legacy",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "hasTouch": false,
+      "metrics": {
+        "inputHeight": 52,
+        "border": "rgb(16, 185, 129)",
+        "borderWidth": "2px",
+        "background": "rgb(248, 250, 252)",
+        "font": "\"Hiragino Kaku Gothic ProN\", \"Hiragino Kaku Gothic Pro\", \"ヒラギノ角ゴ Pro W3\", Helvetica, Arial, Osaka, メイリオ, Meiryo, \"ＭＳ Ｐゴシック\", \"MS PGothic\", sans-serif",
+        "scrollWidth": 1440
+      },
+      "stages": [],
+      "addEditCancelDeleteBack": true,
+      "submits": [],
+      "pageErrors": [],
+      "failedRequests": [
+        {
+          "url": "https://www.googletagmanager.com/gtm.js?id=GTM-TTQ5BP",
+          "reason": "csp"
+        },
+        {
+          "url": "https://www.googletagmanager.com/gtm.js?id=GTM-MBPFSF9G",
+          "reason": "csp"
+        },
+        {
+          "url": "https://www.googletagmanager.com/gtag/js?id=G-MT354TBGD1",
+          "reason": "csp"
+        }
+      ]
+    },
+    {
+      "app": "master",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "hasTouch": false,
+      "metrics": {
+        "inputHeight": 50,
+        "border": "rgb(16, 185, 129)",
+        "borderWidth": "2px",
+        "background": "rgb(248, 249, 250)",
+        "font": "\"Hiragino Kaku Gothic ProN\", \"Hiragino Kaku Gothic Pro\", \"ヒラギノ角ゴ Pro W3\", Helvetica, Arial, Osaka, Meiryo, \"MS PGothic\", sans-serif",
+        "scrollWidth": 1440,
+        "radioLabelHeight": 24
+      },
+      "layout": {
+        "width": 600,
+        "top": 80,
+        "padding": "24px",
+        "radius": "12px",
+        "headerWidth": 1440,
+        "headerTop": 0,
+        "headerHeight": 56
+      },
+      "stages": [
+        "商品情報",
+        "商品確認",
+        "商品情報",
+        "商品情報",
+        "商品情報",
+        "商品確認",
+        "お客様情報",
+        "商品確認"
+      ],
+      "addEditCancelDeleteBack": true,
+      "payload": {
+        "products": [
+          {
+            "itemId": "itm_a161446926844a19a72f07ede23e8bc4",
+            "product_family": "gakki_site",
+            "category": "piano",
+            "title": "合成楽器 Model A",
+            "condition": "used",
+            "location": "2～3階",
+            "location2": "階段作業が必要",
+            "item_comment": "合成ケース付き"
+          },
+          {
+            "itemId": "itm_964b67463627427687cd97ab1f105bed",
+            "product_family": "gakki_site",
+            "category": "keyboard",
+            "title": "合成楽器 Model B",
+            "condition": "used"
+          }
+        ],
+        "kana": "カタカナ",
+        "email": "synthetic@example.invalid",
+        "phone_number": "05012345678",
+        "agree_policy": true
+      },
+      "submits": [
+        200
+      ],
+      "pageErrors": [],
+      "failedRequests": []
+    },
+    {
+      "app": "legacy",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "hasTouch": true,
+      "metrics": {
+        "inputHeight": 48,
+        "border": "rgb(16, 185, 129)",
+        "borderWidth": "2px",
+        "background": "rgb(248, 250, 252)",
+        "font": "\"Hiragino Kaku Gothic ProN\", \"Hiragino Kaku Gothic Pro\", \"ヒラギノ角ゴ Pro W3\", Helvetica, Arial, Osaka, メイリオ, Meiryo, \"ＭＳ Ｐゴシック\", \"MS PGothic\", sans-serif",
+        "scrollWidth": 390
+      },
+      "stages": [],
+      "addEditCancelDeleteBack": true,
+      "submits": [],
+      "pageErrors": [],
+      "failedRequests": [
+        {
+          "url": "https://www.googletagmanager.com/gtm.js?id=GTM-TTQ5BP",
+          "reason": "csp"
+        },
+        {
+          "url": "https://www.googletagmanager.com/gtm.js?id=GTM-MBPFSF9G",
+          "reason": "csp"
+        },
+        {
+          "url": "https://www.googletagmanager.com/gtag/js?id=G-MT354TBGD1",
+          "reason": "csp"
+        }
+      ]
+    },
+    {
+      "app": "master",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "hasTouch": true,
+      "metrics": {
+        "inputHeight": 50,
+        "border": "rgb(16, 185, 129)",
+        "borderWidth": "2px",
+        "background": "rgb(248, 249, 250)",
+        "font": "\"Hiragino Kaku Gothic ProN\", \"Hiragino Kaku Gothic Pro\", \"ヒラギノ角ゴ Pro W3\", Helvetica, Arial, Osaka, Meiryo, \"MS PGothic\", sans-serif",
+        "scrollWidth": 390,
+        "radioLabelHeight": 24
+      },
+      "layout": {
+        "width": 358,
+        "top": 96,
+        "padding": "16px",
+        "radius": "12px",
+        "headerWidth": 390,
+        "headerTop": 0,
+        "headerHeight": 84
+      },
+      "stages": [
+        "商品情報",
+        "商品確認",
+        "商品情報",
+        "商品情報",
+        "商品情報",
+        "商品確認",
+        "お客様情報",
+        "商品確認"
+      ],
+      "addEditCancelDeleteBack": true,
+      "payload": {
+        "products": [
+          {
+            "itemId": "itm_fb9b8b7586384a828ee881d38f4e5761",
+            "product_family": "gakki_site",
+            "category": "piano",
+            "title": "合成楽器 Model A",
+            "condition": "used",
+            "location": "2～3階",
+            "location2": "階段作業が必要",
+            "item_comment": "合成ケース付き"
+          },
+          {
+            "itemId": "itm_7c6013c89b664a52a881d53693757f42",
+            "product_family": "gakki_site",
+            "category": "keyboard",
+            "title": "合成楽器 Model B",
+            "condition": "used"
+          }
+        ],
+        "kana": "カタカナ",
+        "email": "synthetic@example.invalid",
+        "phone_number": "05012345678",
+        "agree_policy": true
+      },
+      "submits": [],
+      "pageErrors": [],
+      "failedRequests": []
+    }
+  ],
+  "T12_K13": "VERIFICATION_PENDING"
+}

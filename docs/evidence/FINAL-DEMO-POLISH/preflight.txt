@@ -1,0 +1,83 @@
+ M .dependency-cruiser.cjs
+ M README.md
+ M contracts/fixtures/engine/golden.json
+ M contracts/schemas/engine-ir/v1.schema.json
+ M contracts/schemas/form-definition/v1.schema.json
+ M docs/CONTEXT_HANDOFF.md
+ M docs/CURRENT_STATUS.md
+ M docs/PROJECT_CHECKLIST.md
+ M docs/REQUIREMENTS_TRACEABILITY.md
+ M docs/evidence/SOURCE-CLEANUP/verify.txt
+ M package.json
+ M packages/contracts/scripts/lint-schemas.ts
+ M packages/contracts/src/generated/engine-ir.v1.ts
+ M packages/contracts/src/generated/form-definition.v1.ts
+ M packages/contracts/src/generated/schemas.ts
+ M packages/form-engine/src/definition.ts
+ M packages/form-engine/src/groups.ts
+ M packages/form-engine/src/index.ts
+ M packages/form-engine/src/runtime.ts
+ M packages/static-runtime/src/appearance.ts
+ M packages/static-runtime/src/enhancements.ts
+ M packages/static-runtime/src/index.ts
+ D packages/static-runtime/src/style.css
+ M pnpm-lock.yaml
+ M tools/compiler/package.json
+ M tools/compiler/src/build.ts
+ M tools/compiler/src/l10n.ts
+ M tools/compiler/test/l10n.test.ts
+ M tools/engine-demo/src/parity.ts
+ M tools/go-auth/README.md
+ M tools/go-auth/generate-studio.ts
+ M tools/go-auth/internal/auth/server_test.go
+ M tools/go-auth/package.json
+ M tools/go-auth/studio/admin.js
+ M tools/go-auth/studio/appearance.js
+ M tools/go-auth/studio/editor.js
+ D tools/go-auth/studio/i18n.js
+ M tools/go-auth/studio/index.html
+ M tools/go-auth/studio/preview.js
+ M tools/go-auth/studio/state.js
+ D tools/go-auth/studio/style.css
+ M tools/go-auth/studio/ui.js
+ M tools/go-auth/studio/workflow.js
+ M tools/go-auth/tsconfig.json
+ M tools/go-auth/web/src/App.test.tsx
+ M tools/go-auth/web/src/App.tsx
+ M tools/go-auth/web/src/Login.tsx
+ M tools/go-auth/web/src/Studio.test.tsx
+ M tools/go-auth/web/src/Studio.tsx
+ M tools/go-auth/web/src/main.tsx
+ D tools/go-auth/web/src/style.css
+ D tools/legacy-analyzer/src/reference.ts
+ M tools/legacy-analyzer/test/capabilities.test.ts
+ M tools/legacy-analyzer/test/compile.test.ts
+ M tools/security/test/gitleaks.test.ts
+?? contracts/fixtures/engine/gakki-apply-reference.json
+?? contracts/fixtures/engine/multi-product.json
+?? docs/evidence/CLOSE-LEGACY-PARITY/
+?? docs/evidence/GAKKI-DEMO/
+?? docs/evidence/REAL-LEGACY-PARITY/
+?? docs/evidence/REMOVE-TRANSLATION/
+?? docs/evidence/TAILWIND-MIGRATION/
+?? docs/evidence/WORKSPACE-TRANSLATIONS/
+?? packages/form-engine/src/dependencies.ts
+?? packages/static-runtime/src/assets/
+?? packages/static-runtime/src/cart.ts
+?? packages/static-runtime/src/field-controls.ts
+?? packages/static-runtime/src/local-logo.ts
+?? packages/static-runtime/src/recipes.ts
+?? packages/static-runtime/src/tailwind.css
+?? packages/ui-styles/
+?? tools/compiler/src/tailwind.ts
+?? tools/go-auth/internal/engine/cart_test.go
+?? tools/go-auth/studio/cart-editor.js
+?? tools/go-auth/studio/item-conditions.js
+?? tools/go-auth/studio/localization.js
+?? tools/go-auth/studio/recipes.js
+?? tools/go-auth/templates/
+?? tools/go-auth/web/src/recipes.ts
+?? tools/go-auth/web/src/tailwind.css
+?? tools/legacy-analyzer/evidence/
+?? tools/legacy-analyzer/test/gakki.test.ts
+?? tools/legacy-analyzer/test/multi-product.test.ts

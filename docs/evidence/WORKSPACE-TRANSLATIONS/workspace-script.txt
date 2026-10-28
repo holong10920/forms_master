@@ -1,0 +1,19 @@
+async(page)=>{
+ const scoped='/sites/site_pc_synthetic/forms/frm_locale_cff3b217c3fd4e3a9d51c5d806c677eb';
+ const traffic=[];const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{const u=new URL(r.url());if(u.pathname.startsWith('/api/')&&!u.pathname.includes('callback'))traffic.push({origin:u.origin,method:r.request().method(),path:u.pathname,status:r.status()});});
+ await page.goto('http://localhost:4180/translations'+scoped+'?lang=vi');await page.locator('.tr-table').waitFor();
+ const screens=[];
+ for(const [width,height] of [[1440,900],[1280,800],[768,1024],[390,844]]){
+  await page.setViewportSize({width,height});const layout=await page.evaluate(()=>({width:innerWidth,body:document.documentElement.scrollWidth,height:innerHeight,bodyScroll:scrollY,header:document.querySelectorAll('header.brand-header').length,picker:document.querySelector('.sidebar-locale').getBoundingClientRect().toJSON()}));if(layout.body>width||layout.bodyScroll||layout.header||layout.picker.right>width||layout.picker.bottom>height)throw Error('Layout '+JSON.stringify(layout));
+  const path='output/playwright/translation-fix-'+width+'.png';await page.screenshot({path});screens.push({width,height,path});
+ }
+ await page.setViewportSize({width:1440,height:900});
+ const locale=page.locator('aside .sidebar-locale select');await locale.selectOption('ja');await page.waitForFunction(()=>document.querySelector('.studio-root').lang==='ja-JP');await locale.selectOption('vi');await page.waitForFunction(()=>document.querySelector('.studio-root').lang==='vi-VN');
+ await page.getByRole('link',{name:'Trình tạo biểu mẫu',exact:true}).click();await page.locator('#mode-build:not([hidden])').waitFor();
+ if(await page.locator('#modes [data-mode="translate"]').count())throw Error('Builder translation tab remains');
+ await page.screenshot({path:'output/playwright/translation-fix-builder.png'});
+ await page.goBack();await page.locator('#mode-translate:not([hidden])').waitFor();await page.goForward();await page.locator('#mode-build:not([hidden])').waitFor();
+ await page.getByRole('link',{name:'Dịch',exact:true}).click();await page.locator('#mode-translate:not([hidden])').waitFor();await page.reload();await page.locator('.tr-table').waitFor();
+ const title=await page.locator('input[data-row="text:formTitle"][data-lang="vi"]').inputValue();if(title!=='Biểu mẫu kiểm chứng JA/VI')throw Error('Save/reload');
+ if(errors.length)throw Error(errors.join(','));return{headerRemoved:true,singleSidebarLanguageControl:await page.locator('aside .sidebar-locale select').count(),sidebarTranslation:true,formContextPreserved:true,builderTranslationTab:false,savedTranslation:title,backForward:true,refresh:true,locales:['ja','vi'],screens,traffic,errors};
+}

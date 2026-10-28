@@ -1,0 +1,7 @@
+### Result
+[{"width":1440,"height":900,"overflow":false},{"width":390,"height":844,"overflow":false}]
+### Ran Playwright code
+```js
+await (async(page)=>{const context=await page.context().browser().newContext();const p=await context.newPage();const result=[];for(const [width,height]of[[1440,900],[390,844]]){await p.setViewportSize({width,height});await p.goto('http://localhost:4180/login?lang=vi');await p.getByRole('link',{name:/Tiếp tục/}).waitFor();const overflow=await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth);if(overflow)throw Error('Login overflow');await p.screenshot({path:'output/playwright/tailwind-login-'+width+'.png',fullPage:true});result.push({width,height,overflow});}await context.close();return result;}
+)(page);
+```

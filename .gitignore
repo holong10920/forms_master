@@ -47,3 +47,10 @@ spikes/*/out/
 # Local browser verification sessions and screenshots
 .playwright-cli/
 output/playwright/
+
+# Evidence naming internal legacy source paths and images: local only (ADR-001)
+tools/legacy-analyzer/evidence/
+docs/evidence/CLOSE-LEGACY-PARITY/
+docs/evidence/REAL-LEGACY-PARITY/
+docs/evidence/T12-K13-DOCKER/
+docs/evidence/GAKKI-V13-FREEZE/
