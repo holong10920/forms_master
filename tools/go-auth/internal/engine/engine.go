@@ -647,12 +647,9 @@ func snapshot(ir, state M, submit bool) view {
 			if s["kind"] != "complete" && (submit || !past) {
 				members := map[string]bool{}
 				for _, c := range arr(s["content"]) {
-					m := obj(c)
-					r := m["field"]
-					if r == nil {
-						r = m["group"]
+					if r, ok := input(c); ok {
+						members[field(r)] = true
 					}
-					members[field(r)] = true
 				}
 				for _, f := range ordered {
 					fid := id(f)
@@ -806,6 +803,17 @@ func cellIssues(f M, value any, req bool) []Issue {
 	}
 	return out
 }
+
+// input returns the field/group reference of a step content item. Display components carry no
+// answer and are skipped, mirroring inputIds in the TS engine.
+func input(c any) (any, bool) {
+	m := obj(c)
+	if r, ok := m["field"]; ok {
+		return r, true
+	}
+	r, ok := m["group"]
+	return r, ok
+}
 func validation(ir, state M, whole bool) []Issue {
 	v := snapshot(ir, state, whole)
 	out := v.errors
@@ -814,12 +822,9 @@ func validation(ir, state M, whole bool) []Issue {
 		s := obj(raw)
 		if s["id"] == state["current"] {
 			for _, c := range arr(s["content"]) {
-				m := obj(c)
-				r := m["field"]
-				if r == nil {
-					r = m["group"]
+				if r, ok := input(c); ok {
+					members[field(r)] = true
 				}
-				members[field(r)] = true
 			}
 		}
 	}

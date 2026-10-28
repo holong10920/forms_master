@@ -1,6 +1,6 @@
 declare const __FB_RESETS__: boolean;
-import type { EngineIRV1, EngineNode, EngineField } from "@fb/contracts";
-import { contentId, fieldOrder } from "./dependencies.ts";
+import type { EngineDisplay, EngineIRV1, EngineNode, EngineField } from "@fb/contracts";
+import { contentId, fieldOrder, inputIds } from "./dependencies.ts";
 import { evaluate } from "./expression.ts";
 import {
   clearGroupCells,
@@ -47,7 +47,7 @@ export function snapshot(ir: EngineIRV1, state: State, submit = false): Snapshot
     if (!skipped) {
       path.push(id);
       if (step.kind !== "complete" && (submit || !pastCurrent)) {
-        const members = new Set((step.content ?? []).map(contentId));
+        const members = new Set(inputIds(step));
         for (const f of order.filter((f) => members.has(f.id))) {
           if (f.visibleWhen && evaluate(f.visibleWhen, read, ir.conditions) !== true) continue;
           active.add(f.id);
@@ -90,9 +90,7 @@ export function snapshot(ir: EngineIRV1, state: State, submit = false): Snapshot
 export function validation(ir: EngineIRV1, state: State, wholePath = false): Issue[] {
   const view = snapshot(ir, state, wholePath);
   const out = [...view.errors];
-  const members = new Set(
-    (ir.steps.find((s) => s.id === state.current)?.content ?? []).map(contentId),
-  );
+  const members = new Set(inputIds(ir.steps.find((s) => s.id === state.current) ?? {}));
   for (const f of ir.nodes) {
     if (!view.active.has(f.id) || (!wholePath && !members.has(f.id))) continue;
     const v = view.effective[f.id];
@@ -201,7 +199,7 @@ export function createSession(
   return { ...state, current, visited: [current] };
 }
 function owner(ir: EngineIRV1, id: string): string | undefined {
-  return ir.steps.find((s) => (s.content ?? []).some((c) => contentId(c) === id))?.id;
+  return ir.steps.find((s) => inputIds(s).includes(id))?.id;
 }
 function reconcile(ir: EngineIRV1, old: State, next: State): State {
   let state = next;
@@ -415,4 +413,25 @@ export function transitionNotices(ir: EngineIRV1, previous: State, next: State) 
       (e) => !visibleErrors(ir, previous).some((p) => p.code === e.code && p.path === e.path),
     ),
   };
+}
+export type StepItem =
+  { kind: "field"; node: EngineNode } | { kind: "display"; item: EngineDisplay };
+/** Active step content in canvas order (step.content), never in fields[] declaration order.
+ * Display items are returned as authored; renderers decide visibility with displayVisible. */
+export function stepItems(
+  ir: EngineIRV1,
+  step: EngineIRV1["steps"][number],
+  state: State,
+): StepItem[] {
+  const active = snapshot(ir, state).active;
+  const out: StepItem[] = [];
+  for (const c of step.content ?? []) {
+    if ("display" in c) {
+      out.push({ kind: "display", item: c.display });
+      continue;
+    }
+    const node = ir.nodes.find((n) => n.id === contentId(c));
+    if (node && active.has(node.id)) out.push({ kind: "field", node });
+  }
+  return out;
 }

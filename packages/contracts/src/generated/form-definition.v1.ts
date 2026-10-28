@@ -44,6 +44,99 @@ export type Expression =
         | "choose";
       args: Expression[];
     };
+export type Display =
+  | DisplayLeaf
+  | {
+      id: string;
+      type: "section";
+      title?: DisplayText;
+      /**
+       * @maxItems 30
+       */
+      children: DisplayLeaf[];
+      visibleWhen?: Expression;
+      appearance?: Appearance;
+    };
+export type DisplayLeaf =
+  | {
+      id: string;
+      type: "heading";
+      text: DisplayText;
+      level?: 2 | 3;
+      visibleWhen?: Expression;
+      appearance?: Appearance;
+    }
+  | {
+      id: string;
+      type: "text";
+      text: DisplayText;
+      tone?: "normal" | "muted" | "notice";
+      visibleWhen?: Expression;
+      appearance?: Appearance;
+    }
+  | {
+      id: string;
+      type: "image";
+      asset: "success" | "info" | "box" | "mail";
+      alt: DisplayText;
+      size?: "small" | "medium" | "large";
+      visibleWhen?: Expression;
+      appearance?: Appearance;
+    }
+  | {
+      id: string;
+      type: "divider";
+      visibleWhen?: Expression;
+      appearance?: Appearance;
+    }
+  | {
+      id: string;
+      type: "spacer";
+      size?: "small" | "medium" | "large";
+      visibleWhen?: Expression;
+      appearance?: Appearance;
+    }
+  | {
+      id: string;
+      type: "fieldValue";
+      field: string;
+      label?: DisplayText;
+      mask?: "none" | "partial" | "full";
+      visibleWhen?: Expression;
+      appearance?: Appearance;
+    }
+  | {
+      id: string;
+      type: "groupSummary";
+      group: string;
+      title?: DisplayText;
+      visibleWhen?: Expression;
+      appearance?: Appearance;
+    }
+  | {
+      id: string;
+      type: "summary";
+      title?: DisplayText;
+      visibleWhen?: Expression;
+      appearance?: Appearance;
+    }
+  | {
+      id: string;
+      type: "reference";
+      label?: DisplayText;
+      visibleWhen?: Expression;
+      appearance?: Appearance;
+    }
+  | {
+      id: string;
+      type: "button";
+      label: DisplayText;
+      action: "restart" | "link";
+      link?: "home" | "faq" | "contact";
+      variant?: "primary" | "secondary";
+      visibleWhen?: Expression;
+      appearance?: Appearance;
+    };
 export type Transition =
   | {
       when: Expression;
@@ -148,6 +241,11 @@ export interface FormDefinitionV1 {
     requiredBadge?: LocalizedOverride;
     optionalBadge?: LocalizedOverride;
     progressLabel?: LocalizedOverride;
+    emptyValue?: LocalizedOverride;
+    yes?: LocalizedOverride;
+    no?: LocalizedOverride;
+    referenceLabel?: LocalizedOverride;
+    referencePreview?: LocalizedOverride;
   };
   appearance?: Appearance;
   customerDraft?: {
@@ -355,9 +453,21 @@ export interface Step {
     | {
         block: string;
       }
+    | {
+        display: Display;
+      }
   )[];
   transitions?: Transition[];
   skipWhen?: Expression;
+  description?: {
+    ja: string;
+    vi?: string;
+  };
+  autoSubmit?: boolean;
+}
+export interface DisplayText {
+  ja: string;
+  vi?: string;
 }
 export interface Condition {
   label: {

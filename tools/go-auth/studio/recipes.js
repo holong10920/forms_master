@@ -287,6 +287,10 @@ const recipes = {
   ".cv-system":
     "grid [gap:10px] [padding:18px] [border-radius:12px] [background:color-mix(in_srgb,_#fff_55%,_transparent)] [border-width:1px] [border-style:solid] [border-color:color-mix(in_srgb,_var(--form-foreground)_12%,_transparent)] [font-size:13.5px]",
   ".cv-nav": "flex justify-between [gap:8px] [margin-top:18px]",
+  ".cv-display":
+    "grid [gap:8px] [&:where(.cv-display)_h3]:[font-size:19px] [&:where(.cv-display)_h4]:[font-size:15.5px] [&:where(.cv-display)_hr]:[width:100%] [&:where(.cv-display)_hr]:[border:0] [&:where(.cv-display)_hr]:[border-top:1px_solid_color-mix(in_srgb,_var(--form-foreground)_20%,_transparent)] [&:where(.cv-display)_[data-tone=muted]]:[opacity:0.7] [&:where(.cv-display)_[data-tone=notice]]:[padding:8px_10px] [&:where(.cv-display)_[data-tone=notice]]:[border-radius:8px] [&:where(.cv-display)_[data-tone=notice]]:[background:color-mix(in_srgb,_var(--form-accent)_10%,_transparent)] [&:where(.cv-display)_dl]:[margin:0] [&:where(.cv-display)_dl]:grid [&:where(.cv-display)_dl]:[grid-template-columns:minmax(6rem,_1fr)_2fr] [&:where(.cv-display)_dl]:[gap:4px_12px] [&:where(.cv-display)_dt]:font-semibold [&:where(.cv-display)_dd]:[margin:0] [&:where(.cv-display)_dd]:[opacity:0.75]",
+  ".cv-section":
+    "grid [gap:14px] [padding:12px] [border-width:1px] [border-style:dashed] [border-color:color-mix(in_srgb,_var(--form-foreground)_25%,_transparent)] [border-radius:10px]",
   ".cv-btn":
     "inline-flex items-center [height:38px] [padding:0_18px] [border-radius:8px] font-bold [font-size:13.5px] [border-width:1px] [border-style:solid] [border-color:color-mix(in_srgb,_var(--form-foreground)_22%,_transparent)] [background:#fff] [color:var(--form-foreground)] [&:where(.cv-btn).primary]:[margin-left:auto] [&:where(.cv-btn).primary]:[background:var(--form-accent)] [&:where(.cv-btn).primary]:[border-color:var(--form-accent)] [&:where(.cv-btn).primary]:[color:#fff]",
   ".canvas-readonly":

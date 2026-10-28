@@ -9,6 +9,7 @@ for (const name of [
   "pc-reference",
   "formats",
   "pc-apply-reference",
+  "display",
 ]) {
   test(`golden and seeded parity ${name}`, () => {
     const cases = [...goldenCases(), ...seededCases()].filter((c) => c.definition === name);

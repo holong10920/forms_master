@@ -22,4 +22,7 @@ export type {
   Node as EngineNode,
   Group as EngineGroup,
   Step as EngineStep,
+  Display as EngineDisplay,
+  DisplayLeaf as EngineDisplayLeaf,
+  DisplayText as EngineDisplayText,
 } from "./generated/engine-ir.v1.ts";

@@ -111,6 +111,11 @@ const DIAGNOSTICS = {
   "E-ORPHAN-FIELD": "どのステップにも配置されていないフィールドがあります",
   "E-LOCALE": "言語設定が正しくありません",
   "E-COMPLETE-GUARD": "完了ステップの設定が正しくありません",
+  "E-DISPLAY-SCOPE":
+    "この表示部品はこの画面では使えません（受付番号・最初からやり直すボタンは完了画面のみ）",
+  "E-DISPLAY-LINK": "ボタンのリンク先は承認済みの一覧から選んでください",
+  "E-DISPLAY-PII": "個人情報を含む項目は完了画面に表示できません（秘密情報は常にマスクが必要）",
+  "E-AUTO-SUBMIT": "確認画面の省略は確認画面でのみ設定できます",
   "E-MOTION-NONE-CONFIG": "モーション「なし」では詳細設定を指定できません",
   "E-PLUGIN-UNAVAILABLE": "プラグインが利用できません",
   "E-PLUGIN-NOT-READY": "プラグインの準備ができていません",
@@ -133,6 +138,8 @@ function whereOf(path) {
   if (step) return L("ステップ「", "Bước 「") + stepLabel(step) + "」";
   const f = S.draft.fields.find((x) => x.id === id || x.key === id);
   if (f) return L("フィールド「", "Trường 「") + fieldLabel(f) + "」";
+  const d = displayById(id)?.display;
+  if (d) return L("表示部品「", "Thành phần 「") + displayText(d) + "」";
   const c = S.draft.conditions?.[id];
   if (c) return L("条件「", "Điều kiện 「") + (c.label?.ja ?? id) + "」";
   return path;
@@ -608,6 +615,56 @@ export function setText(key, lang, value) {
   else delete S.draft.texts;
 }
 export const catalogText = (key) => S.catalog.texts?.[key]?.ja ?? "";
+// ---------- Display components (typed and declarative: no HTML, script or CSS) ----------
+export const DISPLAY_TYPES = {
+  heading: { label: "見出し", vi: "Tiêu đề", icon: "heading", group: "display" },
+  text: { label: "テキスト", vi: "Đoạn văn", icon: "lines", group: "display" },
+  image: { label: "画像", vi: "Hình ảnh", icon: "image", group: "display" },
+  fieldValue: { label: "入力値の表示", vi: "Giá trị đã nhập", icon: "eye", group: "display" },
+  groupSummary: {
+    label: "商品一覧の表示",
+    vi: "Danh sách sản phẩm",
+    icon: "layers",
+    group: "display",
+  },
+  summary: { label: "入力内容の一覧", vi: "Tóm tắt câu trả lời", icon: "review", group: "display" },
+  section: { label: "セクション", vi: "Khu vực", icon: "grid", group: "layout" },
+  divider: { label: "区切り線", vi: "Đường kẻ", icon: "divider", group: "layout" },
+  spacer: { label: "余白", vi: "Khoảng trống", icon: "spacer", group: "layout" },
+  reference: { label: "受付番号", vi: "Mã tiếp nhận", icon: "hash", group: "system" },
+  button: { label: "ボタン", vi: "Nút", icon: "external", group: "system" },
+};
+export const displayTypeLabel = (t) =>
+  DISPLAY_TYPES[t] ? L(DISPLAY_TYPES[t].label, DISPLAY_TYPES[t].vi) : t;
+export const displayText = (d) =>
+  d.text?.ja || d.title?.ja || d.label?.ja || d.alt?.ja || displayTypeLabel(d.type);
+export const displayBinding = (d) =>
+  d.type === "fieldValue" ? d.field : d.type === "groupSummary" ? d.group : undefined;
+// Display items of a step, including one level of section children.
+export const displayEntries = (step) =>
+  (step.content ?? []).flatMap((c) =>
+    c.display ? [c.display, ...(c.display.type === "section" ? c.display.children : [])] : [],
+  );
+export function displayById(id) {
+  for (const step of S.draft?.steps ?? [])
+    for (const c of step.content ?? []) {
+      if (!c.display) continue;
+      if (c.display.id === id) return { display: c.display, step };
+      const child = c.display.children?.find((d) => d.id === id);
+      if (child) return { display: child, step, parent: c.display };
+    }
+  return null;
+}
+// Field ids an expression reads, following named conditions.
+function refsOf(e, seen = new Set()) {
+  if (!e || typeof e !== "object") return [];
+  if (e.ref?.startsWith("$local:")) return [e.ref.slice(7)];
+  if (e.cond && !seen.has(e.cond)) {
+    seen.add(e.cond);
+    return refsOf(S.draft.conditions?.[e.cond]?.when, seen);
+  }
+  return (e.args ?? []).flatMap((a) => refsOf(a, seen));
+}
 // Advisory checks shown while editing; the server-side engine remains the only authority.
 export function lint() {
   const out = [];
@@ -636,6 +693,8 @@ export function lint() {
         });
     }
   }
+  lintGraph(out);
+  lintDisplays(out);
   const known = new Set(allRuleFields().map((f) => ruleRef(f)));
   const json = JSON.stringify(S.draft.steps) + JSON.stringify(S.draft.fields);
   for (const m of json.matchAll(/"ref":"(\$local:[^"]+)"/g))
@@ -644,4 +703,141 @@ export function lint() {
       break;
     }
   return out;
+}
+// Step graph and step-order references, mirroring the engine (E-GRAPH-*, E-FORWARD-REF) with
+// messages that name the steps involved and what to change.
+const targetOf = (t) => t.to ?? t.default;
+function reaches(from, to, seen = new Set()) {
+  if (from === to) return true;
+  if (seen.has(from)) return false;
+  seen.add(from);
+  return (stepById(from)?.transitions ?? []).some((t) => reaches(targetOf(t), to, seen));
+}
+const ownerOf = () =>
+  new Map(
+    S.draft.steps.flatMap((s) =>
+      (s.content ?? []).flatMap((c) =>
+        c.field || c.group ? [[(c.field ?? c.group).slice(7), s.id]] : [],
+      ),
+    ),
+  );
+function forwardRefs(out, step, owner, expressions, where) {
+  for (const id of new Set(expressions.flatMap((e) => refsOf(e)))) {
+    const target = owner.get(id);
+    if (!target || target === step.id || !reaches(step.id, target)) continue;
+    out.push({
+      level: "error",
+      text: L(
+        `${where}が後ろの「${stepLabel(stepById(target))}」の「${fieldLabel(fieldById(id))}」を参照しています。参照先を前のステップへ移すか、条件を変更してください`,
+        `${where} tham chiếu 「${fieldLabel(fieldById(id))}」 ở bước sau 「${stepLabel(stepById(target))}」. Hãy chuyển trường lên trước hoặc đổi điều kiện.`,
+      ),
+      step: step.id,
+    });
+  }
+}
+function lintGraph(out) {
+  const first = S.draft.steps[0]?.id;
+  const owner = ownerOf();
+  for (const step of S.draft.steps) {
+    for (const t of step.transitions ?? []) {
+      const target = stepById(targetOf(t));
+      if (!targetOf(t)) continue;
+      if (!target)
+        out.push({
+          level: "error",
+          text: L(
+            "移動先のステップが見つかりません。「分岐」タブで移動先を選び直してください",
+            "Không tìm thấy bước đích. Hãy chọn lại ở tab 分岐.",
+          ),
+          step: step.id,
+        });
+      else if (target !== step && reaches(target.id, step.id))
+        out.push({
+          level: "error",
+          text: L(
+            `「${stepLabel(step)}」から前の「${stepLabel(target)}」へ戻る移動があり、ループします。移動先を後ろのステップに変更してください`,
+            `「${stepLabel(step)}」 chuyển về bước trước 「${stepLabel(target)}」 tạo vòng lặp. Hãy chọn bước phía sau.`,
+          ),
+          step: step.id,
+        });
+    }
+    if (first && !reaches(first, step.id))
+      out.push({
+        level: "error",
+        text: L(
+          `「${stepLabel(step)}」へ到達する経路がありません。前のステップの「次のステップ」を確認してください`,
+          `Không có đường tới 「${stepLabel(step)}」. Kiểm tra 「次のステップ」 của bước trước.`,
+        ),
+        step: step.id,
+      });
+    const own = S.draft.fields.filter((f) => owner.get(f.id) === step.id);
+    forwardRefs(
+      out,
+      step,
+      owner,
+      [
+        ...(step.transitions ?? []).map((t) => t.when),
+        step.skipWhen,
+        ...own.flatMap((f) => [f.visibleWhen, f.requiredWhen, f.formula]),
+      ],
+      L(`「${stepLabel(step)}」の条件`, `Điều kiện của 「${stepLabel(step)}」`),
+    );
+  }
+}
+function lintDisplays(out) {
+  const owner = ownerOf();
+  const ids = new Set();
+  for (const step of S.draft.steps)
+    for (const d of displayEntries(step)) {
+      const issue = (text) => out.push({ level: "error", text, step: step.id, display: d.id });
+      if (ids.has(d.id)) issue(L("表示部品の ID が重複しています", "ID thành phần bị trùng"));
+      ids.add(d.id);
+      if (["heading", "text"].includes(d.type) && !d.text?.ja?.trim())
+        issue(L("テキストが空です", "Nội dung trống"));
+      if (d.type === "button" && !d.label?.ja?.trim())
+        issue(L("ボタンの文言が空です", "Nhãn nút trống"));
+      if (
+        (d.type === "reference" || (d.type === "button" && d.action === "restart")) &&
+        step.kind !== "complete"
+      )
+        issue(
+          L(
+            "受付番号と「最初から」ボタンは完了画面にだけ置けます",
+            "Mã tiếp nhận và nút làm lại chỉ đặt ở màn hình hoàn tất",
+          ),
+        );
+      const bound = displayBinding(d);
+      if (d.type === "fieldValue" || d.type === "groupSummary") {
+        const node = bound && fieldById(bound.slice(7));
+        if (!node || (node.type === "group") !== (d.type === "groupSummary"))
+          issue(
+            L(
+              "表示する項目を「基本」タブで選んでください（削除された項目を参照しています）",
+              "Hãy chọn trường cần hiển thị ở tab 基本 (trường đã bị xóa).",
+            ),
+          );
+        else {
+          const classes = [node, ...(node.fields ?? [])].map((f) => f.classification);
+          if (step.kind === "complete" && classes.some((c) => c !== "public"))
+            issue(
+              L(
+                "完了画面には個人情報を含む項目を表示できません。確認画面に移すか項目を変更してください",
+                "Màn hình hoàn tất không được hiển thị dữ liệu cá nhân.",
+              ),
+            );
+          else if (
+            classes.includes("secret") &&
+            (d.type !== "fieldValue" || !d.mask || d.mask === "none")
+          )
+            issue(L("秘密情報はマスク表示が必要です", "Thông tin bí mật phải được che"));
+        }
+      }
+      forwardRefs(
+        out,
+        step,
+        owner,
+        [d.visibleWhen, bound && { ref: bound }],
+        L(`表示部品「${displayText(d)}」`, `Thành phần 「${displayText(d)}」`),
+      );
+    }
 }

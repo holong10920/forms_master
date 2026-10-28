@@ -63,3 +63,14 @@ export function journey(
     status: i === index ? "current" : i < index ? "completed" : "inactive",
   }));
 }
+/** Long journeys do not fit as circles: past the limit the indicator becomes "current / total".
+ * `current` is the index of the current stage, or -1 once the journey is complete. */
+export function stepCounter(
+  total: number,
+  current: number,
+  narrow: boolean,
+): { text: string; percent: number } | undefined {
+  if (total <= (narrow ? 4 : 6)) return undefined;
+  const n = current < 0 ? total : current + 1;
+  return { text: `${String(n)} / ${String(total)}`, percent: Math.round((n / total) * 100) };
+}

@@ -264,6 +264,21 @@
         },
         "progressLabel": {
           "$ref": "#/$defs/LocalizedOverride"
+        },
+        "emptyValue": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "yes": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "no": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "referenceLabel": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "referencePreview": {
+          "$ref": "#/$defs/LocalizedOverride"
         }
       },
       "additionalProperties": false
@@ -683,6 +698,16 @@
                 },
                 "required": ["block"],
                 "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "display": {
+                    "$ref": "#/$defs/Display"
+                  }
+                },
+                "required": ["display"],
+                "additionalProperties": false
               }
             ]
           }
@@ -695,6 +720,24 @@
         },
         "skipWhen": {
           "$ref": "#/$defs/Expression"
+        },
+        "description": {
+          "type": "object",
+          "properties": {
+            "ja": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "vi": {
+              "type": "string",
+              "maxLength": 2000
+            }
+          },
+          "required": ["ja"],
+          "additionalProperties": false
+        },
+        "autoSubmit": {
+          "type": "boolean"
         }
       },
       "required": ["id", "kind"],
@@ -1113,6 +1156,308 @@
         }
       },
       "additionalProperties": false
+    },
+    "DisplayText": {
+      "type": "object",
+      "properties": {
+        "ja": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "vi": {
+          "type": "string",
+          "maxLength": 1000
+        }
+      },
+      "required": ["ja"],
+      "additionalProperties": false
+    },
+    "DisplayLeaf": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "const": "heading"
+            },
+            "text": {
+              "$ref": "#/$defs/DisplayText"
+            },
+            "level": {
+              "enum": [2, 3]
+            },
+            "visibleWhen": {
+              "$ref": "#/$defs/Expression"
+            },
+            "appearance": {
+              "$ref": "#/$defs/Appearance"
+            }
+          },
+          "required": ["id", "type", "text"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "const": "text"
+            },
+            "text": {
+              "$ref": "#/$defs/DisplayText"
+            },
+            "tone": {
+              "enum": ["normal", "muted", "notice"]
+            },
+            "visibleWhen": {
+              "$ref": "#/$defs/Expression"
+            },
+            "appearance": {
+              "$ref": "#/$defs/Appearance"
+            }
+          },
+          "required": ["id", "type", "text"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "const": "image"
+            },
+            "asset": {
+              "enum": ["success", "info", "box", "mail"]
+            },
+            "alt": {
+              "$ref": "#/$defs/DisplayText"
+            },
+            "size": {
+              "enum": ["small", "medium", "large"]
+            },
+            "visibleWhen": {
+              "$ref": "#/$defs/Expression"
+            },
+            "appearance": {
+              "$ref": "#/$defs/Appearance"
+            }
+          },
+          "required": ["id", "type", "asset", "alt"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "const": "divider"
+            },
+            "visibleWhen": {
+              "$ref": "#/$defs/Expression"
+            },
+            "appearance": {
+              "$ref": "#/$defs/Appearance"
+            }
+          },
+          "required": ["id", "type"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "const": "spacer"
+            },
+            "size": {
+              "enum": ["small", "medium", "large"]
+            },
+            "visibleWhen": {
+              "$ref": "#/$defs/Expression"
+            },
+            "appearance": {
+              "$ref": "#/$defs/Appearance"
+            }
+          },
+          "required": ["id", "type"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "const": "fieldValue"
+            },
+            "field": {
+              "type": "string"
+            },
+            "label": {
+              "$ref": "#/$defs/DisplayText"
+            },
+            "mask": {
+              "enum": ["none", "partial", "full"]
+            },
+            "visibleWhen": {
+              "$ref": "#/$defs/Expression"
+            },
+            "appearance": {
+              "$ref": "#/$defs/Appearance"
+            }
+          },
+          "required": ["id", "type", "field"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "const": "groupSummary"
+            },
+            "group": {
+              "type": "string"
+            },
+            "title": {
+              "$ref": "#/$defs/DisplayText"
+            },
+            "visibleWhen": {
+              "$ref": "#/$defs/Expression"
+            },
+            "appearance": {
+              "$ref": "#/$defs/Appearance"
+            }
+          },
+          "required": ["id", "type", "group"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "const": "summary"
+            },
+            "title": {
+              "$ref": "#/$defs/DisplayText"
+            },
+            "visibleWhen": {
+              "$ref": "#/$defs/Expression"
+            },
+            "appearance": {
+              "$ref": "#/$defs/Appearance"
+            }
+          },
+          "required": ["id", "type"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "const": "reference"
+            },
+            "label": {
+              "$ref": "#/$defs/DisplayText"
+            },
+            "visibleWhen": {
+              "$ref": "#/$defs/Expression"
+            },
+            "appearance": {
+              "$ref": "#/$defs/Appearance"
+            }
+          },
+          "required": ["id", "type"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "const": "button"
+            },
+            "label": {
+              "$ref": "#/$defs/DisplayText"
+            },
+            "action": {
+              "enum": ["restart", "link"]
+            },
+            "link": {
+              "enum": ["home", "faq", "contact"]
+            },
+            "variant": {
+              "enum": ["primary", "secondary"]
+            },
+            "visibleWhen": {
+              "$ref": "#/$defs/Expression"
+            },
+            "appearance": {
+              "$ref": "#/$defs/Appearance"
+            }
+          },
+          "required": ["id", "type", "label", "action"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Display": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/DisplayLeaf"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "const": "section"
+            },
+            "title": {
+              "$ref": "#/$defs/DisplayText"
+            },
+            "children": {
+              "type": "array",
+              "maxItems": 30,
+              "items": {
+                "$ref": "#/$defs/DisplayLeaf"
+              }
+            },
+            "visibleWhen": {
+              "$ref": "#/$defs/Expression"
+            },
+            "appearance": {
+              "$ref": "#/$defs/Appearance"
+            }
+          },
+          "required": ["id", "type", "children"],
+          "additionalProperties": false
+        }
+      ]
     }
   }
 }

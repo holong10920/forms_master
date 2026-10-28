@@ -2,6 +2,7 @@ import postcss from "postcss";
 import selectorParser from "postcss-selector-parser";
 import type { Plugin } from "vite";
 import * as recipes from "../../../packages/static-runtime/src/recipes.ts";
+import * as displayRecipes from "../../../packages/static-runtime/src/display-recipes.ts";
 
 // Release artifacts use compact deterministic utility names. Source stays readable Tailwind;
 // semantic DOM hooks and selectors are preserved. Only trusted runtime recipes are considered.
@@ -14,13 +15,16 @@ const hooks = new Set([
   "choice-group",
   "choice-option",
 ]);
+const tokens = (values: string[]) =>
+  [
+    ...new Set(values.flatMap((value) => value.split(/\s+/).filter((t) => t && !hooks.has(t)))),
+  ].sort();
+// Display utilities are numbered after the core set so core aliases stay stable.
+const core = tokens(Object.values(recipes));
 const utilities = [
-  ...new Set(
-    Object.values(recipes).flatMap((value) =>
-      value.split(/\s+/).filter((token) => token && !hooks.has(token)),
-    ),
-  ),
-].sort();
+  ...core,
+  ...tokens(Object.values(displayRecipes)).filter((t) => !core.includes(t)),
+];
 const aliases = new Map(utilities.map((utility, index) => [utility, "tw_" + index.toString(36)]));
 export function compactClasses(value: string): string {
   return value
@@ -28,15 +32,20 @@ export function compactClasses(value: string): string {
     .map((token) => aliases.get(token) ?? token)
     .join(" ");
 }
-export function runtimeTailwind(polished = false): Plugin {
+export function runtimeTailwind(polished = false, display = true): Plugin {
   return {
     name: "pinned-tailwind-utilities",
     enforce: "pre",
     transform(code, id) {
       const path = id.split("?")[0]?.replaceAll("\\", "/");
-      if (path?.endsWith("/packages/static-runtime/src/recipes.ts")) {
+      const source = path?.endsWith("/packages/static-runtime/src/recipes.ts")
+        ? recipes
+        : path?.endsWith("/packages/static-runtime/src/display-recipes.ts")
+          ? displayRecipes
+          : undefined;
+      if (source) {
         return {
-          code: Object.entries(recipes)
+          code: Object.entries(source)
             .map(
               ([key, value]) => `export const ${key} = ${JSON.stringify(compactClasses(value))};`,
             )
@@ -51,6 +60,10 @@ export function runtimeTailwind(polished = false): Plugin {
           !polished &&
           /\.layout-wide|\.controls-outlined|\.progress-compact/u.test(rule.selector)
         ) {
+          rule.remove();
+          return;
+        }
+        if (!display && /\.display-item/u.test(rule.selector)) {
           rule.remove();
           return;
         }

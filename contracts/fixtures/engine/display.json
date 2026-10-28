@@ -1,0 +1,235 @@
+{
+  "schemaVersion": "1.0.0",
+  "kind": "form",
+  "formId": "frm_display_synthetic",
+  "siteId": "site_demo",
+  "locale": {
+    "default": "ja",
+    "supported": [
+      "ja"
+    ]
+  },
+  "conditions": {
+    "cnd_store": {
+      "label": {
+        "ja": "店頭"
+      },
+      "when": {
+        "op": "eq",
+        "args": [
+          {
+            "ref": "$local:fld_method"
+          },
+          {
+            "const": "store"
+          }
+        ]
+      }
+    }
+  },
+  "fields": [
+    {
+      "id": "fld_method",
+      "key": "purchaseMethod",
+      "type": "choice.radio",
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "takuhai",
+          "label": {
+            "ja": "宅配"
+          }
+        },
+        {
+          "value": "store",
+          "label": {
+            "ja": "店頭"
+          }
+        }
+      ]
+    },
+    {
+      "id": "fld_kit",
+      "key": "packingKit",
+      "type": "choice.radio",
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "options": [
+        {
+          "value": "yes"
+        },
+        {
+          "value": "no"
+        }
+      ]
+    },
+    {
+      "id": "fld_token",
+      "key": "deliveryToken",
+      "type": "text",
+      "classification": "secret",
+      "clearOnDeactivate": true,
+      "persist": "never",
+      "submit": "displayOnly"
+    },
+    {
+      "id": "fld_store",
+      "key": "store",
+      "type": "text",
+      "classification": "personal",
+      "persist": "allowed",
+      "required": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "stp_method",
+      "kind": "form",
+      "content": [
+        {
+          "display": {
+            "id": "dsp_intro",
+            "type": "heading",
+            "text": {
+              "ja": "お申し込み方法"
+            }
+          }
+        },
+        {
+          "field": "$local:fld_method"
+        }
+      ],
+      "transitions": [
+        {
+          "when": {
+            "cond": "cnd_store"
+          },
+          "to": "stp_store"
+        },
+        {
+          "default": "stp_takuhai"
+        }
+      ]
+    },
+    {
+      "id": "stp_takuhai",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_kit"
+        },
+        {
+          "display": {
+            "id": "dsp_kit_note",
+            "type": "text",
+            "text": {
+              "ja": "キットを手配します"
+            },
+            "visibleWhen": {
+              "op": "eq",
+              "args": [
+                {
+                  "ref": "$local:fld_kit"
+                },
+                {
+                  "const": "yes"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "field": "$local:fld_token"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_review"
+        }
+      ]
+    },
+    {
+      "id": "stp_store",
+      "kind": "form",
+      "content": [
+        {
+          "field": "$local:fld_store"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_review"
+        }
+      ]
+    },
+    {
+      "id": "stp_review",
+      "kind": "review",
+      "transitions": [
+        {
+          "default": "stp_done"
+        }
+      ],
+      "content": [
+        {
+          "display": {
+            "id": "dsp_review_title",
+            "type": "heading",
+            "text": {
+              "ja": "ご確認ください"
+            }
+          }
+        },
+        {
+          "display": {
+            "id": "dsp_method",
+            "type": "fieldValue",
+            "field": "$local:fld_method"
+          }
+        },
+        {
+          "display": {
+            "id": "dsp_summary",
+            "type": "summary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "stp_done",
+      "kind": "complete",
+      "content": [
+        {
+          "display": {
+            "id": "dsp_ok",
+            "type": "image",
+            "asset": "success",
+            "alt": {
+              "ja": "完了"
+            }
+          }
+        },
+        {
+          "display": {
+            "id": "dsp_ref",
+            "type": "reference"
+          }
+        },
+        {
+          "display": {
+            "id": "dsp_home",
+            "type": "button",
+            "label": {
+              "ja": "トップへ"
+            },
+            "action": "link",
+            "link": "home"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -55,3 +55,8 @@ export function fieldOrder(ir: EngineIRV1): EngineNode[] {
 export function contentId(c: { field: string } | { group: string }): string {
   return fieldId("field" in c ? c.field : c.group);
 }
+type Content = NonNullable<EngineIRV1["steps"][number]["content"]>[number];
+/** Input field/group ids of a step; display-only items carry no answer. */
+export function inputIds(step: { content?: readonly Content[] }): string[] {
+  return (step.content ?? []).flatMap((c) => ("display" in c ? [] : [contentId(c)]));
+}

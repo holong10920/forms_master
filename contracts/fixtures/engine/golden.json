@@ -2007,6 +2007,91 @@
           }
         }
       }
+    },
+    {
+      "name": "display-store-review",
+      "definition": "display",
+      "current": "stp_review",
+      "values": {
+        "fld_method": "store",
+        "fld_store": "fictional",
+        "fld_kit": "yes"
+      },
+      "expected": {
+        "path": [
+          "stp_method",
+          "stp_store",
+          "stp_review",
+          "stp_done"
+        ],
+        "active": [
+          "fld_method",
+          "fld_store"
+        ],
+        "errors": [],
+        "payload": {
+          "purchaseMethod": "store",
+          "store": "fictional"
+        }
+      }
+    },
+    {
+      "name": "display-takuhai-review",
+      "definition": "display",
+      "current": "stp_review",
+      "values": {
+        "fld_method": "takuhai",
+        "fld_kit": "yes",
+        "fld_token": "t-1"
+      },
+      "expected": {
+        "path": [
+          "stp_method",
+          "stp_takuhai",
+          "stp_review",
+          "stp_done"
+        ],
+        "active": [
+          "fld_kit",
+          "fld_method",
+          "fld_token"
+        ],
+        "errors": [],
+        "payload": {
+          "purchaseMethod": "takuhai",
+          "packingKit": "yes"
+        }
+      }
+    },
+    {
+      "name": "display-missing-step",
+      "definition": "display",
+      "current": "stp_takuhai",
+      "values": {
+        "fld_method": "takuhai"
+      },
+      "expected": {
+        "path": [
+          "stp_method",
+          "stp_takuhai",
+          "stp_review",
+          "stp_done"
+        ],
+        "active": [
+          "fld_kit",
+          "fld_method",
+          "fld_token"
+        ],
+        "errors": [
+          {
+            "code": "required",
+            "path": "fld_kit"
+          }
+        ],
+        "payload": {
+          "purchaseMethod": "takuhai"
+        }
+      }
     }
   ]
 }

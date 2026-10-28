@@ -103,6 +103,10 @@ const PATHS = {
   loader:
     "M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.2 16.2l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.2 7.8l2.8-2.8",
   dot: "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z",
+  heading: "M6 4v16M18 4v16M6 12h12",
+  image: "M3 3h18v18H3zM8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM21 15l-5-5L5 21",
+  divider: "M3 12h18",
+  spacer: "M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4",
   history: "M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l4 2",
   file: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h5",
   grid: "M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",

@@ -195,6 +195,7 @@ export async function compile(
   const resolved = resolveAssets(root, definition as FormDefinitionV1, ir);
   const extended =
     ir.nodes.some((f) => f.type === "group") ||
+    ir.steps.some((s) => !!s.autoSubmit || s.content?.some((c) => "display" in c)) ||
     !!ir.appearance ||
     !!ir.customerDraft ||
     ir.nodes.some(
@@ -312,6 +313,7 @@ export async function compile(
           !!ir.appearance?.headerVariant ||
             !!ir.appearance?.controlStyle ||
             ir.appearance?.progressStyle === "compact",
+          ir.steps.some((s) => s.content?.some((c) => "display" in c)),
         ),
       ],
       resolve: {

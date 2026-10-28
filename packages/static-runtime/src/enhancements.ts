@@ -16,7 +16,7 @@ import type { EngineIRV1, EngineField } from "@fb/contracts";
 export { assertIR } from "@fb/form-engine";
 export { applyAppearance, siteAppearance } from "./appearance.ts";
 import { instrumentLogo } from "./local-logo.ts";
-import { journey } from "./journey.ts";
+import { journey, stepCounter } from "./journey.ts";
 import type { SiteAppearance } from "./appearance.ts";
 type Pin = {
   releaseId: string;
@@ -192,8 +192,7 @@ export function progress(
       if (stage.status === "current") item.setAttribute("aria-current", "step");
       list.append(item);
     }
-    nav.append(list);
-    return nav;
+    return fitProgress(nav, list);
   }
   const path = snapshot(ir, state).path.filter(
     (id) =>
@@ -217,7 +216,54 @@ export function progress(
     if (step.id === current) item.setAttribute("aria-current", "step");
     list.append(item);
   }
-  nav.append(list);
+  return fitProgress(nav, list);
+}
+/** Keeps the step circles while they fit; otherwise shows the current title, "n / total" and a bar.
+ * Presentation only: the stages and the current step come from the same journey as before. */
+function fitProgress(nav: HTMLElement, list: HTMLElement): HTMLElement {
+  const items = [...list.children];
+  const at = items.findIndex((li) => li.hasAttribute("aria-current"));
+  const counter = stepCounter(items.length, at, matchMedia("(max-width: 639px)").matches);
+  if (!counter) {
+    nav.append(list);
+    return nav;
+  }
+  nav.dataset.overflow = "true";
+  const head = document.createElement("p");
+  Object.assign(head.style, {
+    display: "flex",
+    justifyContent: "space-between",
+    gap: "0.75rem",
+    margin: "0 0 0.5rem",
+    fontSize: "0.85rem",
+  });
+  const title = document.createElement("strong");
+  title.textContent = items[at]?.textContent ?? "";
+  Object.assign(title.style, {
+    minWidth: "0",
+    overflowWrap: "anywhere",
+    color: "var(--form-accent,#0f766e)",
+  });
+  const count = document.createElement("span");
+  count.textContent = counter.text;
+  count.style.flex = "none";
+  head.append(title, count);
+  const bar = document.createElement("div");
+  bar.setAttribute("role", "progressbar");
+  bar.setAttribute("aria-valuemin", "0");
+  bar.setAttribute("aria-valuemax", "100");
+  bar.setAttribute("aria-valuenow", String(counter.percent));
+  bar.setAttribute("aria-valuetext", counter.text);
+  Object.assign(bar.style, { height: "6px", borderRadius: "999px", background: "#e2e8f0" });
+  const fill = document.createElement("div");
+  Object.assign(fill.style, {
+    width: `${String(counter.percent)}%`,
+    height: "100%",
+    borderRadius: "inherit",
+    background: "var(--form-accent,#0f766e)",
+  });
+  bar.append(fill);
+  nav.append(head, bar);
   return nav;
 }
 
@@ -247,6 +293,7 @@ export function displayValue(
 }
 
 export { cart, type CartEditor } from "./cart.ts";
+export { displays, receipt } from "./display.ts";
 
 let logoBitmap: Promise<ImageBitmap> | undefined;
 export function header(appearance?: SiteAppearance): HTMLElement | undefined {

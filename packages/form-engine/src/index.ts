@@ -1,4 +1,4 @@
-export { loadDefinition, loadIR, assertIR, fieldOrder } from "./definition.ts";
+export { loadDefinition, loadIR, assertIR, assertCoreIR, fieldOrder } from "./definition.ts";
 export { evaluate } from "./expression.ts";
 export {
   createSession,
@@ -8,6 +8,8 @@ export {
   draftValues,
   visibleErrors,
   transitionNotices,
+  stepItems,
+  type StepItem,
 } from "./runtime.ts";
 export { dispatch } from "./navigation.ts";
 export type { SessionPorts } from "./model.ts";
@@ -34,3 +36,6 @@ export { canonical, parseNumberInput } from "./canonical.ts";
 export { restoreDraft, type DraftSnapshot } from "./restore.ts";
 
 export { projectPreview } from "./preview.ts";
+
+export { displayVisible, displayItems, displayBinding } from "./display.ts";
+export { contentId, inputIds } from "./dependencies.ts";

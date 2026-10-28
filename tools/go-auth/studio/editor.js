@@ -2,6 +2,10 @@ import { classes } from "./recipes.js";
 import { cartEditor } from "./cart-editor.js";
 import { appearanceEditor } from "./appearance.js";
 import { applyAppearance } from "../../../packages/static-runtime/src/appearance.ts";
+import {
+  APPROVED_IMAGES,
+  APPROVED_LINKS,
+} from "../../../packages/static-runtime/src/display-assets.ts";
 // Build mode: outline + palette (left), canvas (center), inspector (right).
 import {
   $,
@@ -52,19 +56,40 @@ import {
   lint,
   newId,
   clone,
+  DISPLAY_TYPES,
+  displayTypeLabel,
+  displayText,
+  displayById,
+  displayBinding,
 } from "./state.js";
 import { ruleEditor, namedConditions, branches, skipEditor, commit, fieldUsage } from "./rules.js";
 const ed = { leftTab: "outline", inspTab: {}, device: "desktop", drag: null };
 export const editorState = ed;
 // ---------- Selection / content helpers ----------
-const contentKey = (c) => (c.field ? c.field : c.block ? "block:" + c.block : c.group);
-const selectionKey = (sel) => (sel?.startsWith("block:") ? sel : "$local:" + sel);
+const contentKey = (c) =>
+  c.field
+    ? c.field
+    : c.block
+      ? "block:" + c.block
+      : c.display
+        ? "display:" + c.display.id
+        : c.group;
+const selectionKey = (sel) =>
+  sel?.startsWith("block:") || sel?.startsWith("display:") ? sel : "$local:" + sel;
 const keyToSelection = (key) => (key.startsWith("$local:") ? key.slice(7) : key);
+// Section children are located through their section (`parent`), one level deep.
 function locate(key) {
   for (const step of S.draft.steps) {
     const index = (step.content ?? []).findIndex((c) => contentKey(c) === key);
     if (index >= 0) return { step, index };
   }
+  const child = key.startsWith("display:") ? displayById(key.slice(8)) : null;
+  if (child?.parent)
+    return {
+      step: child.step,
+      index: child.parent.children.indexOf(child.display),
+      parent: child.parent,
+    };
   return null;
 }
 export function select_(sel, { step } = {}) {
@@ -161,22 +186,179 @@ export function addField(type, { stepId, index } = {}) {
   commit();
   notice(L("フィールドを追加しました: ", "Đã thêm trường: ") + typeLabel(type));
 }
-export function addStep() {
+// Inserts an input step at `position` among the input steps (default: last). The new step takes
+// over the previous step's "next" so the flow stays connected; branches are left untouched.
+export function addStep(position = formSteps().length, base) {
   if (!S.draft || !canEdit()) return;
-  const prior = formSteps().at(-1),
+  const forms = formSteps(),
+    prior = forms[position - 1],
     id = "stp_" + newId("", 10);
-  const reviewId = S.draft.steps.find((s) => s.kind === "review").id;
-  const next = prior.transitions.find((t) => t.default)?.default ?? reviewId;
-  prior.transitions = prior.transitions.map((t) => (t.default ? { default: id } : t));
-  S.draft.steps.splice(
-    S.draft.steps.findIndex((s) => s.kind === "review"),
-    0,
-    { id, kind: "form", content: [], transitions: [{ default: next }] },
-  );
+  const next =
+    prior?.transitions.find((t) => t.default)?.default ??
+    forms[position]?.id ??
+    S.draft.steps.find((s) => s.kind === "review").id;
+  if (prior) prior.transitions = prior.transitions.map((t) => (t.default ? { default: id } : t));
+  const step = { content: [], ...base, id, kind: "form", transitions: [{ default: next }] };
+  const anchor = forms[position] ?? S.draft.steps.find((s) => s.kind === "review");
+  S.draft.steps.splice(S.draft.steps.indexOf(anchor), 0, step);
   S.currentStep = id;
-  S.selected = null;
+  S.selected = "step:" + id;
   commit();
   notice(L("ステップを追加しました", "Đã thêm bước"));
+  return step;
+}
+// The default flow follows the step order: each input step whose "next" pointed at its old
+// neighbour is re-linked to its new neighbour. Branches keep their targets; a branch that now
+// points backwards is reported by the diagnostics instead of being silently rewritten.
+function relinkDefaults(update) {
+  const review = S.draft.steps.find((s) => s.kind === "review").id;
+  const following = () => {
+    const forms = formSteps();
+    return new Map(forms.map((s, i) => [s, forms[i + 1]?.id ?? review]));
+  };
+  const before = following();
+  update();
+  const after = following();
+  for (const [step, next] of before)
+    for (const t of step.transitions ?? []) if (t.default === next) t.default = after.get(step);
+}
+export function moveStep(step, delta) {
+  const forms = formSteps(),
+    target = forms[forms.indexOf(step) + delta];
+  if (!target || !canEdit()) return;
+  relinkDefaults(() => {
+    const steps = S.draft.steps,
+      a = steps.indexOf(step),
+      b = steps.indexOf(target);
+    [steps[a], steps[b]] = [steps[b], steps[a]];
+  });
+  S.currentStep = step.id;
+  ed.refocus = null;
+  commit();
+  notice(L("ステップを移動しました", "Đã di chuyển bước"));
+}
+// Copies an input step after the original. Fields and display components get new IDs/keys, and
+// rules inside the copy are re-pointed at the copied fields. Shared blocks are not copied.
+export function duplicateStep(step) {
+  if (!canEdit()) return;
+  const ids = new Map();
+  const copyField = (f) => {
+    const suffix = newId("", 12);
+    const copy = {
+      ...clone(f),
+      id: (f.type === "group" ? "grp_" : "fld_") + suffix,
+      key: f.key + "_copy_" + suffix.slice(0, 4),
+    };
+    ids.set("$local:" + f.id, "$local:" + copy.id);
+    return copy;
+  };
+  const fields = [];
+  const content = (step.content ?? []).flatMap((c) => {
+    if (c.block) return [];
+    if (c.display) return [{ display: renewDisplay(clone(c.display)) }];
+    const f = fieldOfContent(c);
+    if (!f) return [];
+    const copy = copyField(f);
+    fields.push(copy);
+    return [f.type === "group" ? { group: "$local:" + copy.id } : { field: "$local:" + copy.id }];
+  });
+  const remap = (value) =>
+    typeof value === "string"
+      ? (ids.get(value) ?? value)
+      : Array.isArray(value)
+        ? value.map(remap)
+        : value && typeof value === "object"
+          ? Object.fromEntries(Object.entries(value).map(([k, v]) => [k, remap(v)]))
+          : value;
+  S.draft.fields.push(...fields.map(remap));
+  const base = remap({
+    content,
+    ...(step.title ? { title: { ...step.title, ja: step.title.ja + "（コピー）" } } : {}),
+    ...(step.description ? { description: step.description } : {}),
+  });
+  addStep(formSteps().indexOf(step) + 1, base);
+  if (step.content?.some((c) => c.block))
+    notice(L("共通ブロックは複製されません", "Khối dùng chung không được nhân bản"));
+}
+// ---------- Display components ----------
+const DISPLAY_DEFAULTS = {
+  heading: () => ({ text: { ja: "見出し" }, level: 2 }),
+  text: () => ({ text: { ja: "説明文を入力してください" }, tone: "normal" }),
+  image: (step) => ({
+    asset: step.kind === "complete" ? "success" : "info",
+    alt: { ja: "イメージ" },
+    size: "medium",
+  }),
+  divider: () => ({}),
+  spacer: () => ({ size: "medium" }),
+  fieldValue: () => {
+    const f = S.draft.fields.find((x) => x.type !== "group" && x.classification === "public");
+    return f ? { field: "$local:" + f.id } : null;
+  },
+  groupSummary: () => {
+    const g = S.draft.fields.find((x) => x.type === "group");
+    return g ? { group: "$local:" + g.id } : null;
+  },
+  summary: () => ({}),
+  section: () => ({ title: { ja: "セクション" }, children: [] }),
+  reference: () => ({}),
+  button: (step) =>
+    step.kind === "complete"
+      ? { label: { ja: "トップへ戻る" }, action: "link", link: "home", variant: "primary" }
+      : { label: { ja: "よくある質問" }, action: "link", link: "faq", variant: "secondary" },
+};
+const newDisplayId = () => "dsp_" + newId("", 12);
+function renewDisplay(d) {
+  d.id = newDisplayId();
+  for (const child of d.children ?? []) child.id = newDisplayId();
+  return d;
+}
+export function addDisplay(type, { stepId, index, parent } = {}) {
+  if (!S.draft || !canEdit()) return;
+  const step = stepById(stepId ?? S.currentStep);
+  if (!step) return;
+  if (type === "reference" && step.kind !== "complete")
+    return notice(
+      L("受付番号は完了画面にだけ置けます", "Mã tiếp nhận chỉ đặt ở màn hình hoàn tất"),
+    );
+  if (parent && type === "section")
+    return notice(L("セクションの中にセクションは置けません", "Không lồng khu vực"));
+  const props = DISPLAY_DEFAULTS[type]?.(step);
+  if (!props)
+    return notice(
+      type === "groupSummary"
+        ? L("商品一覧（繰り返し項目）がまだありません", "Chưa có danh sách lặp lại")
+        : L("表示できる公開項目がまだありません", "Chưa có trường công khai để hiển thị"),
+    );
+  const d = { id: newDisplayId(), type, ...props };
+  if (parent) parent.children.splice(index ?? parent.children.length, 0, d);
+  else (step.content ??= []).splice(index ?? step.content.length, 0, { display: d });
+  S.currentStep = step.id;
+  S.selected = "display:" + d.id;
+  ed.inspTab.display = "basic";
+  commit();
+  notice(L("表示部品を追加しました: ", "Đã thêm thành phần: ") + displayTypeLabel(type));
+}
+export function duplicateDisplay(id) {
+  const at = displayById(id);
+  if (!at || !canEdit()) return;
+  const copy = renewDisplay(clone(at.display));
+  if (at.parent) at.parent.children.splice(at.parent.children.indexOf(at.display) + 1, 0, copy);
+  else {
+    const index = at.step.content.findIndex((c) => c.display === at.display);
+    at.step.content.splice(index + 1, 0, { display: copy });
+  }
+  S.selected = "display:" + copy.id;
+  commit();
+}
+export function deleteDisplay(id) {
+  const at = displayById(id);
+  if (!at || !canEdit()) return;
+  if (at.parent) at.parent.children = at.parent.children.filter((d) => d !== at.display);
+  else at.step.content = at.step.content.filter((c) => c.display !== at.display);
+  S.selected = at.parent ? "display:" + at.parent.id : null;
+  commit();
+  notice(L("表示部品を削除しました", "Đã xóa thành phần"));
 }
 export function insertBlock(pin) {
   if (!S.draft || !canEdit()) return;
@@ -208,7 +390,7 @@ export function insertBlock(pin) {
 export function moveContent(key, toStepId, toIndex) {
   const from = locate(key);
   const to = stepById(toStepId);
-  if (!from || to?.kind !== "form") return;
+  if (!from || from.parent || !to || (to.kind !== "form" && !key.startsWith("display:"))) return;
   const [item] = from.step.content.splice(from.index, 1);
   let index = toIndex;
   if (from.step === to && from.index < toIndex) index--;
@@ -222,10 +404,12 @@ export function moveBy(key, delta) {
   if (!at || !canEdit()) return;
   const steps = formSteps();
   const target = at.index + delta;
-  if (target >= 0 && target < at.step.content.length) {
-    const [item] = at.step.content.splice(at.index, 1);
-    at.step.content.splice(target, 0, item);
+  const list = at.parent ? at.parent.children : at.step.content;
+  if (target >= 0 && target < list.length) {
+    const [item] = list.splice(at.index, 1);
+    list.splice(target, 0, item);
   } else {
+    if (at.parent || at.step.kind !== "form") return;
     const neighbour = steps[steps.indexOf(at.step) + delta];
     if (!neighbour) return;
     const [item] = at.step.content.splice(at.index, 1);
@@ -469,6 +653,7 @@ function renderOutline() {
         ? h("span", { class: "ol-count", "aria-hidden": "true" }, String(step.content?.length ?? 0))
         : null,
     );
+    const forms = formSteps();
     const li = h(
       "li",
       {
@@ -480,14 +665,44 @@ function renderOutline() {
         },
       },
       head,
+      editable && isForm && forms.length > 1
+        ? h(
+            "span",
+            { class: "ol-tools", translate: "no" },
+            btn("", () => moveStep(step, -1), {
+              variant: "ghost",
+              size: "sm",
+              iconName: "up",
+              aria: L(
+                "「" + stepLabel(step) + "」を前へ移動",
+                "Chuyển 「" + stepLabel(step) + "」lên",
+              ),
+            }),
+            btn("", () => moveStep(step, 1), {
+              variant: "ghost",
+              size: "sm",
+              iconName: "down",
+              aria: L(
+                "「" + stepLabel(step) + "」を後ろへ移動",
+                "Chuyển 「" + stepLabel(step) + "」xuống",
+              ),
+            }),
+          )
+        : null,
     );
-    if (isForm) {
-      const items = h("ol", { class: "ol-items" });
-      (step.content ?? []).forEach((c, index) => add(items, outlineItem(step, c, index, editable)));
-      if (!step.content?.length) add(items, h("li", { class: "ol-empty" }, "フィールドなし"));
-      add(li, items);
-      if (editable) dropTarget(li, step, () => step.content.length, true);
-    }
+    const items = h("ol", { class: "ol-items" });
+    (step.content ?? []).forEach((c, index) => add(items, outlineItem(step, c, index, editable)));
+    if (!step.content?.length)
+      add(
+        items,
+        h(
+          "li",
+          { class: "ol-empty" },
+          isForm ? "フィールドなし" : L("既定の表示", "Hiển thị mặc định"),
+        ),
+      );
+    add(li, items);
+    if (editable) dropTarget(li, step, () => step.content.length, true);
     add(list, li);
   }
   fill(box, list);
@@ -497,7 +712,7 @@ function renderOutline() {
       h(
         "div",
         { class: "row", dataset: { pad: "top" } },
-        btn("ステップを追加", addStep, {
+        btn("ステップを追加", () => addStep(), {
           variant: "ghost",
           size: "sm",
           iconName: "plus",
@@ -519,6 +734,10 @@ function outlineItem(step, c, index, editable) {
     label = (instance?.alias ?? c.block) + L("（共通ブロック）", " (khối dùng chung)");
     typeName = "block";
     aria = label;
+  } else if (c.display) {
+    label = displayText(c.display);
+    typeName = "display:" + c.display.type;
+    aria = label + " · " + displayTypeLabel(c.display.type);
   } else {
     label = L("グループ", "Nhóm") + " · " + c.group;
     typeName = "group";
@@ -533,7 +752,9 @@ function outlineItem(step, c, index, editable) {
         ? { fieldId: c.field.replace("$local:", ""), key }
         : c.block
           ? { blockId: c.block, key }
-          : { key },
+          : c.display
+            ? { displayId: c.display.id, key }
+            : { key },
     },
     editable ? h("span", { class: "drag-handle", "aria-hidden": "true" }, icon("grip")) : null,
     h(
@@ -556,7 +777,15 @@ function outlineItem(step, c, index, editable) {
       h(
         "span",
         { class: "ol-type", "aria-hidden": "true" },
-        icon(typeName === "block" ? "box" : typeName === "group" ? "layers" : typeIcon(typeName)),
+        icon(
+          typeName === "block"
+            ? "box"
+            : typeName === "group"
+              ? "layers"
+              : typeName.startsWith("display:")
+                ? DISPLAY_TYPES[typeName.slice(8)]?.icon
+                : typeIcon(typeName),
+        ),
       ),
       h("span", { class: "ol-name" }, label),
     ),
@@ -640,6 +869,28 @@ function blockTitle(entry) {
   const id = entry.block.blockId ?? entry.pin.split("@")[0];
   return id.replace(/^blk_/, "").replaceAll("_", " ");
 }
+const DISPLAY_GROUPS = [
+  ["display", L("表示", "Hiển thị")],
+  ["layout", L("レイアウト", "Bố cục")],
+  ["system", L("システム操作", "Thao tác hệ thống")],
+];
+const displayTypesIn = (group) =>
+  Object.keys(DISPLAY_TYPES).filter((t) => DISPLAY_TYPES[t].group === group);
+function displayPaletteItem(t, onAdd) {
+  return h(
+    "button",
+    {
+      type: "button",
+      class: "palette-item",
+      translate: "no",
+      dataset: { addDisplay: t },
+      title: L("現在のステップに追加", "Thêm vào bước hiện tại"),
+      onclick: onAdd,
+    },
+    h("span", { class: "ol-type", "aria-hidden": "true" }, icon(DISPLAY_TYPES[t].icon)),
+    h("span", {}, displayTypeLabel(t)),
+  );
+}
 function renderPalette() {
   const box = $("palette");
   if (!canEdit()) return fill(box);
@@ -647,8 +898,20 @@ function renderPalette() {
     ...(S.schema?.$defs?.Field?.properties?.type?.enum ?? Object.keys(TYPES)),
     "group",
   ];
+  const inputStep = currentStep()?.kind === "form";
   fill(
     box,
+    h("h2", { class: "section-title" }, L("入力項目", "Trường nhập")),
+    inputStep
+      ? null
+      : h(
+          "p",
+          { class: "small muted" },
+          L(
+            "確認・完了画面には入力項目を置けません。追加先は最初の入力ステップになります。",
+            "Màn hình xác nhận/hoàn tất không chứa trường nhập; trường sẽ được thêm vào bước nhập đầu tiên.",
+          ),
+        ),
     ...GROUPS.map(([group, title]) =>
       h(
         "div",
@@ -674,6 +937,18 @@ function renderPalette() {
                 h("span", {}, typeLabel(t)),
               ),
             ),
+        ),
+      ),
+    ),
+    ...DISPLAY_GROUPS.map(([group, title]) =>
+      h(
+        "div",
+        { class: "palette-group", dataset: { paletteGroup: group } },
+        h("h2", { class: "section-title" }, title),
+        h(
+          "div",
+          { class: "palette-grid" },
+          displayTypesIn(group).map((t) => displayPaletteItem(t, () => addDisplay(t))),
         ),
       ),
     ),
@@ -937,9 +1212,12 @@ function startRename(block, f) {
 function toolbar(key, f) {
   const at = locate(key);
   const steps = formSteps();
-  const first = at.index === 0 && steps.indexOf(at.step) === 0;
-  const last =
-    at.index === at.step.content.length - 1 && steps.indexOf(at.step) === steps.length - 1;
+  // Items inside a section or on the confirmation/completion screens stay where they are.
+  const fixed = at.parent || at.step.kind !== "form";
+  const length = (at.parent?.children ?? at.step.content).length;
+  const first = at.index === 0 && (fixed || steps.indexOf(at.step) === 0);
+  const last = at.index === length - 1 && (fixed || steps.indexOf(at.step) === steps.length - 1);
+  const display = key.startsWith("display:") ? key.slice(8) : null;
   const tool = (iconName, label, fn, disabled) =>
     h(
       "button",
@@ -960,16 +1238,21 @@ function toolbar(key, f) {
     { class: "cv-toolbar", role: "toolbar", "aria-label": "フィールド操作" },
     tool("up", "上へ移動", () => moveBy(key, -1), first),
     tool("down", "下へ移動", () => moveBy(key, 1), last),
-    f ? tool("copy", "複製", () => duplicateField(f.id)) : null,
+    f || display
+      ? tool("copy", "複製", () => (f ? duplicateField(f.id) : duplicateDisplay(display)))
+      : null,
     f
       ? tool("pencil", "名前を変更", () =>
           startRename(document.querySelector(`.cv-block[data-key="${window.CSS.escape(key)}"]`), f),
         )
       : null,
-    tool("trash", "削除", () => (f ? deleteField(f.id) : deleteBlock(key.slice(6)))),
+    tool("trash", "削除", () =>
+      f ? deleteField(f.id) : display ? deleteDisplay(display) : deleteBlock(key.slice(6)),
+    ),
   );
 }
-function insertPoint(step, index) {
+function insertPoint(step, index, parent) {
+  const label = L("ここに項目を追加", "Thêm mục tại đây");
   return h(
     "div",
     { class: "cv-insert" },
@@ -977,18 +1260,18 @@ function insertPoint(step, index) {
       "button",
       {
         type: "button",
-        "aria-label": "ここにフィールドを追加",
+        "aria-label": label,
         "aria-haspopup": "true",
         "aria-expanded": "false",
-        title: "ここにフィールドを追加",
-        onclick: (e) => openInsertMenu(e.currentTarget, step.id, index),
+        title: label,
+        onclick: (e) => openInsertMenu(e.currentTarget, step.id, index, parent),
       },
       icon("plus"),
     ),
   );
 }
 let insertMenu;
-function openInsertMenu(anchor, stepId, index) {
+function openInsertMenu(anchor, stepId, index, parent) {
   insertMenu ??= document.body.appendChild(
     h("div", {
       class: "popover",
@@ -1003,30 +1286,225 @@ function openInsertMenu(anchor, stepId, index) {
     ...(S.schema?.$defs?.Field?.properties?.type?.enum ?? Object.keys(TYPES)),
     "group",
   ];
+  const inputs = !parent && stepById(stepId)?.kind === "form";
+  const item = (iconName, label, fn) =>
+    h(
+      "button",
+      {
+        type: "button",
+        class: "menu-item",
+        role: "menuitem",
+        translate: "no",
+        onclick: () => {
+          closePopover();
+          fn();
+        },
+      },
+      icon(iconName),
+      label,
+    );
   togglePopover(anchor, insertMenu, (pop) =>
     fill(
       pop,
-      ...types.map((t) =>
-        h(
-          "button",
-          {
-            type: "button",
-            class: "menu-item",
-            role: "menuitem",
-            translate: "no",
-            onclick: () => {
-              closePopover();
-              addField(t, { stepId, index });
-            },
-          },
-          icon(typeIcon(t)),
-          typeLabel(t),
+      ...(inputs
+        ? types.map((t) => item(typeIcon(t), typeLabel(t), () => addField(t, { stepId, index })))
+        : []),
+      ...Object.keys(DISPLAY_TYPES)
+        .filter((t) => !(parent && t === "section"))
+        .map((t) =>
+          item(DISPLAY_TYPES[t].icon, displayTypeLabel(t), () =>
+            addDisplay(t, { stepId, index, parent }),
+          ),
         ),
-      ),
     ),
   );
 }
+// Studio mock of a display component; the published runtime renders the same typed data.
+function displayMock(d) {
+  const text = (v) => v?.ja ?? "";
+  const bound = displayBinding(d) && fieldById(displayBinding(d).slice(7));
+  switch (d.type) {
+    case "heading":
+      return h(d.level === 3 ? "h4" : "h3", {}, text(d.text));
+    case "text":
+      return h("p", { dataset: { tone: d.tone ?? "normal" } }, text(d.text));
+    case "image": {
+      const px = { small: 48, medium: 96, large: 160 }[d.size ?? "medium"];
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      for (const [k, v] of Object.entries({
+        viewBox: "0 0 24 24",
+        width: px,
+        height: px,
+        fill: "none",
+        stroke: "currentColor",
+        "stroke-width": 1.6,
+        "stroke-linecap": "round",
+        "stroke-linejoin": "round",
+        role: "img",
+        "aria-label": text(d.alt),
+      }))
+        svg.setAttribute(k, String(v));
+      for (const path of APPROVED_IMAGES[d.asset] ?? []) {
+        const el = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        el.setAttribute("d", path);
+        svg.append(el);
+      }
+      return svg;
+    }
+    case "divider":
+      return h("hr");
+    case "spacer": {
+      const space = h("div", { "aria-hidden": "true" });
+      space.style.height = `${{ small: 8, medium: 24, large: 48 }[d.size ?? "medium"]}px`;
+      return space;
+    }
+    case "fieldValue":
+      return h(
+        "dl",
+        {},
+        h("dt", {}, text(d.label) || fieldLabel(bound)),
+        h(
+          "dd",
+          {},
+          d.mask && d.mask !== "none"
+            ? L("＊＊＊＊（マスク表示）", "＊＊＊＊ (che)")
+            : L("〈お客様の入力値〉", "〈giá trị khách nhập〉"),
+        ),
+      );
+    case "groupSummary":
+      return h(
+        "div",
+        { class: "cv-display" },
+        h("h4", {}, text(d.title) || fieldLabel(bound)),
+        ...[1, 2].map((n) =>
+          h(
+            "dl",
+            { class: "cv-block-group" },
+            ...(bound?.fields ?? []).flatMap((f) => [
+              h("dt", {}, fieldLabel(f)),
+              h("dd", {}, L(`〈${n} 件目の入力値〉`, `〈mục ${n}〉`)),
+            ]),
+          ),
+        ),
+      );
+    case "summary":
+      return h(
+        "div",
+        { class: "cv-display" },
+        text(d.title) ? h("h4", {}, text(d.title)) : null,
+        ...formSteps().map((s) =>
+          h(
+            "dl",
+            {},
+            h("dt", {}, stepLabel(s)),
+            h(
+              "dd",
+              {},
+              (s.content ?? []).map(fieldOfContent).filter(Boolean).map(fieldLabel).join("、") ||
+                "—",
+            ),
+          ),
+        ),
+      );
+    case "reference":
+      return h(
+        "p",
+        {},
+        (text(d.label) || catalogText("referenceLabel") || "受付番号") + ": ",
+        h(
+          "strong",
+          {},
+          L("synthetic_…（送信成功後に表示）", "synthetic_… (hiện sau khi gửi thành công)"),
+        ),
+      );
+    case "button":
+      return h(
+        "div",
+        {},
+        h(
+          "span",
+          { class: "cv-btn" + (d.variant === "secondary" ? "" : " primary") },
+          text(d.label),
+        ),
+        h(
+          "span",
+          { class: "small muted", translate: "no" },
+          " " +
+            (d.action === "link"
+              ? (APPROVED_LINKS[d.link] ?? "")
+              : L("最初からやり直す", "Làm lại từ đầu")),
+        ),
+      );
+  }
+  return null;
+}
+function displayBlock(step, d, index, editable, issues, parent) {
+  const key = "display:" + d.id;
+  const selected = isSelectedKey(key);
+  const warn = issues.some((x) => x.display === d.id);
+  const content = h("div", { class: "cv-content cv-display", translate: "no" });
+  if (d.type === "section") {
+    const inner = h("div", { class: "cv-section" });
+    if (d.title?.ja) add(inner, h("h3", {}, d.title.ja));
+    d.children.forEach((child, i) => {
+      if (editable) add(inner, insertPoint(step, i, d));
+      add(inner, displayBlock(step, child, i, editable, issues, d));
+    });
+    if (editable) add(inner, insertPoint(step, d.children.length, d));
+    if (!d.children.length)
+      add(inner, h("p", { class: "cv-help" }, L("＋ で部品を追加", "Nhấn ＋ để thêm thành phần")));
+    add(content, inner);
+  } else add(content, displayMock(d));
+  const block = h(
+    "div",
+    {
+      class: "cv-block",
+      draggable: editable && !parent ? "true" : undefined,
+      dataset: {
+        kind: "display",
+        displayId: d.id,
+        displayType: d.type,
+        key,
+        selected: String(selected),
+        warn: String(warn),
+      },
+    },
+    h(
+      "span",
+      { class: "cv-type-tag", translate: "no", "aria-hidden": "true" },
+      icon(DISPLAY_TYPES[d.type]?.icon),
+      displayTypeLabel(d.type),
+    ),
+    h("button", {
+      type: "button",
+      class: "cv-hit",
+      translate: "no",
+      "aria-label": displayText(d) + " · " + displayTypeLabel(d.type),
+      "aria-pressed": String(selected),
+      dataset: { focusKey: "cv:" + key },
+      onclick: (e) => {
+        e.stopPropagation();
+        select_("display:" + d.id, { step: step.id });
+      },
+      onkeydown: (e) => {
+        if (editable && e.altKey && ["ArrowUp", "ArrowDown"].includes(e.key)) {
+          e.preventDefault();
+          moveBy(key, e.key === "ArrowUp" ? -1 : 1);
+        }
+      },
+    }),
+    content,
+    selected && editable ? toolbar(key, null) : null,
+  );
+  if (editable && !parent) {
+    dragSource(block, key);
+    dropTarget(block, step, () => index);
+  }
+  applyAppearance(block, d.appearance, "field");
+  return block;
+}
 function fieldBlock(step, c, index, editable, issues) {
+  if (c.display) return displayBlock(step, c.display, index, editable, issues);
   const key = contentKey(c);
   const selected = isSelectedKey(key);
   if (c.field || c.group) {
@@ -1236,6 +1714,20 @@ export function renderCanvas() {
   canvas.classList.toggle("canvas-readonly", !editable);
   canvas.className = classes(canvas.className, canvas.id);
   const body = h("div", { class: "form-page-body", translate: "no" });
+  const stepIssues = issues.filter((x) => x.step === step.id && !x.field && !x.display);
+  if (stepIssues.length)
+    add(
+      body,
+      callout(
+        "warning",
+        "alert",
+        h(
+          "ul",
+          { class: "small", dataset: { stepIssues: step.id } },
+          stepIssues.map((x) => h("li", {}, x.text)),
+        ),
+      ),
+    );
   if (step.kind === "form") {
     const title = input(step.title?.ja ?? "", {
       cls: "inline-input step-title-input",
@@ -1249,7 +1741,24 @@ export function renderCanvas() {
         refresh("canvas");
       },
     });
-    add(body, title);
+    add(
+      body,
+      title,
+      textarea(step.description?.ja ?? "", {
+        class: "textarea inline-input",
+        rows: 2,
+        placeholder: L("ステップの説明（任意）", "Mô tả bước (tùy chọn)"),
+        "aria-label": L("ステップの説明", "Mô tả bước"),
+        translate: "no",
+        readOnly: !editable,
+        maxLength: 2000,
+        onInput: (v) => {
+          if (v.trim()) step.description = { ...step.description, ja: v };
+          else delete step.description;
+          refresh("canvas");
+        },
+      }),
+    );
     const list = h("div", { class: "cv-list" });
     if (!step.content?.length) {
       add(
@@ -1312,7 +1821,59 @@ export function renderCanvas() {
       ),
     );
   } else {
-    add(body, systemStep(step));
+    // Confirmation/completion: authored display components replace the default screen.
+    const t = (key, fallback) => S.draft.texts?.[key]?.ja ?? (catalogText(key) || fallback);
+    if (step.content?.length) {
+      add(
+        body,
+        h(
+          "h3",
+          { class: "step-title-input" },
+          step.kind === "review"
+            ? t("reviewTitle", "入力内容の確認")
+            : t("completeTitle", "送信が完了しました"),
+        ),
+      );
+      const list = h("div", { class: "cv-list" });
+      step.content.forEach((c, index) => {
+        if (editable) add(list, insertPoint(step, index));
+        add(list, fieldBlock(step, c, index, editable, issues));
+      });
+      if (editable) add(list, insertPoint(step, step.content.length));
+      add(body, list);
+    } else {
+      add(body, systemStep(step));
+      if (editable)
+        add(
+          body,
+          h(
+            "div",
+            { class: "cv-empty", translate: "yes" },
+            h(
+              "p",
+              {},
+              L(
+                "表示部品を追加すると、この画面を自由に構成できます（既定の表示の代わりに使われます）。",
+                "Thêm thành phần hiển thị để tự thiết kế màn hình này (thay cho hiển thị mặc định).",
+              ),
+            ),
+            h(
+              "div",
+              { class: "row row-wrap" },
+              (step.kind === "review"
+                ? ["summary", "heading", "text"]
+                : ["image", "heading", "reference", "button"]
+              ).map((type) =>
+                btn(displayTypeLabel(type), () => addDisplay(type, { stepId: step.id }), {
+                  size: "sm",
+                  iconName: DISPLAY_TYPES[type].icon,
+                }),
+              ),
+            ),
+          ),
+        );
+    }
+    if (editable) dropTarget(body, step, () => step.content?.length ?? 0, true);
     if (step.kind === "review")
       add(
         body,
@@ -1372,6 +1933,7 @@ function selection() {
   if (!sel) return { kind: "form" };
   if (sel.startsWith("step:")) return { kind: "step", step: stepById(sel.slice(5)) };
   if (sel.startsWith("block:")) return { kind: "block", instance: blockInstance(sel.slice(6)) };
+  if (sel.startsWith("display:")) return { kind: "display", ...displayById(sel.slice(8)) };
   return { kind: "field", field: fieldById(sel) };
 }
 function renderInspectorHead() {
@@ -1389,6 +1951,10 @@ function renderInspectorHead() {
     crumb =
       L("共通ブロック · ", "Khối dùng chung · ") +
       (S.draft.dependencies?.blocks?.[s.instance.block] ?? "");
+  } else if (s.kind === "display") {
+    iconName = DISPLAY_TYPES[s.display.type]?.icon;
+    title = displayText(s.display);
+    crumb = displayTypeLabel(s.display.type) + " · " + stepLabel(s.step);
   } else if (s.kind === "step") {
     iconName = s.step.kind === "form" ? "file" : s.step.kind === "review" ? "review" : "flag";
     title = stepLabel(s.step);
@@ -1438,6 +2004,11 @@ const TABS = {
     ["basic", "基本"],
     ["advanced", "詳細"],
   ],
+  display: [
+    ["basic", "基本"],
+    ["style", "スタイル"],
+    ["logic", "条件"],
+  ],
   form: [
     ["basic", "基本"],
     ["style", "スタイル"],
@@ -1462,6 +2033,7 @@ export function renderInspector() {
     if (s.kind === "step" && k === "branches")
       count = s.step.transitions?.filter((t) => t.when).length ?? 0;
     if (s.kind === "form" && k === "logic") count = Object.keys(S.draft.conditions ?? {}).length;
+    if (s.kind === "display" && k === "logic") count = s.display.visibleWhen ? 1 : 0;
     return [
       k,
       label,
@@ -1487,6 +2059,7 @@ export function renderInspector() {
     field: fieldInspector,
     step: stepInspector,
     block: blockInspector,
+    display: displayInspector,
     form: formInspector,
   };
   add(fieldset, ...builders[s.kind](s, tab, issues));
@@ -2150,6 +2723,23 @@ function stepInspector({ step }, tab) {
           "review",
           text("reviewTitle", "確認画面タイトル"),
           text("submit", "ボタン: 送信"),
+          toggle(
+            L("確認画面を省略する（2 画面構成）", "Bỏ qua màn hình xác nhận (2 màn hình)"),
+            !!step.autoSubmit,
+            (on) => {
+              if (on) step.autoSubmit = true;
+              else delete step.autoSubmit;
+              commit();
+            },
+            {
+              id: "auto-submit",
+              disabled: !editable,
+              hint: L(
+                "入力 → 送信 → 完了 の流れになります。最後の「次へ」で 1 回だけ送信され、エラー時はこの確認画面にエラーと入力内容を表示します。",
+                "Luồng Nhập → Gửi → Hoàn tất. Gửi đúng một lần khi bấm 「次へ」 cuối; nếu lỗi sẽ hiện lỗi và nội dung tại màn hình xác nhận.",
+              ),
+            },
+          ),
         ),
       );
     else
@@ -2165,7 +2755,10 @@ function stepInspector({ step }, tab) {
       h(
         "p",
         { class: "small muted" },
-        "確認画面と完了画面は自動で作成されます。並び替え・削除はできません。",
+        L(
+          "確認画面と完了画面は並び替え・削除できません。表示部品を追加すると、既定の表示の代わりに使われます。",
+          "Không thể sắp xếp/xóa màn hình xác nhận và hoàn tất. Khi thêm thành phần hiển thị, chúng sẽ thay cho hiển thị mặc định.",
+        ),
       ),
     );
     return out;
@@ -2189,6 +2782,20 @@ function stepInspector({ step }, tab) {
           }),
           { hint: "ステップの見出しとして表示されます（任意）。" },
         ),
+        field(
+          L("説明", "Mô tả"),
+          textarea(step.description?.ja ?? "", {
+            translate: "no",
+            maxLength: 2000,
+            rows: 2,
+            onInput: (v) => {
+              if (v.trim()) step.description = { ...step.description, ja: v };
+              else delete step.description;
+              refresh("inspector");
+            },
+          }),
+          { hint: L("見出しの下に表示されます（任意）。", "Hiển thị dưới tiêu đề (tùy chọn).") },
+        ),
         h(
           "p",
           { class: "small muted" },
@@ -2210,6 +2817,7 @@ function stepInspector({ step }, tab) {
             )
           : null,
       ),
+      editable ? section(L("ステップの操作", "Thao tác bước"), "flow", ...stepTools(step)) : null,
       section("スキップ条件", "chevR", skipEditor(step, !editable)),
     );
   }
@@ -2245,6 +2853,402 @@ function stepInspector({ step }, tab) {
         ),
       );
   }
+  return out;
+}
+function stepTools(step) {
+  const forms = formSteps(),
+    position = forms.indexOf(step);
+  return [
+    h(
+      "div",
+      { class: "row row-wrap" },
+      btn(L("前へ移動", "Lên trước"), () => moveStep(step, -1), {
+        size: "sm",
+        iconName: "up",
+        id: "step-move-up",
+      }),
+      btn(L("後ろへ移動", "Xuống sau"), () => moveStep(step, 1), {
+        size: "sm",
+        iconName: "down",
+        id: "step-move-down",
+      }),
+      btn(L("前に追加", "Thêm trước"), () => addStep(position), {
+        size: "sm",
+        iconName: "plus",
+        id: "step-insert-before",
+      }),
+      btn(L("後ろに追加", "Thêm sau"), () => addStep(position + 1), {
+        size: "sm",
+        iconName: "plus",
+        id: "step-insert-after",
+      }),
+      btn(L("複製", "Nhân bản"), () => duplicateStep(step), {
+        size: "sm",
+        iconName: "copy",
+        id: "step-duplicate",
+      }),
+    ),
+    h(
+      "p",
+      { class: "field-hint" },
+      L(
+        "並び替えると「次のステップ」は新しい順番に付け替えられます。分岐先は変わらないため、前のステップへ戻る分岐や後ろの項目を参照する条件は診断に表示されます。",
+        "Khi sắp xếp lại, 「次のステップ」 được nối theo thứ tự mới. Đích rẽ nhánh giữ nguyên; nhánh quay lui hoặc điều kiện tham chiếu trường phía sau sẽ hiện trong chẩn đoán.",
+      ),
+    ),
+  ];
+}
+const IMAGE_LABELS = {
+  success: ["完了（チェック）", "Hoàn tất"],
+  info: ["お知らせ", "Thông tin"],
+  box: ["荷物", "Hộp hàng"],
+  mail: ["メール", "Thư"],
+};
+const SIZE_OPTIONS = () => [
+  ["small", L("小", "Nhỏ")],
+  ["medium", L("中", "Vừa")],
+  ["large", L("大", "Lớn")],
+];
+function displayInspector({ display: d, step, parent }, tab, issues) {
+  const out = [];
+  const own = issues.filter((x) => x.display === d.id);
+  if (own.length)
+    out.push(
+      callout(
+        "warning",
+        "alert",
+        h(
+          "ul",
+          { class: "small" },
+          own.map((x) => h("li", {}, x.text)),
+        ),
+      ),
+    );
+  if (tab === "style") {
+    out.push(section("スタイル / Kiểu dáng", "palette", ...appearanceEditor(d)));
+    return out;
+  }
+  if (tab === "logic") {
+    out.push(
+      section(
+        "表示ルール",
+        "eye",
+        ruleEditor({
+          prefix: "表示",
+          rule: d.visibleWhen,
+          change: (value) => {
+            if (value) d.visibleWhen = value;
+            else delete d.visibleWhen;
+          },
+          fields: ruleFields(step.id),
+          alwaysLabel: "常に表示",
+          action: L("この部品を表示", "hiển thị thành phần này"),
+        }),
+      ),
+    );
+    return out;
+  }
+  // Localized text property; required ones keep an empty string so diagnostics can point at it.
+  const text = (prop, label, { multiline, required, hint } = {}) =>
+    field(
+      label,
+      (multiline ? textarea : input)(d[prop]?.ja ?? "", {
+        translate: "no",
+        maxLength: 1000,
+        dataset: { displayProp: prop },
+        onInput: (v) => {
+          if (v.trim() || required) d[prop] = { ...d[prop], ja: v };
+          else Reflect.deleteProperty(d, prop);
+          refresh("inspector");
+        },
+      }),
+      hint ? { hint } : {},
+    );
+  const choose = (label, values, chosen, change, id) =>
+    field(
+      label,
+      select(
+        values,
+        chosen,
+        (v) => {
+          change(v);
+          commit();
+        },
+        { id },
+      ),
+    );
+  const basic = [];
+  switch (d.type) {
+    case "heading":
+      basic.push(
+        text("text", L("見出し", "Tiêu đề"), { required: true }),
+        choose(
+          L("大きさ", "Cấp"),
+          [
+            ["2", L("大見出し", "Lớn")],
+            ["3", L("小見出し", "Nhỏ")],
+          ],
+          String(d.level ?? 2),
+          (v) => (d.level = Number(v)),
+        ),
+      );
+      break;
+    case "text":
+      basic.push(
+        text("text", L("本文", "Nội dung"), { multiline: true, required: true }),
+        choose(
+          L("表示の種類", "Kiểu"),
+          [
+            ["normal", L("通常", "Thường")],
+            ["muted", L("補足（薄い文字）", "Phụ")],
+            ["notice", L("お知らせ（強調）", "Nhấn mạnh")],
+          ],
+          d.tone ?? "normal",
+          (v) => (d.tone = v),
+        ),
+      );
+      break;
+    case "image":
+      basic.push(
+        choose(
+          L("画像（承認済み）", "Hình (đã duyệt)"),
+          Object.keys(APPROVED_IMAGES).map((k) => [k, L(...IMAGE_LABELS[k])]),
+          d.asset,
+          (v) => (d.asset = v),
+          "display-image-asset",
+        ),
+        text("alt", L("代替テキスト（読み上げ用）", "Văn bản thay thế"), { required: true }),
+        choose(L("大きさ", "Kích thước"), SIZE_OPTIONS(), d.size ?? "medium", (v) => (d.size = v)),
+        h(
+          "p",
+          { class: "field-hint" },
+          L(
+            "画像は承認済みの一覧からのみ選べます。外部 URL やアップロードは使用できません。",
+            "Chỉ chọn hình trong danh sách đã duyệt; không dùng URL ngoài hay tải lên.",
+          ),
+        ),
+      );
+      break;
+    case "spacer":
+      basic.push(
+        choose(L("高さ", "Chiều cao"), SIZE_OPTIONS(), d.size ?? "medium", (v) => (d.size = v)),
+      );
+      break;
+    case "fieldValue": {
+      const fields = ruleFields(step.id).filter(
+        (f) => !f.ref && (step.kind !== "complete" || f.classification === "public"),
+      );
+      // Copied steps repeat labels; name the step so the choice stays unambiguous.
+      const repeated = (f) => fields.filter((x) => fieldLabel(x) === fieldLabel(f)).length > 1;
+      const owner = (f) =>
+        S.draft.steps.find((s) => s.content?.some((c) => c.field === "$local:" + f.id));
+      basic.push(
+        choose(
+          L("表示する項目", "Trường hiển thị"),
+          [
+            ["", L("選択してください", "Chọn")],
+            ...fields.map((f) => [
+              "$local:" + f.id,
+              repeated(f) ? `${fieldLabel(f)}（${stepLabel(owner(f))}）` : fieldLabel(f),
+            ]),
+          ],
+          d.field,
+          (v) => (d.field = v),
+          "display-binding",
+        ),
+        text("label", L("見出し（空欄なら項目名）", "Nhãn (trống = tên trường)")),
+        choose(
+          L("マスク", "Che"),
+          [
+            ["none", L("なし", "Không")],
+            ["partial", L("一部を隠す", "Một phần")],
+            ["full", L("すべて隠す", "Toàn bộ")],
+          ],
+          d.mask ?? "none",
+          (v) => (v === "none" ? delete d.mask : (d.mask = v)),
+        ),
+        step.kind === "complete"
+          ? h(
+              "p",
+              { class: "field-hint" },
+              L(
+                "完了画面では公開データの項目だけを表示できます。",
+                "Màn hình hoàn tất chỉ hiển thị trường công khai.",
+              ),
+            )
+          : null,
+      );
+      break;
+    }
+    case "groupSummary":
+      basic.push(
+        choose(
+          L("商品一覧（繰り返し項目）", "Danh sách lặp lại"),
+          S.draft.fields
+            .filter((f) => f.type === "group")
+            .map((g) => ["$local:" + g.id, fieldLabel(g)]),
+          d.group,
+          (v) => (d.group = v),
+          "display-binding",
+        ),
+        text("title", L("見出し（空欄なら一覧名）", "Tiêu đề (trống = tên danh sách)")),
+      );
+      break;
+    case "summary":
+      basic.push(
+        text("title", L("見出し（任意）", "Tiêu đề (tùy chọn)")),
+        h(
+          "p",
+          { class: "field-hint" },
+          L(
+            "表示中のステップの入力内容を、ステップごとに項目名と選択肢名で一覧表示します。秘密情報は常にマスクされます。",
+            "Liệt kê câu trả lời theo từng bước với nhãn dễ đọc; thông tin bí mật luôn được che.",
+          ),
+        ),
+      );
+      break;
+    case "reference":
+      basic.push(
+        text("label", L("ラベル", "Nhãn")),
+        h(
+          "p",
+          { class: "field-hint" },
+          L(
+            "送信がサーバーで受け付けられたときだけ、その受付番号を表示します。プレビューでは発行されません。",
+            "Chỉ hiển thị mã khi máy chủ chấp nhận lần gửi; bản xem trước không cấp mã.",
+          ),
+        ),
+      );
+      break;
+    case "button": {
+      const actions = [["link", L("承認済みリンクへ移動", "Mở liên kết đã duyệt")]];
+      if (step.kind === "complete")
+        actions.push(["restart", L("新しいフォームを始める", "Bắt đầu biểu mẫu mới")]);
+      basic.push(
+        text("label", L("ボタンの文言", "Nhãn nút"), { required: true }),
+        choose(
+          L("動作", "Hành động"),
+          actions,
+          d.action,
+          (v) => {
+            d.action = v;
+            if (v === "link") d.link ??= "home";
+            else delete d.link;
+          },
+          "display-button-action",
+        ),
+        d.action === "link"
+          ? choose(
+              L("リンク先（承認済み）", "Đích (đã duyệt)"),
+              Object.entries(APPROVED_LINKS).map(([k, url]) => [k, url]),
+              d.link,
+              (v) => (d.link = v),
+              "display-button-link",
+            )
+          : null,
+        choose(
+          L("見た目", "Kiểu"),
+          [
+            ["primary", L("メイン", "Chính")],
+            ["secondary", L("サブ", "Phụ")],
+          ],
+          d.variant ?? "primary",
+          (v) => (d.variant = v),
+        ),
+      );
+      break;
+    }
+    case "section":
+      basic.push(
+        text("title", L("見出し（任意）", "Tiêu đề (tùy chọn)")),
+        h(
+          "ol",
+          { class: "outline", "aria-label": L("セクション内の部品", "Thành phần trong khu vực") },
+          d.children.map((child) =>
+            h(
+              "li",
+              { class: "ol-item" },
+              h(
+                "button",
+                {
+                  type: "button",
+                  class: "ol-item-btn",
+                  translate: "no",
+                  onclick: () => select_("display:" + child.id, { step: step.id }),
+                },
+                h(
+                  "span",
+                  { class: "ol-type", "aria-hidden": "true" },
+                  icon(DISPLAY_TYPES[child.type]?.icon),
+                ),
+                h("span", { class: "ol-name" }, displayText(child)),
+              ),
+              h(
+                "span",
+                { class: "ol-tools", translate: "no" },
+                btn("", () => moveBy("display:" + child.id, -1), {
+                  variant: "ghost",
+                  size: "sm",
+                  iconName: "up",
+                  aria: L("上へ移動", "Lên"),
+                }),
+                btn("", () => moveBy("display:" + child.id, 1), {
+                  variant: "ghost",
+                  size: "sm",
+                  iconName: "down",
+                  aria: L("下へ移動", "Xuống"),
+                }),
+                btn("", () => deleteDisplay(child.id), {
+                  variant: "ghost",
+                  size: "sm",
+                  iconName: "trash",
+                  aria: L("削除", "Xóa"),
+                }),
+              ),
+            ),
+          ),
+        ),
+        field(
+          L("部品を追加", "Thêm thành phần"),
+          select(
+            [
+              ["", L("選択してください", "Chọn")],
+              ...Object.keys(DISPLAY_TYPES)
+                .filter((type) => type !== "section")
+                .map((type) => [type, displayTypeLabel(type)]),
+            ],
+            "",
+            (v) => v && addDisplay(v, { stepId: step.id, parent: d }),
+            { id: "section-add" },
+          ),
+        ),
+      );
+      break;
+  }
+  out.push(section("", null, ...basic));
+  out.push(
+    section(
+      "情報",
+      "info",
+      h(
+        "dl",
+        { class: "kv" },
+        h("dt", {}, L("種類", "Loại")),
+        h("dd", {}, displayTypeLabel(d.type)),
+        h("dt", {}, "ID"),
+        h("dd", { class: "mono", translate: "no" }, d.id),
+        parent ? h("dt", {}, L("セクション", "Khu vực")) : null,
+        parent ? h("dd", {}, displayText(parent)) : null,
+      ),
+      canEdit()
+        ? btn(L("この部品を削除", "Xóa thành phần"), () => deleteDisplay(d.id), {
+            variant: "danger",
+            size: "sm",
+            iconName: "trash",
+          })
+        : null,
+    ),
+  );
   return out;
 }
 function blockInspector({ instance }, tab) {

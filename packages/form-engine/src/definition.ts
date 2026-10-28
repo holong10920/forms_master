@@ -8,7 +8,8 @@ import {
   type EngineGroup,
 } from "@fb/contracts";
 import { EngineError, fieldId } from "./model.ts";
-import { contentId, fieldExpressions, fieldOrder, references } from "./dependencies.ts";
+import { contentId, fieldExpressions, fieldOrder, inputIds, references } from "./dependencies.ts";
+import { displayBinding, displayItems } from "./display.ts";
 export { contentId, fieldExpressions, fieldOrder, references } from "./dependencies.ts";
 import { itemOrder } from "./groups.ts";
 function budget(value: unknown, depth = 0, seen = new Set<object>(), count = { n: 0 }): void {
@@ -150,6 +151,25 @@ function infer(e: EngineExpression, ir: EngineIRV1, group?: EngineGroup, formula
   }
 }
 export function assertIR(ir: EngineIRV1): void {
+  assertCoreIR(ir);
+  assertDisplays(ir);
+}
+const reaches = (
+  steps: Map<string, EngineIRV1["steps"][number]>,
+  from: string,
+  to: string,
+  seen = new Set<string>(),
+): boolean => {
+  if (from === to) return true;
+  if (seen.has(from)) return false;
+  seen.add(from);
+  return (steps.get(from)?.transitions ?? []).some((t) =>
+    reaches(steps, "to" in t ? t.to : t.default, to, seen),
+  );
+};
+/** Every check except display components. Core runtime builds call only this: they never render
+ * display components (the compiler switches such forms to extended builds). */
+export function assertCoreIR(ir: EngineIRV1): void {
   const ids = new Set<string>(),
     keys = new Set<string>(),
     rank = { public: 0, personal: 1, secret: 2 };
@@ -297,7 +317,11 @@ export function assertIR(ir: EngineIRV1): void {
     throw new EngineError("E-ID-COLLISION");
   const owner = new Map<string, string>();
   for (const s of ir.steps) {
+    if (s.autoSubmit !== undefined && s.kind !== "review")
+      throw new EngineError("E-AUTO-SUBMIT", s.id);
     for (const c of s.content ?? []) {
+      if ("display" in c) continue;
+      if (s.kind === "review") throw new EngineError("E-DISPLAY-SCOPE", s.id);
       const id = contentId(c),
         node = ir.nodes.find((n) => n.id === id);
       if (!node) throw new EngineError("E-REF-DANGLING", id);
@@ -308,7 +332,7 @@ export function assertIR(ir: EngineIRV1): void {
     const ts = s.transitions ?? [];
     if (
       s.kind === "complete"
-        ? ts.length > 0 || (s.content?.length ?? 0) > 0
+        ? ts.length > 0 || (s.content ?? []).some((c) => !("display" in c))
         : ts.filter((t) => "default" in t).length !== 1 || !("default" in (ts.at(-1) ?? {}))
     )
       throw new EngineError("E-GRAPH-NO-DEFAULT", s.id);
@@ -340,14 +364,7 @@ export function assertIR(ir: EngineIRV1): void {
     done.add(id);
   }
   for (const s of ir.steps) walk(s.id);
-  const reachable = (from: string, to: string, seen = new Set<string>()): boolean => {
-    if (from === to) return true;
-    if (seen.has(from)) return false;
-    seen.add(from);
-    return (steps.get(from)?.transitions ?? []).some((t) =>
-      reachable("to" in t ? t.to : t.default, to, seen),
-    );
-  };
+  const reachable = (from: string, to: string) => reaches(steps, from, to);
   for (const s of ir.steps) {
     if (!reachable(ir.steps[0].id, s.id)) throw new EngineError("E-GRAPH-UNREACHABLE", s.id);
     const expressions = [
@@ -362,6 +379,51 @@ export function assertIR(ir: EngineIRV1): void {
           throw new EngineError("E-FORWARD-REF", id);
       }
   }
+}
+/** Display components: ids, scope, approved links, bindings, visibility policy and forward refs. */
+function assertDisplays(ir: EngineIRV1): void {
+  const steps = new Map(ir.steps.map((s) => [s.id, s]));
+  const owner = new Map(ir.steps.flatMap((s) => inputIds(s).map((id) => [id, s.id] as const)));
+  const displayIds = new Set<string>();
+  for (const s of ir.steps)
+    for (const d of displayItems(s)) {
+      if (!/^dsp_[a-zA-Z0-9_]+$/.test(d.id) || displayIds.has(d.id))
+        throw new EngineError("E-ID-COLLISION", d.id);
+      displayIds.add(d.id);
+      if (
+        (d.type === "reference" || (d.type === "button" && d.action === "restart")) &&
+        s.kind !== "complete"
+      )
+        throw new EngineError("E-DISPLAY-SCOPE", d.id);
+      if (d.type === "button" && (d.action === "link") !== (d.link !== undefined))
+        throw new EngineError("E-DISPLAY-LINK", d.id);
+      if (d.visibleWhen && infer(d.visibleWhen, ir) !== "boolean")
+        throw new EngineError("E-TYPE-OPERATOR", d.id);
+      const bound = displayBinding(d);
+      for (const e of [
+        ...(d.visibleWhen ? [d.visibleWhen] : []),
+        ...(bound ? [{ ref: bound }] : []),
+      ])
+        for (const id of references(e, ir.conditions)) {
+          const target = owner.get(id);
+          if (target && target !== s.id && reaches(steps, s.id, target))
+            throw new EngineError("E-FORWARD-REF", id);
+        }
+      if (bound === undefined) continue;
+      const node = ir.nodes.find((n) => n.id === fieldId(bound));
+      if (!node) throw new EngineError("E-REF-DANGLING", d.id);
+      if ((node.type === "group") !== (d.type === "groupSummary"))
+        throw new EngineError("E-TYPE-OPERATOR", d.id);
+      // Approved visibility policy: completion shows public data only; secrets are always masked.
+      const classes = [node, ...(node.type === "group" ? node.fields : [])].map(
+        (f) => f.classification,
+      );
+      if (
+        (s.kind === "complete" && classes.some((c) => c !== "public")) ||
+        (classes.includes("secret") && (d.type !== "fieldValue" || (d.mask ?? "none") === "none"))
+      )
+        throw new EngineError("E-DISPLAY-PII", d.id);
+    }
 }
 export function loadDefinition(value: unknown): EngineIRV1 {
   budget(value);

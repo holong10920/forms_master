@@ -25,6 +25,14 @@ export const systemTexts = {
     ja: "実際の申込・外部送信は行っていません。",
     vi: "Không có đăng ký thực tế hay gửi dữ liệu ra bên ngoài.",
   },
+  emptyValue: { ja: "未入力", vi: "Chưa nhập" },
+  yes: { ja: "はい", vi: "Có" },
+  no: { ja: "いいえ", vi: "Không" },
+  referenceLabel: { ja: "受付番号", vi: "Mã tiếp nhận" },
+  referencePreview: {
+    ja: "プレビューでは受付番号は発行されません",
+    vi: "Bản xem trước không cấp mã tiếp nhận",
+  },
   invalidNumber: { ja: "安全な整数を入力してください", vi: "Vui lòng nhập một số nguyên hợp lệ" },
   formatEmail: { ja: "メールアドレスの形式を確認してください", vi: "Email không hợp lệ" },
   formatPhoneJP: {

@@ -92,3 +92,29 @@ test("negative dynamic import and absolute-path canaries fail artifact verificat
     audit([], new Map([["assets/entry.js", Buffer.from("/Users/synthetic/source.ts")]]));
   }).toThrow("E-ARTIFACT-SOURCE-LEAK");
 });
+test("display components compile into the pinned IR and ship no raw payload view", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "fb-build-display-"));
+  try {
+    const value = {
+      ...(JSON.parse(
+        readFileSync(join(root, "contracts/fixtures/engine/display.json"), "utf8"),
+      ) as Record<string, unknown>),
+      siteId: "site_sports_synthetic",
+    };
+    const result = await compile(value, dir);
+    const ir = readdirSync(join(result.directory, "assets"))
+      .filter((f) => f.startsWith("form-ir."))
+      .map((f) => readFileSync(join(result.directory, "assets", f), "utf8"))
+      .join("");
+    expect(ir).toContain('"dsp_summary"');
+    expect(ir).toContain('"referenceLabel"');
+    const js = readdirSync(join(result.directory, "assets"))
+      .filter((f) => f.endsWith(".js"))
+      .map((f) => readFileSync(join(result.directory, "assets", f), "utf8"))
+      .join("");
+    expect(js).not.toMatch(/innerHTML|insertAdjacentHTML|outerHTML/u);
+    expect(js).not.toContain("JSON.stringify(payloadPreview");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}, 60_000);

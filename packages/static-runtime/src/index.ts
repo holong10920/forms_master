@@ -12,7 +12,8 @@ import "./tailwind.css";
 import { verifiedLoad, type Bindings, type Asset } from "./ports.ts";
 import type { StoreModule, StoreOption, MotionModule } from "@platform/sdk-browser";
 import {
-  assertIR,
+  assertCoreIR,
+  contentId,
   parseNumberInput,
   createSession,
   dispatch,
@@ -23,7 +24,7 @@ import {
   type Cell,
   type Event,
 } from "@fb/form-engine";
-import { sha256Hex, type EngineField, type EngineIRV1 } from "@fb/contracts";
+import { sha256Hex, type EngineDisplay, type EngineField, type EngineIRV1 } from "@fb/contracts";
 interface Pin {
   mode: string;
   partial?: {
@@ -88,7 +89,7 @@ export async function start(bindings: Bindings = {}): Promise<void> {
   const ir = JSON.parse(new TextDecoder().decode(bytes)) as EngineIRV1;
   if (ir.form.formId !== pin.formId || ir.form.siteId !== pin.siteId)
     throw new EngineError("E-RELEASE-PIN");
-  if (!__FB_EXTENDED__) assertIR(ir);
+  if (!__FB_EXTENDED__) assertCoreIR(ir);
   const enhancements = __FB_EXTENDED__
     ? await verifiedLoad(pin.groups?.enhancements ?? [], pin.assets ?? [], () => {
         if (!bindings.loadEnhancements) throw Error("E-ENHANCEMENTS-UNAVAILABLE");
@@ -144,6 +145,59 @@ export async function start(bindings: Bindings = {}): Promise<void> {
     storeOptions: StoreOption[] = [];
   let disposeStore: (() => void) | undefined, motion: ReturnType<MotionModule["mount"]> | undefined;
   const viewRoot = el("div");
+  // Display components exist only in extended builds (the compiler enables them); core drops this.
+  const displays = (
+    into: HTMLElement,
+    target: "review" | "complete" | { display: EngineDisplay },
+  ) => {
+    if (!__FB_EXTENDED__) throw new EngineError("E-RUNTIME-UNSUPPORTED");
+    // The guarded submit is offered only on the render that arrives at the step (autoSubmit).
+    enhancements?.displays(
+      into,
+      target,
+      ir,
+      state,
+      text,
+      state.current !== previousStep && !(__FB_PREVIEW__ && pin.partial) ? submit : undefined,
+    );
+  };
+  // Core readable confirmation (no raw payload). Extended forms use enhancements.answerSections.
+  const answers = () => {
+    const view = snapshot(ir, state),
+      box = el("div");
+    for (const id of view.path) {
+      const step = ir.steps.find((s) => s.id === id),
+        rows = el("dl");
+      for (const c of step?.content ?? []) {
+        const f = ("field" in c && ir.nodes.find((n) => `$local:${n.id}` === c.field)) as
+          EngineField | undefined;
+        if (!f || !view.active.has(f.id)) continue;
+        const v = view.effective[f.id];
+        rows.append(
+          el("dt", text(f.label, f.key)),
+          el(
+            "dd",
+            f.classification === "secret"
+              ? "＊＊＊＊"
+              : [v ?? []]
+                  .flat()
+                  // Groups force the extended runtime, so core answers hold scalars only.
+                  .map((x) =>
+                    typeof x === "boolean"
+                      ? msg(x ? "yes" : "no")
+                      : text(
+                          f.options?.find((o) => o.value === x)?.label,
+                          String(x as string | number),
+                        ),
+                  )
+                  .join("、") || msg("emptyValue"),
+          ),
+        );
+      }
+      if (rows.childElementCount) box.append(tr(el("h2"), step?.title, ""), rows);
+    }
+    return box;
+  };
 
   host.replaceChildren(viewRoot);
   const cartEditors = new Map<string, import("./cart.ts").CartEditor>();
@@ -268,10 +322,13 @@ export async function start(bindings: Bindings = {}): Promise<void> {
     if (enhancements) enhancements.chrome(host, viewRoot, ir, state, text, msg, cartEditors);
     else viewRoot.append(el("p", msg("syntheticNotice")));
     if (state.status === "complete") {
-      viewRoot.append(
-        tr(el("h1"), texts.completeTitle, "completeTitle"),
-        tr(el("p"), texts.completeBody, "completeBody"),
-      );
+      if (__FB_EXTENDED__) displays(viewRoot, "complete");
+      else
+        viewRoot.append(
+          tr(el("h1"), texts.completeTitle, "completeTitle"),
+          tr(el("p"), texts.completeBody, "completeBody"),
+        );
+      focusHeading();
       return;
     }
     const step = ir.steps.find((s) => s.id === state.current);
@@ -283,6 +340,7 @@ export async function start(bindings: Bindings = {}): Promise<void> {
           ? tr(el("h1"), texts.reviewTitle, "reviewTitle")
           : tr(el("h1"), step.title, step.id.replace("stp_", "")),
       );
+    if (step.description) viewRoot.append(tr(el("p"), step.description, ""));
     const errors = visibleErrors(ir, state);
     if (errors.length) {
       const summary = el("div");
@@ -302,25 +360,22 @@ export async function start(bindings: Bindings = {}): Promise<void> {
       viewRoot.append(summary);
     }
     if (step.kind === "review") {
-      viewRoot.append(
-        tr(el("h2"), texts.payloadTitle, "payloadTitle"),
-        el("pre", JSON.stringify(payloadPreview(ir, state), null, 2)),
-      );
+      // Readable confirmation. The submit payload is unchanged and never printed raw.
+      if (__FB_EXTENDED__) displays(viewRoot, "review");
+      else viewRoot.append(answers());
     } else {
       const content = el("div");
       content.className = formFields;
       viewRoot.append(content);
       const view = snapshot(ir, state);
-      for (const f of ir.nodes) {
-        if (
-          !view.active.has(f.id) ||
-          !(step.content ?? []).some(
-            (c) =>
-              ("field" in c && c.field === `$local:${f.id}`) ||
-              ("group" in c && c.group === `$local:${f.id}`),
-          )
-        )
+      // Canvas order: step.content, never the fields[] declaration order.
+      for (const c of step.content ?? []) {
+        if ("display" in c) {
+          displays(content, c);
           continue;
+        }
+        const f = ir.nodes.find((n) => n.id === contentId(c));
+        if (!f || !view.active.has(f.id)) continue;
         if (__FB_PREVIEW__ && pin.partial?.blockedFields.includes(f.id)) {
           viewRoot.append(el("p", "この部品は利用停止中です · " + f.key));
           continue;
@@ -585,48 +640,7 @@ export async function start(bindings: Bindings = {}): Promise<void> {
         nav("next");
         return;
       }
-      const result = dispatch(ir, state, {
-        type: "next",
-        fromStep: state.current,
-        stateVersion: state.stateVersion,
-      });
-      state = result.state;
-      render();
-      const request = state.request;
-      if (request?.kind !== "submit") return;
-      const payload = payloadPreview(ir, state);
-      void fetch(new URL("api/submit", location.href), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "omit",
-        redirect: "error",
-        body: JSON.stringify({ payload, idempotencyKey: state.ports?.idempotencyKey }),
-      })
-        .then(async (response) => {
-          const outcome = (await response.json()) as {
-            ok: boolean;
-            errors: {
-              code: string;
-              path: string;
-            }[];
-          };
-          send({
-            type: "submitResult",
-            id: request.id,
-            fingerprint: request.fingerprint,
-            ok: response.ok && outcome.ok,
-            rejected: response.status === 422,
-            issues: outcome.errors,
-          });
-        })
-        .catch(() => {
-          send({
-            type: "submitResult",
-            id: request.id,
-            fingerprint: request.fingerprint,
-            ok: false,
-          });
-        });
+      submit();
     });
     actions.append(next);
     viewRoot.append(actions);
@@ -647,6 +661,9 @@ export async function start(bindings: Bindings = {}): Promise<void> {
       });
       previousActive = active;
     }
+    focusHeading();
+  }
+  function focusHeading() {
     if (state.current !== previousStep) {
       const heading = viewRoot.querySelector("h1");
       if (heading) {
@@ -655,6 +672,53 @@ export async function start(bindings: Bindings = {}): Promise<void> {
       }
     }
     previousStep = state.current;
+  }
+  function submit() {
+    const result = dispatch(ir, state, {
+      type: "next",
+      fromStep: state.current,
+      stateVersion: state.stateVersion,
+    });
+    state = result.state;
+    render();
+    const request = state.request;
+    if (request?.kind !== "submit") return;
+    const payload = payloadPreview(ir, state);
+    void fetch(new URL("api/submit", location.href), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "omit",
+      redirect: "error",
+      body: JSON.stringify({ payload, idempotencyKey: state.ports?.idempotencyKey }),
+    })
+      .then(async (response) => {
+        const outcome = (await response.json()) as {
+          ok: boolean;
+          receipt?: unknown;
+          errors: {
+            code: string;
+            path: string;
+          }[];
+        };
+        const ok = response.ok && outcome.ok;
+        if (__FB_EXTENDED__) enhancements?.receipt(ok, outcome);
+        send({
+          type: "submitResult",
+          id: request.id,
+          fingerprint: request.fingerprint,
+          ok,
+          rejected: response.status === 422,
+          issues: outcome.errors,
+        });
+      })
+      .catch(() => {
+        send({
+          type: "submitResult",
+          id: request.id,
+          fingerprint: request.fingerprint,
+          ok: false,
+        });
+      });
   }
   render();
   performance.mark("form:visible");

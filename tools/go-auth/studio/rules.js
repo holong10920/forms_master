@@ -654,8 +654,12 @@ export function skipEditor(step, readOnly) {
   return box;
 }
 
-// Number of rule/formula references to a field (its placement in a step is not counted).
+// Number of rule/formula/display references to a field (its placement in a step is not counted).
 export const fieldUsage = (id) =>
-  JSON.stringify({ ...S.draft, steps: S.draft.steps.map((s) => ({ ...s, content: [] })) }).split(
-    '"$local:' + id + '"',
-  ).length - 1;
+  JSON.stringify({
+    ...S.draft,
+    steps: S.draft.steps.map((s) => ({
+      ...s,
+      content: (s.content ?? []).filter((c) => c.display),
+    })),
+  }).split('"$local:' + id + '"').length - 1;
