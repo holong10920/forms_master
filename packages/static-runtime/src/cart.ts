@@ -43,7 +43,7 @@ export function cart(
   const button = (label: string, action: () => void) => {
     const b = node("button", label);
     b.type = "button";
-    if (!["商品を確認", "商品を追加", "削除する"].includes(label)) b.dataset.secondary = "true";
+    if (![msg("next"), "商品を追加", "削除する"].includes(label)) b.dataset.secondary = "true";
     b.onclick = action;
     return b;
   };
@@ -79,6 +79,7 @@ export function cart(
         (o) => !o.availableWhen || evaluate(o.availableWhen, read, ir.conditions) === true,
       );
       const value = editor.cells[f.id];
+      wrap.dataset.filled = String(value !== undefined && value !== "");
       if (f.type === "choice.radio") {
         label.remove();
         wrap.append(
@@ -111,6 +112,7 @@ export function cart(
         if (!(input instanceof HTMLSelectElement)) {
           input.placeholder = text(f.placeholder, "");
           input.oninput = () => {
+            wrap.dataset.filled = String(input.value !== "");
             change(f.id, f.type === "number" ? Number(input.value) : input.value, false);
           };
         }
@@ -147,7 +149,7 @@ export function cart(
     const controls = node("div");
     controls.className = actions;
     controls.append(
-      button("商品を確認", () => {
+      button(msg("next"), () => {
         editor.attempted = true;
         const latest = effectiveGroup(
           g,
@@ -184,26 +186,40 @@ export function cart(
           render();
         }),
       );
+    if (ir.appearance?.headerVariant === "fullWidth") controls.style.marginTop = "20px";
     root.append(controls);
   } else {
-    root.append(node("h1", "商品確認"));
+    root.append(node("h1", text(g.listTitle, "商品確認")));
     const restored = effectiveGroup(g, confirmed, readGlobal, ir.conditions);
     if (groupIssues(g, restored.value, new Set(restored.active), readGlobal, ir.conditions).length)
       root.append(node("p", "未入力の項目があります。編集して商品名などを再入力してください。"));
+    if (g.summaryFields) {
+      const count = node("p", `合計: ${String(confirmed.order.length)} 商品`);
+      count.className = "cart-count";
+      root.append(count);
+    }
     for (const [index, id] of confirmed.order.entries()) {
       const card = node("article");
       card.setAttribute("data-item-id", id);
-      card.append(node("h3", `商品 ${String(index + 1)}`));
+      if (!g.summaryFields) card.append(node("h3", `商品 ${String(index + 1)}`));
+      const summary = node("div");
+      summary.className = "cart-item-summary";
+      card.append(summary);
       const row = confirmed.items[id] ?? {};
-      for (const f of g.fields) {
+      const fields = g.summaryFields
+        ? g.summaryFields.flatMap((id) => g.fields.filter((f) => f.id === id))
+        : g.fields;
+      for (const f of fields) {
         if (row[f.id] === undefined) continue;
         const v = row[f.id];
         const label = f.options?.find((o) => o.value === v);
-        card.append(
-          node("p", `${text(f.label, f.key)}: ${label ? text(label.label, String(v)) : String(v)}`),
-        );
+        const value = label ? text(label.label, String(v)) : String(v);
+        summary.append(node("p", g.summaryFields ? value : `${text(f.label, f.key)}: ${value}`));
       }
-      card.append(
+      const itemActions = node("div");
+      itemActions.className = "cart-item-actions";
+      card.append(itemActions);
+      itemActions.append(
         button("編集", () => {
           editor.id = id;
           editor.cells = structuredClone(row);
@@ -243,6 +259,11 @@ export function cart(
           render();
         }),
       );
+  }
+  if (ir.appearance?.headerVariant === "fullWidth") {
+    const heading = root.querySelector("h1");
+    if (heading)
+      Object.assign(heading.style, { fontSize: "20px", lineHeight: "1.4", margin: "0 0 12px" });
   }
   return root;
 }

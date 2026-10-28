@@ -87,7 +87,13 @@ Mở rộng legacy hiện là prototype PC một sản phẩm desktop/notebook; 
 - [Legacy capability/evidence](tools/legacy-analyzer/evidence/RESULTS.md)
 - [Responsive verification](tools/go-auth/evidence/responsive/RESULTS.md)
 
-## Demo Gakki một sản phẩm
+## Gakki v13 — frozen internal demo
+
+Approved immutable release: [Gakki v13](http://127.0.0.1:4183/r/rel_ckzoawdxgnwqnusqfgkvdecnhz/index.html). [Internal demo guide](docs/GAKKI_V13_DEMO_GUIDE.md) · [Separate backlog](docs/GAKKI_DEMO_BACKLOG.md).
+
+READY_FOR_INTERNAL_DEMO applies to Gakki multi-product only. FULL_LEGACY_PARITY is NOT ACHIEVED. PRODUCTION_READY is NO. T12/K13 remain pending.
+
+## Demo Gakki một sản phẩm — mốc trước đây
 
 Trong Form Builder, chọn **楽器フォーム / Mẫu nhạc cụ** để tạo draft riêng. Category, piano/floor/carry-out, reset phụ thuộc, validators và style đều là Form Definition chỉnh được trong Inspector; Save → Preview → review → approver riêng → Publish dùng luồng Go hiện có.
 

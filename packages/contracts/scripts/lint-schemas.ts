@@ -16,6 +16,10 @@ const fixedPatterns = new Map([
       "requiredColor",
       "inputBorderColor",
       "focusColor",
+      "controlBackground",
+      "selectedBackground",
+      "optionalColor",
+      "pageBackground",
     ].map((key) => [`/$defs/${name}/properties/${key}`, "^#[a-fA-F0-9]{6}$"] as const),
   ),
 ]);

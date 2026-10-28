@@ -779,6 +779,17 @@
           "items": {
             "$ref": "#/$defs/Field"
           }
+        },
+        "listTitle": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "summaryFields": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": ["id", "key", "type", "classification", "fields"],
@@ -903,10 +914,53 @@
           "maxLength": 100
         },
         "progressStyle": {
-          "enum": ["circles", "bar"]
+          "enum": ["circles", "bar", "compact"]
         },
         "requiredBadge": {
           "enum": ["solid", "outline"]
+        },
+        "headerVariant": {
+          "enum": ["inline", "fullWidth"]
+        },
+        "controlStyle": {
+          "enum": ["standard", "outlined"]
+        },
+        "logoHeight": {
+          "type": "integer",
+          "minimum": 20,
+          "maximum": 48
+        },
+        "controlHeight": {
+          "type": "integer",
+          "minimum": 36,
+          "maximum": 64
+        },
+        "controlRadius": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16
+        },
+        "labelWeight": {
+          "enum": [400, 500, 600, 700]
+        },
+        "controlBackground": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "selectedBackground": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "optionalColor": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "pageBackground": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "labelVisibility": {
+          "enum": ["visible", "visuallyHidden"]
         }
       },
       "additionalProperties": false
@@ -1009,10 +1063,53 @@
           "maxLength": 100
         },
         "progressStyle": {
-          "enum": ["circles", "bar"]
+          "enum": ["circles", "bar", "compact"]
         },
         "requiredBadge": {
           "enum": ["solid", "outline"]
+        },
+        "headerVariant": {
+          "enum": ["inline", "fullWidth"]
+        },
+        "controlStyle": {
+          "enum": ["standard", "outlined"]
+        },
+        "logoHeight": {
+          "type": "integer",
+          "minimum": 20,
+          "maximum": 48
+        },
+        "controlHeight": {
+          "type": "integer",
+          "minimum": 36,
+          "maximum": 64
+        },
+        "controlRadius": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16
+        },
+        "labelWeight": {
+          "enum": [400, 500, 600, 700]
+        },
+        "controlBackground": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "selectedBackground": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "optionalColor": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "pageBackground": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "labelVisibility": {
+          "enum": ["visible", "visuallyHidden"]
         }
       },
       "additionalProperties": false

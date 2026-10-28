@@ -244,6 +244,11 @@ export function assertIR(ir: EngineIRV1): void {
         if (rank[f.classification] < rank[child.classification])
           throw new EngineError("E-CLASS-BELOW-MIN", f.id);
       }
+      if (
+        f.summaryFields?.some((id) => !f.fields.some((child) => child.id === id)) ||
+        new Set(f.summaryFields).size !== (f.summaryFields?.length ?? 0)
+      )
+        throw new EngineError("E-REF-SCOPE", f.id);
       itemOrder(f);
     }
   }

@@ -305,7 +305,15 @@ export async function compile(
       publicDir: false,
       base: "./",
       logLevel: "silent",
-      plugins: [proof, tailwindcss(), runtimeTailwind()],
+      plugins: [
+        proof,
+        tailwindcss(),
+        runtimeTailwind(
+          !!ir.appearance?.headerVariant ||
+            !!ir.appearance?.controlStyle ||
+            ir.appearance?.progressStyle === "compact",
+        ),
+      ],
       resolve: {
         alias: {
           react: realpathSync(join(root, "tools/compiler/node_modules/react")),

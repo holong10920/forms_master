@@ -20,7 +20,35 @@ export function cartEditor(group) {
         commit();
       },
     });
+  const summaryOptions = [
+    ["", "すべての回答"],
+    ...group.fields.map((f) => [f.id, f.label?.ja ?? f.key]),
+  ];
   const out = [
+    field(
+      "一覧の主見出し",
+      select(summaryOptions, group.summaryFields?.[0] ?? "", (id) => {
+        if (id)
+          group.summaryFields = [
+            id,
+            ...(group.summaryFields ?? []).filter((other) => other !== id),
+          ].slice(0, 2);
+        else delete group.summaryFields;
+        commit();
+      }),
+    ),
+    field(
+      "一覧の補助情報",
+      select([["", "なし"], ...summaryOptions.slice(1)], group.summaryFields?.[1] ?? "", (id) => {
+        const first = group.summaryFields?.[0];
+        if (first) group.summaryFields = id && id !== first ? [first, id] : [first];
+        commit();
+      }),
+    ),
+    field(
+      "商品確認の見出し",
+      edit(group.listTitle?.ja ?? "商品確認", (v) => (group.listTitle = { ja: v })),
+    ),
     field(
       "商品グループ表示名",
       edit(group.label?.ja, (v) => (group.label = { ja: v })),
@@ -55,6 +83,20 @@ export function cartEditor(group) {
         .map((x) => [x.id, x.label?.ja ?? x.key]),
     ];
     const parts = [
+      field(
+        "プレースホルダー · " + f.key,
+        edit(f.placeholder?.ja, (v) => {
+          if (v) f.placeholder = { ja: v };
+          else delete f.placeholder;
+        }),
+      ),
+      field(
+        "補足説明 · " + f.key,
+        edit(f.help?.ja, (v) => {
+          if (v) f.help = { ja: v };
+          else delete f.help;
+        }),
+      ),
       field(
         "データキー · " + f.key,
         input(f.key, {

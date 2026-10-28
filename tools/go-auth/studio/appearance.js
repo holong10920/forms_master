@@ -2,6 +2,9 @@ import { h, field, input, select, btn, L } from "./ui.js";
 import { commit } from "./rules.js";
 let viewport = "desktop";
 const numbers = [
+  ["logoHeight", "ロゴ高さ", 20, 48],
+  ["controlHeight", "入力高さ", 36, 64],
+  ["controlRadius", "入力角丸", 0, 16],
   ["maxWidth", "最大幅 / Chiều rộng tối đa", 320, 960],
   ["padding", "内側余白 / Đệm", 0, 64],
   ["margin", "外側余白 / Lề", 0, 64],
@@ -131,6 +134,10 @@ export function appearanceEditor(owner) {
     ["requiredColor", "必須バッジ色"],
     ["inputBorderColor", "入力枠色"],
     ["focusColor", "フォーカス色"],
+    ["controlBackground", "入力背景色"],
+    ["selectedBackground", "選択背景色"],
+    ["optionalColor", "任意バッジ色"],
+    ["pageBackground", "ページ背景色"],
   ])
     out.push(
       field(
@@ -148,6 +155,40 @@ export function appearanceEditor(owner) {
       ),
     );
   for (const [key, label, choices] of [
+    [
+      "labelVisibility",
+      "ラベル表示",
+      [
+        ["visible", "表示"],
+        ["visuallyHidden", "読み上げ専用"],
+      ],
+    ],
+    [
+      "headerVariant",
+      "ヘッダー配置",
+      [
+        ["inline", "フォーム内"],
+        ["fullWidth", "全幅・固定"],
+      ],
+    ],
+    [
+      "controlStyle",
+      "入力スタイル",
+      [
+        ["standard", "標準"],
+        ["outlined", "入力済みを枠で表示"],
+      ],
+    ],
+    [
+      "labelWeight",
+      "ラベルの太さ",
+      [
+        ["400", "400"],
+        ["500", "500"],
+        ["600", "600"],
+        ["700", "700"],
+      ],
+    ],
     [
       "requiredBadge",
       "必須バッジ形式",
@@ -179,13 +220,16 @@ export function appearanceEditor(owner) {
       [
         ["circles", "丸"],
         ["bar", "バー"],
+        ["compact", "コンパクト・商品ステージ"],
       ],
     ],
   ])
     out.push(
       field(
         label,
-        select([["", "継承"], ...choices], current?.[key] ?? "", (v) => set(key, v)),
+        select([["", "継承"], ...choices], current?.[key] ?? "", (v) =>
+          set(key, key === "labelWeight" && v ? Number(v) : v),
+        ),
       ),
     );
   out.push(

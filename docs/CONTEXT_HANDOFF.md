@@ -28,3 +28,8 @@ Mẫu instrument Pattern A một sản phẩm, reset phụ thuộc và template 
 ### 2026-10-28 — multi-product internal demo closure
 
 Corrected v10 is READY_WITH_KNOWN_GAPS for Gakki multi-product demo: 14/14 bounded browser checks PASS, catalog 12/12 parents, No-Code 9/12 groups fully demonstrated. Public-only session recovery retains no personal cells; full legacy personal restore and specialist non-Gakki forms are not certified. Review/approve/publish, desktop/mobile touch and Go 422/200 verified. T12/K13 remain VERIFICATION_PENDING. See [closure evidence](evidence/CLOSE-LEGACY-PARITY/RESULTS.md). No commit/GitHub/AWS writes.
+
+
+### 2026-10-28 — final internal demo polish
+
+Gakki v13 (`rel_ckzoawdxgnwqnusqfgkvdecnhz`) is READY_FOR_INTERNAL_DEMO within the selected multi-product scope: 14 targeted browser checks PASS, reusable full-width responsive branding, actual staged progress, clean labels, 11/12 No-Code groups demonstrated. Restore stays public-only; specialist forms/full PII retention are follow-ups. T12/K13 remain VERIFICATION_PENDING. No staging/commit/GitHub/AWS writes. See [final polish evidence](evidence/FINAL-DEMO-POLISH/RESULTS.md).

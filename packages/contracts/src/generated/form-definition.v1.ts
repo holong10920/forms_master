@@ -260,8 +260,19 @@ export interface Appearance {
   fontFamily?: "system" | "hiragino" | "noto";
   headerLogo?: "none" | "instrument-local";
   headerText?: string;
-  progressStyle?: "circles" | "bar";
+  progressStyle?: "circles" | "bar" | "compact";
   requiredBadge?: "solid" | "outline";
+  headerVariant?: "inline" | "fullWidth";
+  controlStyle?: "standard" | "outlined";
+  logoHeight?: number;
+  controlHeight?: number;
+  controlRadius?: number;
+  labelWeight?: 400 | 500 | 600 | 700;
+  controlBackground?: string;
+  selectedBackground?: string;
+  optionalColor?: string;
+  pageBackground?: string;
+  labelVisibility?: "visible" | "visuallyHidden";
 }
 export interface AppearanceValues {
   maxWidth?: number;
@@ -286,8 +297,19 @@ export interface AppearanceValues {
   fontFamily?: "system" | "hiragino" | "noto";
   headerLogo?: "none" | "instrument-local";
   headerText?: string;
-  progressStyle?: "circles" | "bar";
+  progressStyle?: "circles" | "bar" | "compact";
   requiredBadge?: "solid" | "outline";
+  headerVariant?: "inline" | "fullWidth";
+  controlStyle?: "standard" | "outlined";
+  logoHeight?: number;
+  controlHeight?: number;
+  controlRadius?: number;
+  labelWeight?: 400 | 500 | 600 | 700;
+  controlBackground?: string;
+  selectedBackground?: string;
+  optionalColor?: string;
+  pageBackground?: string;
+  labelVisibility?: "visible" | "visuallyHidden";
 }
 export interface Group {
   id: string;
@@ -309,6 +331,12 @@ export interface Group {
    * @maxItems 100
    */
   fields: [Field, ...Field[]];
+  listTitle?: LocalizedOverride;
+  /**
+   * @minItems 1
+   * @maxItems 2
+   */
+  summaryFields?: [string] | [string, string];
 }
 export interface Step {
   id: string;

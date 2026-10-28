@@ -28,7 +28,7 @@ export function compactClasses(value: string): string {
     .map((token) => aliases.get(token) ?? token)
     .join(" ");
 }
-export function runtimeTailwind(): Plugin {
+export function runtimeTailwind(polished = false): Plugin {
   return {
     name: "pinned-tailwind-utilities",
     enforce: "pre",
@@ -47,6 +47,13 @@ export function runtimeTailwind(): Plugin {
       if (!path?.endsWith("/packages/static-runtime/src/tailwind.css")) return;
       const sheet = postcss.parse(code);
       sheet.walkRules((rule) => {
+        if (
+          !polished &&
+          /\.layout-wide|\.controls-outlined|\.progress-compact/u.test(rule.selector)
+        ) {
+          rule.remove();
+          return;
+        }
         rule.selector = selectorParser((selectors) =>
           selectors.walkClasses((node) => {
             const alias = aliases.get(node.value);

@@ -4,8 +4,6 @@ import {
   formTitle,
   help as helpClasses,
   formFields,
-  cartLayout,
-  siteTokens,
 } from "./recipes.ts";
 declare const __FB_MOTION__: boolean;
 declare const __FB_EXTENDED__: boolean;
@@ -146,9 +144,13 @@ export async function start(bindings: Bindings = {}): Promise<void> {
     storeOptions: StoreOption[] = [];
   let disposeStore: (() => void) | undefined, motion: ReturnType<MotionModule["mount"]> | undefined;
   const viewRoot = el("div");
-  host.classList.add(...(cartLayout + " " + siteTokens).split(" "));
+
   host.replaceChildren(viewRoot);
   const cartEditors = new Map<string, import("./cart.ts").CartEditor>();
+  if (ir.appearance?.headerVariant === "fullWidth")
+    matchMedia("(max-width: 639px)").addEventListener("change", () => {
+      render();
+    });
   let previousStep = state.current,
     previousActive = "";
   const reduced = __FB_MOTION__ ? matchMedia("(prefers-reduced-motion: reduce)") : undefined;
@@ -263,7 +265,8 @@ export async function start(bindings: Bindings = {}): Promise<void> {
         p.className = key === "formTitle" ? formTitle : key;
         viewRoot.append(p);
       }
-    viewRoot.append(el("p", msg("syntheticNotice")));
+    if (enhancements) enhancements.chrome(host, viewRoot, ir, state, text, msg, cartEditors);
+    else viewRoot.append(el("p", msg("syntheticNotice")));
     if (state.status === "complete") {
       viewRoot.append(
         tr(el("h1"), texts.completeTitle, "completeTitle"),
@@ -273,9 +276,7 @@ export async function start(bindings: Bindings = {}): Promise<void> {
     }
     const step = ir.steps.find((s) => s.id === state.current);
     if (!step) throw new EngineError("E-STEP");
-    const siteHeader = enhancements?.header(ir.appearance);
-    if (siteHeader) viewRoot.append(siteHeader);
-    if (enhancements) viewRoot.append(enhancements.progress(ir, state, text, msg));
+
     if (!(step.content ?? []).some((c) => "group" in c))
       viewRoot.append(
         step.kind === "review"
@@ -405,6 +406,7 @@ export async function start(bindings: Bindings = {}): Promise<void> {
           continue;
         }
         const value = state.values[f.id];
+        wrap.dataset.filled = String(value !== undefined && value !== "");
         const availableOptions = enhancements
           ? enhancements.availableOptions(f, view.effective, ir.conditions)
           : (f.options ?? []);
@@ -486,6 +488,7 @@ export async function start(bindings: Bindings = {}): Promise<void> {
           }
         };
         input.addEventListener("input", () => {
+          wrap.dataset.filled = String(input.value !== "");
           input.setCustomValidity("");
         });
         const currentValue = (): Cell | undefined =>
