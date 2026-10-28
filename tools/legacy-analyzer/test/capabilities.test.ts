@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { pcApplyDraft } from "../src/reference.ts";
+import { pcApplyDraft } from "../../go-auth/templates/pc-apply.ts";
 import {
   loadDefinition,
   createSession,

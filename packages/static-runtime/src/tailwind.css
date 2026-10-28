@@ -1,0 +1,2 @@
+@import "tailwindcss/utilities.css" source(none);
+@source "./recipes.ts";

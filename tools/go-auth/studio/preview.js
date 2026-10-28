@@ -26,15 +26,20 @@ window.addEventListener("message", async (event) => {
     const r = await fetch("/api/preview/bootstrap");
     if (!r.ok) throw Error("PREVIEW_SESSION_EXPIRED");
     const doc = new DOMParser().parseFromString(await r.text(), "text/html");
+    document.documentElement.className = doc.documentElement.className;
     const release = doc.querySelector("#release");
     const pin = JSON.parse(release.textContent);
     if (/^(ja|vi)$/.test(event.data.locale ?? ""))
       try {
         window.sessionStorage.setItem("fb.locale", event.data.locale);
       } catch {
-        // Storage blocked: the runtime starts in Japanese and its own switcher still works.
+        // Storage blocked: preserve the validated locale in the isolated runtime URL.
       }
-    history.replaceState(null, "", `/r/${pin.releaseId}/index.html`);
+    history.replaceState(
+      null,
+      "",
+      `/r/${pin.releaseId}/index.html?lang=${event.data.locale === "vi" ? "vi" : "ja"}`,
+    );
     const metadata = document.createElement("script");
     metadata.type = "application/json";
     metadata.id = "release";

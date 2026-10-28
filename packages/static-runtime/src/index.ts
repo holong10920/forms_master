@@ -1,7 +1,14 @@
+import {
+  field,
+  actions as actionClasses,
+  formTitle,
+  help as helpClasses,
+  formFields,
+} from "./recipes.ts";
 declare const __FB_MOTION__: boolean;
 declare const __FB_EXTENDED__: boolean;
 declare const __FB_PREVIEW__: boolean;
-import "./style.css";
+import "./tailwind.css";
 import { verifiedLoad, type Bindings, type Asset } from "./ports.ts";
 import type { StoreModule, StoreOption, MotionModule } from "@platform/sdk-browser";
 import {
@@ -19,17 +26,35 @@ import {
 import { sha256Hex, type EngineField, type EngineIRV1 } from "@fb/contracts";
 interface Pin {
   mode: string;
-  partial?: { stops: string[]; blockedFields: string[]; diagnostics: { code: string }[] };
+  partial?: {
+    stops: string[];
+    blockedFields: string[];
+    diagnostics: {
+      code: string;
+    }[];
+  };
   plugin?: boolean;
   assets?: Asset[];
-  groups?: { store: string[]; motion: string[]; enhancements?: string[] };
+  groups?: {
+    store: string[];
+    motion: string[];
+    enhancements?: string[];
+  };
   releaseId: string;
   formId: string;
   siteId: string;
   revision: string;
-  ir: { path: string; sha256: string };
+  ir: {
+    path: string;
+    sha256: string;
+  };
 }
-type Text = { ja?: string; vi?: string } | undefined;
+type Text =
+  | {
+      ja?: string;
+      vi?: string;
+    }
+  | undefined;
 type Locale = "ja" | "vi";
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, text?: string) {
   const node = document.createElement(tag);
@@ -63,13 +88,14 @@ export async function start(bindings: Bindings = {}): Promise<void> {
   const ir = JSON.parse(new TextDecoder().decode(bytes)) as EngineIRV1;
   if (ir.form.formId !== pin.formId || ir.form.siteId !== pin.siteId)
     throw new EngineError("E-RELEASE-PIN");
-  assertIR(ir);
+  if (!__FB_EXTENDED__) assertIR(ir);
   const enhancements = __FB_EXTENDED__
     ? await verifiedLoad(pin.groups?.enhancements ?? [], pin.assets ?? [], () => {
         if (!bindings.loadEnhancements) throw Error("E-ENHANCEMENTS-UNAVAILABLE");
         return bindings.loadEnhancements();
       })
     : undefined;
+  enhancements?.assertIR(ir);
   enhancements?.applyAppearance(host, ir.appearance);
   const locales: Locale[] = ir.locale?.supported ?? ["ja"];
   const pick = (v?: string | null) => locales.find((l) => l === v?.slice(0, 2));
@@ -81,9 +107,8 @@ export async function start(bindings: Bindings = {}): Promise<void> {
       return null; // Storage may be blocked; the choice then lasts only for this page.
     }
   };
-  let locale = pick(remember()) ?? pick(new URLSearchParams(location.search).get("lang")) ?? "ja";
   const texts = (ir.texts ?? {}) as Record<string, Text>;
-  // Active locale first, then ja (default locale), then the built-in ja fallback.
+  const locale = pick(new URLSearchParams(location.search).get("lang")) ?? pick(remember()) ?? "ja";
   const text = (t: Text, fallback: string) => t?.[locale] || t?.ja || fallback;
   const tr = <T extends HTMLElement>(node: T, t: Text, fallback: string): T => {
     node.textContent = text(t, fallback);
@@ -183,7 +208,6 @@ export async function start(bindings: Bindings = {}): Promise<void> {
         }
       }
   }
-
   const send = (event: Event) => {
     const result = dispatch(ir, state, event);
     state = result.state;
@@ -199,17 +223,12 @@ export async function start(bindings: Bindings = {}): Promise<void> {
       }
     }
     send({ type, fromStep: state.current, stateVersion: state.stateVersion });
+    if (type === "next" && state.errors.length)
+      viewRoot
+        .querySelector<HTMLElement>('[aria-invalid="true"]')
+        ?.scrollIntoView({ block: "center" });
   };
-  function switchLocale(next: Locale) {
-    const active = document.activeElement;
-    // Commit an in-progress edit before the view is rebuilt (some browsers keep focus on click).
-    if (active && viewRoot.contains(active) && !active.closest(".locale"))
-      active.dispatchEvent(new Event("change"));
-    remember((locale = next));
-    render(true);
-    viewRoot.querySelector<HTMLElement>(`[data-locale="${next}"]`)?.focus();
-  }
-  function render(localeOnly = false) {
+  function render() {
     persistDraft();
     if (!host) return;
     disposeStore?.();
@@ -233,28 +252,10 @@ export async function start(bindings: Bindings = {}): Promise<void> {
       }
     }
     document.documentElement.lang = locale === "vi" ? "vi-VN" : "ja-JP";
-    if (locales.length > 1) {
-      const bar = el("div");
-      bar.className = "locale";
-      bar.setAttribute("role", "group");
-      bar.setAttribute("aria-label", "Language");
-      for (const l of locales) {
-        const b = el("button", l === "vi" ? "Tiếng Việt" : "日本語");
-        b.type = "button";
-        b.lang = l === "vi" ? "vi-VN" : "ja-JP";
-        b.dataset.locale = l;
-        b.setAttribute("aria-pressed", String(l === locale));
-        b.addEventListener("click", () => {
-          switchLocale(l);
-        });
-        bar.append(b);
-      }
-      viewRoot.append(bar);
-    }
     for (const key of ["formTitle", "formDescription"])
       if (text(texts[key], "")) {
         const p = tr(el("p"), texts[key], "");
-        p.className = key;
+        p.className = key === "formTitle" ? formTitle : key;
         viewRoot.append(p);
       }
     viewRoot.append(el("p", msg("syntheticNotice")));
@@ -267,6 +268,7 @@ export async function start(bindings: Bindings = {}): Promise<void> {
     }
     const step = ir.steps.find((s) => s.id === state.current);
     if (!step) throw new EngineError("E-STEP");
+    if (enhancements) viewRoot.append(enhancements.progress(ir, state, text, msg));
     viewRoot.append(
       step.kind === "review"
         ? tr(el("h1"), texts.reviewTitle, "reviewTitle")
@@ -297,7 +299,7 @@ export async function start(bindings: Bindings = {}): Promise<void> {
       );
     } else {
       const content = el("div");
-      content.className = "form-fields";
+      content.className = formFields;
       viewRoot.append(content);
       const view = snapshot(ir, state);
       for (const f of ir.nodes) {
@@ -312,7 +314,20 @@ export async function start(bindings: Bindings = {}): Promise<void> {
         }
         if (f.type === "group") throw new EngineError("E-RUNTIME-UNSUPPORTED", f.id);
         const wrap = el("div");
-        wrap.className = "field";
+        const showIssues = () =>
+          enhancements?.inlineIssues(
+            wrap,
+            f.id,
+            errors
+              .filter((issue) => issue.path === f.id)
+              .map((issue) =>
+                msg(issue.code).replace(
+                  "{n}",
+                  String(f.validators?.find((v) => v.use === issue.code)?.params?.value ?? ""),
+                ),
+              ),
+          );
+        wrap.className = field;
         enhancements?.applyAppearance(wrap, f.appearance, "field");
         const label = tr(el("label"), f.label, f.key);
         label.htmlFor = f.id;
@@ -346,7 +361,14 @@ export async function start(bindings: Bindings = {}): Promise<void> {
           continue;
         }
         if (f.type === "calculated") {
-          wrap.append(el("output", JSON.stringify(view.effective[f.id])));
+          wrap.append(
+            el(
+              "output",
+              enhancements
+                ? enhancements.displayValue(ir, f, view.effective[f.id], text)
+                : JSON.stringify(view.effective[f.id]),
+            ),
+          );
           content.append(wrap);
           continue;
         }
@@ -373,6 +395,8 @@ export async function start(bindings: Bindings = {}): Promise<void> {
               },
             ),
           );
+          enhancements.decorateField(wrap, f, view.effective, ir.conditions, msg);
+          showIssues();
           content.append(wrap);
           continue;
         }
@@ -482,16 +506,18 @@ export async function start(bindings: Bindings = {}): Promise<void> {
         }
         if (text(f.help, "")) {
           const help = tr(el("p"), f.help, "");
-          help.className = "help";
+          help.className = helpClasses;
           help.id = `${f.id}-help`;
           input.setAttribute("aria-describedby", help.id);
           wrap.append(help);
         }
+        enhancements?.decorateField(wrap, f, view.effective, ir.conditions, msg);
+        showIssues();
         content.append(wrap);
       }
     }
     const actions = el("div");
-    actions.className = "actions";
+    actions.className = actionClasses;
     const back = tr(el("button"), texts.back, "back");
     back.type = "button";
     back.disabled = state.current === snapshot(ir, state).path[0] || state.status === "pending";
@@ -534,7 +560,10 @@ export async function start(bindings: Bindings = {}): Promise<void> {
         .then(async (response) => {
           const outcome = (await response.json()) as {
             ok: boolean;
-            errors: { code: string; path: string }[];
+            errors: {
+              code: string;
+              path: string;
+            }[];
           };
           send({
             type: "submitResult",
@@ -556,7 +585,6 @@ export async function start(bindings: Bindings = {}): Promise<void> {
     });
     actions.append(next);
     viewRoot.append(actions);
-    if (localeOnly) return;
     if (__FB_MOTION__) {
       const active = [...snapshot(ir, state).active].sort().join(",");
       const kind =

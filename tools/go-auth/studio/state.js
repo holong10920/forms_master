@@ -1,6 +1,6 @@
+import { classes } from "./recipes.js";
 // Shared Admin state, API access, persistence (autosave + optimistic locking) and form helpers.
 import { $, h, icon, toast, L } from "./ui.js";
-
 export const S = {
   session: null,
   schema: null,
@@ -18,7 +18,6 @@ export const S = {
   history: null,
   mode: "build",
 };
-
 // ---------- Event bus ----------
 const listeners = new Map();
 export function on(event, fn) {
@@ -27,12 +26,10 @@ export function on(event, fn) {
 export function emit(event, ...args) {
   for (const fn of listeners.get(event) ?? []) fn(...args);
 }
-
 export const notice = (message, opts) => toast(message, opts);
 export const clone = (value) => JSON.parse(JSON.stringify(value));
 export const newId = (prefix, length = 32) =>
   prefix + crypto.randomUUID().replaceAll("-", "").slice(0, length);
-
 // ---------- Session / roles ----------
 export const site = () => $("site").value;
 export const scope = () => ({ site: site(), form: S.draft?.formId });
@@ -40,7 +37,6 @@ export const roles = (siteId = site()) =>
   S.session?.sites.find((s) => s.id === siteId)?.roles ?? [];
 export const can = (role) => roles().includes(role);
 export const canEdit = () => can("editor");
-
 // ---------- Human-readable errors ----------
 const FAULTS = {
   UNAUTHORIZED: "セッションの有効期限が切れました。再ログインしてください。",
@@ -70,9 +66,6 @@ const FAULTS = {
   KEY_COLLISION: "データキーが重複しています。",
   PUBLISHED_FORM_DELETE_FORBIDDEN: "公開済みのフォームは削除できません。",
   ROLLBACK_TARGET_INELIGIBLE: "この版には戻せません。",
-  TRANSLATION_PROVIDER_UNAVAILABLE: "自動翻訳は利用できません。",
-  TRANSLATION_INPUT: "翻訳対象の文言が正しくありません。",
-  TRANSLATION_LANGUAGE: "この言語の組み合わせには対応していません。",
   BUILD_FAILED: "公開用ビルドに失敗しました。",
   BLOCK_STATE: "共通ブロックが利用できない状態です。",
   CAPABILITY_NOT_INGESTED: "プラグインの準備ができていません。",
@@ -145,14 +138,13 @@ function whereOf(path) {
   return path;
 }
 export const faultText = (code) => FAULTS[code] ?? "操作を完了できませんでした。";
-
 export function clearError() {
   $("diagnostics").replaceChildren();
-  $("diagnostics").className = "alert-bar";
+  $("diagnostics").className = classes("alert-bar", $("diagnostics").id);
 }
 export function showError(code, diagnostics = []) {
   const bar = $("diagnostics");
-  bar.className = "alert-bar";
+  bar.className = classes("alert-bar", bar.id);
   const items = diagnostics.map((d) => {
     const x = humanDiagnostic(typeof d === "string" ? d : (d.code ?? JSON.stringify(d)));
     return h(
@@ -187,7 +179,7 @@ export function showError(code, diagnostics = []) {
 }
 export function showOk(message) {
   const bar = $("diagnostics");
-  bar.className = "alert-bar ok";
+  bar.className = classes("alert-bar ok", bar.id);
   bar.replaceChildren(
     icon("check"),
     h("div", { class: "alert-text" }, message),
@@ -205,7 +197,6 @@ export function showOk(message) {
 }
 // Message for a thrown Error whose message is a server code.
 export const errorText = (e) => (FAULTS[e?.message] ? faultText(e.message) : (e?.message ?? ""));
-
 export async function api(op, body = {}) {
   let r, value;
   try {
@@ -230,7 +221,6 @@ export async function api(op, body = {}) {
   clearError();
   return value;
 }
-
 let formsRequest = 0,
   formsSite;
 export async function refreshForms() {
@@ -255,7 +245,6 @@ export async function refreshForms() {
     if (current()) emit("forms");
   }
 }
-
 export async function loadHistory() {
   if (!S.draft) return;
   const formId = S.draft.formId;
@@ -264,7 +253,6 @@ export async function loadHistory() {
   S.history = data;
   emit("history");
 }
-
 // ---------- Preview frame ----------
 export function previewFrame() {
   let frame = $("preview-frame");
@@ -286,7 +274,6 @@ export function resetPreview() {
   if (frame) frame.src = "about:blank";
   emit("preview");
 }
-
 // ---------- Persistence: autosave + optimistic locking (CAS), no auto-merge ----------
 const P = {
   saveTimer: 0,
@@ -299,10 +286,8 @@ const P = {
   failed: false,
   savedAt: null,
 };
-export const machineDrafts = new Set();
 export const isDirty = () => P.editSeq !== P.savedSeq;
 export const persistence = P;
-
 export function setSaveState() {
   const btnEl = $("save-state");
   btnEl.hidden = !S.draft;
@@ -339,7 +324,6 @@ export function setSaveState() {
     h("span", { translate: "no" }, ` ${time} · v${S.version}`),
   );
 }
-
 export function resetPersistence() {
   window.clearTimeout(P.saveTimer);
   P.epoch++;
@@ -348,7 +332,6 @@ export function resetPersistence() {
   P.blocked = false;
   P.failed = false;
   P.baseDocument = S.draft ? clone(S.draft) : null;
-  machineDrafts.clear();
   $("conflict").hidden = true;
   setSaveState();
 }
@@ -362,7 +345,6 @@ export function markRecovered() {
   // The unsaved draft now lives in sessionStorage for the re-login round trip.
   P.savedSeq = P.editSeq;
 }
-
 function scheduleSave() {
   window.clearTimeout(P.saveTimer);
   if ($("autosave").checked && !P.blocked)
@@ -386,7 +368,6 @@ export function autosaveChanged() {
 export function cancelAutosave() {
   window.clearTimeout(P.saveTimer);
 }
-
 export function changeSummary(before, after) {
   const result = [];
   for (const key of [
@@ -413,7 +394,6 @@ export function changeSummary(before, after) {
   }
   return result;
 }
-
 export async function compareConflict() {
   const current = await api("get", scope());
   const report = {
@@ -445,7 +425,6 @@ export async function compareConflict() {
   );
   $("conflict").hidden = false;
 }
-
 export async function save() {
   window.clearTimeout(P.saveTimer);
   if (P.saving) {
@@ -501,7 +480,6 @@ export async function ensureSaved() {
   if (P.saving) await P.saving;
   if (isDirty() || S.version === 0) await save();
 }
-
 // ---------- Form model helpers ----------
 export const TYPES = {
   text: { label: "テキスト（1行）", vi: "Văn bản (1 dòng)", icon: "text", group: "basic" },
@@ -560,7 +538,6 @@ export const TEXT_LIKE = [
 ];
 export const STRING_TYPES = ["text", "textarea", "email", "tel", "postal", "katakana", "date"];
 export const PERSONAL_TYPES = ["text", "textarea", "email", "tel", "postal", "katakana", "date"];
-
 export const fieldLabel = (f) => f?.label?.ja || f?.key || L("（名称未設定）", "(chưa đặt tên)");
 export function stepLabel(step) {
   if (step.title?.ja) return step.title.ja;
@@ -584,7 +561,6 @@ export const formTitleText = () =>
   S.draft?.texts?.formTitle?.ja ||
   $("form-title").value ||
   L("無題のフォーム", "Biểu mẫu chưa đặt tên");
-
 export function ruleRef(field) {
   return field.ref ?? "$local:" + field.id;
 }
@@ -616,7 +592,6 @@ export function ruleFields(stepId, exclude) {
 export function allRuleFields() {
   return ruleFields();
 }
-
 export const textValue = (key) => S.draft?.texts?.[key];
 export function setText(key, lang, value) {
   const current = Object.fromEntries(
@@ -631,7 +606,6 @@ export function setText(key, lang, value) {
   else delete S.draft.texts;
 }
 export const catalogText = (key) => S.catalog.texts?.[key]?.ja ?? "";
-
 // Advisory checks shown while editing; the server-side engine remains the only authority.
 export function lint() {
   const out = [];

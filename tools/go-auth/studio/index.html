@@ -4,7 +4,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Form Studio · Synthetic Local P0</title>
-    <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
     <div class="env-banner" role="note">
@@ -45,11 +44,6 @@
           <span id="save-icon"></span><span id="save-label">保存済み</span
           ><span id="version" translate="no"></span>
         </button>
-        <label class="sr-only" for="admin-locale">表示言語</label>
-        <select id="admin-locale" class="select locale-select" translate="no" title="表示言語">
-          <option value="ja" lang="ja-JP">日本語</option>
-          <option value="vi" lang="vi-VN">Tiếng Việt</option>
-        </select>
         <span id="readonly-badge" class="chip" hidden>閲覧のみ</span>
         <button
           id="preview"
@@ -206,18 +200,6 @@
           </div>
         </div>
 
-        <div id="mode-translate" class="page" role="tabpanel" aria-label="翻訳" hidden>
-          <div class="page-inner">
-            <div class="page-head">
-              <div>
-                <h2>翻訳</h2>
-                <p>お客様に表示される文言を日本語とベトナム語で管理します。</p>
-              </div>
-            </div>
-            <div id="translations"></div>
-          </div>
-        </div>
-
         <div
           id="mode-preview"
           class="preview-layout"
@@ -229,7 +211,7 @@
             <div class="row" id="preview-bar"></div>
             <div class="device" id="preview-device" data-device="desktop">
               <div class="device-bar">
-                <i></i><i></i><i></i><span translate="no">127.0.0.1:4175 · isolated preview</span>
+                <i></i><i></i><i></i><span translate="no">127.0.0.1:4185 · isolated preview</span>
               </div>
               <div id="preview-container">
                 <iframe
@@ -355,7 +337,6 @@
       <div id="notice" class="toast" role="status" aria-live="polite"></div>
     </div>
 
-    <script type="module" src="/i18n.js"></script>
     <script type="module" src="/admin.js"></script>
   </body>
 </html>

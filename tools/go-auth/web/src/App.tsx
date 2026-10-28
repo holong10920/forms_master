@@ -1,23 +1,38 @@
+import { classes } from "./recipes";
 import { useEffect, useRef, useState } from "react";
 import { ApiError, request, type Session, destination } from "./api";
 import { messages, type Locale } from "./i18n";
 import { Login } from "./Login";
 import { Studio, type StudioController } from "./Studio";
-
 type AuthState =
-  | { kind: "loading" }
-  | { kind: "anonymous"; reason: "expired" | "error" | "" }
-  | { kind: "error" }
-  | { kind: "authenticated"; session: Session };
+  | {
+      kind: "loading";
+    }
+  | {
+      kind: "anonymous";
+      reason: "expired" | "error" | "";
+    }
+  | {
+      kind: "error";
+    }
+  | {
+      kind: "authenticated";
+      session: Session;
+    };
 export function App() {
   const [locale, setLocale] = useState<Locale>(
     new URLSearchParams(location.search).get("lang") === "vi" ? "vi" : "ja",
   );
   const t = messages[locale];
+  useEffect(() => {
+    if (location.pathname !== "/login" && destination(location.pathname) !== location.pathname)
+      history.replaceState(null, "", destination(location.pathname) + location.search);
+  }, []);
+
   const [state, setState] = useState<AuthState>({ kind: "loading" });
   const [attempt, setAttempt] = useState(0);
   const [path, setPath] = useState(destination(location.pathname));
-  const [studioOpened, setStudioOpened] = useState(location.pathname.startsWith("/studio"));
+  const [studioOpened, setStudioOpened] = useState(/^\/studio(\/|$)/.test(location.pathname));
   const studioRef = useRef<StudioController>({
     dirty: () => false,
     beforeLeave: () => Promise.resolve(true),
@@ -58,7 +73,7 @@ export function App() {
     const route = () => {
       const next = destination(location.pathname);
       setPath(next);
-      if (next.startsWith("/studio")) setStudioOpened(true);
+      if (/^\/studio(\/|$)/.test(next)) setStudioOpened(true);
     };
     const pop = () => {
       void (async () => {
@@ -131,7 +146,7 @@ export function App() {
   }, [path, session?.user.id, attempt]);
   async function navigate(next: string) {
     if (studioPath && !(await studioRef.current.beforeLeave())) return;
-    if (next.startsWith("/studio")) setStudioOpened(true);
+    if (/^\/studio(\/|$)/.test(next)) setStudioOpened(true);
     history.pushState(null, "", next + "?lang=" + locale);
     setPath(next);
   }
@@ -158,41 +173,48 @@ export function App() {
   }
   return (
     <div
-      className={
-        state.kind === "authenticated" && studioPath ? "app-layout app-layout-studio" : "app-layout"
-      }
+      className={classes(
+        state.kind === "authenticated" && studioPath
+          ? "app-layout app-layout-workspace app-layout-studio"
+          : state.kind === "authenticated"
+            ? "app-layout app-layout-workspace"
+            : "app-layout",
+      )}
     >
-      <header className="brand-header">
-        <a href="/dashboard" className="brand">
-          <span className="brand-mark" aria-hidden="true">
-            f.
-          </span>
-          Form Master
-          <span className="brand-divider" /> <span className="brand-sub">{t.workspace}</span>
-        </a>
-        <label className="locale">
-          <span className="sr-only">Language / 言語 / Ngôn ngữ</span>
-          <select
-            value={locale}
-            onChange={(e) => {
-              setLocale(e.target.value === "vi" ? "vi" : "ja");
-            }}
-          >
-            <option value="ja">日本語</option>
-            <option value="vi">Tiếng Việt</option>
-          </select>
-        </label>
-      </header>
+      {state.kind !== "authenticated" ? (
+        <header className={classes("brand-header")}>
+          <a href="/dashboard" className={classes("brand")}>
+            <span className={classes("brand-mark")} aria-hidden="true">
+              f.
+            </span>
+            Form Master
+            <span className={classes("brand-divider")} />{" "}
+            <span className={classes("brand-sub")}>{t.workspace}</span>
+          </a>
+          <label className={classes("locale")}>
+            <span className={classes("sr-only")}>Language / 言語 / Ngôn ngữ</span>
+            <select
+              value={locale}
+              onChange={(e) => {
+                setLocale(e.target.value === "vi" ? "vi" : "ja");
+              }}
+            >
+              <option value="ja">日本語</option>
+              <option value="vi">Tiếng Việt</option>
+            </select>
+          </label>
+        </header>
+      ) : null}
       {state.kind === "loading" ? (
-        <main className="center-state" aria-busy="true">
-          <span className="loader" />
+        <main className={classes("center-state")} aria-busy="true">
+          <span className={classes("loader")} />
           <p role="status">{t.loading}</p>
         </main>
       ) : state.kind === "error" ? (
-        <main className="center-state">
+        <main className={classes("center-state")}>
           <p role="alert">{t.network}</p>
           <button
-            className="primary"
+            className={classes("primary")}
             onClick={() => {
               setAttempt((a) => a + 1);
             }}
@@ -207,10 +229,10 @@ export function App() {
           message={state.reason === "expired" ? t.expired : state.reason === "error" ? t.error : ""}
         />
       ) : (
-        <div className="shell">
+        <div className={classes("shell")}>
           <aside>
             <div>
-              <p className="eyebrow mb-5">WORKSPACE</p>
+              <p className={classes("eyebrow mb-5")}>WORKSPACE</p>
               <nav aria-label={t.workspace}>
                 {[
                   "/dashboard",
@@ -220,11 +242,11 @@ export function App() {
                 ].map((item) => (
                   <a
                     key={item}
-                    className={
+                    className={classes(
                       path === item || (item === "/studio" && studioPath)
                         ? "nav-item selected"
-                        : "nav-item"
-                    }
+                        : "nav-item",
+                    )}
                     aria-current={
                       path === item || (item === "/studio" && studioPath) ? "page" : undefined
                     }
@@ -237,7 +259,7 @@ export function App() {
                     <span aria-hidden="true">
                       {item === "/dashboard" ? "◫" : item === "/admin" ? "◇" : "○"}
                     </span>
-                    <span className="nav-label">
+                    <span className={classes("nav-label")}>
                       {item === "/dashboard"
                         ? t.dashboard
                         : item === "/studio"
@@ -252,21 +274,40 @@ export function App() {
                 ))}
               </nav>
             </div>
-            <div className="aside-footer">
-              <p className="text-sm font-semibold">{session?.user.display_name}</p>
-              <p className="muted text-xs mt-1 mb-4">{session?.user.role.toUpperCase()}</p>
-              <button className="quiet-button" disabled={busy} onClick={() => void logout()}>
-                <span className="logout-label">{busy ? t.signOutBusy : t.logout}</span>{" "}
+            <div className={classes("aside-footer")}>
+              <label className={classes("sidebar-locale")}>
+                <span className={classes("sr-only")}>Language / 言語 / Ngôn ngữ</span>
+                <select
+                  aria-label="Language / 言語 / Ngôn ngữ"
+                  value={locale}
+                  onChange={(e) => {
+                    setLocale(e.target.value === "vi" ? "vi" : "ja");
+                  }}
+                >
+                  <option value="ja">JA · 日本語</option>
+                  <option value="vi">VI · Tiếng Việt</option>
+                </select>
+              </label>
+              <p className={classes("text-sm font-semibold")}>{session?.user.display_name}</p>
+              <p className={classes("muted text-xs mt-1 mb-4")}>
+                {session?.user.role.toUpperCase()}
+              </p>
+              <button
+                className={classes("quiet-button")}
+                disabled={busy}
+                onClick={() => void logout()}
+              >
+                <span className={classes("logout-label")}>{busy ? t.signOutBusy : t.logout}</span>{" "}
                 <span aria-hidden="true">↗</span>
               </button>
               {logoutError ? <p role="alert">{t.network}</p> : null}
             </div>
           </aside>
-          <div className="workspace-content">
-            <main className="workspace-main" hidden={studioPath}>
-              <div className="page-heading">
+          <div className={classes("workspace-content")}>
+            <main className={classes("workspace-main")} hidden={studioPath}>
+              <div className={classes("page-heading")}>
                 <div>
-                  <p className="eyebrow mb-3">
+                  <p className={classes("eyebrow mb-3")}>
                     FORM MASTER /{" "}
                     {path === "/admin"
                       ? "ADMIN"
@@ -282,24 +323,24 @@ export function App() {
                         : t.dashboard}
                   </h1>
                 </div>
-                <span className="status-badge">
+                <span className={classes("status-badge")}>
                   <i />
                   {t.active}
                 </span>
               </div>
               {page === "loading" ? (
-                <div className="content-card" role="status" aria-busy="true">
+                <div className={classes("content-card")} role="status" aria-busy="true">
                   {t.checking}
                 </div>
               ) : page === "denied" ? (
-                <div className="content-card notice" role="alert">
+                <div className={classes("content-card notice")} role="alert">
                   {t.denied}
                 </div>
               ) : page === "error" ? (
-                <div className="content-card" role="alert">
+                <div className={classes("content-card")} role="alert">
                   <p>{t.network}</p>
                   <button
-                    className="quiet-button"
+                    className={classes("quiet-button")}
                     onClick={() => {
                       setAttempt((a) => a + 1);
                     }}
@@ -308,9 +349,9 @@ export function App() {
                   </button>
                 </div>
               ) : path === "/profile" || path === "/settings/profile" ? (
-                <section className="content-card">
+                <section className={classes("content-card")}>
                   <h2>{t.account}</h2>
-                  <dl className="profile-grid">
+                  <dl className={classes("profile-grid")}>
                     <dt>{t.identity}</dt>
                     <dd>{session?.user.display_name}</dd>
                     <dt>{t.email}</dt>
@@ -322,21 +363,21 @@ export function App() {
                   </dl>
                 </section>
               ) : path === "/admin" ? (
-                <section className="content-card">
-                  <span className="eyebrow">ADMIN ONLY</span>
-                  <h2 className="mt-5">{t.admin}</h2>
-                  <p className="muted">{t.adminDescription}</p>
+                <section className={classes("content-card")}>
+                  <span className={classes("eyebrow")}>ADMIN ONLY</span>
+                  <h2 className={classes("mt-5")}>{t.admin}</h2>
+                  <p className={classes("muted")}>{t.adminDescription}</p>
                 </section>
               ) : (
                 <>
-                  <section className="welcome-card">
+                  <section className={classes("welcome-card")}>
                     <div>
-                      <span className="eyebrow">A NEW CHAPTER</span>
+                      <span className={classes("eyebrow")}>A NEW CHAPTER</span>
                       <h2>{t.greeting}</h2>
                       <p>{t.phase}</p>
                       <a
                         href="/settings/profile"
-                        className="primary"
+                        className={classes("primary")}
                         onClick={(e) => {
                           e.preventDefault();
                           void navigate("/settings/profile");
@@ -346,30 +387,30 @@ export function App() {
                         <span aria-hidden="true">↗</span>
                       </a>
                     </div>
-                    <div className="welcome-art" aria-hidden="true">
+                    <div className={classes("welcome-art")} aria-hidden="true">
                       f<span>+</span>
                     </div>
                   </section>
-                  <div className="summary-grid">
-                    <section className="content-card">
-                      <p className="eyebrow">01 / {t.role}</p>
+                  <div className={classes("summary-grid")}>
+                    <section className={classes("content-card")}>
+                      <p className={classes("eyebrow")}>01 / {t.role}</p>
                       <h2>{session?.user.role === "admin" ? t.adminRole : t.member}</h2>
-                      <p className="muted text-sm">{session?.user.role.toUpperCase()}</p>
+                      <p className={classes("muted text-sm")}>{session?.user.role.toUpperCase()}</p>
                     </section>
-                    <section className="content-card">
-                      <p className="eyebrow">02 / {t.workspace}</p>
+                    <section className={classes("content-card")}>
+                      <p className={classes("eyebrow")}>02 / {t.workspace}</p>
                       <h2>{t.overview}</h2>
-                      <p className="muted text-sm">{t.phaseDescription}</p>
+                      <p className={classes("muted text-sm")}>{t.phaseDescription}</p>
                     </section>
                   </div>
                 </>
               )}
-              <footer className="workspace-footer">
+              <footer className={classes("workspace-footer")}>
                 FORM MASTER <span>PHASE 01 / ACCESS & IDENTITY</span>
               </footer>
             </main>
             {studioOpened ? (
-              <section className="studio-panel" hidden={!studioPath}>
+              <section className={classes("studio-panel")} hidden={!studioPath}>
                 <Studio
                   locale={locale}
                   path={path}

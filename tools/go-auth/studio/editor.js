@@ -1,3 +1,4 @@
+import { classes } from "./recipes.js";
 import { appearanceEditor } from "./appearance.js";
 import { applyAppearance } from "../../../packages/static-runtime/src/appearance.ts";
 // Build mode: outline + palette (left), canvas (center), inspector (right).
@@ -52,10 +53,8 @@ import {
   clone,
 } from "./state.js";
 import { ruleEditor, namedConditions, branches, skipEditor, commit, fieldUsage } from "./rules.js";
-
 const ed = { leftTab: "outline", inspTab: {}, device: "desktop", drag: null };
 export const editorState = ed;
-
 // ---------- Selection / content helpers ----------
 const contentKey = (c) => (c.field ? c.field : c.block ? "block:" + c.block : "group:" + c.group);
 const selectionKey = (sel) => (sel?.startsWith("block:") ? sel : "$local:" + sel);
@@ -77,12 +76,10 @@ export function select_(sel, { step } = {}) {
   emit("render");
 }
 const isSelectedKey = (key) => S.selected && selectionKey(S.selected) === key;
-
 export function currentTheme() {
   const approved = (S.catalog.themes ?? []).filter((t) => t.site === S.draft.siteId);
   return approved.find((t) => t.id === S.draft.themeRef) ?? approved[0];
 }
-
 // ---------- Mutations ----------
 export function addField(type, { stepId, index } = {}) {
   if (!S.draft || !canEdit()) return;
@@ -139,7 +136,6 @@ export function addField(type, { stepId, index } = {}) {
   commit();
   notice(L("フィールドを追加しました: ", "Đã thêm trường: ") + typeLabel(type));
 }
-
 export function addStep() {
   if (!S.draft || !canEdit()) return;
   const prior = formSteps().at(-1),
@@ -157,7 +153,6 @@ export function addStep() {
   commit();
   notice(L("ステップを追加しました", "Đã thêm bước"));
 }
-
 export function insertBlock(pin) {
   if (!S.draft || !canEdit()) return;
   let step = currentStep();
@@ -185,7 +180,6 @@ export function insertBlock(pin) {
   commit();
   notice(L("共通ブロックを挿入しました", "Đã chèn khối dùng chung"));
 }
-
 export function moveContent(key, toStepId, toIndex) {
   const from = locate(key);
   const to = stepById(toStepId);
@@ -218,7 +212,6 @@ export function moveBy(key, delta) {
   ed.refocus = key;
   commit();
 }
-
 export function duplicateField(id) {
   const f = fieldById(id);
   const at = locate("$local:" + id);
@@ -232,7 +225,6 @@ export function duplicateField(id) {
   commit();
   notice(L("フィールドを複製しました", "Đã nhân bản trường"));
 }
-
 export async function deleteField(id) {
   const f = fieldById(id);
   if (!f || !canEdit()) return;
@@ -261,7 +253,6 @@ export async function deleteField(id) {
   commit();
   notice(L("フィールドを削除しました", "Đã xóa trường"));
 }
-
 export async function deleteBlock(instanceId) {
   const instance = blockInstance(instanceId);
   if (!instance || !canEdit()) return;
@@ -284,7 +275,6 @@ export async function deleteBlock(instanceId) {
   S.selected = null;
   commit();
 }
-
 async function deleteStep(step) {
   const forms = formSteps();
   if (forms.length <= 1) return notice("入力ステップは最低 1 つ必要です");
@@ -324,7 +314,6 @@ async function deleteStep(step) {
   S.selected = null;
   commit();
 }
-
 // ---------- Rendering ----------
 // Re-rendering replaces DOM nodes; remember what had focus so keyboard users keep their place.
 const REGIONS = "#left-panel, #stepper, #canvas, #inspector-head, #inspector-tabs, #inspector";
@@ -373,7 +362,6 @@ function restoreFocus(memo) {
   }
   el?.focus({ preventScroll: false });
 }
-
 export function renderBuild() {
   if (!S.draft) return;
   if (!currentStep()) S.currentStep = S.draft.steps[0].id;
@@ -395,7 +383,6 @@ export function refresh(except) {
   if (except !== "inspector") renderInspector();
   else renderInspectorHead();
 }
-
 function renderLeft() {
   const editable = canEdit();
   const items = [["outline", "構成"]];
@@ -411,11 +398,9 @@ function renderLeft() {
   renderOutline();
   renderPalette();
 }
-
 function itemAria(f, required) {
   return `${fieldLabel(f)}${required ? " *" : ""} · ${typeLabel(f.type)}`;
 }
-
 function renderOutline() {
   const box = $("steps");
   const editable = canEdit();
@@ -486,7 +471,6 @@ function renderOutline() {
       ),
     );
 }
-
 function outlineItem(step, c, index, editable) {
   const key = contentKey(c);
   let label, typeName, aria;
@@ -566,7 +550,6 @@ function outlineItem(step, c, index, editable) {
   }
   return li;
 }
-
 // ---------- Drag and drop (outline + canvas share the same model) ----------
 function clearDrop() {
   for (const el of document.querySelectorAll("[data-drop]")) delete el.dataset.drop;
@@ -611,7 +594,6 @@ function dropTarget(el, step, indexOf, container = false) {
     moveContent(key, step.id, indexOf() + (where === "after" ? 1 : 0));
   });
 }
-
 // ---------- Palette ----------
 const GROUPS = [
   ["basic", "基本"],
@@ -695,7 +677,6 @@ function renderPalette() {
     ),
   );
 }
-
 // ---------- Stage: stepper, device toggle, canvas ----------
 function renderStage() {
   renderStepper();
@@ -750,7 +731,6 @@ function renderStage() {
   };
   renderCanvas();
 }
-
 function renderStepper() {
   const box = $("stepper");
   fill(box);
@@ -794,7 +774,6 @@ function renderStepper() {
     .querySelector('[aria-current="step"]')
     ?.scrollIntoView({ block: "nearest", inline: "nearest" });
 }
-
 const optionLabel = (o) => o.label?.ja ?? o.value;
 function mockControl(f) {
   const ph = f.placeholder?.ja ?? "";
@@ -862,7 +841,6 @@ function mockControl(f) {
       return h("div", { class: "cv-control" }, ph);
   }
 }
-
 function badges(f) {
   const out = [];
   if (f.visibleWhen) out.push(["chip-info", L("条件付き表示", "Hiển thị có điều kiện")]);
@@ -875,7 +853,6 @@ function badges(f) {
     out.map(([cls, text]) => h("span", { class: "chip " + cls }, text)),
   );
 }
-
 function startRename(block, f) {
   const labelEl = block.querySelector(".cv-label");
   if (!labelEl || !canEdit()) return;
@@ -913,7 +890,6 @@ function startRename(block, f) {
   editor.focus();
   editor.select();
 }
-
 function toolbar(key, f) {
   const at = locate(key);
   const steps = formSteps();
@@ -949,7 +925,6 @@ function toolbar(key, f) {
     tool("trash", "削除", () => (f ? deleteField(f.id) : deleteBlock(key.slice(6)))),
   );
 }
-
 function insertPoint(step, index) {
   return h(
     "div",
@@ -1004,7 +979,6 @@ function openInsertMenu(anchor, stepId, index) {
     ),
   );
 }
-
 function fieldBlock(step, c, index, editable, issues) {
   const key = contentKey(c);
   const selected = isSelectedKey(key);
@@ -1171,7 +1145,6 @@ function fieldBlock(step, c, index, editable, issues) {
     ),
   );
 }
-
 function systemStep(step) {
   const t = (key, fallback) => S.draft.texts?.[key]?.ja ?? (catalogText(key) || fallback);
   if (step.kind === "review")
@@ -1200,7 +1173,6 @@ function systemStep(step) {
     h("p", {}, t("completeBody", "")),
   );
 }
-
 export function renderCanvas() {
   const canvas = $("canvas");
   const theme = currentTheme();
@@ -1215,6 +1187,7 @@ export function renderCanvas() {
   const forms = formSteps();
   const issues = lint();
   canvas.classList.toggle("canvas-readonly", !editable);
+  canvas.className = classes(canvas.className, canvas.id);
   const body = h("div", { class: "form-page-body", translate: "no" });
   if (step.kind === "form") {
     const title = input(step.title?.ja ?? "", {
@@ -1338,7 +1311,6 @@ export function renderCanvas() {
   );
   applyAppearance(canvas.querySelector(".form-page"), S.draft.appearance);
 }
-
 // ---------- Inspector ----------
 function section(title, iconName, ...content) {
   return h(
@@ -1355,7 +1327,6 @@ function selection() {
   if (sel.startsWith("block:")) return { kind: "block", instance: blockInstance(sel.slice(6)) };
   return { kind: "field", field: fieldById(sel) };
 }
-
 function renderInspectorHead() {
   const s = selection();
   let iconName = "settings",
@@ -1382,7 +1353,7 @@ function renderInspectorHead() {
     title = formTitleText();
     crumb = L("フォーム全体の設定", "Cài đặt toàn biểu mẫu");
   }
-  $("inspector-head").className = "insp-head";
+  $("inspector-head").className = classes("insp-head", $("inspector-head").id);
   fill(
     $("inspector-head"),
     h("span", { class: "insp-icon", "aria-hidden": "true" }, icon(iconName)),
@@ -1403,7 +1374,6 @@ function renderInspectorHead() {
       : null,
   );
 }
-
 const TABS = {
   field: [
     ["basic", "基本"],
@@ -1429,7 +1399,6 @@ const TABS = {
     ["advanced", "詳細"],
   ],
 };
-
 export function renderInspector() {
   if (!S.draft) return;
   renderInspectorHead();
@@ -1481,7 +1450,6 @@ export function renderInspector() {
     label?.select?.();
   }
 }
-
 function fieldInspector({ field: f }, tab, issues) {
   const out = [];
   const step = stepOfField(f.id) ?? currentStep();
@@ -1630,13 +1598,6 @@ function fieldInspector({ field: f }, tab, issues) {
     );
     const validators = validatorEditor(f);
     if (validators.length) out.push(section("入力の制限", "hash", ...validators));
-    out.push(
-      h(
-        "p",
-        { class: "small muted" },
-        "エラーメッセージの文言は「翻訳」でフォーム全体に設定できます。",
-      ),
-    );
   }
   if (tab === "logic") {
     const fields = ruleFields(step.id, f.id);
@@ -1672,6 +1633,32 @@ function fieldInspector({ field: f }, tab, issues) {
         }),
       ),
     );
+    if (!f.formula && S.draft.fields.some((node) => node.id === f.id))
+      out.push(
+        section(
+          "回答のリセット / Đặt lại câu trả lời",
+          "refresh",
+          ...fields
+            .filter((source) =>
+              S.draft.fields.some((node) => node.id === source.id && node.type !== "group"),
+            )
+            .map((source) =>
+              toggle(
+                fieldLabel(source),
+                f.resetOnChange?.includes(source.id),
+                (on) => {
+                  const ids = new Set(f.resetOnChange ?? []);
+                  if (on) ids.add(source.id);
+                  else ids.delete(source.id);
+                  if (ids.size) f.resetOnChange = [...ids];
+                  else delete f.resetOnChange;
+                  commit();
+                },
+                { hint: "この項目が変わったら回答をクリア / Xóa câu trả lời khi mục này thay đổi" },
+              ),
+            ),
+        ),
+      );
     if (S.schema?.$defs?.Field?.properties?.clearOnDeactivate)
       out.push(
         section(
@@ -1781,7 +1768,6 @@ function fieldInspector({ field: f }, tab, issues) {
   }
   return out;
 }
-
 function optionsEditor(f) {
   const isCheck = f.type === "choice.checkboxes";
   const list = h("div", { class: "opt-list" });
@@ -1842,6 +1828,20 @@ function optionsEditor(f) {
         ),
       ),
     );
+    add(
+      list,
+      ruleEditor({
+        prefix: "選択肢 " + (i + 1),
+        rule: o.availableWhen,
+        change: (value) => {
+          if (value) o.availableWhen = value;
+          else delete o.availableWhen;
+        },
+        fields: ruleFields(S.currentStep, f.id),
+        alwaysLabel: "常に選択可能",
+        action: L("この選択肢を表示", "hiển thị lựa chọn này"),
+      }),
+    );
   });
   const bulk = textarea(f.options.map((o) => o.value + "|" + optionLabel(o)).join("\n"), {
     translate: "no",
@@ -1890,10 +1890,9 @@ function optionsEditor(f) {
     ),
   );
 }
-
 function calculatedEditor(f) {
   const other = S.draft.fields.filter((x) => x.id !== f.id && x.type !== "group");
-  const op = f.formula?.op ?? "add";
+  const op = f.formula?.ref ? "copy" : (f.formula?.op ?? "add");
   const out = [
     field(
       "計算方法",
@@ -1903,15 +1902,41 @@ function calculatedEditor(f) {
           ["subtract", "引き算（−）"],
           ["multiply", "掛け算（×）"],
           ["concat", "文字列をつなげる"],
+          ["copy", "回答を表示 / Hiển thị câu trả lời"],
         ],
         op,
         (v) => {
-          f.formula = { op: v, args: [{ const: 0 }, { const: 0 }] };
+          f.formula =
+            v === "copy"
+              ? {
+                  ref:
+                    "$local:" +
+                    (other.find((field) => field.type !== "choice.checkboxes")?.id ?? ""),
+                }
+              : { op: v, args: [{ const: 0 }, { const: 0 }] };
           commit();
         },
       ),
     ),
   ];
+  if (op === "copy") {
+    out.push(
+      field(
+        "表示する回答 / Câu trả lời hiển thị",
+        select(
+          other
+            .filter((field) => field.type !== "choice.checkboxes")
+            .map((field) => [field.id, fieldLabel(field), { noTranslate: true }]),
+          f.formula.ref.replace("$local:", ""),
+          (id) => {
+            f.formula = { ref: "$local:" + id };
+            commit();
+          },
+        ),
+      ),
+    );
+    return out;
+  }
   for (let i = 0; i < 2; i++)
     out.push(
       field(
@@ -1935,7 +1960,6 @@ function calculatedEditor(f) {
   out.push(h("p", { class: "small muted" }, "計算結果は表示のみで、送信データには含まれません。"));
   return out;
 }
-
 function pluginEditor(f) {
   const spec = S.schema?.$defs?.Field?.properties?.config?.properties ?? {};
   const out = [];
@@ -1971,7 +1995,6 @@ function pluginEditor(f) {
   );
   return out;
 }
-
 const VALIDATORS = [
   ["minLength", "最小文字数", ["text", "textarea", "email", "tel", "postal", "katakana"]],
   ["maxLength", "最大文字数", ["text", "textarea", "email", "tel", "postal", "katakana"]],
@@ -2056,7 +2079,6 @@ function validatorEditor(f) {
     );
   return out;
 }
-
 function stepInspector({ step }, tab) {
   const out = [];
   const editable = canEdit();
@@ -2177,7 +2199,6 @@ function stepInspector({ step }, tab) {
   }
   return out;
 }
-
 function blockInspector({ instance }, tab) {
   const out = [];
   const pin = S.draft.dependencies?.blocks?.[instance.block];
@@ -2327,7 +2348,6 @@ function blockInspector({ instance }, tab) {
   }
   return out;
 }
-
 function themeCards() {
   const approved = (S.catalog.themes ?? []).filter((t) => t.site === S.draft.siteId);
   const chosen = currentTheme()?.id;
@@ -2366,7 +2386,6 @@ function themeCards() {
     }),
   );
 }
-
 const MOTION = [
   ["none", "なし", "動きを使いません（最も軽量）"],
   ["subtle", "控えめ", "フェードと小さな移動で変化を伝えます"],
@@ -2465,7 +2484,6 @@ function motionPanel() {
   );
   return out;
 }
-
 function formInspector(_s, tab) {
   const out = [];
   const textField = (key, label, opts = {}) =>
@@ -2581,10 +2599,7 @@ function formInspector(_s, tab) {
           h("dd", { class: "mono", translate: "no" }, S.draft.siteId),
           h("dt", {}, "保存版"),
           h("dd", { translate: "no" }, "v" + S.version),
-          h("dt", {}, "対応言語"),
-          h("dd", { translate: "no" }, (S.draft.locale?.supported ?? ["ja"]).join(", ")),
         ),
-        btn("翻訳を開く", () => emit("mode", "translate"), { size: "sm", iconName: "globe" }),
       ),
       section(
         "送信後の処理",
@@ -2598,7 +2613,6 @@ function formInspector(_s, tab) {
     );
   return out;
 }
-
 // ---------- Keyboard shortcuts in build mode ----------
 export function buildShortcut(e) {
   if (!S.draft || S.mode !== "build" || !canEdit()) return false;

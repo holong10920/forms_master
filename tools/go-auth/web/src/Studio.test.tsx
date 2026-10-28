@@ -18,13 +18,7 @@ beforeEach(() => {
   vi.stubGlobal("CSS", { escape: (value: string) => value });
   vi.stubGlobal(
     "fetch",
-    vi.fn(() =>
-      Promise.resolve(
-        new Response(
-          '<div id="fixture">Editor</div>',
-        ),
-      ),
-    ),
+    vi.fn(() => Promise.resolve(new Response('<div id="fixture">Editor</div>'))),
   );
 });
 afterEach(() => {
@@ -35,8 +29,10 @@ afterEach(() => {
 it("mounts the editor in the React subtree, synchronizes locale and routes", async () => {
   let bridge: Bridge | undefined;
   const navigate = vi.fn(() => Promise.resolve());
+  const localeChanged = vi.fn();
   fixture.mount.mockImplementation((b: Bridge) => {
     bridge = b;
+    b.document.addEventListener("studio:locale", localeChanged);
     b.register({
       dirty: () => true,
       beforeLeave: () => Promise.resolve(false),
@@ -66,6 +62,8 @@ it("mounts the editor in the React subtree, synchronizes locale and routes", asy
     expect(navigate).toHaveBeenCalledWith("/studio/sites/site_pc_synthetic/forms/frm_test");
   });
   expect(bridge?.locale).toBe("vi");
+  expect(localeChanged).toHaveBeenCalledOnce();
+  expect((localeChanged.mock.calls[0]?.[0] as CustomEvent<string>).detail).toBe("vi");
 });
 it("cleans up global listeners and timers and blocks cross-origin editor fetches", async () => {
   const listener = vi.fn();

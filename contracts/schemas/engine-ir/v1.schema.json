@@ -212,6 +212,15 @@
         },
         "formatDate": {
           "$ref": "#/$defs/LocalizedOverride"
+        },
+        "requiredBadge": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "optionalBadge": {
+          "$ref": "#/$defs/LocalizedOverride"
+        },
+        "progressLabel": {
+          "$ref": "#/$defs/LocalizedOverride"
         }
       },
       "additionalProperties": false
@@ -548,6 +557,15 @@
         },
         "appearance": {
           "$ref": "#/$defs/Appearance"
+        },
+        "resetOnChange": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "minItems": 1,
+          "maxItems": 50
         }
       },
       "required": ["id", "key", "type", "classification"],

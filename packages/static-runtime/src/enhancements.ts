@@ -1,8 +1,15 @@
+import {
+  choiceGroup,
+  choiceOption,
+  badge as badgeClass,
+  progress as progressClass,
+} from "./recipes.ts";
 /** Optional host-owned renderer. Loaded only from the pinned, hash-verified enhancement group. */
 import {
   createSession,
   canonical,
   evaluate,
+  snapshot,
   restoreDraft,
   draftValues,
   type DraftSnapshot,
@@ -12,8 +19,12 @@ import {
   type Value,
 } from "@fb/form-engine";
 import type { EngineIRV1, EngineField } from "@fb/contracts";
+export { assertIR } from "@fb/form-engine";
 export { applyAppearance } from "./appearance.ts";
-type Pin = { releaseId: string; revision: string };
+type Pin = {
+  releaseId: string;
+  revision: string;
+};
 const key = (pin: Pin) => `fb.draft.${pin.releaseId}`;
 export function restore(
   ir: EngineIRV1,
@@ -63,13 +74,21 @@ export function choices(
   f: EngineField,
   options: NonNullable<EngineField["options"]>,
   value: Value | undefined,
-  label: (v: { ja?: string; vi?: string } | undefined, fallback: string) => string,
+  label: (
+    v:
+      | {
+          ja?: string;
+          vi?: string;
+        }
+      | undefined,
+    fallback: string,
+  ) => string,
   disabled: boolean,
   invalid: boolean,
   commit: (v: Cell) => void,
 ): HTMLElement {
   const group = document.createElement("fieldset");
-  group.className = "choice-group";
+  group.className = choiceGroup;
   const legend = document.createElement("legend");
   legend.textContent = label(f.label, f.key);
   group.append(legend);
@@ -80,7 +99,7 @@ export function choices(
   if (invalid) group.setAttribute("aria-invalid", "true");
   for (const option of options) {
     const row = document.createElement("label");
-    row.className = "choice-option";
+    row.className = choiceOption;
     const input = document.createElement("input");
     input.type = f.type === "choice.radio" ? "radio" : "checkbox";
     input.name = f.key;
@@ -133,7 +152,10 @@ export function postal(
       signal: AbortSignal.timeout(3000),
     })
       .then(async (r) => {
-        const data = (await r.json()) as { synthetic?: boolean; address?: string };
+        const data = (await r.json()) as {
+          synthetic?: boolean;
+          address?: string;
+        };
         if (
           !r.ok ||
           data.synthetic !== true ||
@@ -199,4 +221,101 @@ export function availableOptions(
   return (f.options ?? []).filter(
     (o) => !o.availableWhen || evaluate(o.availableWhen, (id) => values[id], conditions) === true,
   );
+}
+
+/** Accessible adornments derive from the same workflow and required rules as validation. */
+export function badge(required: boolean, text: string): HTMLElement {
+  const span = document.createElement("span");
+  span.className = badgeClass;
+  span.dataset.required = String(required);
+  span.textContent = text;
+  return span;
+}
+export function decorateField(
+  wrap: HTMLElement,
+  f: EngineField,
+  values: Record<string, Value>,
+  conditions: EngineIRV1["conditions"],
+  msg: (key: string) => string,
+): void {
+  const required =
+    !!f.required ||
+    !!f.validators?.some((v) => v.use === "required") ||
+    !!(f.requiredWhen && evaluate(f.requiredWhen, (id) => values[id], conditions) === true);
+  const label = wrap.querySelector("legend, label");
+  label?.append(badge(required, msg(required ? "requiredBadge" : "optionalBadge")));
+  wrap
+    .querySelector("input, select, textarea, fieldset")
+    ?.setAttribute("aria-required", String(required));
+}
+export function progress(
+  ir: EngineIRV1,
+  state: State,
+  text: (value: { ja?: string; vi?: string } | undefined, fallback: string) => string,
+  msg: (key: string) => string,
+): HTMLElement {
+  const nav = document.createElement("nav");
+  nav.setAttribute("aria-label", msg("progressLabel"));
+  nav.className = progressClass;
+  const list = document.createElement("ol");
+  const path = snapshot(ir, state).path.filter(
+    (id) => ir.steps.find((step) => step.id === id)?.kind === "form",
+  );
+  const current = path.includes(state.current) ? state.current : path.at(-1);
+  for (const id of path) {
+    const step = ir.steps.find((s) => s.id === id);
+    if (!step) continue;
+    const item = document.createElement("li");
+    item.textContent = text(
+      step.title,
+      step.kind === "review"
+        ? msg("reviewTitle")
+        : step.kind === "complete"
+          ? msg("completeTitle")
+          : step.id.replace("stp_", ""),
+    );
+    if (step.id === current) item.setAttribute("aria-current", "step");
+    list.append(item);
+  }
+  nav.append(list);
+  return nav;
+}
+
+export function inlineIssues(wrap: HTMLElement, id: string, messages: string[]): void {
+  if (!messages.length) return;
+  const help = document.createElement("p");
+  help.id = id + "-errors";
+  help.className = "field-errors [color:#b91c1c] [font-size:0.875rem] [margin:0.35rem_0_0]";
+  help.textContent = messages.join(" · ");
+  wrap.append(help);
+  for (const input of wrap.querySelectorAll("input, select, textarea, fieldset"))
+    input.setAttribute(
+      "aria-describedby",
+      [input.getAttribute("aria-describedby"), help.id].filter(Boolean).join(" "),
+    );
+}
+
+export function displayValue(
+  ir: EngineIRV1,
+  field: EngineField,
+  value: Value | undefined,
+  text: (label: { ja?: string; vi?: string } | undefined, fallback: string) => string,
+): string {
+  const source =
+    field.formula && "ref" in field.formula
+      ? ir.nodes.find(
+          (node) =>
+            "$local:" + node.id ===
+            (field.formula && "ref" in field.formula ? field.formula.ref : ""),
+        )
+      : undefined;
+  const option =
+    source && source.type !== "group"
+      ? source.options?.find((option) => option.value === value)
+      : undefined;
+  return typeof value === "string"
+    ? text(option?.label, value)
+    : value === undefined
+      ? ""
+      : JSON.stringify(value);
 }

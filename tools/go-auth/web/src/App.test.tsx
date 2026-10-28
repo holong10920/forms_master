@@ -156,3 +156,27 @@ describe("authentication shell", () => {
       expect(destination(p)).toBe("/dashboard");
   });
 });
+
+it("keeps the authenticated header absent and the single locale control in the sidebar", async () => {
+  render(<App />);
+  await screen.findByText(messages.ja.greeting);
+  expect(document.querySelector("header.brand-header")).toBeNull();
+  const picker = screen.getByRole("combobox", { name: "Language / 言語 / Ngôn ngữ" });
+  expect(picker.closest("aside")).not.toBeNull();
+  expect(screen.getAllByRole("combobox")).toHaveLength(1);
+  fireEvent.change(picker, { target: { value: "vi" } });
+  expect(screen.queryByRole("link", { name: "Dịch" })).toBeNull();
+  expect(document.documentElement.lang).toBe("vi");
+});
+it("rejects removed translation destinations", () => {
+  for (const path of ["/translations", "/translations/sites/site_pc_synthetic/forms/frm_test"])
+    expect(destination(path)).toBe("/dashboard");
+});
+it("redirects an old translation URL without mounting the deleted page", async () => {
+  history.replaceState(null, "", "/translations/sites/site_pc_synthetic/forms/frm_test?lang=vi");
+  render(<App />);
+  await screen.findByText(messages.vi.greeting);
+  expect(location.pathname).toBe("/dashboard");
+  expect(screen.queryByRole("link", { name: "Dịch" })).toBeNull();
+  expect(document.querySelector(".studio-root")).toBeNull();
+});

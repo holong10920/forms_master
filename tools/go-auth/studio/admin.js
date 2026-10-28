@@ -1,4 +1,9 @@
-import { pcApplyDraft } from "../../legacy-analyzer/src/reference.ts";
+import { decorateStudio } from "./ui.js";
+import { classes } from "./recipes.js";
+import "./localization.js";
+import { gakkiApplyDraft } from "../templates/gakki-apply.ts";
+import { pcApplyDraft } from "../templates/pc-apply.ts";
+decorateStudio();
 // Form Studio shell: sign-in (Mock IdP, OIDC + PKCE), header, form list, modes and global wiring.
 import {
   $,
@@ -44,16 +49,13 @@ import { renderBuild, buildShortcut, editorState } from "./editor.js";
 import {
   hooks,
   renderFlow,
-  renderTranslations,
   renderPreviewMode,
   openPreview,
   renderPublish,
   openReviewDialog,
   validate,
 } from "./workflow.js";
-
 setErrorSink((e) => notice(errorText(e)));
-
 const ACCOUNTS = [
   ["synthetic-editor", "編集者", "フォームの作成・編集とレビュー依頼"],
   ["synthetic-reviewer", "レビュー担当", "レビュー内容の承認・差し戻し"],
@@ -77,17 +79,16 @@ const SITE_NAMES = {
 const MODES = [
   ["build", "作成", "pencil"],
   ["flow", "フロー", "flow"],
-  ["translate", "翻訳", "globe"],
   ["preview", "プレビュー", "eye"],
   ["publish", "公開", "rocket"],
 ];
+const MODE_KEYS = MODES.map(([key]) => key);
 const RECOVERY_KEY = "fb.admin.recovery";
 const roleText = (siteId) =>
   roles(siteId)
     .map((r) => ROLE_LABELS[r] ?? r)
     .join("・") || "—";
 const initial = (user) => (user.replace(/^synthetic-/, "")[0] ?? "?").toUpperCase();
-
 // ---------- Static icons ----------
 fill($("brand-mark"), icon("brand"));
 fill($("search-icon"), icon("search"));
@@ -95,7 +96,6 @@ fill($("new-form-icon"), icon("file"));
 fill($("more-btn"), icon("more"));
 $("new-form").prepend(icon("plus"));
 fill($("preview"), icon("eye"), h("span", { class: "btn-label" }, "プレビュー"));
-
 // ---------- Session ----------
 async function loadSession() {
   const r = await fetch("/api/session");
@@ -113,7 +113,6 @@ async function loadSession() {
   $("session-banner").hidden = true;
   renderShell();
 }
-
 async function login(user) {
   closePopover();
   if (isDirty()) {
@@ -150,7 +149,6 @@ async function login(user) {
   const response = await api("login", { user, target });
   window.location.assign(response.authorizeUrl);
 }
-
 async function logout() {
   closePopover();
   if (isDirty()) return notice("ログアウトの前に保存してください");
@@ -166,7 +164,6 @@ async function logout() {
   closeDraft();
   await loadSession();
 }
-
 function accountButton(user, role, description, menu) {
   return h(
     "button",
@@ -188,11 +185,9 @@ function accountButton(user, role, description, menu) {
     S.session?.user === user ? icon("check", "chevron") : menu ? null : icon("chevR", "chevron"),
   );
 }
-
 function renderSignin() {
   fill($("account-list"), ...ACCOUNTS.map(([u, role, d]) => accountButton(u, role, d)));
 }
-
 function buildUserMenu(pop) {
   fill(
     pop,
@@ -225,7 +220,6 @@ function buildUserMenu(pop) {
     ),
   );
 }
-
 // ---------- Header ----------
 function formStatus() {
   const history = S.history;
@@ -235,7 +229,6 @@ function formStatus() {
   if (history?.active?.candidateId) return ["chip-success", "公開中"];
   return ["", "下書き"];
 }
-
 function primaryAction() {
   const reviews = S.history?.reviews ?? [];
   if (canEdit()) return ["レビュー依頼", "send", openReviewDialog];
@@ -245,7 +238,6 @@ function primaryAction() {
     return ["公開へ進む", "rocket", () => setMode("publish")];
   return null;
 }
-
 function renderModes() {
   const nav = $("modes");
   const hadFocus = nav.contains(document.activeElement);
@@ -286,7 +278,6 @@ $("modes").addEventListener("keydown", (e) => {
         : (i + (e.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
   selectMode(tabs[n].dataset.mode);
 });
-
 function renderHeader() {
   const signedIn = !!S.session;
   const open = signedIn && !!S.draft;
@@ -305,7 +296,7 @@ function renderHeader() {
   status.hidden = !open;
   if (open) {
     const [cls, text] = formStatus();
-    status.className = "chip chip-dot " + cls;
+    status.className = classes("chip chip-dot " + cls, status.id);
     status.textContent = text;
     status.title = text;
     renderModes();
@@ -332,13 +323,11 @@ function renderHeader() {
   }
   setSaveState();
 }
-
 // ---------- Home (form list) ----------
 let search = "";
 const untitled = (f) => !f.title || f.title === f.formId;
 function renderHome() {
   const list = $("forms");
-  // Separate text nodes so the i18n layer can translate each part.
   fill(
     $("home-sub"),
     h("span", {}, SITE_NAMES[site()] ?? site()),
@@ -348,7 +337,7 @@ function renderHome() {
     h("span", {}, roleText(site())),
   );
   $("new-form").hidden = !canEdit();
-  for (const id of ["reference-template", "import-definition"]) {
+  for (const id of ["reference-template", "gakki-template", "import-definition"]) {
     const button = $(id);
     if (button) button.hidden = !canEdit();
   }
@@ -463,7 +452,6 @@ $("form-search").addEventListener("input", () => {
   search = $("form-search").value;
   renderHome();
 });
-
 // ---------- Shell / modes ----------
 function renderShell() {
   const signedIn = !!S.session;
@@ -474,27 +462,24 @@ function renderShell() {
     $("home").hidden = !!S.draft;
     $("editor").hidden = !S.draft;
     if (S.draft) {
-      for (const [key] of MODES) $("mode-" + key).hidden = key !== S.mode;
+      for (const key of MODE_KEYS) $("mode-" + key).hidden = key !== S.mode;
       renderMode();
     } else renderHome();
   }
   renderHeader();
 }
-
 function renderMode() {
   if (!S.draft) return;
   if (S.mode === "build") renderBuild();
   else if (S.mode === "flow") renderFlow();
-  else if (S.mode === "translate") renderTranslations();
   else if (S.mode === "preview") renderPreviewMode();
   else if (S.mode === "publish") renderPublish();
 }
-
 function setMode(mode) {
   if (!S.draft) return;
   closePopover();
   S.mode = mode;
-  for (const [key] of MODES) $("mode-" + key).hidden = key !== mode;
+  for (const key of MODE_KEYS) $("mode-" + key).hidden = key !== mode;
   renderHeader();
   renderMode();
   if (mode === "publish") void loadHistory().catch((e) => notice(errorText(e)));
@@ -506,7 +491,6 @@ function selectMode(mode) {
     return void openPreview().catch((e) => notice(errorText(e)));
   setMode(mode);
 }
-
 function syncUrl() {
   const url = S.draft
     ? "/?site=" + encodeURIComponent(site()) + "&form=" + encodeURIComponent(S.draft.formId)
@@ -514,7 +498,6 @@ function syncUrl() {
   if (window.location.pathname + window.location.search !== url)
     window.history.replaceState(null, "", url);
 }
-
 // Puts a server copy of a draft ({definition, version, title}) into the editor.
 async function adoptDraft(data) {
   S.draft = data.definition;
@@ -538,14 +521,12 @@ hooks.adopt = async (data) => {
   await adoptDraft(data);
   await refreshForms();
 };
-
 async function openForm(formId) {
   notice("読み込み中", { quiet: true });
   const data = await api("get", { site: site(), form: formId });
   await adoptDraft(data);
   notice("保存済みドラフトを読み込みました");
 }
-
 function closeDraft() {
   S.draft = null;
   S.version = 0;
@@ -556,7 +537,6 @@ function closeDraft() {
   resetPreview();
   syncUrl();
 }
-
 async function goHome() {
   closePopover();
   if (isDirty()) await save();
@@ -564,7 +544,6 @@ async function goHome() {
   renderShell();
   await refreshForms();
 }
-
 // ---------- New form ----------
 function openNewFormDialog() {
   if (isDirty()) return notice("新規作成の前に保存してください");
@@ -622,7 +601,6 @@ $("new-form-form").addEventListener("submit", (e) => {
     .catch((err) => notice(errorText(err)))
     .finally(() => (create.disabled = false));
 });
-
 // ---------- Header wiring ----------
 $("home-link").addEventListener("click", () => {
   if (!S.session) return;
@@ -733,8 +711,6 @@ $("relogin").addEventListener(
   "click",
   () => void login(S.session?.user ?? ACCOUNTS[0][0]).catch((e) => notice(errorText(e))),
 );
-$("admin-locale").addEventListener("change", () => renderShell());
-
 // ---------- Global ----------
 on("render", () => renderMode());
 on("mode", (mode) => setMode(mode));
@@ -750,11 +726,10 @@ on("forms", () => {
 on("session-expired", () => {
   $("session-banner").hidden = false;
 });
-
 // Field edits made through native controls mark the draft dirty; view-only controls opt out.
 document.addEventListener("change", (e) => {
   if (!(e.target instanceof window.Element) || e.target.closest("[data-ui]")) return;
-  if (e.target.closest("#mode-build, #mode-translate, #form-title")) dirty();
+  if (e.target.closest("#mode-build, #form-title")) dirty();
 });
 document.addEventListener("keydown", (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
@@ -773,7 +748,6 @@ window.addEventListener("beforeunload", (e) => {
     e.returnValue = "";
   }
 });
-
 // ---------- Boot ----------
 async function restoreRecovery() {
   let raw;
@@ -805,7 +779,6 @@ async function restoreRecovery() {
   await refreshForms();
   await loadHistory();
 }
-
 void (async () => {
   await loadSession();
   if (!S.session) return;
@@ -825,7 +798,6 @@ void (async () => {
   }
   syncUrl();
 })().catch((e) => notice(errorText(e)));
-
 // Review-only imports always create a fresh scoped draft. Publishing still requires normal approval.
 async function importDefinition(definition, title, diagnostics = []) {
   if (!canEdit() || isDirty()) return notice("先に変更を保存してください / Hãy lưu thay đổi trước");
@@ -869,6 +841,20 @@ const referenceButton = h(
   },
   "参考フロー / Mẫu tham khảo",
 );
+const gakkiButton = h(
+  "button",
+  {
+    type: "button",
+    class: "btn",
+    id: "gakki-template",
+    hidden: true,
+    onclick: () =>
+      void importDefinition(gakkiApplyDraft(), "楽器 Apply 合成デモ").catch((e) =>
+        notice(errorText(e)),
+      ),
+  },
+  "楽器フォーム / Mẫu nhạc cụ",
+);
 const importButton = h(
   "button",
   {
@@ -903,7 +889,7 @@ const importButton = h(
   },
   "下書きを取込 / Nhập bản nháp",
 );
-$("new-form").after(referenceButton, importButton);
+$("new-form").after(referenceButton, gakkiButton, importButton);
 on("render", () => {
-  referenceButton.hidden = importButton.hidden = !canEdit();
+  referenceButton.hidden = gakkiButton.hidden = importButton.hidden = !canEdit();
 });

@@ -12,7 +12,7 @@ bridge.register({
  dirty:isDirty,
  beforeLeave:async()=>{if(isDirty()){try{await save()}catch(e){notice(errorText(e));return false}}resetPreview();return true},
  recover:()=>{if(!isDirty()||!S.session)return;try{window.sessionStorage.setItem(RECOVERY_KEY,JSON.stringify({user:S.session.user,draft:S.draft,version:S.version,title:$("form-title").value,currentStep:S.currentStep,selected:S.selected,baseDocument:persistence.baseDocument,editSeq:persistence.editSeq,savedSeq:persistence.savedSeq}));}catch{}},
- navigate:async(path)=>{const match=/^\\/studio\\/sites\\/(site_[a-z0-9_]+)\\/forms\\/(frm_[a-z0-9_]+)$/.exec(path);if(match){if(S.draft?.siteId===match[1]&&S.draft?.formId===match[2])return;if(isDirty())await save();if(!S.session.sites.some(s=>s.id===match[1]))return;$("site").value=match[1];await adoptDraft(await api("get",{site:match[1],form:match[2]}));await refreshForms()}else if(path==="/studio"&&S.draft){if(isDirty())await save();closeDraft()}}
+ navigate:async(path)=>{const match=/^\\/studio\\/sites\\/(site_[a-z0-9_]+)\\/forms\\/(frm_[a-z0-9_]+)$/.exec(path);if(match){if(S.draft?.siteId===match[1]&&S.draft?.formId===match[2]){setMode("build");return;}if(isDirty())await save();if(!S.session.sites.some(s=>s.id===match[1]))return;$("site").value=match[1];await adoptDraft(await api("get",{site:match[1],form:match[2]}));setMode("build");await refreshForms()}else if(path==="/studio"&&S.draft){if(isDirty())await save();closeDraft()}}
 });`;
 const bundled = await build({
   configFile: false,
@@ -37,7 +37,7 @@ const bundled = await build({
           if (start < 0 || end <= start) throw Error("E-STUDIO-ROUTE-SEAM");
           code =
             code.slice(0, start) +
-            `function syncUrl(){const url=S.draft?"/studio/sites/"+encodeURIComponent(site())+"/forms/"+encodeURIComponent(S.draft.formId):"/studio";const full=url+"?lang="+bridge.locale;if(window.location.pathname+window.location.search!==full)window.history.pushState(null,"",full);}\n\n` +
+            `function syncUrl(){const prefix="/studio";const url=S.draft?prefix+"/sites/"+encodeURIComponent(site())+"/forms/"+encodeURIComponent(S.draft.formId):prefix;const full=url+"?lang="+bridge.locale;if(window.location.pathname+window.location.search!==full)window.history.pushState(null,"",full);}\n\n` +
             code.slice(end);
           code = code.replace(
             'const siteId = q.get("site"),\n    formId = q.get("form");',
@@ -52,6 +52,11 @@ const bundled = await build({
           code = code
             .replaceAll("http://127.0.0.1:4175", "http://127.0.0.1:4185")
             .replaceAll("http://127.0.0.1:4173", "http://127.0.0.1:4183");
+        if (id.endsWith("/localization.js"))
+          code = code.replace(
+            'locale = window.sessionStorage.getItem(storageKey) === "vi" ? "vi" : "ja";',
+            "locale = bridge.locale;",
+          );
         return { code, map: null };
       },
     },
@@ -73,13 +78,5 @@ const html = readFileSync(join(source, "index.html"), "utf8")
   ?.replace(/<script[^>]*>[\s\S]*?<\/script>/g, "");
 if (!html) throw Error("E-STUDIO-TEMPLATE");
 writeFileSync(join(output, "template.html"), html);
-let css = readFileSync(join(source, "style.css"), "utf8")
-  .replace(":root {", ":scope {")
-  .replace(/^html \{/m, ":scope {")
-  .replace(/^body \{/m, ":scope {");
-css =
-  "@scope (.studio-root) {\n" +
-  css +
-  "\n}\n.studio-root{min-width:0}.studio-root .topbar{position:static}.studio-root .topbar .brand{color:var(--text)}";
-writeFileSync(join(output, "studio.css"), css);
+// Studio recipes are compiled by the Workspace Tailwind build.
 console.log("Derived Studio bundle from existing editor sources");

@@ -1695,6 +1695,207 @@
           }
         ]
       }
+    },
+    {
+      "name": "gakki-guitar-bass",
+      "values": {
+        "fld_title": "合成楽器 Model A",
+        "fld_condition": "used",
+        "fld_kana": "テスト",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "00000000000",
+        "fld_agree_policy": true,
+        "fld_category": "guitar-bass",
+        "fld_product_family": "gakki_site"
+      },
+      "definition": "gakki-apply-reference",
+      "current": "stp_review"
+    },
+    {
+      "name": "gakki-piano",
+      "values": {
+        "fld_title": "合成楽器 Model A",
+        "fld_condition": "used",
+        "fld_kana": "テスト",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "00000000000",
+        "fld_agree_policy": true,
+        "fld_category": "piano",
+        "fld_location": "1階",
+        "fld_product_family": "gakki_site"
+      },
+      "definition": "gakki-apply-reference",
+      "current": "stp_review"
+    },
+    {
+      "name": "gakki-keyboard",
+      "values": {
+        "fld_title": "合成楽器 Model A",
+        "fld_condition": "used",
+        "fld_kana": "テスト",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "00000000000",
+        "fld_agree_policy": true,
+        "fld_category": "keyboard",
+        "fld_product_family": "gakki_site"
+      },
+      "definition": "gakki-apply-reference",
+      "current": "stp_review"
+    },
+    {
+      "name": "gakki-inst",
+      "values": {
+        "fld_title": "合成楽器 Model A",
+        "fld_condition": "used",
+        "fld_kana": "テスト",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "00000000000",
+        "fld_agree_policy": true,
+        "fld_category": "inst",
+        "fld_product_family": "gakki_site"
+      },
+      "definition": "gakki-apply-reference",
+      "current": "stp_review"
+    },
+    {
+      "name": "gakki-dtm-dj",
+      "values": {
+        "fld_title": "合成楽器 Model A",
+        "fld_condition": "used",
+        "fld_kana": "テスト",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "00000000000",
+        "fld_agree_policy": true,
+        "fld_category": "dtm-dj",
+        "fld_product_family": "gakki_site"
+      },
+      "definition": "gakki-apply-reference",
+      "current": "stp_review"
+    },
+    {
+      "name": "gakki-gakki-accessories",
+      "values": {
+        "fld_title": "合成楽器 Model A",
+        "fld_condition": "used",
+        "fld_kana": "テスト",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "00000000000",
+        "fld_agree_policy": true,
+        "fld_category": "gakki-accessories",
+        "fld_product_family": "gakki_site"
+      },
+      "definition": "gakki-apply-reference",
+      "current": "stp_review"
+    },
+    {
+      "name": "gakki-gakki-o",
+      "values": {
+        "fld_title": "合成楽器 Model A",
+        "fld_condition": "used",
+        "fld_kana": "テスト",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "00000000000",
+        "fld_agree_policy": true,
+        "fld_category": "gakki-o",
+        "fld_product_family": "gakki_site"
+      },
+      "definition": "gakki-apply-reference",
+      "current": "stp_review"
+    },
+    {
+      "name": "gakki-upper-floor-required",
+      "values": {
+        "fld_title": "合成楽器 Model A",
+        "fld_condition": "used",
+        "fld_kana": "テスト",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "00000000000",
+        "fld_agree_policy": true,
+        "fld_category": "piano",
+        "fld_location": "2～3階",
+        "fld_product_family": "gakki_site"
+      },
+      "definition": "gakki-apply-reference",
+      "current": "stp_review"
+    },
+    {
+      "name": "gakki-upper-floor-complete",
+      "values": {
+        "fld_title": "合成楽器 Model A",
+        "fld_condition": "used",
+        "fld_kana": "テスト",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "00000000000",
+        "fld_agree_policy": true,
+        "fld_category": "piano",
+        "fld_location": "4階以上",
+        "fld_location2": "階段作業が必要",
+        "fld_product_family": "gakki_site"
+      },
+      "definition": "gakki-apply-reference",
+      "current": "stp_review"
+    },
+    {
+      "name": "gakki-stale-hidden-floor",
+      "values": {
+        "fld_title": "合成楽器 Model A",
+        "fld_condition": "used",
+        "fld_kana": "テスト",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "00000000000",
+        "fld_agree_policy": true,
+        "fld_category": "guitar-bass",
+        "fld_location": "4階以上",
+        "fld_location2": "階段作業が必要",
+        "fld_product_family": "gakki_site"
+      },
+      "definition": "gakki-apply-reference",
+      "current": "stp_review"
+    },
+    {
+      "name": "gakki-title-too-long",
+      "values": {
+        "fld_title": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "fld_condition": "used",
+        "fld_kana": "テスト",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "00000000000",
+        "fld_agree_policy": true,
+        "fld_category": "guitar-bass",
+        "fld_product_family": "gakki_site"
+      },
+      "definition": "gakki-apply-reference",
+      "current": "stp_review"
+    },
+    {
+      "name": "gakki-blank-title",
+      "values": {
+        "fld_title": "  ",
+        "fld_condition": "used",
+        "fld_kana": "テスト",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "00000000000",
+        "fld_agree_policy": true,
+        "fld_category": "inst",
+        "fld_product_family": "gakki_site"
+      },
+      "definition": "gakki-apply-reference",
+      "current": "stp_review"
+    },
+    {
+      "name": "gakki-unknown-category",
+      "values": {
+        "fld_title": "合成楽器 Model A",
+        "fld_condition": "used",
+        "fld_kana": "テスト",
+        "fld_email": "synthetic@example.invalid",
+        "fld_phone_number": "00000000000",
+        "fld_agree_policy": true,
+        "fld_category": "not-a-category",
+        "fld_product_family": "gakki_site"
+      },
+      "definition": "gakki-apply-reference",
+      "current": "stp_review"
     }
   ]
 }

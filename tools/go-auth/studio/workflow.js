@@ -1,4 +1,4 @@
-// Flow overview, translations, isolated preview, review request and publish/rollback pages.
+// Flow overview, isolated preview, review request and publish/rollback pages.
 import {
   $,
   h,
@@ -6,7 +6,6 @@ import {
   fill,
   icon,
   btn,
-  toggle,
   segmented,
   confirmDialog,
   callout,
@@ -22,14 +21,12 @@ import {
   scope,
   can,
   canEdit,
-  dirty,
   ensureSaved,
   isDirty,
   save,
   showOk,
   loadHistory,
   previewFrame,
-  machineDrafts,
   humanDiagnostic,
   fieldLabel,
   stepLabel,
@@ -38,7 +35,6 @@ import {
   lint,
   newId,
   errorText,
-  TEXT_LIKE,
 } from "./state.js";
 import { describeRule } from "./rules.js";
 import { editorState } from "./editor.js";
@@ -46,8 +42,8 @@ import { editorState } from "./editor.js";
 // Set by admin.js: opens a draft returned by the server (clone) in the editor.
 export const hooks = { adopt: async () => {} };
 
-const PREVIEW_ORIGIN = "http://127.0.0.1:4175";
-const CUSTOMER_ORIGIN = "http://127.0.0.1:4173";
+const PREVIEW_ORIGIN = "http://127.0.0.1:4185";
+const CUSTOMER_ORIGIN = "http://127.0.0.1:4183";
 const releaseUrl = (id) => `${CUSTOMER_ORIGIN}/r/${id}/index.html`;
 const when = (seconds) =>
   seconds
@@ -147,365 +143,6 @@ export function renderFlow() {
     );
   });
   fill(box, list);
-}
-
-// ---------- Translations (ja required, vi optional; IDs/keys/values are never translated) ----------
-let onlyMissing = false;
-const textLabels = {
-  formTitle: "フォームタイトル",
-  formDescription: "フォーム説明",
-  next: "ボタン: 次へ",
-  back: "ボタン: 戻る",
-  submit: "ボタン: 送信",
-  selectPrompt: "選択プロンプト",
-  reviewTitle: "確認画面タイトル",
-  payloadTitle: "送信プレビュー見出し",
-  errorSummary: "エラー概要",
-  completeTitle: "完了タイトル",
-  completeBody: "完了メッセージ",
-  syntheticNotice: "合成データ表示",
-  invalidNumber: "メッセージ: 数値",
-  required: "メッセージ: 必須",
-  mustBeTrue: "メッセージ: 同意",
-  minLength: "メッセージ: 最小文字数",
-  maxLength: "メッセージ: 最大文字数",
-  min: "メッセージ: 最小値",
-  max: "メッセージ: 最大値",
-  minItems: "メッセージ: 最小選択数",
-  maxItems: "メッセージ: 最大選択数",
-  exclusiveOption: "メッセージ: 排他選択肢",
-};
-// One row per customer-facing text. `need`: "ja" = Japanese always required, "any" = Japanese
-// required once either language is set, "" = optional override (empty falls back to Japanese or
-// the built-in message). IDs, keys and option values are never edited here.
-function localizedRow(id, kind, context, read, write, need, defaults) {
-  return {
-    id,
-    kind,
-    context,
-    defaults,
-    get: (l) => read()?.[l] ?? "",
-    set(l, value) {
-      const next = Object.fromEntries(
-        Object.entries({ ...read(), [l]: value }).filter(([, text]) => text),
-      );
-      if ((need === "ja" || (need === "any" && next.vi)) && !next.ja) return false;
-      write(Object.keys(next).length ? next : undefined);
-      return true;
-    },
-  };
-}
-function translationRows() {
-  const draft = S.draft;
-  const text = (key) =>
-    localizedRow(
-      "text:" + key,
-      textLabels[key],
-      "",
-      () => draft.texts?.[key],
-      (value) => {
-        const texts = Object.fromEntries(
-          Object.entries({ ...draft.texts, [key]: value }).filter(([, entry]) => entry),
-        );
-        if (Object.keys(texts).length) draft.texts = texts;
-        else delete draft.texts;
-      },
-      "",
-      S.catalog.texts?.[key],
-    );
-  const rows = [text("formTitle"), text("formDescription")];
-  for (const s of draft.steps.filter((s) => s.kind === "form"))
-    rows.push(
-      localizedRow(
-        "step:" + s.id,
-        "ステップ名",
-        stepLabel(s),
-        () => s.title,
-        (value) => {
-          if (value) s.title = value;
-          else delete s.title;
-        },
-        "any",
-      ),
-    );
-  for (const f of draft.fields) {
-    if (f.type === "group") continue;
-    rows.push(
-      localizedRow(
-        `field:${f.id}:label`,
-        "表示名",
-        typeLabel(f.type),
-        () => f.label,
-        (value) => (f.label = value),
-        "ja",
-      ),
-    );
-    if (TEXT_LIKE.includes(f.type))
-      rows.push(
-        localizedRow(
-          `field:${f.id}:placeholder`,
-          "プレースホルダー",
-          fieldLabel(f),
-          () => f.placeholder,
-          (value) => {
-            if (value) f.placeholder = value;
-            else delete f.placeholder;
-          },
-          "",
-        ),
-      );
-    if (f.type !== "plugin:storeSel")
-      rows.push(
-        localizedRow(
-          `field:${f.id}:help`,
-          "ヘルプ",
-          fieldLabel(f),
-          () => f.help,
-          (value) => {
-            if (value) f.help = value;
-            else delete f.help;
-          },
-          "",
-        ),
-      );
-    for (const o of f.options ?? [])
-      rows.push(
-        localizedRow(
-          `option:${f.id}:${o.value}`,
-          "選択肢",
-          fieldLabel(f),
-          () => o.label,
-          (value) => (o.label = value),
-          "ja",
-        ),
-      );
-  }
-  for (const key of Object.keys(textLabels).slice(2)) rows.push(text(key));
-  return rows;
-}
-function translationState(row) {
-  const ja = row.get("ja"),
-    vi = row.get("vi");
-  if (machineDrafts.has(row.id + ":ja") || machineDrafts.has(row.id + ":vi"))
-    return ["machine", "自動翻訳（要確認）"];
-  if (vi) return ["done", "翻訳済み"];
-  if (row.defaults?.vi && !ja) return ["default", "既定の文言"];
-  if (!ja) return ["empty", "未設定"];
-  return ["missing", "未翻訳（日本語で表示）"];
-}
-function translationProgress(rows) {
-  const states = rows.map((r) => translationState(r)[0]).filter((s) => s !== "empty");
-  const counted = states.filter((s) => s !== "default");
-  const done = counted.filter((s) => s !== "missing").length;
-  return { done, total: counted.length };
-}
-async function autoTranslate(source, target) {
-  const pending = translationRows().filter((r) => r.get(source) && !r.get(target));
-  if (!pending.length) return notice("翻訳対象の空欄がありません");
-  let result;
-  try {
-    result = await api("translate", {
-      source,
-      target,
-      texts: pending.map((r) => ({ id: r.id, text: r.get(source) })),
-    });
-  } catch (e) {
-    return notice(
-      e.message === "TRANSLATION_PROVIDER_UNAVAILABLE"
-        ? "自動翻訳は利用できません：承認済みの翻訳プロバイダーが設定されていません。手動で入力してください。"
-        : e.message,
-    );
-  }
-  // Drafts land only in cells that are still empty, so text typed meanwhile is never overwritten.
-  const rows = new Map(translationRows().map((r) => [r.id, r]));
-  let added = 0;
-  for (const item of result.drafts ?? []) {
-    const row = rows.get(item.id);
-    if (!row || row.get(target) || typeof item.text !== "string" || !item.text.trim()) continue;
-    if (row.set(target, item.text)) {
-      machineDrafts.add(item.id + ":" + target);
-      added++;
-    }
-  }
-  if (added) {
-    dirty();
-    renderTranslations();
-  }
-  notice(`自動翻訳の下書き ${added} 件を追加しました（要確認）`);
-}
-
-export function renderTranslations() {
-  const box = $("translations");
-  if (!S.draft) return fill(box);
-  const editable = canEdit();
-  const enabled = S.draft.locale?.supported?.includes("vi") ?? false;
-  const rows = translationRows();
-  const progress = translationProgress(rows);
-  const bar = h("i");
-  const ratio = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
-  bar.style.setProperty("width", ratio + "%");
-  const count = h(
-    "span",
-    { role: "status", class: "small" },
-    `翻訳済み ${progress.done} / ${progress.total}`,
-  );
-  const repaintCount = () => {
-    const p = translationProgress(rows);
-    count.textContent = `翻訳済み ${p.done} / ${p.total}`;
-    bar.style.setProperty("width", (p.total ? Math.round((p.done / p.total) * 100) : 0) + "%");
-  };
-  const filter = h(
-    "button",
-    {
-      type: "button",
-      class: "btn btn-sm",
-      "aria-pressed": String(onlyMissing),
-      dataset: { ui: "true" },
-      onclick: () => {
-        onlyMissing = !onlyMissing;
-        renderTranslations();
-        $("translations").querySelector("[aria-pressed]")?.focus();
-      },
-    },
-    icon("search"),
-    h("span", { class: "btn-label" }, "未翻訳のみ表示"),
-  );
-  const head = h(
-    "div",
-    { class: "card card-pad" },
-    toggle(
-      "ベトナム語 (vi-VN) を有効化",
-      enabled,
-      (on) => {
-        S.draft.locale = { default: "ja", supported: on ? ["ja", "vi"] : ["ja"] };
-        dirty();
-        renderTranslations();
-        $("translations").querySelector('[role="switch"]')?.focus();
-      },
-      {
-        disabled: !editable,
-        hint: enabled
-          ? "公開フォームでお客様が日本語とベトナム語を切り替えられます。"
-          : "ベトナム語が無効のため、公開フォームには日本語のみ含まれます。",
-      },
-    ),
-  );
-  const toolbar = h(
-    "div",
-    { class: "tr-toolbar" },
-    h("div", { class: "progress", "aria-hidden": "true" }, bar),
-    count,
-    h("span", { class: "spacer" }),
-    filter,
-    editable
-      ? btn("自動翻訳 ja→vi（下書き）", () => autoTranslate("ja", "vi"), {
-          size: "sm",
-          iconName: "sparkles",
-        })
-      : null,
-    editable
-      ? btn("自動翻訳 vi→ja（下書き）", () => autoTranslate("vi", "ja"), {
-          size: "sm",
-          iconName: "sparkles",
-        })
-      : null,
-  );
-  const table = h(
-    "table",
-    { class: "tr-table" },
-    h(
-      "thead",
-      {},
-      h(
-        "tr",
-        {},
-        h("th", { scope: "col" }, "項目"),
-        h("th", { scope: "col", id: "tr-head-ja" }, "日本語"),
-        h("th", { scope: "col", id: "tr-head-vi" }, "Tiếng Việt"),
-        h("th", { scope: "col" }, "状態"),
-      ),
-    ),
-  );
-  const tbody = h("tbody");
-  rows.forEach((row, i) => {
-    if (onlyMissing && translationState(row)[0] !== "missing") return;
-    const label = h(
-      "td",
-      { id: "tr-row-" + i },
-      h("span", { class: "tr-kind" }, row.kind),
-      row.context ? h("code", { class: "tr-context", translate: "no" }, row.context) : null,
-    );
-    const state = h("td", { class: "small" });
-    const paint = () => {
-      const [kind, text] = translationState(row);
-      state.dataset.state = kind;
-      fill(
-        state,
-        h(
-          "span",
-          {
-            class:
-              "chip " +
-              ({ done: "chip-success", machine: "chip-info", missing: "chip-warning" }[kind] ?? ""),
-          },
-          text,
-        ),
-      );
-    };
-    const tr = h("tr", {}, label);
-    for (const l of ["ja", "vi"]) {
-      const input = h("input", {
-        class: "input",
-        lang: l === "vi" ? "vi-VN" : "ja-JP",
-        translate: "no",
-        maxLength: 2000,
-        readOnly: !editable,
-        placeholder: row.defaults?.[l] ?? (l === "vi" ? row.get("ja") : ""),
-        "aria-labelledby": `${label.id} tr-head-${l}`,
-        dataset: { row: row.id, lang: l },
-      });
-      input.value = row.get(l);
-      input.addEventListener("input", () => {
-        const ok = row.set(l, input.value.trim() ? input.value : "");
-        input.setCustomValidity(ok ? "" : "日本語が必要です");
-        input.setAttribute("aria-invalid", String(!ok));
-        machineDrafts.delete(row.id + ":" + l);
-        paint();
-        if (!ok) {
-          state.dataset.state = "error";
-          fill(state, h("span", { class: "chip chip-danger" }, "日本語が必要です"));
-        }
-        repaintCount();
-      });
-      add(tr, h("td", {}, input));
-    }
-    paint();
-    add(tr, state);
-    add(tbody, tr);
-  });
-  add(table, tbody);
-  fill(
-    box,
-    head,
-    h(
-      "p",
-      { class: "small muted" },
-      "ID・データキー・選択肢の値・ルールは言語に依存しません。空欄は日本語（または既定の文言）で表示されます。",
-    ),
-    toolbar,
-    h(
-      "p",
-      { class: "small muted" },
-      "自動翻訳は承認済みの翻訳プロバイダーがある場合のみ動作します。結果は空欄にだけ下書きとして入り、手入力の翻訳は上書きしません。",
-    ),
-    tbody.children.length
-      ? table
-      : emptyState(
-          "check",
-          "未翻訳の項目はありません",
-          "すべての文言にベトナム語が入力されています。",
-        ),
-  );
 }
 
 // ---------- Isolated preview (separate origin; Admin only hands over a session id) ----------
@@ -750,7 +387,7 @@ export function renderPreviewMode() {
       h(
         "p",
         { class: "small muted" },
-        "プレビューは別オリジン（127.0.0.1:4175）で動作し、管理画面の Cookie やスクリプトとは分離されています。プラグインのプログラムは管理画面では実行されません。",
+        "プレビューは別オリジン（127.0.0.1:4185）で動作し、管理画面の Cookie やスクリプトとは分離されています。プラグインのプログラムは管理画面では実行されません。",
       ),
     ),
   );

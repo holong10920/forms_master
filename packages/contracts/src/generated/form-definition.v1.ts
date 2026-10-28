@@ -145,6 +145,9 @@ export interface FormDefinitionV1 {
     formatPostalJP?: LocalizedOverride;
     formatKatakana?: LocalizedOverride;
     formatDate?: LocalizedOverride;
+    requiredBadge?: LocalizedOverride;
+    optionalBadge?: LocalizedOverride;
+    progressLabel?: LocalizedOverride;
   };
   appearance?: Appearance;
   customerDraft?: {
@@ -221,6 +224,11 @@ export interface Field {
   placeholder?: LocalizedOverride;
   help?: LocalizedOverride;
   appearance?: Appearance;
+  /**
+   * @minItems 1
+   * @maxItems 50
+   */
+  resetOnChange?: [string, ...string[]];
 }
 export interface LocalizedOverride {
   ja?: string;

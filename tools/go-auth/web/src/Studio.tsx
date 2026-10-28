@@ -1,3 +1,4 @@
+import { classes } from "./recipes";
 import { useEffect, useRef, useState } from "react";
 import type { Locale } from "./i18n";
 import { loadStudioBundle } from "./studio-bundle";
@@ -17,7 +18,9 @@ export function Studio({
 }: {
   locale: Locale;
   path: string;
-  controller: { current: StudioController };
+  controller: {
+    current: StudioController;
+  };
   onExpired: () => void;
 }) {
   const host = useRef<HTMLDivElement>(null);
@@ -29,7 +32,9 @@ export function Studio({
     if (!root) return;
     const abort = new AbortController();
     const timers = new Set<number>();
-    const observers: { disconnect(): void }[] = [];
+    const observers: {
+      disconnect(): void;
+    }[] = [];
     const overlay = new Map<PropertyKey, unknown>();
     let disposed = false;
     const realWindow = globalThis.window;
@@ -183,11 +188,7 @@ export function Studio({
     };
   }, [controller]);
   useEffect(() => {
-    const picker = host.current?.querySelector<HTMLSelectElement>("#admin-locale");
-    if (picker && picker.value !== locale) {
-      picker.value = locale;
-      picker.dispatchEvent(new Event("change", { bubbles: true }));
-    }
+    host.current?.dispatchEvent(new CustomEvent("studio:locale", { detail: locale }));
   }, [locale]);
   useEffect(() => {
     void controller.current.navigate(path).catch(() => {
@@ -196,7 +197,6 @@ export function Studio({
   }, [path, controller]);
   return (
     <>
-      <link rel="stylesheet" href="/studio/studio.css" />
       {error ? (
         <p role="alert">
           {locale === "vi"
@@ -204,7 +204,7 @@ export function Studio({
             : "Form Studio を読み込めませんでした。再読み込みしてください。"}
         </p>
       ) : null}
-      <div ref={host} className="studio-root" aria-label="Form Studio" />
+      <div ref={host} className={classes("studio-root")} aria-label="Form Studio" />
     </>
   );
 }

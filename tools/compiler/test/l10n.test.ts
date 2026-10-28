@@ -92,3 +92,23 @@ test("bilingual Sports build pins translations in the IR, stays deterministic an
     rmSync(b, { recursive: true, force: true });
   }
 }, 60000);
+
+test("Tailwind runtime classes are pinned and compressed consistently in compiled HTML", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "fb-tailwind-html-"));
+  try {
+    const result = await compile(sports(), dir);
+    const html = readFileSync(join(result.directory, "index.html"), "utf8");
+    const tokens = /<html[^>]+class="([^"]+)"/.exec(html)?.[1]?.split(" ") ?? [];
+    expect(tokens.length).toBeGreaterThan(20);
+    expect(tokens.every((token) => /^tw_[a-z0-9]+$/.test(token))).toBe(true);
+    const css = result.manifest.inventory
+      .filter((f) => f.path.endsWith(".css"))
+      .map((f) => readFileSync(join(result.directory, f.path), "utf8"))
+      .join("\n");
+    expect(css).toContain("tailwindcss v4.3.0");
+    for (const token of tokens) expect(css).toContain("." + token);
+    expect(css).not.toContain("@import");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});

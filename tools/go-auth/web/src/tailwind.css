@@ -1,0 +1,57 @@
+@import "tailwindcss" source(none);
+@source "./";
+@source "./recipes.ts";
+@source "../../studio/recipes.js";
+@theme static {
+  --font-sans: "Inter", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
+  --animate-spin: spin 160ms ease;
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  --animate-pop-in: pop-in 160ms ease;
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+  --animate-dialog-in: dialog-in 160ms ease;
+  @keyframes dialog-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+    }
+  }
+  --animate-shimmer: shimmer 160ms ease;
+  @keyframes shimmer {
+    to {
+      background-position: -200% 0;
+    }
+  }
+  --animate-demo-fade-slide: demo-fade-slide 160ms ease;
+  @keyframes demo-fade-slide {
+    0%,
+    30% {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    100% {
+      opacity: 0.85;
+      transform: none;
+    }
+  }
+  --animate-demo-slide: demo-slide 160ms ease;
+  @keyframes demo-slide {
+    0%,
+    30% {
+      opacity: 0;
+      transform: translateX(16px) scale(0.98);
+    }
+    100% {
+      opacity: 0.85;
+      transform: none;
+    }
+  }
+}

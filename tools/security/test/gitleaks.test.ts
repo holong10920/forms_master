@@ -14,7 +14,10 @@ test.skipIf(!available)(
     try {
       writeFileSync(join(dir, "fixture.txt"), "synthetic clean fixture\n");
       expect(spawnSync("sh", [wrapper, dir]).status).toBe(0);
-      const id = "AKIA" + "Z".repeat(16);
+      // Repeating one character falls below the AWS detector's entropy threshold.
+      // Keep the fake ID deterministic so detection cannot depend on a random generic-key match.
+      const id =
+        "AKIA" + Array.from({ length: 16 }, (_, i) => String.fromCharCode(66 + i)).join("");
       const secret = randomBytes(30).toString("base64");
       writeFileSync(
         join(dir, "fixture.txt"),

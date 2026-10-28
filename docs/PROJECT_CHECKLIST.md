@@ -407,3 +407,11 @@
 | DOD-08 | AWS deploy Admin + published form URL hoạt động và smoke test pass (nếu đã có AWS permission). Nếu không, báo đúng local demo scope. | TODO | | |
 | DOD-09 | Không dùng PII/backend production, không AWS writes trái phép, không public secrets/company source. | TODO | | |
 | DOD-10 | Có ADRs, docs handoff, ops/rollback, demo script, cost/performance report đủ để PO quyết định phase tiếp theo. | TODO | | |
+
+### Checkpoint Gakki demo — 2026-10-27
+
+Mẫu instrument Pattern A một sản phẩm, reset phụ thuộc và template boundaries đã triển khai; xem [bằng chứng mới](evidence/GAKKI-DEMO/RESULTS.md). Root 654 PASS + 15 expected fail; React 17 PASS; Go tests/race/vet PASS; TS/Go 284 cases PASS. Browser/review/publish xem `evidence/GAKKI-DEMO/browser.json`. Legacy browser parity NOT_VERIFIED; cart và production mapping chưa hỗ trợ. T12/K13 giữ VERIFICATION_PENDING. Không commit/GitHub/AWS writes.
+
+### Real local legacy parity review
+
+Đã chạy launcher legacy gốc qua overlay Docker synthetic/read-only và so sánh browser thật. Kết quả **NOT_READY cho full legacy parity**: 8/12 scenarios PASS, 4 FAIL; 4/12 nhóm No-Code được chứng minh đầy đủ. Đã sửa parent/child trong nhánh hỗ trợ, single-item confirmation, inline validation/scroll và container width. Còn catalog 12 nhóm, repeated cart/staged edit, header và committed-product restore. Xem [báo cáo thực chứng](evidence/REAL-LEGACY-PARITY/RESULTS.md), thay cho suy diễn từ checkpoint Gakki trước. T12/K13 không đổi.

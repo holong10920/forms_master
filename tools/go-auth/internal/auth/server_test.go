@@ -391,3 +391,11 @@ func TestCookiePolicyAndPersistence(t *testing.T) {
 		t.Fatal("raw reusable session secret stored")
 	}
 }
+
+func TestRemovedTranslationTargetsRejected(t *testing.T) {
+	for _, target := range []string{"/translations", "/translations/sites/site_pc_synthetic/forms/frm_test"} {
+		if auth.AllowedTarget(target) {
+			t.Errorf("removed target allowed: %s", target)
+		}
+	}
+}

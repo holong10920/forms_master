@@ -19,9 +19,9 @@ Tài liệu này thay thế trạng thái vận hành cũ. Bản trước đư�
 - [Responsive](../tools/go-auth/evidence/responsive/RESULTS.md): 9 viewport 320–1920px, keyboard/drawer/navigation checks.
 - [Cleanup và kiểm chứng sau gỡ Python](evidence/SOURCE-CLEANUP/RESULTS.md): xem log mới; không kế thừa PASS từ trước cleanup.
 
-## Blocker UI hiện tại
+## Blocker UI đã giải quyết
 
-Sau các browser flow PASS của checkpoint Go-only, một phiên khác tiếp tục thay đổi Studio. `i18n.js` bị xóa nhưng generator vẫn inject import; `admin-locale` bị bỏ khỏi HTML trong khi admin.js còn đăng ký handler. Smoke mới nhất báo không tải được Studio. User yêu cầu giữ nguyên UI và chỉ chốt phần độc lập; không đánh UI mới nhất PASS. Xem `docs/evidence/SOURCE-CLEANUP/ui-integration-blocker.json`.
+Chức năng translate (tab 翻訳, panel dịch song ngữ Nhật/Việt, auto-translate stub) đã được xóa hoàn toàn khỏi form builder. Các file đã sửa: `tools/go-auth/studio/admin.js`, `workflow.js`, `editor.js`, `state.js`, `index.html`, `style.css`; xóa `i18n.js`; `tools/go-auth/internal/studio/http.go`; `tools/go-auth/generate-studio.ts`; `tools/go-auth/web/src/Studio.tsx`, `Studio.test.tsx`; `packages/static-runtime/src/index.ts`, `style.css`; `tools/compiler/src/l10n.ts`. Build output trong `web/dist/` và `web/public/` cần tái tạo bằng `generate-studio`.
 
 ## Việc còn lại
 
@@ -30,3 +30,11 @@ Sau các browser flow PASS của checkpoint Go-only, một phiên khác tiếp t
 3. Production/ECS/PostgreSQL, provider thật, real integrations và comprehensive accessibility/performance audit chưa được xác minh.
 
 Chạy `pnpm local:master`. Cấu trúc source và các lệnh hiện hành ở [README](../README.md). Không chạy `local:p0`, `compiler:serve` hoặc lệnh `uv` lịch sử nữa.
+
+### Checkpoint Gakki demo — 2026-10-27
+
+Mẫu instrument Pattern A một sản phẩm, reset phụ thuộc và template boundaries đã triển khai; xem [bằng chứng mới](evidence/GAKKI-DEMO/RESULTS.md). Root 654 PASS + 15 expected fail; React 17 PASS; Go tests/race/vet PASS; TS/Go 284 cases PASS. Browser/review/publish xem `evidence/GAKKI-DEMO/browser.json`. Legacy browser parity NOT_VERIFIED; cart và production mapping chưa hỗ trợ. T12/K13 giữ VERIFICATION_PENDING. Không commit/GitHub/AWS writes.
+
+### Real local legacy parity review
+
+Đã chạy launcher legacy gốc qua overlay Docker synthetic/read-only và so sánh browser thật. Kết quả **NOT_READY cho full legacy parity**: 8/12 scenarios PASS, 4 FAIL; 4/12 nhóm No-Code được chứng minh đầy đủ. Đã sửa parent/child trong nhánh hỗ trợ, single-item confirmation, inline validation/scroll và container width. Còn catalog 12 nhóm, repeated cart/staged edit, header và committed-product restore. Xem [báo cáo thực chứng](evidence/REAL-LEGACY-PARITY/RESULTS.md), thay cho suy diễn từ checkpoint Gakki trước. T12/K13 không đổi.

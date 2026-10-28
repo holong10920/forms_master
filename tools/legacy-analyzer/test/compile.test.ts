@@ -3,8 +3,10 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
+import { compileRelease } from "../../compiler/src/release.ts";
 import { compile } from "../../compiler/src/build.ts";
-import { pcApplyDraft } from "../src/reference.ts";
+import { gakkiApplyDraft } from "../../go-auth/templates/gakki-apply.ts";
+import { pcApplyDraft } from "../../go-auth/templates/pc-apply.ts";
 test("extended forms keep pinned host-only chunks, initial budgets and escaped document titles", async () => {
   const dir = mkdtempSync(join(tmpdir(), "fm-extended-"));
   try {
@@ -46,6 +48,16 @@ test("extended forms keep pinned host-only chunks, initial budgets and escaped d
         ...c.manifest.inventory.filter((x) => x.path.endsWith(".css")).map((x) => x.path),
       ]),
     ).toBeLessThanOrEqual(16 * 1024);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}, 30000);
+
+test("instrument draft compiles under the existing isolated customer budgets", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "fm-instruments-"));
+  try {
+    const result = await compileRelease(gakkiApplyDraft(), dir);
+    expect(result.chunks.length).toBeGreaterThan(0);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

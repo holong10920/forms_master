@@ -1,3 +1,6 @@
+import tailwindcss from "@tailwindcss/vite";
+import { compactClasses, runtimeTailwind } from "./tailwind.ts";
+import { rootUtilities } from "../../../packages/static-runtime/src/recipes.ts";
 import { resolveTheme } from "./themes.ts";
 import { localize } from "./l10n.ts";
 import { expandBlocks, bindBlocks } from "./blocks.ts";
@@ -197,6 +200,7 @@ export async function compile(
       (f) =>
         f.type !== "group" &&
         (!!f.appearance ||
+          (f.type === "calculated" && !!f.formula && "ref" in f.formula) ||
           !!f.config?.searchable ||
           !!f.config?.postalAddressTarget ||
           !!f.config?.queryParameter ||
@@ -283,6 +287,9 @@ export async function compile(
         __FB_PREVIEW__: preview ? "true" : "false",
         __FB_MOTION__: JSON.stringify(resolved.preset !== "none"),
         __FB_EXTENDED__: JSON.stringify(extended),
+        __FB_RESETS__: JSON.stringify(
+          ir.nodes.some((f) => f.type !== "group" && !!f.resetOnChange?.length),
+        ),
         __FB_FORMATS__: JSON.stringify(
           ir.nodes.some(
             (f) => f.type !== "group" && f.validators?.some((v) => v.use.startsWith("format")),
@@ -294,7 +301,7 @@ export async function compile(
       publicDir: false,
       base: "./",
       logLevel: "silent",
-      plugins: [proof],
+      plugins: [proof, tailwindcss(), runtimeTailwind()],
       resolve: {
         alias: {
           react: realpathSync(join(root, "tools/compiler/node_modules/react")),
@@ -483,14 +490,14 @@ export async function compile(
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
-  const html = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${documentTitle} · Local Synthetic</title>${css.map((f) => `<link rel="stylesheet" href="./${f.path}" integrity="${sri(f.path)}" crossorigin="anonymous">`).join("")}</head><body><main id="app" aria-live="polite">読み込み中…</main><script type="application/json" id="release">${escape(canonicalJson(metadata))}</script><script type="module" src="./${main.path}" integrity="${sri(main.path)}" crossorigin="anonymous"></script></body></html>`;
+  const html = `<!doctype html><html lang="ja" class="${compactClasses(rootUtilities).replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;")}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${documentTitle} · Local Synthetic</title>${css.map((f) => `<link rel="stylesheet" href="./${f.path}" integrity="${sri(f.path)}" crossorigin="anonymous">`).join("")}</head><body><main id="app" aria-live="polite">読み込み中…</main><script type="application/json" id="release">${escape(canonicalJson(metadata))}</script><script type="module" src="./${main.path}" integrity="${sri(main.path)}" crossorigin="anonymous"></script></body></html>`;
   files.set("index.html", Buffer.from(html));
   if (!profile.plugin && !profile.motion && !preview) {
     const size = [...initial, "index.html", ...css.map((f) => f.path)].reduce(
       (n, file) => n + gzipSync(files.get(file) ?? Buffer.alloc(0), { level: 9 }).length,
       0,
     );
-    if (size > 16 * 1024) throw new Error("E-PERF-INITIAL-TOTAL");
+    if (size > 16 * 1024) throw Object.assign(new Error("E-PERF-INITIAL-TOTAL"), { bytes: size });
   }
   audit(chunks, files, profile);
   const directory = resolve(outRoot, "r", candidateId);

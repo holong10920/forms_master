@@ -3,6 +3,9 @@ import type { EngineIRV1 } from "@fb/contracts";
 type Texts = NonNullable<EngineIRV1["texts"]>;
 /** Built-in customer-runtime messages: data only, compiled into the pinned IR (ja default). */
 export const systemTexts = {
+  requiredBadge: { ja: "必須", vi: "Bắt buộc" },
+  optionalBadge: { ja: "任意", vi: "Tùy chọn" },
+  progressLabel: { ja: "お申し込みの流れ", vi: "Các bước đăng ký" },
   syntheticNotice: { ja: "合成データのみ", vi: "Chỉ dữ liệu giả lập" },
   next: { ja: "次へ", vi: "Tiếp theo" },
   back: { ja: "戻る", vi: "Quay lại" },

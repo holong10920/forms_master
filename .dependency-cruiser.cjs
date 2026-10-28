@@ -2,6 +2,12 @@
 module.exports = {
   forbidden: [
     {
+      name: "studio-no-analysis-tool",
+      severity: "error",
+      from: { path: "^tools/go-auth/(studio|templates)/" },
+      to: { path: "^tools/legacy-analyzer/" },
+    },
+    {
       name: "motion-no-engine-or-tools",
       severity: "error",
       from: { path: "^packages/motion-adapter/src/" },
@@ -30,7 +36,7 @@ module.exports = {
       name: "browser-safe-no-node",
       severity: "error",
       from: {
-        path: "^(packages/(contracts|form-engine|static-runtime|sdk-browser|motion-adapter|motion-presets)/src/|plugins/[^/]+/browser/)",
+        path: "^(packages/(contracts|form-engine|static-runtime|sdk-browser|motion-adapter|motion-presets|ui-styles)/src/|plugins/[^/]+/browser/)",
       },
       to: { dependencyTypes: ["core"] },
     },

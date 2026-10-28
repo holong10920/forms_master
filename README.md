@@ -38,7 +38,7 @@ Launcher kiểm tra port, build Go và Studio, health-check các dịch vụ, in
 | `packages/form-engine`, `packages/static-runtime` | Workflow và runtime customer dùng chung                                            |
 | `contracts`                                       | Schema, generated contracts và golden fixtures                                     |
 | `plugins`                                         | Trusted browser plugin và metadata/pin contract; thực thi server bằng Go           |
-| `tools/legacy-analyzer`                           | Analyzer AST read-only, import nháp và mẫu PC                                      |
+| `tools/legacy-analyzer`                           | Analyzer AST read-only và import nháp                                              |
 | `tools/security`, `tools/verify`                  | Security checks, toolchain và cleanup có giới hạn                                  |
 | `docs`                                            | Tài liệu hiện tại, lịch sử và bằng chứng                                           |
 | `var`                                             | Database, immutable releases, khóa local và backup; không phải source thừa         |
@@ -86,3 +86,9 @@ Mở rộng legacy hiện là prototype PC một sản phẩm desktop/notebook; 
 - [Route migration matrix](tools/go-auth/evidence/migration/ROUTE-MATRIX.md)
 - [Legacy capability/evidence](tools/legacy-analyzer/evidence/RESULTS.md)
 - [Responsive verification](tools/go-auth/evidence/responsive/RESULTS.md)
+
+## Demo Gakki một sản phẩm
+
+Trong Form Builder, chọn **楽器フォーム / Mẫu nhạc cụ** để tạo draft riêng. Category, piano/floor/carry-out, reset phụ thuộc, validators và style đều là Form Definition chỉnh được trong Inspector; Save → Preview → review → approver riêng → Publish dùng luồng Go hiện có.
+
+Template thuộc `tools/go-auth/templates/`, tách khỏi analyzer read-only. [Kết quả và giới hạn parity](docs/evidence/GAKKI-DEMO/RESULTS.md). Chưa có repeated cart hoặc adapter gửi payload legacy thật.

@@ -1,3 +1,4 @@
+import { classes, rootUtilities } from "./recipes.js";
 // Small DOM toolkit for the Admin (no framework, CSP-safe: no inline styles/handlers, no HTML strings).
 export const $ = (id) => document.getElementById(id);
 const SVG = "http://www.w3.org/2000/svg";
@@ -29,7 +30,15 @@ export function h(tag, props, ...children) {
       el.setAttribute(k === "for" ? "for" : k, v === true ? "" : String(v));
     else el[k] = v;
   }
+  el.className = classes(el.className, el.id);
   return append(el, children);
+}
+
+export function decorateStudio() {
+  document.documentElement.classList.add(...rootUtilities.split(/\s+/));
+  for (const el of document.querySelectorAll("*")) {
+    if (el instanceof window.HTMLElement) el.className = classes(el.className, el.id);
+  }
 }
 
 const PATHS = {
@@ -109,7 +118,7 @@ const PATHS = {
 export function icon(name, cls = "") {
   const svg = document.createElementNS(SVG, "svg");
   svg.setAttribute("viewBox", "0 0 24 24");
-  svg.setAttribute("class", ("icon " + cls).trim());
+  svg.setAttribute("class", classes(("icon " + cls).trim()));
   svg.setAttribute("aria-hidden", "true");
   svg.setAttribute("focusable", "false");
   const path = document.createElementNS(SVG, "path");

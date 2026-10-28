@@ -1,5 +1,6 @@
-import type { EngineIRV1, EngineNode } from "@fb/contracts";
-import { contentId, fieldOrder } from "./definition.ts";
+declare const __FB_RESETS__: boolean;
+import type { EngineIRV1, EngineNode, EngineField } from "@fb/contracts";
+import { contentId, fieldOrder } from "./dependencies.ts";
 import { evaluate } from "./expression.ts";
 import {
   clearGroupCells,
@@ -205,6 +206,19 @@ function reconcile(ir: EngineIRV1, old: State, next: State): State {
   let state = next;
   const before = snapshot(ir, old);
   for (let i = 0; i <= ir.nodes.length + 1; i++) {
+    // Walk dependencies in order so a parent reset also clears its descendants.
+    const resetValues: Record<string, Value> = { ...state.values };
+    if (typeof __FB_RESETS__ === "undefined" || __FB_RESETS__)
+      for (const f of fieldOrder(ir)) {
+        if (
+          !(f as EngineField).resetOnChange?.some(
+            (id) => JSON.stringify(old.values[id]) !== JSON.stringify(resetValues[id]),
+          )
+        )
+          continue;
+        Reflect.deleteProperty(resetValues, f.id);
+      }
+    state = { ...state, values: resetValues };
     const after = snapshot(ir, state);
     let values = clearGroupCells(ir, state.values, before.active, after.active);
     let changed = false;

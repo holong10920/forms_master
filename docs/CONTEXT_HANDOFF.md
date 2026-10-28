@@ -14,4 +14,12 @@
 
 Tiếp theo: đóng kiểm chứng cleanup còn mở nếu có, rồi làm capability tiếp theo trong gap matrix. Không mở lại chu kỳ brainstorm kiến trúc hoặc chuyển production.
 
-UI handoff: cập nhật generator/locale bridge theo refactor đang làm; hiện generator còn import i18n.js đã xóa và admin.js còn handler admin-locale đã bỏ khỏi template. Chưa có latest-UI smoke PASS. Backend/Go bootstrap/test/race/vet độc lập đã qua; đọc báo cáo để phân biệt checkpoint.
+- Chức năng translate (tab 翻訳, panel dịch song ngữ, auto-translate stub, admin locale switcher `i18n.js`) đã bị xóa hoàn toàn khỏi form builder. Build output (`web/dist/`, `web/public/`) cần tái tạo bằng `generate-studio`.
+
+### Checkpoint Gakki demo — 2026-10-27
+
+Mẫu instrument Pattern A một sản phẩm, reset phụ thuộc và template boundaries đã triển khai; xem [bằng chứng mới](evidence/GAKKI-DEMO/RESULTS.md). Root 654 PASS + 15 expected fail; React 17 PASS; Go tests/race/vet PASS; TS/Go 284 cases PASS. Browser/review/publish xem `evidence/GAKKI-DEMO/browser.json`. Legacy browser parity NOT_VERIFIED; cart và production mapping chưa hỗ trợ. T12/K13 giữ VERIFICATION_PENDING. Không commit/GitHub/AWS writes.
+
+### Real local legacy parity review
+
+Đã chạy launcher legacy gốc qua overlay Docker synthetic/read-only và so sánh browser thật. Kết quả **NOT_READY cho full legacy parity**: 8/12 scenarios PASS, 4 FAIL; 4/12 nhóm No-Code được chứng minh đầy đủ. Đã sửa parent/child trong nhánh hỗ trợ, single-item confirmation, inline validation/scroll và container width. Còn catalog 12 nhóm, repeated cart/staged edit, header và committed-product restore. Xem [báo cáo thực chứng](evidence/REAL-LEGACY-PARITY/RESULTS.md), thay cho suy diễn từ checkpoint Gakki trước. T12/K13 không đổi.

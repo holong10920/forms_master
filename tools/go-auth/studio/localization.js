@@ -133,29 +133,10 @@ const exact = new Map(
     この版へロールバック: "Khôi phục về phiên bản này",
     ロールバック完了: "Đã khôi phục",
     監査ログ: "Nhật ký kiểm toán",
-    // Translation panel
-    "翻訳（日本語 / Tiếng Việt）": "Bản dịch (日本語 / Tiếng Việt)",
-    "ベトナム語 (vi-VN) を有効化": "Bật tiếng Việt (vi-VN)",
-    未翻訳のみ表示: "Chỉ hiện mục chưa dịch",
-    "自動翻訳 ja→vi（下書き）": "Dịch tự động ja→vi (bản nháp)",
-    "自動翻訳 vi→ja（下書き）": "Dịch tự động vi→ja (bản nháp)",
     項目: "Mục",
     状態: "Trạng thái",
-    翻訳済み: "Đã dịch",
-    "未翻訳（日本語で表示）": "Chưa dịch (hiển thị tiếng Nhật)",
-    "自動翻訳（要確認）": "Dịch tự động (cần kiểm tra)",
     既定の文言: "Văn bản mặc định",
     未設定: "Chưa đặt",
-    日本語が必要です: "Cần có tiếng Nhật",
-    "ID・データキー・選択肢の値・ルールは言語に依存しません。空欄は日本語（または既定の文言）で表示されます。":
-      "ID, khóa dữ liệu, giá trị lựa chọn và quy tắc không phụ thuộc ngôn ngữ. Ô trống sẽ hiển thị bằng tiếng Nhật (hoặc văn bản mặc định).",
-    "自動翻訳は承認済みの翻訳プロバイダーがある場合のみ動作します。結果は空欄にだけ下書きとして入り、手入力の翻訳は上書きしません。":
-      "Dịch tự động chỉ hoạt động khi có nhà cung cấp dịch đã được phê duyệt. Kết quả chỉ điền vào ô trống dưới dạng bản nháp, không ghi đè bản dịch đã nhập tay.",
-    "自動翻訳は利用できません：承認済みの翻訳プロバイダーが設定されていません。手動で入力してください。":
-      "Không dùng được dịch tự động: chưa cấu hình nhà cung cấp dịch đã được phê duyệt. Vui lòng nhập thủ công.",
-    翻訳対象の空欄がありません: "Không có ô trống cần dịch",
-    "ベトナム語が無効のため、公開フォームには日本語のみ含まれます。":
-      "Tiếng Việt đang tắt nên biểu mẫu phát hành chỉ có tiếng Nhật.",
     フォームタイトル: "Tiêu đề biểu mẫu",
     フォーム説明: "Mô tả biểu mẫu",
     プレースホルダー: "Placeholder",
@@ -199,7 +180,7 @@ for (const [ja, vi] of Object.entries(rulePrefix)) {
   exact.set(ja + "条件: 等しい値", "Điều kiện " + vi + ": giá trị bằng");
   exact.set(ja + "条件を追加", "Thêm điều kiện " + vi);
 }
-// Form Studio chrome (header, home, build, flow, translate, preview, publish). Earlier entries win.
+// Form Studio chrome (header, home, build, flow, preview, publish). Earlier entries win.
 for (const [ja, vi] of Object.entries({
   // Shell / header / sign-in
   "合成データ専用のローカル環境です · 実データを入力しないでください":
@@ -232,7 +213,6 @@ for (const [ja, vi] of Object.entries({
   その他の操作: "Thao tác khác",
   作成: "Tạo",
   フロー: "Luồng",
-  翻訳: "Dịch",
   公開: "Phát hành",
   閲覧のみ: "Chỉ xem",
   レビューする: "Duyệt ngay",
@@ -359,8 +339,6 @@ for (const [ja, vi] of Object.entries({
   必須: "Bắt buộc",
   "未入力のまま次へ進めないようにします。": "Không cho đi tiếp khi chưa nhập.",
   入力の制限: "Giới hạn nhập",
-  "エラーメッセージの文言は「翻訳」でフォーム全体に設定できます。":
-    'Có thể đặt nội dung thông báo lỗi cho toàn biểu mẫu trong "Dịch".',
   表示ルール: "Quy tắc hiển thị",
   表示: "Hiển thị",
   常に表示: "Luôn hiển thị",
@@ -458,7 +436,6 @@ for (const [ja, vi] of Object.entries({
   "フォーム ID": "ID biểu mẫu",
   保存版: "Bản đã lưu",
   対応言語: "Ngôn ngữ hỗ trợ",
-  翻訳を開く: "Mở phần dịch",
   送信後の処理: "Xử lý sau khi gửi",
   // Rules
   が次と等しい: "bằng",
@@ -505,17 +482,13 @@ for (const [ja, vi] of Object.entries({
   "条件分岐があるステップにはスキップ条件を設定できません。":
     "Không thể đặt điều kiện bỏ qua cho bước có rẽ nhánh.",
   スキップしない: "Không bỏ qua",
-  // Flow / translate
+  // Flow
   "ステップの順序と分岐を確認できます（参照用）。分岐の編集は「作成」でステップを選択して行います。":
     'Xem thứ tự các bước và rẽ nhánh (tham khảo). Để sửa rẽ nhánh, hãy chọn bước trong "Tạo".',
   "お客様に表示される文言を日本語とベトナム語で管理します。":
     "Quản lý văn bản hiển thị cho khách bằng tiếng Nhật và tiếng Việt.",
-  "公開フォームでお客様が日本語とベトナム語を切り替えられます。":
-    "Khách hàng có thể chuyển giữa tiếng Nhật và tiếng Việt trên biểu mẫu phát hành.",
   日本語: "Tiếng Nhật",
   項目: "Mục",
-  未翻訳の項目はありません: "Không có mục chưa dịch",
-  "すべての文言にベトナム語が入力されています。": "Mọi văn bản đều đã có tiếng Việt.",
   // Preview
   プレビュー情報: "Thông tin xem trước",
   プレビューできるレビューがありません: "Không có bản duyệt nào để xem trước",
@@ -640,8 +613,6 @@ for (const [ja, vi] of Object.entries({
   データキーが重複しています: "Khóa dữ liệu bị trùng",
   "公開済みのフォームは削除できません。": "Không thể xóa biểu mẫu đã phát hành.",
   "この版には戻せません。": "Không thể quay về phiên bản này.",
-  "自動翻訳は利用できません。": "Không dùng được dịch tự động.",
-  "翻訳対象の文言が正しくありません。": "Văn bản cần dịch không hợp lệ.",
   "この言語の組み合わせには対応していません。": "Không hỗ trợ cặp ngôn ngữ này.",
   "公開用ビルドに失敗しました。": "Tạo bản dựng phát hành thất bại.",
   "共通ブロックが利用できない状態です。": "Khối dùng chung hiện không dùng được.",
@@ -766,11 +737,6 @@ const patterns = [
   [/^(.*) · 現在公開中$/s, "$1 · Đang phát hành"],
   [/^(.*) · 必須$/s, "$1 · Bắt buộc"],
   [/^(.*) · 任意$/s, "$1 · Không bắt buộc"],
-  [/^翻訳済み (\d+) \/ (\d+)$/, "Đã dịch $1 / $2"],
-  [
-    /^自動翻訳の下書き (\d+) 件を追加しました（要確認）$/,
-    "Đã thêm $1 bản nháp dịch tự động (cần kiểm tra)",
-  ],
   [
     /^固定リビジョンを (.*) → (.*) に変更します。.*$/s,
     "Đổi phiên bản cố định $1 → $2. Hãy kiểm tra ảnh hưởng tới Data Contract và tham chiếu. Các biểu mẫu khác không bị thay đổi.",
@@ -842,7 +808,6 @@ new window.MutationObserver((records) => {
 });
 const nativeConfirm = window.confirm.bind(window);
 window.confirm = (message) => nativeConfirm(locale === "vi" ? translate(String(message)) : message);
-const picker = document.getElementById("admin-locale");
 function setLocale(next) {
   locale = next === "vi" ? "vi" : "ja";
   try {
@@ -851,8 +816,7 @@ function setLocale(next) {
     // Not persisted; the choice still applies to this page view.
   }
   document.documentElement.lang = locale === "vi" ? "vi-VN" : "ja-JP";
-  picker.value = locale;
   apply(document.body);
 }
-picker.addEventListener("change", () => setLocale(picker.value));
+document.addEventListener("studio:locale", (event) => setLocale(event.detail));
 setLocale(locale);

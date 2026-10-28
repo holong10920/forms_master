@@ -2,6 +2,18 @@
 
 Open **http://localhost:4180/**. Sign in once through the Go OIDC BFF, then choose Form Builder in the shared sidebar. The real existing Studio is mounted directly in React, with shared locale/account/session and deep links under `/studio/sites/:siteId/forms/:formId`. The editor itself is not inside an iframe. Only untrusted Preview uses an isolated frame.
 
+Authenticated pages use the sidebar for navigation and the single JA/VI language control; the redundant Workspace header is removed. Form-content translation management has been removed completely, including its page, navigation, editor module and login return targets. Previous translation URLs return to the Dashboard. The sidebar language control changes application chrome only. Members remain read-only unless an explicit server capability grants editing.
+
+Compiler releases retain supported JA/VI content and validation messages. Isolated Preview receives the sidebar language through the existing origin-checked handshake, with a validated `lang` URL fallback when browser storage is blocked. Preview has no language-switch buttons. Public runtime can select a supported language using `?lang=ja` or `?lang=vi`; unsupported languages fall back to Japanese. Existing immutable releases are unchanged; new compilation is required to include updated runtime behavior.
+
+## Tailwind styling
+
+Workspace, Studio and Customer/Preview use Tailwind CSS 4.3.0. Component recipes live in `web/src/recipes.ts`, `studio/recipes.js` and `packages/static-runtime/src/recipes.ts`; React and the DOM helpers apply complete static utility strings. Semantic class hooks remain for behavior and tests. Shared recipe composition lives in `@fb/ui-styles`.
+
+The three handwritten `style.css` files are removed. The only application CSS source files are Tailwind entries: `web/src/tailwind.css` (imports, explicit sources, theme/animation configuration) and `packages/static-runtime/src/tailwind.css` (utilities and explicit runtime source). Do not add a parallel stylesheet or construct Tailwind classes from Business User values. Typed No-Code appearance values continue through validated CSS variables and the approved theme-token generator.
+
+The compiler runs Tailwind locally, assigns compact deterministic utility names through a CSS selector AST, and pins the CSS/HTML/JS together. Semantic hooks stay intact. Runtime root classes are carried by compiled HTML and copied from the verified bootstrap document into isolated Preview. Existing releases retain their original artifacts. Sports initial budgets and Motion-none isolation remain enforced; no Tailwind browser CDN/runtime or CSS compiler is shipped to customers.
+
 ## Start locally
 
 From repository root, using Node 24.22.1 and the pinned pnpm 12.15.0:
