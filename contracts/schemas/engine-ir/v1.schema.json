@@ -467,6 +467,9 @@
               },
               "availableWhen": {
                 "$ref": "#/$defs/Expression"
+              },
+              "initial": {
+                "type": "boolean"
               }
             },
             "required": ["value"],
@@ -534,6 +537,10 @@
             },
             "presentation": {
               "enum": ["native", "compact"]
+            },
+            "defaultValue": {
+              "type": "string",
+              "maxLength": 100
             }
           },
           "additionalProperties": false
@@ -831,6 +838,42 @@
         },
         "shadow": {
           "enum": ["none", "soft"]
+        },
+        "primaryColor": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "secondaryColor": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "requiredColor": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "inputBorderColor": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "focusColor": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "fontFamily": {
+          "enum": ["system", "hiragino", "noto"]
+        },
+        "headerLogo": {
+          "enum": ["none", "instrument-local"]
+        },
+        "headerText": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "progressStyle": {
+          "enum": ["circles", "bar"]
+        },
+        "requiredBadge": {
+          "enum": ["solid", "outline"]
         }
       },
       "additionalProperties": false
@@ -901,6 +944,42 @@
         },
         "mobile": {
           "$ref": "#/$defs/AppearanceValues"
+        },
+        "primaryColor": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "secondaryColor": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "requiredColor": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "inputBorderColor": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "focusColor": {
+          "type": "string",
+          "pattern": "^#[a-fA-F0-9]{6}$"
+        },
+        "fontFamily": {
+          "enum": ["system", "hiragino", "noto"]
+        },
+        "headerLogo": {
+          "enum": ["none", "instrument-local"]
+        },
+        "headerText": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "progressStyle": {
+          "enum": ["circles", "bar"]
+        },
+        "requiredBadge": {
+          "enum": ["solid", "outline"]
         }
       },
       "additionalProperties": false

@@ -181,6 +181,7 @@ export interface Field {
     };
     exclusive?: boolean;
     availableWhen?: Expression;
+    initial?: boolean;
   }[];
   validators?: {
     use:
@@ -209,6 +210,7 @@ export interface Field {
     postalAddressTarget?: string;
     queryParameter?: string;
     presentation?: "native" | "compact";
+    defaultValue?: string;
   };
   /**
    * @minItems 2
@@ -245,6 +247,16 @@ export interface Appearance {
   radius?: number;
   shadow?: "none" | "soft";
   mobile?: AppearanceValues;
+  primaryColor?: string;
+  secondaryColor?: string;
+  requiredColor?: string;
+  inputBorderColor?: string;
+  focusColor?: string;
+  fontFamily?: "system" | "hiragino" | "noto";
+  headerLogo?: "none" | "instrument-local";
+  headerText?: string;
+  progressStyle?: "circles" | "bar";
+  requiredBadge?: "solid" | "outline";
 }
 export interface AppearanceValues {
   maxWidth?: number;
@@ -261,6 +273,16 @@ export interface AppearanceValues {
   borderWidth?: number;
   radius?: number;
   shadow?: "none" | "soft";
+  primaryColor?: string;
+  secondaryColor?: string;
+  requiredColor?: string;
+  inputBorderColor?: string;
+  focusColor?: string;
+  fontFamily?: "system" | "hiragino" | "noto";
+  headerLogo?: "none" | "instrument-local";
+  headerText?: string;
+  progressStyle?: "circles" | "bar";
+  requiredBadge?: "solid" | "outline";
 }
 export interface Group {
   id: string;

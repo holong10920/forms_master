@@ -70,6 +70,7 @@ export function itemOrder(g: EngineGroup): EngineField[] {
     const f = g.fields.find((f) => f.id === id);
     if (!f) throw new EngineError("E-REF-DANGLING", id);
     pending.add(id);
+    for (const dep of f.resetOnChange ?? []) visit(dep);
     for (const e of [
       f.visibleWhen,
       f.requiredWhen,
@@ -200,4 +201,74 @@ export function moveItems(value: GroupValue, order: string[]): GroupValue {
   )
     throw new EngineError("E-ITEM-ID");
   return { order: [...order], items: structuredClone(value.items) };
+}
+
+/** Renderer defaults are applied only to absent staged cells, never to an explicit empty answer. */
+export function itemDefaults(
+  g: EngineGroup,
+  cells: Record<string, Cell>,
+  conditions: EngineIRV1["conditions"] = {},
+  read: Read = () => undefined,
+): Record<string, Cell> {
+  const next = { ...cells };
+  const itemRead: Read = (name) => (name.startsWith("$item:") ? next[name.slice(6)] : read(name));
+  for (const field of itemOrder(g)) {
+    if (
+      Object.hasOwn(next, field.id) ||
+      (field.visibleWhen && evaluate(field.visibleWhen, itemRead, conditions) !== true)
+    )
+      continue;
+    const selected = field.options?.find(
+      (option) =>
+        (option.value === field.config?.defaultValue || option.initial) &&
+        (!option.availableWhen || evaluate(option.availableWhen, itemRead, conditions) === true),
+    );
+    if (selected) next[field.id] = selected.value;
+  }
+  return next;
+}
+
+/** Edit a staged row; confirmed rows are copied before calling this helper. */
+export function stageChange(
+  g: EngineGroup,
+  previous: Record<string, Cell>,
+  id: string,
+  value: Cell | undefined,
+  conditions: EngineIRV1["conditions"] = {},
+  read: Read = () => undefined,
+): Record<string, Cell> {
+  const next = { ...previous };
+  if (value === undefined) Reflect.deleteProperty(next, id);
+  else next[id] = value;
+  for (const field of itemOrder(g))
+    if (
+      field.resetOnChange?.some(
+        (source) => JSON.stringify(previous[source]) !== JSON.stringify(next[source]),
+      )
+    )
+      Reflect.deleteProperty(next, field.id);
+  Object.assign(next, itemDefaults(g, next, conditions, read));
+  const stagedId = "itm_staged";
+  const before = effectiveGroup(
+    g,
+    { order: [stagedId], items: { [stagedId]: previous } },
+    read,
+    conditions,
+  );
+  const after = effectiveGroup(
+    g,
+    { order: [stagedId], items: { [stagedId]: next } },
+    read,
+    conditions,
+  );
+  for (const field of g.fields) {
+    const address = `${g.id}[${stagedId}]/${field.id}`;
+    if (
+      field.clearOnDeactivate &&
+      before.active.includes(address) &&
+      !after.active.includes(address)
+    )
+      Reflect.deleteProperty(next, field.id);
+  }
+  return next;
 }

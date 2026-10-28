@@ -1,7 +1,7 @@
 import { decorateStudio } from "./ui.js";
 import { classes } from "./recipes.js";
 import "./localization.js";
-import { gakkiApplyDraft } from "../templates/gakki-apply.ts";
+import { multiProductDraft } from "../templates/multi-product.ts";
 import { pcApplyDraft } from "../templates/pc-apply.ts";
 decorateStudio();
 // Form Studio shell: sign-in (Mock IdP, OIDC + PKCE), header, form list, modes and global wiring.
@@ -849,7 +849,7 @@ const gakkiButton = h(
     id: "gakki-template",
     hidden: true,
     onclick: () =>
-      void importDefinition(gakkiApplyDraft(), "楽器 Apply 合成デモ").catch((e) =>
+      void importDefinition(multiProductDraft(), "複数商品 Apply 合成デモ").catch((e) =>
         notice(errorText(e)),
       ),
   },

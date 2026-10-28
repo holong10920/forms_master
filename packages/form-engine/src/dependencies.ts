@@ -16,14 +16,17 @@ export function references(
   }
   return e.args.flatMap((a) => references(a, conditions, pending));
 }
-export function fieldExpressions(f: EngineNode): EngineExpression[] {
+export function fieldExpressions(f: EngineNode, item = false): EngineExpression[] {
   return f.type === "group"
-    ? [...(f.visibleWhen ? [f.visibleWhen] : []), ...f.fields.flatMap(fieldExpressions)]
+    ? [
+        ...(f.visibleWhen ? [f.visibleWhen] : []),
+        ...f.fields.flatMap((child) => fieldExpressions(child, true)),
+      ]
     : [
         f.visibleWhen,
         f.requiredWhen,
         f.formula,
-        ...(f.resetOnChange ?? []).map((id) => ({ ref: "$local:" + id })),
+        ...(f.resetOnChange ?? []).map((id) => (item ? { item: id } : { ref: "$local:" + id })),
         ...(f.options ?? []).map((o) => o.availableWhen),
       ].filter((e) => e !== undefined);
 }

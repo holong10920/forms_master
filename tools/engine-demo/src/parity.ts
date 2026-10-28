@@ -34,6 +34,7 @@ export function fixtureIR(name: string): EngineIRV1 {
       "formats",
       "pc-apply-reference",
       "gakki-apply-reference",
+      "multi-product",
     ].includes(name)
   )
     throw new Error("unknown trusted fixture");
@@ -114,6 +115,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     "formats",
     "pc-apply-reference",
     "gakki-apply-reference",
+    "multi-product",
   ]) {
     const selected = cases.filter((c) => c.definition === name);
     const ir = fixtureIR(name);

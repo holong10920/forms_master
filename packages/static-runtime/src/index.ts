@@ -4,6 +4,8 @@ import {
   formTitle,
   help as helpClasses,
   formFields,
+  cartLayout,
+  siteTokens,
 } from "./recipes.ts";
 declare const __FB_MOTION__: boolean;
 declare const __FB_EXTENDED__: boolean;
@@ -97,6 +99,7 @@ export async function start(bindings: Bindings = {}): Promise<void> {
     : undefined;
   enhancements?.assertIR(ir);
   enhancements?.applyAppearance(host, ir.appearance);
+  enhancements?.siteAppearance(host, ir.appearance);
   const locales: Locale[] = ir.locale?.supported ?? ["ja"];
   const pick = (v?: string | null) => locales.find((l) => l === v?.slice(0, 2));
   const remember = (value?: Locale) => {
@@ -143,7 +146,9 @@ export async function start(bindings: Bindings = {}): Promise<void> {
     storeOptions: StoreOption[] = [];
   let disposeStore: (() => void) | undefined, motion: ReturnType<MotionModule["mount"]> | undefined;
   const viewRoot = el("div");
+  host.classList.add(...(cartLayout + " " + siteTokens).split(" "));
   host.replaceChildren(viewRoot);
+  const cartEditors = new Map<string, import("./cart.ts").CartEditor>();
   let previousStep = state.current,
     previousActive = "";
   const reduced = __FB_MOTION__ ? matchMedia("(prefers-reduced-motion: reduce)") : undefined;
@@ -268,12 +273,15 @@ export async function start(bindings: Bindings = {}): Promise<void> {
     }
     const step = ir.steps.find((s) => s.id === state.current);
     if (!step) throw new EngineError("E-STEP");
+    const siteHeader = enhancements?.header(ir.appearance);
+    if (siteHeader) viewRoot.append(siteHeader);
     if (enhancements) viewRoot.append(enhancements.progress(ir, state, text, msg));
-    viewRoot.append(
-      step.kind === "review"
-        ? tr(el("h1"), texts.reviewTitle, "reviewTitle")
-        : tr(el("h1"), step.title, step.id.replace("stp_", "")),
-    );
+    if (!(step.content ?? []).some((c) => "group" in c))
+      viewRoot.append(
+        step.kind === "review"
+          ? tr(el("h1"), texts.reviewTitle, "reviewTitle")
+          : tr(el("h1"), step.title, step.id.replace("stp_", "")),
+      );
     const errors = visibleErrors(ir, state);
     if (errors.length) {
       const summary = el("div");
@@ -305,14 +313,38 @@ export async function start(bindings: Bindings = {}): Promise<void> {
       for (const f of ir.nodes) {
         if (
           !view.active.has(f.id) ||
-          !(step.content ?? []).some((c) => "field" in c && c.field === `$local:${f.id}`)
+          !(step.content ?? []).some(
+            (c) =>
+              ("field" in c && c.field === `$local:${f.id}`) ||
+              ("group" in c && c.group === `$local:${f.id}`),
+          )
         )
           continue;
         if (__FB_PREVIEW__ && pin.partial?.blockedFields.includes(f.id)) {
           viewRoot.append(el("p", "この部品は利用停止中です · " + f.key));
           continue;
         }
-        if (f.type === "group") throw new EngineError("E-RUNTIME-UNSUPPORTED", f.id);
+        if (f.type === "group") {
+          if (!enhancements) throw new EngineError("E-RUNTIME-UNSUPPORTED", f.id);
+          const editor = cartEditors.get(f.id) ?? {};
+          cartEditors.set(f.id, editor);
+          content.append(
+            enhancements.cart(
+              f,
+              view.effective[f.id] as import("@fb/form-engine").GroupValue | undefined,
+              editor,
+              ir,
+              text,
+              msg,
+              (value) => {
+                send({ type: "commit", field: f.id, value });
+              },
+              render,
+              (id) => view.effective[id],
+            ),
+          );
+          continue;
+        }
         const wrap = el("div");
         const showIssues = () =>
           enhancements?.inlineIssues(
@@ -516,10 +548,20 @@ export async function start(bindings: Bindings = {}): Promise<void> {
         content.append(wrap);
       }
     }
+    if (
+      [...cartEditors.values()].some((editor) => editor.cells) &&
+      ir.nodes.some(
+        (f) =>
+          f.type === "group" &&
+          (step.content ?? []).some((c) => "group" in c && c.group === `$local:${f.id}`),
+      )
+    )
+      return;
     const actions = el("div");
     actions.className = actionClasses;
     const back = tr(el("button"), texts.back, "back");
     back.type = "button";
+    back.dataset.secondary = "true";
     back.disabled = state.current === snapshot(ir, state).path[0] || state.status === "pending";
     back.addEventListener("click", () => {
       nav("back");

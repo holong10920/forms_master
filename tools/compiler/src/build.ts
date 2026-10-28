@@ -194,6 +194,7 @@ export async function compile(
   localize(ir);
   const resolved = resolveAssets(root, definition as FormDefinitionV1, ir);
   const extended =
+    ir.nodes.some((f) => f.type === "group") ||
     !!ir.appearance ||
     !!ir.customerDraft ||
     ir.nodes.some(
@@ -213,25 +214,28 @@ export async function compile(
   };
   if (
     !/^frm_[a-z0-9_]{1,64}$/u.test(ir.form.formId) ||
-    ir.nodes.some(
-      (f) =>
-        f.type === "group" ||
-        ![
-          "number",
-          "date",
-          "tel",
-          "postal",
-          "katakana",
-          "text",
-          "textarea",
-          "email",
-          "boolean",
-          "choice.radio",
-          "choice.select",
-          "calculated",
-          "choice.checkboxes",
-          "plugin:storeSel",
-        ].includes(f.type),
+    ir.nodes.some((f) =>
+      f.type === "group"
+        ? f.fields.some(
+            (child) =>
+              !["text", "textarea", "number", "choice.select", "choice.radio"].includes(child.type),
+          )
+        : ![
+            "number",
+            "date",
+            "tel",
+            "postal",
+            "katakana",
+            "text",
+            "textarea",
+            "email",
+            "boolean",
+            "choice.radio",
+            "choice.select",
+            "calculated",
+            "choice.checkboxes",
+            "plugin:storeSel",
+          ].includes(f.type),
     )
   )
     throw new Error("E-RUNTIME-PROFILE-UNSUPPORTED");

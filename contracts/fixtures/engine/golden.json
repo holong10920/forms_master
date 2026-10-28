@@ -1896,6 +1896,117 @@
       },
       "definition": "gakki-apply-reference",
       "current": "stp_review"
+    },
+    {
+      "name": "multi-two-products",
+      "definition": "multi-product",
+      "values": {
+        "grp_products": {
+          "order": [
+            "itm_a",
+            "itm_b"
+          ],
+          "items": {
+            "itm_a": {
+              "fld_product_family": "gakki_site",
+              "fld_category": "guitar-bass",
+              "fld_title": "合成 Model A",
+              "fld_condition": "used"
+            },
+            "itm_b": {
+              "fld_product_family": "gakki_site",
+              "fld_category": "guitar-bass",
+              "fld_title": "合成 Model B",
+              "fld_condition": "used"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "multi-bad-dependent",
+      "definition": "multi-product",
+      "values": {
+        "grp_products": {
+          "order": [
+            "itm_a"
+          ],
+          "items": {
+            "itm_a": {
+              "fld_product_family": "gakki_site",
+              "fld_category": "desktop",
+              "fld_title": "合成 Model A",
+              "fld_condition": "used"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "multi-missing-title",
+      "definition": "multi-product",
+      "values": {
+        "grp_products": {
+          "order": [
+            "itm_a"
+          ],
+          "items": {
+            "itm_a": {
+              "fld_product_family": "other",
+              "fld_condition": "used"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "multi-empty",
+      "definition": "multi-product",
+      "values": {
+        "grp_products": {
+          "order": [],
+          "items": {}
+        }
+      }
+    },
+    {
+      "name": "multi-foreign-key",
+      "definition": "multi-product",
+      "values": {
+        "grp_products": {
+          "order": [
+            "itm_a"
+          ],
+          "items": {
+            "itm_a": {
+              "fld_product_family": "gakki_site",
+              "fld_category": "guitar-bass",
+              "fld_title": "合成 Model A",
+              "fld_condition": "used",
+              "extra": "invalid"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "multi-foreign-category",
+      "definition": "multi-product",
+      "values": {
+        "grp_products": {
+          "order": [
+            "itm_a"
+          ],
+          "items": {
+            "itm_a": {
+              "fld_product_family": "gakki_site",
+              "fld_category": "injected",
+              "fld_title": "合成 Model A",
+              "fld_condition": "used"
+            }
+          }
+        }
+      }
     }
   ]
 }

@@ -1,4 +1,5 @@
 import { classes } from "./recipes.js";
+import { cartEditor } from "./cart-editor.js";
 import { appearanceEditor } from "./appearance.js";
 import { applyAppearance } from "../../../packages/static-runtime/src/appearance.ts";
 // Build mode: outline + palette (left), canvas (center), inspector (right).
@@ -56,7 +57,7 @@ import { ruleEditor, namedConditions, branches, skipEditor, commit, fieldUsage }
 const ed = { leftTab: "outline", inspTab: {}, device: "desktop", drag: null };
 export const editorState = ed;
 // ---------- Selection / content helpers ----------
-const contentKey = (c) => (c.field ? c.field : c.block ? "block:" + c.block : "group:" + c.group);
+const contentKey = (c) => (c.field ? c.field : c.block ? "block:" + c.block : c.group);
 const selectionKey = (sel) => (sel?.startsWith("block:") ? sel : "$local:" + sel);
 const keyToSelection = (key) => (key.startsWith("$local:") ? key.slice(7) : key);
 function locate(key) {
@@ -96,6 +97,26 @@ export function addField(type, { stepId, index } = {}) {
     persist: "allowed",
     required: false,
   };
+  if (type === "group") {
+    f.id = "grp_" + suffix;
+    f.key = "products_" + suffix;
+    f.classification = "personal";
+    delete f.required;
+    f.minItems = 1;
+    f.maxItems = 20;
+    f.label = { ja: "商品一覧" };
+    f.fields = [
+      {
+        id: "fld_item_title",
+        key: "title",
+        type: "text",
+        label: { ja: "商品名" },
+        classification: "personal",
+        persist: "never",
+        required: true,
+      },
+    ];
+  }
   if (type.startsWith("choice.")) f.config = { presentation: "native" };
   if (type.startsWith("choice."))
     f.options = [
@@ -128,7 +149,11 @@ export function addField(type, { stepId, index } = {}) {
   }[type];
   if (format) f.validators = [{ use: format }];
   S.draft.fields.push(f);
-  step.content.splice(index ?? step.content.length, 0, { field: "$local:" + f.id });
+  step.content.splice(
+    index ?? step.content.length,
+    0,
+    f.type === "group" ? { group: "$local:" + f.id } : { field: "$local:" + f.id },
+  );
   S.currentStep = step.id;
   S.selected = f.id;
   ed.inspTab.field = "basic";
@@ -217,10 +242,18 @@ export function duplicateField(id) {
   const at = locate("$local:" + id);
   if (!f || !at || !canEdit()) return;
   const suffix = newId("", 12);
-  const copy = { ...clone(f), id: "fld_" + suffix, key: f.key + "_copy_" + suffix.slice(0, 4) };
+  const copy = {
+    ...clone(f),
+    id: (f.type === "group" ? "grp_" : "fld_") + suffix,
+    key: f.key + "_copy_" + suffix.slice(0, 4),
+  };
   copy.label = { ...copy.label, ja: (f.label?.ja ?? "") + "（コピー）" };
   S.draft.fields.push(copy);
-  at.step.content.splice(at.index + 1, 0, { field: "$local:" + copy.id });
+  at.step.content.splice(
+    at.index + 1,
+    0,
+    copy.type === "group" ? { group: "$local:" + copy.id } : { field: "$local:" + copy.id },
+  );
   S.selected = copy.id;
   commit();
   notice(L("フィールドを複製しました", "Đã nhân bản trường"));
@@ -243,7 +276,7 @@ export async function deleteField(id) {
   if (!ok) return;
   S.draft.fields = S.draft.fields.filter((x) => x.id !== f.id);
   for (const s of S.draft.steps)
-    if (s.content) s.content = s.content.filter((c) => c.field !== "$local:" + f.id);
+    if (s.content) s.content = s.content.filter((c) => (c.field ?? c.group) !== "$local:" + f.id);
   if (
     !S.draft.fields.some((x) => x.type === "plugin:storeSel") &&
     S.draft.dependencies?.capabilities
@@ -301,7 +334,9 @@ async function deleteStep(step) {
       if (t.to === step.id) t.to = fallback;
     }
   const removed = new Set(
-    (step.content ?? []).filter((c) => c.field).map((c) => c.field.replace("$local:", "")),
+    (step.content ?? [])
+      .filter((c) => c.field || c.group)
+      .map((c) => (c.field ?? c.group).replace("$local:", "")),
   );
   S.draft.fields = S.draft.fields.filter((f) => !removed.has(f.id));
   const blocks = new Set((step.content ?? []).filter((c) => c.block).map((c) => c.block));
@@ -474,7 +509,7 @@ function renderOutline() {
 function outlineItem(step, c, index, editable) {
   const key = contentKey(c);
   let label, typeName, aria;
-  if (c.field) {
+  if (c.field || c.group) {
     const f = fieldOfContent(c);
     label = f ? fieldLabel(f) : c.field;
     typeName = f?.type;
@@ -608,7 +643,10 @@ function blockTitle(entry) {
 function renderPalette() {
   const box = $("palette");
   if (!canEdit()) return fill(box);
-  const types = S.schema?.$defs?.Field?.properties?.type?.enum ?? Object.keys(TYPES);
+  const types = [
+    ...(S.schema?.$defs?.Field?.properties?.type?.enum ?? Object.keys(TYPES)),
+    "group",
+  ];
   fill(
     box,
     ...GROUPS.map(([group, title]) =>
@@ -778,6 +816,12 @@ const optionLabel = (o) => o.label?.ja ?? o.value;
 function mockControl(f) {
   const ph = f.placeholder?.ja ?? "";
   switch (f.type) {
+    case "group":
+      return h(
+        "div",
+        { class: "cv-control" },
+        "商品一覧 · " + f.fields.length + " 項目 · 追加 / 編集 / 削除",
+      );
     case "textarea":
       return h("div", { class: "cv-control tall" }, ph);
     case "boolean":
@@ -955,7 +999,10 @@ function openInsertMenu(anchor, stepId, index) {
     }),
   );
   anchor.setAttribute("aria-controls", "insert-menu");
-  const types = S.schema?.$defs?.Field?.properties?.type?.enum ?? Object.keys(TYPES);
+  const types = [
+    ...(S.schema?.$defs?.Field?.properties?.type?.enum ?? Object.keys(TYPES)),
+    "group",
+  ];
   togglePopover(anchor, insertMenu, (pop) =>
     fill(
       pop,
@@ -982,7 +1029,7 @@ function openInsertMenu(anchor, stepId, index) {
 function fieldBlock(step, c, index, editable, issues) {
   const key = contentKey(c);
   const selected = isSelectedKey(key);
-  if (c.field) {
+  if (c.field || c.group) {
     const f = fieldOfContent(c);
     if (!f)
       return h(
@@ -1451,6 +1498,7 @@ export function renderInspector() {
   }
 }
 function fieldInspector({ field: f }, tab, issues) {
+  if (f.type === "group") return cartEditor(f);
   const out = [];
   const step = stepOfField(f.id) ?? currentStep();
   const own = issues.filter((x) => x.field === f.id);

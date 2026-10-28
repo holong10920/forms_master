@@ -57,3 +57,38 @@ export function applyAppearance(node: HTMLElement, value?: Appearance, scope?: "
   for (const [key, v] of Object.entries(appearanceVariables(value, scope ? "field-" : "")))
     node.style.setProperty(key, v);
 }
+
+export type SiteAppearance = Appearance & {
+  primaryColor?: string;
+  secondaryColor?: string;
+  requiredColor?: string;
+  inputBorderColor?: string;
+  focusColor?: string;
+  fontFamily?: "system" | "hiragino" | "noto";
+  headerLogo?: "none" | "instrument-local";
+  headerText?: string;
+  progressStyle?: "circles" | "bar";
+  requiredBadge?: "solid" | "outline";
+};
+/** All values come from bounded schema tokens. No URL/CSS/script input. */
+export function siteAppearance(host: HTMLElement, appearance?: SiteAppearance): void {
+  for (const [key, variable] of Object.entries({
+    primaryColor: "--form-accent",
+    secondaryColor: "--fb-secondary",
+    requiredColor: "--fb-required",
+    inputBorderColor: "--fb-input-border",
+    focusColor: "--fb-focus",
+  })) {
+    const v = appearance?.[key as keyof SiteAppearance];
+    if (typeof v === "string" && /^#[a-fA-F0-9]{6}$/.test(v)) host.style.setProperty(variable, v);
+  }
+  if (appearance?.requiredColor) host.style.setProperty("--fb-required-text", "#ffffff");
+  const fonts = {
+    system: "system-ui, sans-serif",
+    hiragino: '"Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif',
+    noto: '"Noto Sans JP", sans-serif',
+  };
+  if (appearance?.fontFamily) host.style.fontFamily = fonts[appearance.fontFamily];
+  host.dataset.requiredBadge = appearance?.requiredBadge ?? "solid";
+  host.dataset.progressStyle = appearance?.progressStyle ?? "circles";
+}

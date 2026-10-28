@@ -7,9 +7,16 @@ const fixedPatterns = new Map([
   ["/$defs/Field/properties/config/properties/postalAddressTarget", "^fld_[a-zA-Z0-9_]+$"],
   ["/$defs/Field/properties/config/properties/queryParameter", "^[a-z][a-z0-9_]{0,30}$"],
   ...["Appearance", "AppearanceValues"].flatMap((name) =>
-    ["color", "background", "borderColor"].map(
-      (key) => [`/$defs/${name}/properties/${key}`, "^#[a-fA-F0-9]{6}$"] as const,
-    ),
+    [
+      "color",
+      "background",
+      "borderColor",
+      "primaryColor",
+      "secondaryColor",
+      "requiredColor",
+      "inputBorderColor",
+      "focusColor",
+    ].map((key) => [`/$defs/${name}/properties/${key}`, "^#[a-fA-F0-9]{6}$"] as const),
   ),
 ]);
 const KEYWORDS = new Set([

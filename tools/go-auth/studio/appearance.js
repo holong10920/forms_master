@@ -125,6 +125,75 @@ export function appearanceEditor(owner) {
       ),
     ),
   );
+  for (const [key, label] of [
+    ["primaryColor", "メイン色"],
+    ["secondaryColor", "補助色"],
+    ["requiredColor", "必須バッジ色"],
+    ["inputBorderColor", "入力枠色"],
+    ["focusColor", "フォーカス色"],
+  ])
+    out.push(
+      field(
+        label,
+        input(current?.[key] ?? "", {
+          placeholder: "#008b46",
+          onCommit: (v, el) => {
+            if (v && !/^#[a-fA-F0-9]{6}$/.test(v)) {
+              el.setAttribute("aria-invalid", "true");
+              return;
+            }
+            set(key, v);
+          },
+        }),
+      ),
+    );
+  for (const [key, label, choices] of [
+    [
+      "requiredBadge",
+      "必須バッジ形式",
+      [
+        ["solid", "塗り"],
+        ["outline", "枠線"],
+      ],
+    ],
+    [
+      "fontFamily",
+      "フォント",
+      [
+        ["system", "System"],
+        ["hiragino", "Hiragino / Yu Gothic"],
+        ["noto", "Noto Sans JP"],
+      ],
+    ],
+    [
+      "headerLogo",
+      "ヘッダーロゴ",
+      [
+        ["none", "なし"],
+        ["instrument-local", "楽器（承認済ローカル画像）"],
+      ],
+    ],
+    [
+      "progressStyle",
+      "進捗表示",
+      [
+        ["circles", "丸"],
+        ["bar", "バー"],
+      ],
+    ],
+  ])
+    out.push(
+      field(
+        label,
+        select([["", "継承"], ...choices], current?.[key] ?? "", (v) => set(key, v)),
+      ),
+    );
+  out.push(
+    field(
+      "ヘッダー文言",
+      input(current?.headerText ?? "", { maxLength: 100, onCommit: (v) => set("headerText", v) }),
+    ),
+  );
   out.push(
     btn(
       "スタイルをリセット / Đặt lại",

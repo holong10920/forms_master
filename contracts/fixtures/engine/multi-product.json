@@ -1,0 +1,1327 @@
+{
+  "schemaVersion": "1.0.0",
+  "kind": "form",
+  "formId": "frm_multi_product_demo",
+  "siteId": "site_pc_synthetic",
+  "locale": {
+    "default": "ja",
+    "supported": [
+      "ja",
+      "vi"
+    ]
+  },
+  "appearance": {
+    "maxWidth": 600,
+    "padding": 24,
+    "gap": 24,
+    "radius": 0,
+    "background": "#ffffff",
+    "color": "#333333",
+    "fontFamily": "hiragino",
+    "primaryColor": "#008b46",
+    "secondaryColor": "#666666",
+    "requiredColor": "#e53935",
+    "inputBorderColor": "#cccccc",
+    "focusColor": "#008b46",
+    "headerLogo": "instrument-local",
+    "headerText": "楽器高く売れるドットコム",
+    "progressStyle": "circles",
+    "mobile": {
+      "padding": 16
+    }
+  },
+  "texts": {
+    "formTitle": {
+      "ja": ""
+    },
+    "formDescription": {
+      "ja": ""
+    }
+  },
+  "fields": [
+    {
+      "id": "grp_products",
+      "key": "products",
+      "type": "group",
+      "label": {
+        "ja": "商品情報"
+      },
+      "classification": "personal",
+      "persist": "allowed",
+      "minItems": 1,
+      "maxItems": 20,
+      "fields": [
+        {
+          "id": "fld_product_family",
+          "key": "product_family",
+          "type": "choice.select",
+          "label": {
+            "ja": "商品カテゴリ"
+          },
+          "classification": "public",
+          "persist": "allowed",
+          "required": true,
+          "options": [
+            {
+              "value": "laundry",
+              "label": {
+                "ja": "洗濯機、乾燥機"
+              }
+            },
+            {
+              "value": "fridge",
+              "label": {
+                "ja": "冷蔵庫、冷凍庫"
+              }
+            },
+            {
+              "value": "hvac",
+              "label": {
+                "ja": "冷暖房、空調"
+              }
+            },
+            {
+              "value": "kitchen",
+              "label": {
+                "ja": "キッチン家電"
+              }
+            },
+            {
+              "value": "tv",
+              "label": {
+                "ja": "テレビ、周辺機器"
+              }
+            },
+            {
+              "value": "beauty",
+              "label": {
+                "ja": "美容、健康器具"
+              }
+            },
+            {
+              "value": "pc_site",
+              "label": {
+                "ja": "PC、スマホ、タブレット"
+              }
+            },
+            {
+              "value": "camera_site",
+              "label": {
+                "ja": "カメラ、光学機器"
+              }
+            },
+            {
+              "value": "audio",
+              "label": {
+                "ja": "オーディオ"
+              }
+            },
+            {
+              "value": "gakki_site",
+              "label": {
+                "ja": "楽器"
+              }
+            },
+            {
+              "value": "sports_outdoor",
+              "label": {
+                "ja": "スポーツ・アウトドア"
+              }
+            },
+            {
+              "value": "other",
+              "label": {
+                "ja": "その他"
+              }
+            }
+          ],
+          "config": {
+            "presentation": "native",
+            "defaultValue": "gakki_site"
+          }
+        },
+        {
+          "id": "fld_category",
+          "key": "category",
+          "type": "choice.select",
+          "label": {
+            "ja": "商品カテゴリ詳細"
+          },
+          "classification": "public",
+          "persist": "allowed",
+          "required": true,
+          "options": [
+            {
+              "value": "laundry-f",
+              "label": {
+                "ja": "ドラム式洗濯機"
+              },
+              "initial": true,
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "laundry"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "laundry-t",
+              "label": {
+                "ja": "縦型洗濯機"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "laundry"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "laundry-d",
+              "label": {
+                "ja": "乾燥機"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "laundry"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "desktop",
+              "label": {
+                "ja": "デスクトップPC"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "pc_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "note",
+              "label": {
+                "ja": "ノートPC"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "pc_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "phone",
+              "label": {
+                "ja": "スマホ本体"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "pc_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "tablet",
+              "label": {
+                "ja": "タブレット"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "pc_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "pc-accessories",
+              "label": {
+                "ja": "周辺機器"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "pc_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "camera",
+              "label": {
+                "ja": "カメラ本体"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "camera_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "lens",
+              "label": {
+                "ja": "レンズ"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "camera_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "camera-accessories",
+              "label": {
+                "ja": "アクセサリー"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "camera_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "telescope",
+              "label": {
+                "ja": "望遠鏡"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "camera_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "fieldglasses",
+              "label": {
+                "ja": "双眼鏡"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "camera_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "microscope",
+              "label": {
+                "ja": "顕微鏡"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "camera_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "guitar-bass",
+              "label": {
+                "ja": "ギター、ベース"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "gakki_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "piano",
+              "label": {
+                "ja": "ピアノ、エレクトーン"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "gakki_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "keyboard",
+              "label": {
+                "ja": "キーボード、電子ピアノ"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "gakki_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "inst",
+              "label": {
+                "ja": "管楽器・弦楽器・打楽器"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "gakki_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "dtm-dj",
+              "label": {
+                "ja": "DTM・DJ・音響機器"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "gakki_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "gakki-accessories",
+              "label": {
+                "ja": "周辺機器・アクセサリー"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "gakki_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "gakki-o",
+              "label": {
+                "ja": "その他"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "gakki_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "bicycle_site",
+              "label": {
+                "ja": "自転車"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "sports_outdoor"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "golf",
+              "label": {
+                "ja": "ゴルフ"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "sports_outdoor"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "fishing",
+              "label": {
+                "ja": "釣具"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "sports_outdoor"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "sports-o",
+              "label": {
+                "ja": "その他"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_product_family"
+                  },
+                  {
+                    "const": "sports_outdoor"
+                  }
+                ]
+              }
+            }
+          ],
+          "config": {
+            "presentation": "native"
+          },
+          "visibleWhen": {
+            "op": "in",
+            "args": [
+              {
+                "item": "fld_product_family"
+              },
+              {
+                "const": [
+                  "laundry",
+                  "pc_site",
+                  "camera_site",
+                  "gakki_site",
+                  "sports_outdoor"
+                ]
+              }
+            ]
+          },
+          "clearOnDeactivate": true,
+          "resetOnChange": [
+            "fld_product_family"
+          ]
+        },
+        {
+          "id": "fld_subcategory",
+          "key": "subcategory",
+          "type": "choice.select",
+          "label": {
+            "ja": "種類"
+          },
+          "classification": "public",
+          "persist": "allowed",
+          "required": true,
+          "visibleWhen": {
+            "op": "in",
+            "args": [
+              {
+                "item": "fld_category"
+              },
+              {
+                "const": [
+                  "camera",
+                  "bicycle_site",
+                  "fishing"
+                ]
+              }
+            ]
+          },
+          "clearOnDeactivate": true,
+          "resetOnChange": [
+            "fld_product_family",
+            "fld_category"
+          ],
+          "config": {
+            "presentation": "native"
+          },
+          "options": [
+            {
+              "value": "camera-d",
+              "label": {
+                "ja": "デジタルカメラ"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_category"
+                  },
+                  {
+                    "const": "camera"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "camera-v",
+              "label": {
+                "ja": "ビデオカメラ"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_category"
+                  },
+                  {
+                    "const": "camera"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "camera-a",
+              "label": {
+                "ja": "アクションカメラ"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_category"
+                  },
+                  {
+                    "const": "camera"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "camera-f",
+              "label": {
+                "ja": "フィルムカメラ"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_category"
+                  },
+                  {
+                    "const": "camera"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "camera-i",
+              "label": {
+                "ja": "インスタントカメラ"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_category"
+                  },
+                  {
+                    "const": "camera"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "camera-o",
+              "label": {
+                "ja": "その他"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_category"
+                  },
+                  {
+                    "const": "camera"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "bike",
+              "label": {
+                "ja": "自転車本体"
+              },
+              "initial": true,
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_category"
+                  },
+                  {
+                    "const": "bicycle_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "parts",
+              "label": {
+                "ja": "パーツ"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_category"
+                  },
+                  {
+                    "const": "bicycle_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "bicycle-accessories",
+              "label": {
+                "ja": "アクセサリー"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_category"
+                  },
+                  {
+                    "const": "bicycle_site"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "rod",
+              "label": {
+                "ja": "ロッド"
+              },
+              "initial": true,
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_category"
+                  },
+                  {
+                    "const": "fishing"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "reel",
+              "label": {
+                "ja": "リール"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_category"
+                  },
+                  {
+                    "const": "fishing"
+                  }
+                ]
+              }
+            },
+            {
+              "value": "fishing-accessories",
+              "label": {
+                "ja": "アクセサリー"
+              },
+              "availableWhen": {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_category"
+                  },
+                  {
+                    "const": "fishing"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "fld_title",
+          "key": "title",
+          "type": "text",
+          "label": {
+            "ja": "メーカー、モデル、型番など"
+          },
+          "classification": "personal",
+          "persist": "never",
+          "required": true,
+          "validators": [
+            {
+              "use": "maxLength",
+              "params": {
+                "value": 250
+              }
+            }
+          ],
+          "placeholder": {
+            "ja": "例）合成楽器 Model A"
+          },
+          "visibleWhen": {
+            "op": "or",
+            "args": [
+              {
+                "op": "not",
+                "args": [
+                  {
+                    "op": "in",
+                    "args": [
+                      {
+                        "item": "fld_product_family"
+                      },
+                      {
+                        "const": [
+                          "laundry",
+                          "pc_site",
+                          "camera_site",
+                          "gakki_site",
+                          "sports_outdoor"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "isNotEmpty",
+                "args": [
+                  {
+                    "item": "fld_category"
+                  }
+                ]
+              }
+            ]
+          },
+          "resetOnChange": [
+            "fld_product_family",
+            "fld_category"
+          ],
+          "clearOnDeactivate": true
+        },
+        {
+          "id": "fld_condition",
+          "key": "condition",
+          "type": "choice.radio",
+          "label": {
+            "ja": "商品の状態"
+          },
+          "classification": "public",
+          "persist": "allowed",
+          "required": true,
+          "options": [
+            {
+              "value": "used",
+              "label": {
+                "ja": "中古"
+              }
+            },
+            {
+              "value": "broken",
+              "label": {
+                "ja": "故障"
+              }
+            },
+            {
+              "value": "unused",
+              "label": {
+                "ja": "未使用"
+              }
+            }
+          ],
+          "config": {
+            "presentation": "native"
+          },
+          "visibleWhen": {
+            "op": "or",
+            "args": [
+              {
+                "op": "not",
+                "args": [
+                  {
+                    "op": "in",
+                    "args": [
+                      {
+                        "item": "fld_product_family"
+                      },
+                      {
+                        "const": [
+                          "laundry",
+                          "pc_site",
+                          "camera_site",
+                          "gakki_site",
+                          "sports_outdoor"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "isNotEmpty",
+                "args": [
+                  {
+                    "item": "fld_category"
+                  }
+                ]
+              }
+            ]
+          },
+          "resetOnChange": [
+            "fld_product_family",
+            "fld_category"
+          ],
+          "clearOnDeactivate": true,
+          "appearance": {
+            "columns": 3,
+            "mobile": {
+              "columns": 3
+            }
+          }
+        },
+        {
+          "id": "fld_location",
+          "key": "location",
+          "type": "choice.select",
+          "label": {
+            "ja": "建物の何階に設置していますか？"
+          },
+          "classification": "public",
+          "persist": "allowed",
+          "required": true,
+          "options": [
+            {
+              "value": "1階",
+              "label": {
+                "ja": "1階"
+              }
+            },
+            {
+              "value": "2～3階",
+              "label": {
+                "ja": "2～3階"
+              }
+            },
+            {
+              "value": "4階以上",
+              "label": {
+                "ja": "4階以上"
+              }
+            }
+          ],
+          "config": {
+            "presentation": "native"
+          },
+          "visibleWhen": {
+            "op": "eq",
+            "args": [
+              {
+                "item": "fld_category"
+              },
+              {
+                "const": "piano"
+              }
+            ]
+          },
+          "resetOnChange": [
+            "fld_product_family",
+            "fld_category"
+          ],
+          "clearOnDeactivate": true
+        },
+        {
+          "id": "fld_location2",
+          "key": "location2",
+          "type": "choice.select",
+          "label": {
+            "ja": "搬出について"
+          },
+          "classification": "public",
+          "persist": "allowed",
+          "required": true,
+          "options": [
+            {
+              "value": "エレベーターを使用",
+              "label": {
+                "ja": "エレベーターを使用"
+              }
+            },
+            {
+              "value": "階段作業が必要",
+              "label": {
+                "ja": "階段作業が必要"
+              }
+            },
+            {
+              "value": "クレーン作業が必要",
+              "label": {
+                "ja": "クレーン作業が必要"
+              }
+            }
+          ],
+          "config": {
+            "presentation": "native"
+          },
+          "visibleWhen": {
+            "op": "and",
+            "args": [
+              {
+                "op": "eq",
+                "args": [
+                  {
+                    "item": "fld_category"
+                  },
+                  {
+                    "const": "piano"
+                  }
+                ]
+              },
+              {
+                "op": "in",
+                "args": [
+                  {
+                    "item": "fld_location"
+                  },
+                  {
+                    "const": [
+                      "2～3階",
+                      "4階以上"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "resetOnChange": [
+            "fld_product_family",
+            "fld_category"
+          ],
+          "clearOnDeactivate": true
+        },
+        {
+          "id": "fld_item_comment",
+          "key": "item_comment",
+          "type": "textarea",
+          "label": {
+            "ja": "補足事項"
+          },
+          "classification": "personal",
+          "persist": "never",
+          "required": false,
+          "placeholder": {
+            "ja": "例）付属品：合成ケース"
+          },
+          "visibleWhen": {
+            "op": "or",
+            "args": [
+              {
+                "op": "not",
+                "args": [
+                  {
+                    "op": "in",
+                    "args": [
+                      {
+                        "item": "fld_product_family"
+                      },
+                      {
+                        "const": [
+                          "laundry",
+                          "pc_site",
+                          "camera_site",
+                          "gakki_site",
+                          "sports_outdoor"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "isNotEmpty",
+                "args": [
+                  {
+                    "item": "fld_category"
+                  }
+                ]
+              }
+            ]
+          },
+          "resetOnChange": [
+            "fld_product_family",
+            "fld_category"
+          ],
+          "clearOnDeactivate": true
+        }
+      ]
+    },
+    {
+      "id": "fld_kana",
+      "key": "kana",
+      "type": "katakana",
+      "label": {
+        "ja": "お名前（カナ）"
+      },
+      "classification": "personal",
+      "persist": "never",
+      "required": true,
+      "validators": [
+        {
+          "use": "formatKatakana"
+        }
+      ]
+    },
+    {
+      "id": "fld_email",
+      "key": "email",
+      "type": "email",
+      "label": {
+        "ja": "メールアドレス"
+      },
+      "classification": "personal",
+      "persist": "never",
+      "required": true,
+      "validators": [
+        {
+          "use": "formatEmail"
+        }
+      ]
+    },
+    {
+      "id": "fld_phone_number",
+      "key": "phone_number",
+      "type": "tel",
+      "label": {
+        "ja": "電話番号"
+      },
+      "classification": "personal",
+      "persist": "never",
+      "required": true,
+      "validators": [
+        {
+          "use": "formatPhoneJP"
+        }
+      ]
+    },
+    {
+      "id": "fld_agree_policy",
+      "key": "agree_policy",
+      "type": "boolean",
+      "label": {
+        "ja": "個人情報保護方針に同意する"
+      },
+      "classification": "public",
+      "persist": "allowed",
+      "required": true,
+      "config": {
+        "presentation": "native"
+      },
+      "appearance": {
+        "columns": 2,
+        "gap": 12,
+        "mobile": {
+          "columns": 2,
+          "gap": 12
+        }
+      },
+      "validators": [
+        {
+          "use": "mustBeTrue"
+        }
+      ]
+    },
+    {
+      "id": "fld_subscribe_mm",
+      "key": "subscribe_mm",
+      "type": "boolean",
+      "label": {
+        "ja": "メールマガジンを受け取る"
+      },
+      "classification": "public",
+      "persist": "allowed",
+      "required": false,
+      "config": {
+        "presentation": "native"
+      },
+      "appearance": {
+        "columns": 2,
+        "gap": 12,
+        "mobile": {
+          "columns": 2,
+          "gap": 12
+        }
+      }
+    }
+  ],
+  "steps": [
+    {
+      "id": "stp_products",
+      "kind": "form",
+      "title": {
+        "ja": "商品情報を入力"
+      },
+      "content": [
+        {
+          "group": "$local:grp_products"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_customer"
+        }
+      ]
+    },
+    {
+      "id": "stp_customer",
+      "kind": "form",
+      "title": {
+        "ja": "お客様情報"
+      },
+      "content": [
+        {
+          "field": "$local:fld_kana"
+        },
+        {
+          "field": "$local:fld_email"
+        },
+        {
+          "field": "$local:fld_phone_number"
+        },
+        {
+          "field": "$local:fld_agree_policy"
+        },
+        {
+          "field": "$local:fld_subscribe_mm"
+        }
+      ],
+      "transitions": [
+        {
+          "default": "stp_review"
+        }
+      ]
+    },
+    {
+      "id": "stp_review",
+      "kind": "review",
+      "transitions": [
+        {
+          "default": "stp_complete"
+        }
+      ]
+    },
+    {
+      "id": "stp_complete",
+      "kind": "complete"
+    }
+  ],
+  "customerDraft": {
+    "ttlMinutes": 30
+  }
+}

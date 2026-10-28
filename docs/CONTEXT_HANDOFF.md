@@ -23,3 +23,8 @@ Mẫu instrument Pattern A một sản phẩm, reset phụ thuộc và template 
 ### Real local legacy parity review
 
 Đã chạy launcher legacy gốc qua overlay Docker synthetic/read-only và so sánh browser thật. Kết quả **NOT_READY cho full legacy parity**: 8/12 scenarios PASS, 4 FAIL; 4/12 nhóm No-Code được chứng minh đầy đủ. Đã sửa parent/child trong nhánh hỗ trợ, single-item confirmation, inline validation/scroll và container width. Còn catalog 12 nhóm, repeated cart/staged edit, header và committed-product restore. Xem [báo cáo thực chứng](evidence/REAL-LEGACY-PARITY/RESULTS.md), thay cho suy diễn từ checkpoint Gakki trước. T12/K13 không đổi.
+
+
+### 2026-10-28 — multi-product internal demo closure
+
+Corrected v10 is READY_WITH_KNOWN_GAPS for Gakki multi-product demo: 14/14 bounded browser checks PASS, catalog 12/12 parents, No-Code 9/12 groups fully demonstrated. Public-only session recovery retains no personal cells; full legacy personal restore and specialist non-Gakki forms are not certified. Review/approve/publish, desktop/mobile touch and Go 422/200 verified. T12/K13 remain VERIFICATION_PENDING. See [closure evidence](evidence/CLOSE-LEGACY-PARITY/RESULTS.md). No commit/GitHub/AWS writes.

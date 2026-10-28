@@ -180,6 +180,14 @@ export function assertIR(ir: EngineIRV1): void {
       (f.classification !== "public" || !["choice.radio", "choice.select"].includes(f.type))
     )
       throw new EngineError("E-REF-SCOPE", f.id);
+    if (
+      f.type !== "group" &&
+      f.config?.defaultValue &&
+      (f.classification !== "public" ||
+        !["choice.radio", "choice.select"].includes(f.type) ||
+        !f.options?.some((o) => o.value === f.config?.defaultValue))
+    )
+      throw new EngineError("E-OPTION", f.id);
     if (f.type !== "group" && f.config?.postalAddressTarget) {
       const target = ir.nodes.find((n) => n.id === f.config?.postalAddressTarget);
       if (f.type !== "postal" || !target || target.type !== "text")
@@ -188,9 +196,12 @@ export function assertIR(ir: EngineIRV1): void {
     if (
       f.type !== "group" &&
       f.resetOnChange &&
-      (item ||
-        f.formula ||
-        f.resetOnChange.some((id) => ir.nodes.find((n) => n.id === id)?.type === "group"))
+      (f.formula ||
+        f.resetOnChange.some((id) =>
+          item
+            ? !ir.nodes.some((n) => n.type === "group" && n.fields.some((c) => c.id === id))
+            : ir.nodes.find((n) => n.id === id)?.type === "group",
+        ))
     )
       throw new EngineError("E-REF-SCOPE", f.id);
     if (f.type !== "group" && (f.type === "calculated") !== (f.formula !== undefined))
@@ -337,7 +348,7 @@ export function assertIR(ir: EngineIRV1): void {
     const expressions = [
       ...(s.transitions ?? []).flatMap((t) => ("when" in t ? [t.when] : [])),
       ...(s.skipWhen ? [s.skipWhen] : []),
-      ...ir.nodes.filter((f) => owner.get(f.id) === s.id).flatMap(fieldExpressions),
+      ...ir.nodes.filter((f) => owner.get(f.id) === s.id).flatMap((f) => fieldExpressions(f)),
     ];
     for (const e of expressions)
       for (const id of references(e, ir.conditions)) {

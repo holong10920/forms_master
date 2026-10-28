@@ -1,9 +1,4 @@
-import {
-  choiceGroup,
-  choiceOption,
-  badge as badgeClass,
-  progress as progressClass,
-} from "./recipes.ts";
+import { progress as progressClass } from "./recipes.ts";
 /** Optional host-owned renderer. Loaded only from the pinned, hash-verified enhancement group. */
 import {
   createSession,
@@ -15,12 +10,13 @@ import {
   type DraftSnapshot,
   type State,
   type SessionPorts,
-  type Cell,
   type Value,
 } from "@fb/form-engine";
 import type { EngineIRV1, EngineField } from "@fb/contracts";
 export { assertIR } from "@fb/form-engine";
-export { applyAppearance } from "./appearance.ts";
+export { applyAppearance, siteAppearance } from "./appearance.ts";
+import { instrumentLogo } from "./local-logo.ts";
+import type { SiteAppearance } from "./appearance.ts";
 type Pin = {
   releaseId: string;
   revision: string;
@@ -69,66 +65,6 @@ export function persist(ir: EngineIRV1, pin: Pin, state: State, preview: boolean
   } catch {
     /* anonymous runtime remains usable without storage */
   }
-}
-export function choices(
-  f: EngineField,
-  options: NonNullable<EngineField["options"]>,
-  value: Value | undefined,
-  label: (
-    v:
-      | {
-          ja?: string;
-          vi?: string;
-        }
-      | undefined,
-    fallback: string,
-  ) => string,
-  disabled: boolean,
-  invalid: boolean,
-  commit: (v: Cell) => void,
-): HTMLElement {
-  const group = document.createElement("fieldset");
-  group.className = choiceGroup;
-  const legend = document.createElement("legend");
-  legend.textContent = label(f.label, f.key);
-  group.append(legend);
-  if (f.type === "choice.radio") {
-    group.setAttribute("role", "radiogroup");
-    group.setAttribute("aria-required", String(!!f.required));
-  }
-  if (invalid) group.setAttribute("aria-invalid", "true");
-  for (const option of options) {
-    const row = document.createElement("label");
-    row.className = choiceOption;
-    const input = document.createElement("input");
-    input.type = f.type === "choice.radio" ? "radio" : "checkbox";
-    input.name = f.key;
-    input.value = option.value;
-    input.checked =
-      f.type === "choice.radio"
-        ? value === option.value
-        : Array.isArray(value) && value.includes(option.value);
-    input.disabled = disabled;
-    input.addEventListener("change", () => {
-      commit(
-        f.type === "choice.radio"
-          ? option.value
-          : [...group.querySelectorAll<HTMLInputElement>("input:checked")].map((c) => c.value),
-      );
-    });
-    const span = document.createElement("span");
-    span.textContent = label(option.label, option.value);
-    row.append(input, span);
-    group.append(row);
-  }
-  if (f.help) {
-    const help = document.createElement("p");
-    help.id = f.id + "-help";
-    help.textContent = label(f.help, "");
-    group.setAttribute("aria-describedby", help.id);
-    group.append(help);
-  }
-  return group;
 }
 export function postal(
   input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement,
@@ -224,30 +160,6 @@ export function availableOptions(
 }
 
 /** Accessible adornments derive from the same workflow and required rules as validation. */
-export function badge(required: boolean, text: string): HTMLElement {
-  const span = document.createElement("span");
-  span.className = badgeClass;
-  span.dataset.required = String(required);
-  span.textContent = text;
-  return span;
-}
-export function decorateField(
-  wrap: HTMLElement,
-  f: EngineField,
-  values: Record<string, Value>,
-  conditions: EngineIRV1["conditions"],
-  msg: (key: string) => string,
-): void {
-  const required =
-    !!f.required ||
-    !!f.validators?.some((v) => v.use === "required") ||
-    !!(f.requiredWhen && evaluate(f.requiredWhen, (id) => values[id], conditions) === true);
-  const label = wrap.querySelector("legend, label");
-  label?.append(badge(required, msg(required ? "requiredBadge" : "optionalBadge")));
-  wrap
-    .querySelector("input, select, textarea, fieldset")
-    ?.setAttribute("aria-required", String(required));
-}
 export function progress(
   ir: EngineIRV1,
   state: State,
@@ -259,7 +171,10 @@ export function progress(
   nav.className = progressClass;
   const list = document.createElement("ol");
   const path = snapshot(ir, state).path.filter(
-    (id) => ir.steps.find((step) => step.id === id)?.kind === "form",
+    (id) =>
+      ir.steps.find((step) => step.id === id)?.kind === "form" ||
+      (ir.nodes.some((n) => n.type === "group") &&
+        ir.steps.find((step) => step.id === id)?.kind === "review"),
   );
   const current = path.includes(state.current) ? state.current : path.at(-1);
   for (const id of path) {
@@ -279,20 +194,6 @@ export function progress(
   }
   nav.append(list);
   return nav;
-}
-
-export function inlineIssues(wrap: HTMLElement, id: string, messages: string[]): void {
-  if (!messages.length) return;
-  const help = document.createElement("p");
-  help.id = id + "-errors";
-  help.className = "field-errors [color:#b91c1c] [font-size:0.875rem] [margin:0.35rem_0_0]";
-  help.textContent = messages.join(" · ");
-  wrap.append(help);
-  for (const input of wrap.querySelectorAll("input, select, textarea, fieldset"))
-    input.setAttribute(
-      "aria-describedby",
-      [input.getAttribute("aria-describedby"), help.id].filter(Boolean).join(" "),
-    );
 }
 
 export function displayValue(
@@ -319,3 +220,37 @@ export function displayValue(
       ? ""
       : JSON.stringify(value);
 }
+
+export { cart, type CartEditor } from "./cart.ts";
+
+let logoBitmap: Promise<ImageBitmap> | undefined;
+export function header(appearance?: SiteAppearance): HTMLElement | undefined {
+  if (!appearance?.headerText && appearance?.headerLogo !== "instrument-local") return;
+  const header = document.createElement("header");
+  header.className = "site-header";
+  if (appearance.headerLogo === "instrument-local") {
+    // Decode trusted module bytes locally. No data/blob URL, remote request, or CSP expansion.
+    const canvas = document.createElement("canvas");
+    canvas.className = "site-logo";
+    canvas.setAttribute("role", "img");
+    canvas.setAttribute("aria-label", appearance.headerText ?? "");
+    logoBitmap ??= createImageBitmap(
+      new Blob([Uint8Array.from(atob(instrumentLogo), (c) => c.charCodeAt(0))], {
+        type: "image/png",
+      }),
+    );
+    void logoBitmap
+      .then((bitmap) => {
+        canvas.width = bitmap.width;
+        canvas.height = bitmap.height;
+        canvas.getContext("2d")?.drawImage(bitmap, 0, 0);
+      })
+      .catch(() => {
+        canvas.replaceWith(document.createTextNode(appearance.headerText ?? ""));
+      });
+    header.append(canvas);
+  } else header.textContent = appearance.headerText ?? "";
+  return header;
+}
+
+export { choices, badge, decorateField, inlineIssues } from "./field-controls.ts";

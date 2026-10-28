@@ -521,7 +521,7 @@ export const TYPES = {
     icon: "store",
     group: "advanced",
   },
-  group: { label: "グループ", vi: "Nhóm", icon: "layers", group: "advanced" },
+  group: { label: "繰り返し商品", vi: "Giỏ sản phẩm", icon: "layers", group: "advanced" },
 };
 // Locale-aware (used inside translate="no" regions and re-rendered on locale change).
 export const typeLabel = (t) => (TYPES[t] ? L(TYPES[t].label, TYPES[t].vi) : t);
@@ -550,9 +550,11 @@ export const stepById = (id) => S.draft?.steps.find((s) => s.id === id);
 export const currentStep = () => stepById(S.currentStep);
 export const fieldById = (id) => S.draft?.fields.find((f) => f.id === id);
 export const fieldOfContent = (c) =>
-  c.field ? S.draft.fields.find((f) => "$local:" + f.id === c.field) : undefined;
+  c.field || c.group
+    ? S.draft.fields.find((f) => "$local:" + f.id === (c.field ?? c.group))
+    : undefined;
 export const stepOfField = (id) =>
-  S.draft.steps.find((s) => s.content?.some((c) => c.field === "$local:" + id));
+  S.draft.steps.find((s) => s.content?.some((c) => (c.field ?? c.group) === "$local:" + id));
 export const blockInstance = (id) => S.draft.blockInstances?.find((i) => i.id === id);
 export const blockEntryFor = (instance) =>
   S.catalog.blocks.find((b) => b.pin === S.draft.dependencies?.blocks?.[instance?.block]);

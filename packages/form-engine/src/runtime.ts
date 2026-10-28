@@ -131,6 +131,7 @@ export function payloadPreview(ir: EngineIRV1, state: State): Payload {
   }
   return out;
 }
+/** Groups retain only public, persist-allowed child cells; the group classification never permits personal cells. */
 export function draftValues(ir: EngineIRV1, state: State): Values {
   const view = snapshot(ir, state),
     out: Record<string, Value> = {};
@@ -138,7 +139,7 @@ export function draftValues(ir: EngineIRV1, state: State): Values {
     const v = view.effective[f.id];
     if (
       !view.active.has(f.id) ||
-      f.classification !== "public" ||
+      (f.type !== "group" && f.classification !== "public") ||
       f.persist !== "allowed" ||
       f.submit === "displayOnly" ||
       v === undefined

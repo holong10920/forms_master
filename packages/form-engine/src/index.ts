@@ -20,7 +20,15 @@ export {
   type Result,
   type Issue,
 } from "./model.ts";
-export { addItem, removeItem, moveItems } from "./groups.ts";
+export {
+  addItem,
+  removeItem,
+  moveItems,
+  effectiveGroup,
+  groupIssues,
+  stageChange,
+  itemDefaults,
+} from "./groups.ts";
 export type { GroupValue, Cell } from "./model.ts";
 export { canonical, parseNumberInput } from "./canonical.ts";
 export { restoreDraft, type DraftSnapshot } from "./restore.ts";
