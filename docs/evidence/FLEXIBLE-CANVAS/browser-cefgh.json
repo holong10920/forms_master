@@ -1,0 +1,66 @@
+{
+ "form": "frm_faf31ad489564bf4992af53c6c8317e1",
+ "C": {
+  "autoSubmit": true,
+  "autoSubmitReloaded": true,
+  "preview": {
+   "completion": "合成データのみ\n\nお申し込み内容\nローカル模擬受付完了\nお申し込みありがとうございました\n\n内容を確認のうえ、担当者よりご連絡します。\n\nプラン\nはい\n\n受付番号: プレビューでは受付番号は発行されません\n\nトップへ戻る\n新しく申し込む",
+   "reviewSkipped": true,
+   "noFabricatedReference": true
+  }
+ },
+ "E": {
+  "completeOptions": [
+   "選択してください",
+   "プラン"
+  ],
+  "canvas": "E2E 2画面完了\nローカル模擬受付完了\nお申し込みありがとうございました\n\n内容を確認のうえ、担当者よりご連絡します。\n\nプラン\n〈お客様の入力値〉\n\n受付番号: synthetic_…（送信成功後に表示）\n\nトップへ戻る https://example.com/\nボタン\n新しく申し込む 最初からやり直す",
+  "reloadedTypes": [
+   "image",
+   "heading",
+   "text",
+   "fieldValue",
+   "reference",
+   "button",
+   "button"
+  ]
+ },
+ "H": {
+  "selfApproval": 403,
+  "approverCanEdit": 0,
+  "memberCanEdit": 0,
+  "memberReadonly": true,
+  "restartFreshForm": true,
+  "submitCount": 1,
+  "submitStatuses": [
+   200
+  ],
+  "customerErrors": []
+ },
+ "F": {
+  "approve": 200,
+  "publish": 200,
+  "url": "http://127.0.0.1:4183/r/rel_7foelfn4alqze2xwipab5jgsg6/index.html",
+  "customer": {
+   "order": [
+    "image",
+    "heading",
+    "text",
+    "fieldValue",
+    "reference",
+    "button",
+    "button"
+   ],
+   "receipt": "synthetic_APc6mrDRPX-glznYKlERr3lC",
+   "links": [
+    "https://example.com/"
+   ],
+   "image": 1,
+   "rawJson": false,
+   "emailShown": false,
+   "nicknameShown": false,
+   "plan": "プラン\nはい"
+  }
+ },
+ "errors": []
+}

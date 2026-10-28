@@ -1,0 +1,10 @@
+ Test Files  2 passed (2)
+      Tests  17 passed (17)
+web vitest exit 0
+web tsc exit 0
+web eslint exit 0
+dist/assets/index-JN6VQv58.css  175.78 kB │ gzip: 26.26 kB
+dist/assets/index-eF48OPOV.js   260.62 kB │ gzip: 79.04 kB
+
+✓ built in 195ms
+web build exit 0

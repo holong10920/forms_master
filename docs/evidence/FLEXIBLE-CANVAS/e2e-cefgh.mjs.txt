@@ -1,0 +1,177 @@
+import { open, studio, save, leftTab, formId, shot, OUT } from "./lib.mjs";
+import { writeFileSync } from "node:fs";
+const result = {};
+const admin = await open();
+const page = admin.page;
+async function selectDisplay(type, nth = 0) {
+  await page
+    .locator(`#canvas .cv-block[data-display-type="${type}"]`)
+    .nth(nth)
+    .click({ position: { x: 20, y: 10 } });
+}
+const outlineStep = (label) =>
+  page.locator("#steps li.ol-step", { hasText: label }).first().locator("> button").first();
+try {
+  // ---- C: two-screen form (Input → Submit → Completion)
+  await studio(page);
+  await page.locator("#new-form").click();
+  await page.locator("#new-name").fill("E2E 2画面完了");
+  await page.locator("#create").click();
+  await page.waitForFunction(() => location.pathname.includes("/forms/"));
+  const form = formId(page);
+  result.form = form;
+  await page.locator(".step-title-input").first().fill("お申し込み内容");
+  await leftTab(page, "add");
+  await page.locator('[data-add-type="text"]').click();
+  await page.locator('[data-focus="label"]').fill("ニックネーム");
+  await page.locator('[data-add-type="choice.radio"]').click();
+  await page.locator('[data-focus="label"]').fill("プラン");
+  await page.locator('[data-add-type="email"]').click();
+  await page.locator('[data-focus="label"]').fill("メールアドレス");
+  await leftTab(page, "outline");
+  await outlineStep("確認画面").click();
+  await page.locator("#auto-submit").locator("xpath=..").click();
+  if (!(await page.locator("#auto-submit").isChecked())) throw Error("toggle");
+  // ---- E: completion with image, text, bound value, reference and CTAs
+  await page.locator("#stepper .step-pill", { hasText: "完了画面" }).click();
+  await leftTab(page, "add");
+  for (const t of ["image", "heading", "text", "fieldValue", "reference", "button", "button"])
+    await page.locator(`[data-add-display="${t}"]`).click();
+  await selectDisplay("heading");
+  await page.locator('#inspector-body [data-display-prop="text"]').fill("お申し込みありがとうございました");
+  await selectDisplay("text");
+  await page.locator('#inspector-body [data-display-prop="text"]').fill("内容を確認のうえ、担当者よりご連絡します。");
+  await selectDisplay("fieldValue");
+  const completeOptions = await page.locator("#display-binding option").allInnerTexts();
+  await page.locator("#display-binding").selectOption({ label: "プラン" });
+  await selectDisplay("button", 1);
+  await page.locator('#inspector-body [data-display-prop="label"]').fill("新しく申し込む");
+  await page.locator("#display-button-action").selectOption("restart");
+  const canvas = await page.locator("#canvas").innerText();
+  result.C = { autoSubmit: await page.evaluate(() => true) };
+  result.E = { completeOptions, canvas };
+  if (completeOptions.includes("メールアドレス")) throw Error("H personal field offered on completion");
+  await save(page);
+  await page.reload();
+  await page.locator("#mode-build:not([hidden])").waitFor();
+  await page.locator("#stepper .step-pill", { hasText: "完了画面" }).click();
+  result.E.reloadedTypes = await page
+    .locator("#canvas .cv-block")
+    .evaluateAll((els) => els.map((e) => e.dataset.displayType));
+  await shot(page, "E-completion-canvas");
+  await leftTab(page, "outline");
+  await outlineStep("確認画面").click();
+  result.C.autoSubmitReloaded = await page.locator("#auto-submit").isChecked();
+  if (!result.C.autoSubmitReloaded) throw Error("C autoSubmit lost");
+
+  // ---- Preview: no fabricated reference
+  const pv = page.waitForResponse((r) => r.url().endsWith("/api/preview") && r.request().method() === "POST");
+  await page.locator("#preview").click();
+  if ((await pv).status() !== 200) throw Error("preview");
+  const frame = page.frameLocator("#preview-frame");
+  await frame.locator("#app h1").waitFor();
+  await frame.getByLabel("ニックネーム").fill("合成ユーザー");
+  await frame.getByRole("radio", { name: "はい" }).check();
+  await frame.getByLabel("メールアドレス").fill("synthetic@example.com");
+  await frame.getByRole("button", { name: "次へ", exact: true }).click();
+  await frame.locator('[data-display="reference"]').waitFor();
+  const previewDone = await frame.locator("#app").innerText();
+  result.C.preview = {
+    completion: previewDone,
+    reviewSkipped: !previewDone.includes("入力内容の確認"),
+    noFabricatedReference: !/synthetic_/.test(previewDone),
+  };
+  if (!result.C.preview.noFabricatedReference) throw Error("preview fabricated a reference");
+  await shot(page, "C-preview-completion");
+  await page.locator("#modes [data-mode], #mode-tab-build").first().waitFor();
+  await page.locator("#mode-tab-build").click();
+
+  // ---- F: review request → approval (separate approver) → publish
+  await page.locator("#primary-cta").click();
+  await page.locator("#review-dialog[open]").waitFor();
+  if (await page.locator("#contract-ack-row").isVisible()) await page.locator("#contract-ack").check();
+  await page.locator("#review").click();
+  await page.locator("#mode-publish:not([hidden])").waitFor();
+  const card = page.getByRole("listitem").filter({ hasText: "承認 (Data Contract 確認)" }).first();
+  // H: the author cannot approve their own request.
+  const self = page.waitForResponse((r) => r.url().endsWith("/api/approve"));
+  await card.getByRole("button", { name: "承認 (Data Contract 確認)" }).click();
+  if (await page.locator("dialog[open]").getByRole("button", { name: "承認する" }).count())
+    await page.locator("dialog[open]").getByRole("button", { name: "承認する" }).click();
+  result.H = { selfApproval: (await self).status() };
+  if ((await self).status() === 200) throw Error("self approval accepted");
+
+  const approver = await open("synthetic-approver");
+  await studio(approver.page, form);
+  result.H.approverCanEdit = await approver.page.locator('[data-add-type]').count();
+  await approver.page.locator("#mode-tab-publish").click();
+  const ok = approver.page.waitForResponse((r) => r.url().endsWith("/api/approve"));
+  await approver.page.getByRole("button", { name: "承認 (Data Contract 確認)" }).first().click();
+  await approver.page.locator("dialog[open]").getByRole("button", { name: "承認する" }).click();
+  result.F = { approve: (await ok).status() };
+  await approver.browser.close();
+
+  const member = await open("synthetic-member");
+  await studio(member.page, form);
+  result.H.memberCanEdit = await member.page.locator('[data-add-type]').count();
+  result.H.memberReadonly = await member.page.locator("#readonly-badge").isVisible();
+  await member.browser.close();
+  if (result.H.approverCanEdit || result.H.memberCanEdit) throw Error("non-editor can edit");
+
+  await page.reload();
+  await page.locator("#mode-tab-publish").click();
+  await page.getByRole("button", { name: "ローカル公開" }).first().click();
+  const pub = page.waitForResponse((r) => r.url().endsWith("/api/publish"));
+  await page.locator("dialog[open]").getByRole("button", { name: "公開する" }).click();
+  result.F.publish = (await pub).status();
+  const link = page.getByRole("link", { name: "公開中のフォームを新しいタブで開く" });
+  await link.waitFor();
+  const url = await link.getAttribute("href");
+  result.F.url = url;
+  await shot(page, "F-published");
+
+  // ---- Customer: real synthetic submit through Go, then completion
+  const customer = await admin.browser.newContext({ viewport: { width: 390, height: 844 } });
+  const c = await customer.newPage();
+  const submits = [];
+  const cErrors = [];
+  c.on("pageerror", (e) => cErrors.push(e.message));
+  c.on("response", (r) => {
+    if (r.url().endsWith("/api/submit")) submits.push(r.status());
+  });
+  await c.goto(url);
+  await c.locator("#app h1").waitFor();
+  await c.getByLabel("ニックネーム").fill("合成ユーザー");
+  await c.getByRole("radio", { name: "はい" }).check();
+  await c.getByLabel("メールアドレス").fill("synthetic@example.com");
+  await c.getByRole("button", { name: "次へ", exact: true }).click();
+  await c.locator(".request-reference strong").waitFor();
+  const done = await c.locator("#app").innerText();
+  const receipt = await c.locator(".request-reference strong").innerText();
+  result.F.customer = {
+    order: await c.locator("[data-display]").evaluateAll((els) => els.map((e) => e.dataset.display)),
+    receipt,
+    links: await c.locator("a.display-cta").evaluateAll((els) => els.map((a) => a.href)),
+    image: await c.locator('[data-display="image"] svg[role="img"]').count(),
+    rawJson: /[{[]\s*"/.test(done),
+    emailShown: done.includes("synthetic@example.com"),
+    nicknameShown: done.includes("合成ユーザー"),
+    plan: await c.locator('[data-display="fieldValue"]').innerText(),
+  };
+  await c.screenshot({ path: OUT + "/E-customer-completion.png", fullPage: true });
+  if (!/^synthetic_/.test(receipt)) throw Error("receipt");
+  if (result.F.customer.rawJson || result.F.customer.emailShown) throw Error("G/H completion leak");
+  // H: restart reloads into a fresh session; completion never resubmits.
+  await c.getByRole("button", { name: "新しく申し込む" }).click();
+  await c.getByLabel("ニックネーム").waitFor();
+  result.H.restartFreshForm = (await c.getByLabel("ニックネーム").inputValue()) === "";
+  result.H.submitCount = submits.length;
+  result.H.submitStatuses = submits;
+  result.H.customerErrors = cErrors;
+  if (submits.length !== 1 || submits[0] !== 200) throw Error("submit count " + submits);
+} finally {
+  result.errors = admin.errors;
+  writeFileSync(OUT + "/scenario-cefgh.json", JSON.stringify(result, null, 1));
+  console.log(JSON.stringify(result, null, 1));
+  await admin.browser.close();
+}

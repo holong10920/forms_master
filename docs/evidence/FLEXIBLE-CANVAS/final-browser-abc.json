@@ -1,0 +1,128 @@
+{
+ "form": "frm_a061be72f0e242c6844507985fcc0928",
+ "completeBinding": "E2E 最終確認\nローカル模擬受付完了\nお申し込みありがとうございました\n\n受付番号を控えてください。\n\n受付番号: synthetic_…（送信成功後に表示）\n\nトップへ戻る https://example.com/\nボタン\n新しく申し込む 最初からやり直す",
+ "A": {
+  "studioOrder": {
+   "STEP 1": [
+    "heading",
+    "text",
+    "field:ニックネーム",
+    "field:プラン",
+    "field:メールアドレス",
+    "fieldValue"
+   ],
+   "確認画面": [
+    "summary",
+    "groupSummary",
+    "fieldValue"
+   ],
+   "完了画面": [
+    "image",
+    "heading",
+    "text",
+    "reference",
+    "button",
+    "button"
+   ]
+  },
+  "reloadSame": true,
+  "customer": {
+   "step1": [
+    "heading",
+    "text",
+    "field:ニックネーム任意",
+    "field:プラン任意",
+    "field:はい",
+    "field:いいえ",
+    "field:メールアドレス任意",
+    "fieldValue"
+   ],
+   "dynamic": "プラン\nはい"
+  }
+ },
+ "preview": {
+  "dynamic": "プラン\nはい",
+  "review": "合成データのみ\n\nSTEP 1\nSTEP 2\n入力内容の確認\n入力内容の確認\nSTEP 1\nニックネーム\n合成ユーザー\nプラン\nはい\nメールアドレス\nsynthetic@example.com\nSTEP 2\n商品一覧\n商品名\n合成ギター\n商品一覧\n商品名\n合成ギター\nメールアドレス\n＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊om\n戻る\nローカル模擬受付",
+  "completion": "合成データのみ\n\nSTEP 1\nSTEP 2\n入力内容の確認\nローカル模擬受付完了\nお申し込みありがとうございました\n\n受付番号を控えてください。\n\n受付番号: プレビューでは受付番号は発行されません\n\nトップへ戻る\n新しく申し込む",
+  "noFabricatedReference": true
+ },
+ "approve": 200,
+ "publish": 200,
+ "url": "http://127.0.0.1:4183/r/rel_4vvf2dr5zuxrzbfjqt5564ogrv/index.html",
+ "B": {
+  "reviewOrder": [
+   "summary",
+   "groupSummary",
+   "fieldValue"
+  ],
+  "products": "商品一覧\n商品名\n合成ギター",
+  "maskedEmail": "メールアドレス\n＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊om",
+  "rawJson": false,
+  "submitsBeforeConfirm": 0
+ },
+ "C": {
+  "order": [
+   "image",
+   "heading",
+   "text",
+   "reference",
+   "button",
+   "button"
+  ],
+  "receipt": "synthetic_gxO_8HQbQ2JWiwqlUut5d7JH",
+  "links": [
+   "https://example.com/"
+  ],
+  "image": 1,
+  "emailShown": false,
+  "nicknameShown": false,
+  "restartFresh": true,
+  "uiSubmitCount": 1,
+  "submitsAfterRestart": 0,
+  "customerErrors": []
+ },
+ "api": {
+  "first": 200,
+  "replay": {
+   "status": 200,
+   "body": {
+    "ok": true,
+    "receipt": "synthetic_gxO_8HQbQ2JWiwqlUut5d7JH",
+    "synthetic": true
+   }
+  },
+  "keyReuse": {
+   "status": 409,
+   "body": {
+    "errors": [
+     {
+      "code": "IDEMPOTENCY_KEY_REUSED",
+      "path": ""
+     }
+    ],
+    "ok": false,
+    "payload": {}
+   }
+  },
+  "invalid": {
+   "status": 422,
+   "body": {
+    "errors": [
+     {
+      "code": "formatEmail",
+      "path": "fld_15c87572140f"
+     }
+    ],
+    "ok": false,
+    "payload": {}
+   }
+  },
+  "payloadKeys": [
+   "field_e23cbb0f48f7",
+   "field_d5ce8dc04383",
+   "field_15c87572140f",
+   "products_ba3a5589a61a"
+  ]
+ },
+ "errors": []
+}

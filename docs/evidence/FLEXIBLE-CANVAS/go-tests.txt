@@ -1,0 +1,14 @@
+?   	forms-master/go-auth/cmd/api	[no test files]
+?   	forms-master/go-auth/cmd/artifact-check	[no test files]
+?   	forms-master/go-auth/cmd/engine-oracle	[no test files]
+?   	forms-master/go-auth/cmd/inspect	[no test files]
+?   	forms-master/go-auth/cmd/local-idp	[no test files]
+?   	forms-master/go-auth/cmd/migrate	[no test files]
+ok  	forms-master/go-auth/internal/auth	(cached)
+?   	forms-master/go-auth/internal/compiler	[no test files]
+ok  	forms-master/go-auth/internal/engine	(cached)
+?   	forms-master/go-auth/internal/localidp	[no test files]
+?   	forms-master/go-auth/internal/persistence	[no test files]
+?   	forms-master/go-auth/internal/platform	[no test files]
+ok  	forms-master/go-auth/internal/studio	143.668s
+exit 0

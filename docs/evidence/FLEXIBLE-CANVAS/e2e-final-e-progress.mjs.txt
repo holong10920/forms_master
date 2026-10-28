@@ -1,0 +1,122 @@
+// E: 10 business steps — reorder, duplicate, branch, Back; Save/Reload/Preview.
+// Plus the progress indicator for 2, 5 and 11+ stages at 1440 and 390.
+import { open, studio, save, leftTab, formId, shot, OUT } from "./lib.mjs";
+import { readFileSync, writeFileSync } from "node:fs";
+const result = {};
+const admin = await open();
+const page = admin.page;
+const pills = () => page.locator("#stepper .step-pill").allInnerTexts();
+const outlineStep = (label) =>
+  page.locator("#steps li.ol-step > button").filter({ has: page.getByText(label, { exact: true }) }).first();
+const progressOf = (target) =>
+  target.locator("nav[aria-label]").first().evaluate((nav) => ({
+    overflow: nav.dataset.overflow === "true",
+    circles: nav.querySelectorAll("li").length,
+    counter: nav.querySelector("p span")?.textContent ?? null,
+    current: nav.querySelector("p strong")?.textContent ?? nav.querySelector('[aria-current="step"]')?.textContent ?? null,
+    bar: nav.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow") ?? null,
+    overflowsX: nav.scrollWidth > nav.clientWidth + 1,
+    width: nav.clientWidth,
+  }));
+try {
+  await studio(page);
+  await page.locator("#new-form").click();
+  await page.locator("#new-name").fill("E2E 10ステップ最終");
+  await page.locator("#create").click();
+  await page.waitForFunction(() => location.pathname.includes("/forms/"));
+  result.form = formId(page);
+  await page.locator(".step-title-input").first().fill("STEP 1");
+  await leftTab(page, "add");
+  await page.locator('[data-add-type="choice.radio"]').click();
+  await page.locator('#inspector-body [data-focus="label"]').fill("プラン");
+  for (let i = 2; i <= 10; i++) {
+    await leftTab(page, "outline");
+    await page.locator("#add-step").click();
+    await page.locator(".step-title-input").first().fill("STEP " + i);
+    await leftTab(page, "add");
+    await page.locator('[data-add-type="text"]').click();
+    await page.locator('#inspector-body [data-focus="label"]').fill("項目 " + i);
+  }
+  const before = await pills();
+  // Reorder: STEP 10 up twice (outline tool, then inspector tool); duplicate STEP 3.
+  await leftTab(page, "outline");
+  await page.getByRole("button", { name: "「STEP 10」を前へ移動" }).click();
+  await outlineStep("STEP 10").click();
+  await page.locator("#step-move-up").click();
+  await outlineStep("STEP 3").click();
+  await page.locator("#step-duplicate").click();
+  const reordered = await pills();
+  // Branch on STEP 1: プラン = default option → STEP 6.
+  await outlineStep("STEP 1").click();
+  await page.locator("#inspector-tabs").getByRole("tab", { name: /分岐/ }).click();
+  await page.getByRole("button", { name: "条件分岐を追加" }).click();
+  const target = page.getByLabel("分岐 1 の移動先");
+  result.branchTargets = await target.locator("option").allInnerTexts();
+  await target.selectOption({ label: result.branchTargets.find((t) => t.trim() === "STEP 6") });
+  result.branchRule = await page.locator("#inspector-body").innerText();
+  await save(page);
+  await page.reload();
+  await page.locator("#mode-build:not([hidden])").waitFor();
+  const reloaded = await pills();
+  await leftTab(page, "outline");
+  await outlineStep("STEP 1").click();
+  await page.locator("#inspector-tabs").getByRole("tab", { name: /分岐/ }).click();
+  const targetAfter = await page.getByLabel("分岐 1 の移動先").evaluate((s) => s.selectedOptions[0]?.textContent);
+  result.E = { before, reordered, reloaded, orderKept: JSON.stringify(reordered) === JSON.stringify(reloaded), targetAfter };
+  if (!result.E.orderKept || targetAfter?.trim() !== "STEP 6") throw Error("E reload " + targetAfter);
+  await shot(page, "final-E-studio");
+
+  // Preview: branch taken, Back returns, other option follows the default order.
+  const pv = page.waitForResponse((r) => r.url().endsWith("/api/preview") && r.request().method() === "POST");
+  await page.locator("#preview").click();
+  if ((await pv).status() !== 200) throw Error("preview");
+  const frame = page.frameLocator("#preview-frame");
+  const heading = () => frame.locator("#app [aria-current=step], #app nav p strong").first().innerText();
+  await frame.locator("#app nav[aria-label]").waitFor();
+  result.progress = { desktop11: await progressOf(frame) };
+  await shot(page, "final-progress-11-desktop");
+  await frame.getByRole("radio", { name: "はい" }).check();
+  await frame.getByRole("button", { name: "次へ", exact: true }).click();
+  await page.waitForTimeout(300);
+  const afterBranch = await heading();
+  await frame.getByRole("button", { name: "戻る", exact: true }).click();
+  await page.waitForTimeout(300);
+  const afterBack = await heading();
+  await frame.getByRole("radio", { name: "いいえ" }).check();
+  await frame.getByRole("button", { name: "次へ", exact: true }).click();
+  await page.waitForTimeout(300);
+  const otherwise = await heading();
+  result.E.preview = { afterBranch, afterBack, otherwise, expectedOtherwise: reloaded[1].split("\n").pop() };
+  if (afterBranch !== "STEP 6" || afterBack !== "STEP 1" || otherwise !== result.E.preview.expectedOtherwise) throw Error("E branch/back");
+  result.progress.desktop11Step2 = await progressOf(frame);
+  await page.locator("#preview-bar input[value=mobile]").check();
+  await page.waitForTimeout(400);
+  await frame.getByRole("button", { name: "戻る", exact: true }).click();
+  await page.waitForTimeout(300);
+  result.progress.mobile11 = await progressOf(frame);
+  await shot(page, "final-progress-11-mobile");
+
+  // 2- and ~5-stage published forms from the earlier scenarios, desktop and mobile.
+  const urls = {
+    twoScreen: JSON.parse(readFileSync(OUT + "/final-d.json", "utf8")).F.url,
+    fourStep: JSON.parse(readFileSync(OUT + "/final-abc.json", "utf8")).url,
+  };
+  for (const [name, url] of Object.entries(urls))
+    for (const [w, h] of [[1440, 900], [390, 844]]) {
+      const ctx = await admin.browser.newContext({ viewport: { width: w, height: h } });
+      const c = await ctx.newPage();
+      await c.goto(url);
+      await c.locator("#app nav[aria-label]").waitFor();
+      result.progress[`${name}-${w}`] = await progressOf(c);
+      await c.screenshot({ path: `${OUT}/final-progress-${name}-${w}.png` });
+      await ctx.close();
+    }
+  const p = result.progress;
+  if (!p.desktop11.overflow || !p.mobile11.overflow || p.mobile11.overflowsX || p.desktop11.overflowsX) throw Error("11 overflow");
+  if (p["twoScreen-1440"].overflow || p["fourStep-1440"].overflow || p["fourStep-390"].overflow) throw Error("short");
+} finally {
+  result.errors = admin.errors;
+  writeFileSync(OUT + "/final-e-progress.json", JSON.stringify(result, null, 1));
+  console.log(JSON.stringify(result, null, 1));
+  await admin.browser.close();
+}

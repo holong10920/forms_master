@@ -1,0 +1,21 @@
+const R = process.argv[2];
+const { compile } = await import(R + "/tools/compiler/src/build.ts");
+const { multiProductDraft } = await import(R + "/tools/go-auth/templates/multi-product.ts");
+const { gakkiApplyDraft } = await import(R + "/tools/go-auth/templates/gakki-apply.ts");
+import { mkdtempSync, readFileSync } from "node:fs";
+import { gzipSync } from "node:zlib";
+import { join } from "node:path";
+const polished = () => { const d = multiProductDraft(); d.appearance = { ...d.appearance, headerVariant: "fullWidth", progressStyle: "compact", controlStyle: "outlined" }; return d; };
+const sports = () => JSON.parse(readFileSync(R + "/contracts/fixtures/engine/sports.json", "utf8"));
+for (const [name, f] of [["sports", sports], ["multi", multiProductDraft], ["polished", polished], ["gakki", gakkiApplyDraft], ["display", () => ({ ...JSON.parse(readFileSync(R + "/contracts/fixtures/engine/display.json", "utf8")), siteId: "site_pc_synthetic" })]]) {
+  try {
+    const r = await compile(f(), mkdtempSync("/private/tmp/claude-501/-Users-hongocbaolong-Documents-marketenterprise-forms-master/c64055ac-b7e3-4a0f-b11a-0ec7182758e6/scratchpad/perf/fbm-"));
+    const entry = r.chunks.find((c) => c.modules.some((m) => m.id === "gen:entry.ts"));
+    const seen = new Set(); const visit = (x) => { if (seen.has(x)) return; seen.add(x); for (const c of r.chunks.find((y) => y.file === x)?.staticImports ?? []) visit(c); };
+    visit(entry.file);
+    const gz = (p) => gzipSync(readFileSync(join(r.directory, p)), { level: 9 }).length;
+    const js = [...seen].reduce((n, p) => n + gz(p), 0);
+    const css = r.manifest.inventory.filter((x) => x.path.endsWith(".css")).reduce((n, x) => n + gz(x.path), 0);
+    console.log(name, "js", js, "total", js + css + gz("index.html"), "css", css);
+  } catch (e) { console.log(name, e.message, e.bytes ?? ""); }
+}

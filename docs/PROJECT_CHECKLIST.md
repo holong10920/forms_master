@@ -425,3 +425,8 @@ Corrected v10 is READY_WITH_KNOWN_GAPS for Gakki multi-product demo: 14/14 bound
 ### 2026-10-28 — final internal demo polish
 
 Gakki v13 (`rel_ckzoawdxgnwqnusqfgkvdecnhz`) is READY_FOR_INTERNAL_DEMO within the selected multi-product scope: 14 targeted browser checks PASS, reusable full-width responsive branding, actual staged progress, clean labels, 11/12 No-Code groups demonstrated. Restore stays public-only; specialist forms/full PII retention are follow-ups. T12/K13 remain VERIFICATION_PENDING. No staging/commit/GitHub/AWS writes. See [final polish evidence](evidence/FINAL-DEMO-POLISH/RESULTS.md).
+
+
+### 2026-10-28 — Flexible step & visual canvas builder
+
+Form Studio giờ cho phép tạo form trống, thêm/xóa/sắp xếp/nhân bản step, display components typed (Heading, Paragraph, Image allowlist, Divider, Spacer, Section, Field Value, Product Summary, Summary, Reference, CTA allowlist), confirmation đọc được thay raw JSON, completion tùy biến và tùy chọn 2 màn hình (`autoSubmit`). Browser A–H và smoke PC/Sports/Gakki PASS; root 684 PASS + 15 expected fail; Go/React/parity 293 PASS. Final verification cùng ngày: stack đã restart (được user cho phép), browser A–E PASS trên Go mới, progress gọn cho 10+ step, budget 15.846/16.384 gzip. Không commit/GitHub/AWS writes. Xem [bằng chứng](evidence/FLEXIBLE-CANVAS/RESULTS.md).

@@ -1,0 +1,26 @@
+{
+ "out": [
+  {
+   "site": "site_pc_synthetic",
+   "name": "複数商品 Apply 合成デモ",
+   "preview": 200,
+   "fields": 2,
+   "validationBlocksEmptyNext": true
+  },
+  {
+   "site": "site_pc_synthetic",
+   "name": "PC Apply 単品互換プロトタイプ",
+   "preview": 200,
+   "fields": 22,
+   "validationBlocksEmptyNext": true
+  },
+  {
+   "site": "site_sports_synthetic",
+   "name": "合成多言語フォーム",
+   "preview": 200,
+   "fields": 2,
+   "validationBlocksEmptyNext": true
+  }
+ ],
+ "errors": []
+}

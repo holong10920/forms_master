@@ -1,0 +1,39 @@
+import { open, OUT } from "./lib.mjs";
+import { writeFileSync } from "node:fs";
+const { browser, page, errors } = await open();
+const out = [];
+try {
+  for (const [site, title] of [
+    ["site_pc_synthetic", "複数商品 Apply 合成デモ"],
+    ["site_pc_synthetic", "PC Apply 単品互換プロトタイプ"],
+    ["site_sports_synthetic", null],
+  ]) {
+    await page.goto("http://localhost:4180/studio?lang=ja");
+    await page.locator("#forms .form-card").first().waitFor();
+    if ((await page.locator("#site").inputValue()) !== site) {
+      await page.locator("#site").selectOption(site);
+      await page.waitForTimeout(1500);
+    }
+    const cards = page.locator("#forms .form-card");
+    if (!(await cards.count())) { out.push({ site, forms: 0 }); continue; }
+    const card = title ? cards.filter({ hasText: title }).first() : cards.first();
+    const name = (await card.innerText()).split("\n")[0];
+    await card.click();
+    await page.locator("#mode-build:not([hidden])").waitFor();
+    const pv = page.waitForResponse((r) => r.url().endsWith("/api/preview") && r.request().method() === "POST");
+    await page.locator("#preview").click();
+    const status = (await pv).status();
+    const frame = page.frameLocator("#preview-frame");
+    await frame.locator("#app h1").waitFor();
+    const fields = await frame.locator("#app input, #app select, #app textarea").count();
+    await frame.getByRole("button", { name: "次へ", exact: true }).click();
+    const invalid = await frame.locator("[aria-invalid=true]").count();
+    out.push({ site, name, preview: status, fields, validationBlocksEmptyNext: invalid > 0 });
+    await page.screenshot({ path: OUT + "/smoke-" + site + "-" + out.length + ".png" });
+    await page.locator("#mode-tab-build").click();
+  }
+} finally {
+  writeFileSync(OUT + "/smoke.json", JSON.stringify({ out, errors }, null, 1));
+  console.log(JSON.stringify({ out, errors }, null, 1));
+  await browser.close();
+}

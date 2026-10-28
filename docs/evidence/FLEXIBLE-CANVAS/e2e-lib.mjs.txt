@@ -1,0 +1,38 @@
+import { chromium } from "/Users/hongocbaolong/.npm/_npx/e41f203b7505f1fb/node_modules/playwright/index.mjs";
+export const OUT = "/Users/hongocbaolong/Documents/marketenterprise/forms_master/output/playwright/flexible-canvas";
+export const SITE = "site_pc_synthetic";
+export async function open(subject = "synthetic-admin") {
+  const browser = await chromium.launch();
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("http://localhost:4180/");
+  await page.getByText("IDプロバイダーで続ける").click();
+  await page.getByRole("button", { name: "Continue as " + subject }).click();
+  await page.waitForURL(/dashboard/);
+  return { browser, page, errors };
+}
+export async function studio(page, form) {
+  await page.goto(
+    "http://localhost:4180/studio/sites/" + SITE + (form ? "/forms/" + form : "") + "?lang=ja",
+  );
+  await page.locator(form ? "#mode-build:not([hidden])" : "#new-form").waitFor();
+}
+export async function save(page) {
+  const r = page.waitForResponse((x) => x.url().endsWith("/api/save") && x.request().method() === "POST");
+  await page.keyboard.press("ControlOrMeta+s");
+  const res = await r;
+  if (res.status() !== 200) throw Error("save " + res.status() + " " + (await res.text()));
+  return res.json();
+}
+export async function leftTab(page, key) {
+  await page.locator(`#left-tabs [data-tab="${key}"]`).click();
+}
+export async function pill(page, label) {
+  await page.locator("#stepper .step-pill", { hasText: label }).first().click();
+}
+export const formId = (page) => new URL(page.url()).pathname.split("/forms/")[1]?.split("/")[0];
+export async function shot(page, name) {
+  await page.screenshot({ path: OUT + "/" + name + ".png" });
+}

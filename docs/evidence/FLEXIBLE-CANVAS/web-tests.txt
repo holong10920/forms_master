@@ -1,0 +1,12 @@
+
+ RUN  v5.0.5 /Users/hongocbaolong/Documents/marketenterprise/forms_master/tools/go-auth/web
+
+
+ Test Files  2 passed (2)
+      Tests  17 passed (17)
+   Start at  13:44:05
+   Duration  1.33s (environment 56%, tests 26%, import 10%, transform 7%)
+
+exit 0
+tsc exit 0
+eslint exit 0

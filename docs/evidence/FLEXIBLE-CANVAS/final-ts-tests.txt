@@ -1,0 +1,13 @@
+
+ RUN  v5.0.5 /Users/hongocbaolong/Documents/marketenterprise/forms_master
+
+
+ Test Files  44 passed (44)
+      Tests  687 passed | 15 expected fail | 1 skipped (703)
+   Start at  14:05:57
+   Duration  6.12s (tests 80%, import 14%, transform 5%, setup 1%)
+
+    Isolate  44 workers spawned · ~98ms startup each (spawn + environment, per file)
+             at least ~516ms faster with isolate: false — reuses workers across files instead of one per file
+
+exit 0

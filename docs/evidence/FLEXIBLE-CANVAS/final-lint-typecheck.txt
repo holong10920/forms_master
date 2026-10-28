@@ -1,0 +1,8 @@
+eslint exit 0
+Checking formatting...
+All matched files use Prettier code style!
+prettier exit 0
+tools/engine-demo typecheck: Done
+tools/compiler typecheck: Done
+packages/static-runtime typecheck: Done
+typecheck exit 0

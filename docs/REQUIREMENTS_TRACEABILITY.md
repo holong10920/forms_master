@@ -108,3 +108,13 @@ Corrected v10 is READY_WITH_KNOWN_GAPS for Gakki multi-product demo: 14/14 bound
 ### 2026-10-28 — final internal demo polish
 
 Gakki v13 (`rel_ckzoawdxgnwqnusqfgkvdecnhz`) is READY_FOR_INTERNAL_DEMO within the selected multi-product scope: 14 targeted browser checks PASS, reusable full-width responsive branding, actual staged progress, clean labels, 11/12 No-Code groups demonstrated. Restore stays public-only; specialist forms/full PII retention are follow-ups. T12/K13 remain VERIFICATION_PENDING. No staging/commit/GitHub/AWS writes. See [final polish evidence](evidence/FINAL-DEMO-POLISH/RESULTS.md).
+
+
+### 2026-10-28 — Flexible step & visual canvas builder
+
+| Req | Implementation | Tests | Evidence | Status |
+|---|---|---|---|---|
+| F-P0-03 Visual Form Builder — display components, step management | studio/editor.js, state.js; packages/static-runtime/src/display.ts; packages/form-engine/src/display.ts | display.test.ts, display_test.go, browser A/B/D/E | evidence/FLEXIBLE-CANVAS | LOCAL_VERIFIED |
+| F-P0-05 Multi-step Flow — add/move/duplicate step, 2 màn hình | studio/editor.js; runtime `autoSubmit` | browser B/C, Go submit | evidence/FLEXIBLE-CANVAS | LOCAL_VERIFIED — browser submit trên Go mới (final-browser-*.json) |
+| Confirmation/Completion builder | static-runtime summary.ts, display.ts; engine lint E-DISPLAY-* | browser D/E/F/G/H, Go PII reject | evidence/FLEXIBLE-CANVAS | LOCAL_VERIFIED |
+| Progress gọn cho journey dài (n / tổng + thanh) | static-runtime journey.ts `stepCounter`, enhancements.ts `fitProgress` | progress.test.ts, final-browser-e-progress.json | evidence/FLEXIBLE-CANVAS | LOCAL_VERIFIED |

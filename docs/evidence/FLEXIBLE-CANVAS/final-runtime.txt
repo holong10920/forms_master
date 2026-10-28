@@ -1,0 +1,6 @@
+  PID STARTED                      COMMAND
+89148 Wed Oct 28 13:56:33 2026     /Users/hongocbaolong/Documents/marketenterprise/forms_master/var/go-auth/local-idp
+89191 Wed Oct 28 13:56:34 2026     /Users/hongocbaolong/Documents/marketenterprise/forms_master/var/go-auth/master-api
+89193 Wed Oct 28 13:56:34 2026     /Users/hongocbaolong/.volta/tools/image/node/24.22.1/bin/node /Users/hongocbaolong/Documents/marketenterprise/forms_master/tools/go-auth/web/node_modules/vite/bin/vite.js --host localhost --port 4180 --strictPort
+-rw-r--r--@ 1 hongocbaolong  staff     25121 Oct 28 12:50 tools/go-auth/internal/engine/engine.go
+-rwxr-xr-x@ 1 hongocbaolong  staff  17775586 Oct 28 13:56 var/go-auth/master-api

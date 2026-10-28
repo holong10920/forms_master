@@ -1,0 +1,12 @@
+✔ no dependency violations found (189 modules, 523 dependencies cruised)
+
+depcruise exit 0
+  "findings": []
+}
+synthetic exit 0
+  ]
+}
+secrets exit 0
+gen:check OK (4 generated files)
+schemas:lint OK (3 schema files)
+contracts exit 0

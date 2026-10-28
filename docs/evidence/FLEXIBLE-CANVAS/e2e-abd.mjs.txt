@@ -1,0 +1,123 @@
+import { open, studio, save, leftTab, formId, shot, OUT } from "./lib.mjs";
+import { writeFileSync } from "node:fs";
+const { browser, page, errors } = await open();
+const result = {};
+const canvasKeys = () =>
+  page.locator("#canvas .cv-block").evaluateAll((els) => els.filter((e) => !e.closest(".cv-section-body")).map((e) => e.dataset.key));
+const pills = () => page.locator("#stepper .step-pill").allInnerTexts();
+async function selectDisplay(type, nth = 0) {
+  await page.locator(`#canvas .cv-block[data-display-type="${type}"]`).nth(nth).click({ position: { x: 20, y: 10 } });
+  await page.locator("#inspector-body [data-display-prop]").first().waitFor().catch(() => {});
+}
+try {
+  // ---- A: blank form with Heading + Paragraph + Fields
+  await studio(page);
+  await page.locator("#new-form").click();
+  await page.locator("#new-name").fill("E2E 空白キャンバス");
+  await page.locator("#create").click();
+  await page.waitForFunction(() => location.pathname.includes("/forms/"));
+  const form = formId(page);
+  result.form = form;
+  await page.locator(".step-title-input").first().fill("STEP 1");
+  await leftTab(page, "add");
+  for (const t of ["heading", "text"]) await page.locator(`[data-add-display="${t}"]`).click();
+  await page.locator('[data-add-type="text"]').click();
+  await page.locator("#inspector-body").locator('[data-focus="label"]').fill("ニックネーム");
+  await page.locator('[data-add-type="choice.radio"]').click();
+  await page.locator("#inspector-body").locator('[data-focus="label"]').fill("プラン");
+  await selectDisplay("heading");
+  await page.locator('#inspector-body [data-display-prop="text"]').fill("会員登録フォーム");
+  await selectDisplay("text");
+  await page.locator('#inspector-body [data-display-prop="text"]').fill("以下の項目を入力してください");
+  await save(page);
+  await page.reload();
+  await page.locator("#mode-build:not([hidden])").waitFor();
+  const aKeys = await canvasKeys();
+  const aText = await page.locator("#canvas").innerText();
+  result.A = { order: aKeys, heading: aText.includes("会員登録フォーム"), paragraph: aText.includes("以下の項目を入力してください") };
+  if (!aKeys[0].startsWith("display:") || !aKeys[1].startsWith("display:") || aKeys.length !== 4) throw Error("A order " + aKeys);
+  await shot(page, "A-blank-canvas");
+
+  // ---- B: 10 input steps + reorder
+  for (let i = 2; i <= 10; i++) {
+    await leftTab(page, "outline");
+    await page.locator("#add-step").click();
+    await page.locator(".step-title-input").first().fill("STEP " + i);
+    await leftTab(page, "add");
+    await page.locator('[data-add-type="text"]').click();
+    await page.locator("#inspector-body").locator('[data-focus="label"]').fill("項目 " + i);
+  }
+  const before = await pills();
+  const stepIdsOf = () => page.locator("#steps li.ol-step").evaluateAll((els) => els.map((e) => e.dataset.stepId));
+  await leftTab(page, "outline");
+  // Outline tool: STEP 10 one up.
+  await page.getByRole("button", { name: "「STEP 10」を前へ移動" }).click();
+  // Inspector tools: select STEP 10 and move it up once more, then duplicate STEP 1.
+  await page.locator("#steps li.ol-step", { hasText: "STEP 10" }).locator("> button").first().click();
+  await page.locator("#step-move-up").click();
+  const after = await pills();
+  await page.locator("#steps li.ol-step", { hasText: "STEP 1" }).first().locator("> button").first().click();
+  await page.locator("#step-duplicate").click();
+  const duplicated = await pills();
+  const ids = await stepIdsOf();
+  result.B = { before, after, duplicated, uniqueIds: new Set(ids).size === ids.length };
+  const diag = await page.locator("#diagnostics").innerText();
+  result.B.diagnostics = diag;
+  await save(page);
+  await page.reload();
+  await page.locator("#mode-build:not([hidden])").waitFor();
+  result.B.reloaded = await pills();
+  if (JSON.stringify(result.B.reloaded) !== JSON.stringify(duplicated)) throw Error("B reload order");
+  await shot(page, "B-ten-steps");
+  // ---- D: confirmation with bindings + product (repeatable group) summary
+  await page.locator("#stepper .step-pill", { hasText: "STEP 1" }).first().click();
+  await leftTab(page, "add");
+  await page.locator('[data-add-type="group"]').click();
+  await page.locator("#stepper .step-pill", { hasText: "確認画面" }).click();
+  await leftTab(page, "add");
+  for (const t of ["summary", "fieldValue", "groupSummary"]) await page.locator(`[data-add-display="${t}"]`).click();
+  await selectDisplay("fieldValue");
+  result.D = { bindingOptions: await page.locator("#display-binding option").allInnerTexts() };
+  await page.locator("#display-binding").selectOption({ label: "プラン（STEP 1）" });
+  result.D.canvas = await page.locator("#canvas").innerText();
+  await save(page);
+  await shot(page, "D-review-canvas");
+  // ---- Preview (isolated origin, TS runtime)
+  const pv = page.waitForResponse((r) => r.url().endsWith("/api/preview") && r.request().method() === "POST");
+  await page.locator("#preview").click();
+  if ((await pv).status() !== 200) throw Error("preview");
+  const frame = page.frameLocator("#preview-frame");
+  await frame.locator("#app h1").waitFor();
+  result.preview = { first: await frame.locator("#app").innerText() };
+  await shot(page, "D-preview-step1");
+  await frame.getByLabel("ニックネーム").fill("合成ユーザー");
+  await frame.getByRole("radio", { name: "はい" }).check();
+  await frame.getByLabel("商品名").fill("合成ギター");
+  const visited = [];
+  for (let i = 0; i < 30; i++) {
+    const h = await frame.locator("#app h1, #app h2").first().innerText().catch(() => "");
+    visited.push(h);
+    if (await frame.locator('[data-display="summary"]').count()) break;
+    await frame.getByRole("button", { name: "次へ", exact: true }).click();
+    await page.waitForTimeout(150);
+  }
+  const review = await frame.locator("#app").innerText();
+  result.D.preview = {
+    visited,
+    review,
+    plan: await frame.locator('[data-display="fieldValue"]').innerText(),
+    products: await frame.locator('[data-display="groupSummary"]').innerText(),
+    sections: await frame.locator('[data-display="summary"] section[data-step]').count(),
+    rawJson: /[{[]\s*"/.test(review),
+  };
+  if (!result.D.preview.plan.includes("はい") || !result.D.preview.products.includes("合成ギター") || result.D.preview.rawJson)
+    throw Error("D bindings");
+  await shot(page, "D-preview-review");
+  writeFileSync(OUT + "/scenario-abd.json", JSON.stringify(result, null, 1));
+  console.log(JSON.stringify(result, null, 1));
+  console.log((await page.locator("#inspector-head").innerText()));
+  await shot(page, "B-probe");
+} finally {
+  console.log("errors", errors);
+  await browser.close();
+}

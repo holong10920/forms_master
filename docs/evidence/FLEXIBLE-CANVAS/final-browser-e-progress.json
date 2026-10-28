@@ -1,0 +1,138 @@
+{
+ "form": "frm_479e25a7b0fd42c0939e1c942add26f0",
+ "branchTargets": [
+  "未設定",
+  "STEP 2",
+  "STEP 3",
+  "STEP 3（コピー）",
+  "STEP 4",
+  "STEP 5",
+  "STEP 6",
+  "STEP 7",
+  "STEP 10",
+  "STEP 8",
+  "STEP 9",
+  "確認画面"
+ ],
+ "branchRule": "上から順に評価し、最初に一致した分岐へ進みます。どれにも一致しない場合は「それ以外」へ進みます。\n\n分岐 1\n優先 1\nもし\n条件削除\n分岐条件\n条件\n次の条件を満たすとき\nすべての条件を満たすとき（AND）\nいずれかの条件を満たすとき（OR）\n条件 1\nプラン\nが次と等しい\nが次と異なる\nが未回答\nが回答済み\nが次のいずれか\nが次のいずれでもない\nはい\nいいえ\n分岐条件を追加\n「プラン」が「はい」 のとき → 「STEP 6」へ進む\n→ 移動先\n未設定\nSTEP 2\nSTEP 3\nSTEP 3（コピー）\nSTEP 4\nSTEP 5\nSTEP 6\nSTEP 7\nSTEP 10\nSTEP 8\nSTEP 9\n確認画面\nそれ以外\n次のステップ\n未設定\nSTEP 2\nSTEP 3\nSTEP 3（コピー）\nSTEP 4\nSTEP 5\nSTEP 6\nSTEP 7\nSTEP 10\nSTEP 8\nSTEP 9\n確認画面\n条件分岐を追加",
+ "E": {
+  "before": [
+   "1\nSTEP 1",
+   "2\nSTEP 2",
+   "3\nSTEP 3",
+   "4\nSTEP 4",
+   "5\nSTEP 5",
+   "6\nSTEP 6",
+   "7\nSTEP 7",
+   "8\nSTEP 8",
+   "9\nSTEP 9",
+   "10\nSTEP 10",
+   "確認画面",
+   "完了画面"
+  ],
+  "reordered": [
+   "1\nSTEP 1",
+   "2\nSTEP 2",
+   "3\nSTEP 3",
+   "4\nSTEP 3（コピー）",
+   "5\nSTEP 4",
+   "6\nSTEP 5",
+   "7\nSTEP 6",
+   "8\nSTEP 7",
+   "9\nSTEP 10",
+   "10\nSTEP 8",
+   "11\nSTEP 9",
+   "確認画面",
+   "完了画面"
+  ],
+  "reloaded": [
+   "1\nSTEP 1",
+   "2\nSTEP 2",
+   "3\nSTEP 3",
+   "4\nSTEP 3（コピー）",
+   "5\nSTEP 4",
+   "6\nSTEP 5",
+   "7\nSTEP 6",
+   "8\nSTEP 7",
+   "9\nSTEP 10",
+   "10\nSTEP 8",
+   "11\nSTEP 9",
+   "確認画面",
+   "完了画面"
+  ],
+  "orderKept": true,
+  "targetAfter": "STEP 6",
+  "preview": {
+   "afterBranch": "STEP 6",
+   "afterBack": "STEP 1",
+   "otherwise": "STEP 2",
+   "expectedOtherwise": "STEP 2"
+  }
+ },
+ "progress": {
+  "desktop11": {
+   "overflow": true,
+   "circles": 0,
+   "counter": "1 / 11",
+   "current": "STEP 1",
+   "bar": "9",
+   "overflowsX": false,
+   "width": 608
+  },
+  "desktop11Step2": {
+   "overflow": true,
+   "circles": 0,
+   "counter": "2 / 11",
+   "current": "STEP 2",
+   "bar": "18",
+   "overflowsX": false,
+   "width": 608
+  },
+  "mobile11": {
+   "overflow": true,
+   "circles": 0,
+   "counter": "1 / 11",
+   "current": "STEP 1",
+   "bar": "9",
+   "overflowsX": false,
+   "width": 310
+  },
+  "twoScreen-1440": {
+   "overflow": false,
+   "circles": 1,
+   "counter": null,
+   "current": "お申し込み内容",
+   "bar": null,
+   "overflowsX": false,
+   "width": 608
+  },
+  "twoScreen-390": {
+   "overflow": false,
+   "circles": 1,
+   "counter": null,
+   "current": "お申し込み内容",
+   "bar": null,
+   "overflowsX": false,
+   "width": 326
+  },
+  "fourStep-1440": {
+   "overflow": false,
+   "circles": 3,
+   "counter": null,
+   "current": "STEP 1",
+   "bar": null,
+   "overflowsX": false,
+   "width": 608
+  },
+  "fourStep-390": {
+   "overflow": false,
+   "circles": 3,
+   "counter": null,
+   "current": "STEP 1",
+   "bar": null,
+   "overflowsX": false,
+   "width": 326
+  }
+ },
+ "errors": []
+}

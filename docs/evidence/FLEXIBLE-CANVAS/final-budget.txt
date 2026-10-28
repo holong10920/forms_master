@@ -1,0 +1,9 @@
+# Template compile (tools/compiler compile, gzip -9; budget JS<=12288, total<=16384)
+sports js 11954 total 15717 css 2663
+multi js 11443 total 15294 css 2662
+polished js 11443 total 16078 css 3452
+gakki js 11475 total 15359 css 2662
+display js 11175 total 15280 css 2935
+# Published releases on fresh stack (var/master/objects/releases)
+rel_4vvf2dr5zuxrzbfjqt5564ogrv initialJS 11592 initialTotal 15846 css 2935 lazyJS 36908 initialFiles 2
+rel_n4qcurlg4grdzieltlyrn5lap5 initialJS 11592 initialTotal 15840 css 2935 lazyJS 36908 initialFiles 2

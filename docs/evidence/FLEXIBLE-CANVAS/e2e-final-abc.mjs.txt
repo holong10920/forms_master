@@ -1,0 +1,225 @@
+// Final verification A/B/C on the fresh Go stack: blank canvas with a dynamic display on an
+// input step, custom confirmation, custom completion, publish, real submit 200/422/replay.
+import { open, studio, save, leftTab, formId, shot, OUT } from "./lib.mjs";
+import { writeFileSync } from "node:fs";
+const result = {};
+const admin = await open();
+const page = admin.page;
+const pill = (label) => page.locator("#stepper .step-pill", { hasText: label }).first();
+const selectDisplay = (type, nth = 0) =>
+  page.locator(`#canvas .cv-block[data-display-type="${type}"]`).nth(nth).click({ position: { x: 20, y: 10 } });
+const canvasTypes = () =>
+  page
+    .locator("#canvas .cv-block")
+    .evaluateAll((els) =>
+      els.filter((e) => !e.closest(".cv-section-body")).map((e) => e.dataset.displayType || "field:" + e.innerText.split("\n")[0]),
+    );
+const field = async (type, label) => {
+  await page.locator(`[data-add-type="${type}"]`).click();
+  await page.locator("#inspector-body [data-focus=\"label\"]").fill(label);
+};
+try {
+  await studio(page);
+  await page.locator("#new-form").click();
+  await page.locator("#new-name").fill("E2E 最終確認");
+  await page.locator("#create").click();
+  await page.waitForFunction(() => location.pathname.includes("/forms/"));
+  const form = formId(page);
+  result.form = form;
+  // ---- A: STEP 1 = Heading, Paragraph, fields, dynamic display (fieldValue on an input step)
+  await page.locator(".step-title-input").first().fill("STEP 1");
+  await leftTab(page, "add");
+  for (const t of ["heading", "text"]) await page.locator(`[data-add-display="${t}"]`).click();
+  await field("text", "ニックネーム");
+  await field("choice.radio", "プラン");
+  await field("email", "メールアドレス");
+  await page.locator('[data-add-display="fieldValue"]').click();
+  await page.locator("#display-binding").selectOption({ label: "プラン" });
+  await selectDisplay("heading");
+  await page.locator('#inspector-body [data-display-prop="text"]').fill("会員登録フォーム");
+  await selectDisplay("text");
+  await page.locator('#inspector-body [data-display-prop="text"]').fill("以下の項目を入力してください");
+  // STEP 2 = repeatable product group
+  await leftTab(page, "outline");
+  await page.locator("#add-step").click();
+  await page.locator(".step-title-input").first().fill("STEP 2");
+  await leftTab(page, "add");
+  await page.locator('[data-add-type="group"]').click();
+  // ---- B: confirmation = summary + product summary + masked email
+  await pill("確認画面").click();
+  await leftTab(page, "add");
+  for (const t of ["summary", "groupSummary", "fieldValue"]) await page.locator(`[data-add-display="${t}"]`).click();
+  await selectDisplay("fieldValue");
+  await page.locator("#display-binding").selectOption({ label: "メールアドレス" });
+  await page.locator("#inspector-body").getByLabel("マスク").selectOption("partial");
+  // ---- C: completion = image, heading, paragraph, reference, CTA link, restart
+  await pill("完了画面").click();
+  await leftTab(page, "add");
+  for (const t of ["image", "heading", "text", "reference", "button", "button"])
+    await page.locator(`[data-add-display="${t}"]`).click();
+  await selectDisplay("heading");
+  await page.locator('#inspector-body [data-display-prop="text"]').fill("お申し込みありがとうございました");
+  await selectDisplay("text");
+  await page.locator('#inspector-body [data-display-prop="text"]').fill("受付番号を控えてください。");
+  await selectDisplay("button", 1);
+  await page.locator('#inspector-body [data-display-prop="label"]').fill("新しく申し込む");
+  await page.locator("#display-button-action").selectOption("restart");
+  result.completeBinding = await page.locator("#canvas").innerText();
+  await save(page);
+  // Save → Reload: per-step order survives
+  const studioOrder = {};
+  for (const s of ["STEP 1", "確認画面", "完了画面"]) {
+    await pill(s).click();
+    studioOrder[s] = await canvasTypes();
+  }
+  await page.reload();
+  await page.locator("#mode-build:not([hidden])").waitFor();
+  const reloaded = {};
+  for (const s of ["STEP 1", "確認画面", "完了画面"]) {
+    await pill(s).click();
+    reloaded[s] = await canvasTypes();
+  }
+  result.A = { studioOrder, reloadSame: JSON.stringify(studioOrder) === JSON.stringify(reloaded) };
+  if (!result.A.reloadSame) throw Error("A reload order " + JSON.stringify(reloaded));
+  await pill("STEP 1").click();
+  await shot(page, "final-A-studio");
+
+  // ---- Preview: dynamic display, review, no fabricated reference
+  const pv = page.waitForResponse((r) => r.url().endsWith("/api/preview") && r.request().method() === "POST");
+  await page.locator("#preview").click();
+  if ((await pv).status() !== 200) throw Error("preview");
+  const frame = page.frameLocator("#preview-frame");
+  await frame.locator("#app h1").waitFor();
+  await frame.getByLabel("ニックネーム").fill("合成ユーザー");
+  await frame.getByRole("radio", { name: "はい" }).check();
+  await frame.getByLabel("メールアドレス").fill("synthetic@example.com");
+  result.preview = { dynamic: await frame.locator('[data-display="fieldValue"]').innerText() };
+  await frame.getByRole("button", { name: "次へ", exact: true }).click();
+  await frame.getByLabel("商品名").fill("合成ギター");
+  for (let i = 0; i < 4 && !(await frame.locator('[data-display="summary"]').count()); i++) {
+    await frame.getByRole("button", { name: "次へ", exact: true }).click();
+    await page.waitForTimeout(200);
+  }
+  await frame.locator('[data-display="summary"]').waitFor({ timeout: 5000 }).catch(async (e) => {
+    await shot(page, "final-debug");
+    throw Error("no review: " + (await frame.locator("#app").innerText()));
+  });
+  result.preview.review = await frame.locator("#app").innerText();
+  await shot(page, "final-B-preview-review");
+  await frame.getByRole("button", { name: "ローカル模擬受付", exact: true }).click();
+  await frame.locator('[data-display="reference"]').waitFor();
+  result.preview.completion = await frame.locator("#app").innerText();
+  result.preview.noFabricatedReference = !/synthetic_/.test(result.preview.completion);
+  if (!result.preview.noFabricatedReference) throw Error("preview fabricated a reference");
+  await shot(page, "final-C-preview-completion");
+  await page.locator("#mode-tab-build").click();
+
+  // ---- Publish: review request → separate approver → publish
+  await page.locator("#primary-cta").click();
+  await page.locator("#review-dialog[open]").waitFor();
+  if (await page.locator("#contract-ack-row").isVisible()) await page.locator("#contract-ack").check();
+  await page.locator("#review").click();
+  await page.locator("#mode-publish:not([hidden])").waitFor();
+  const approver = await open("synthetic-approver");
+  await studio(approver.page, form);
+  await approver.page.locator("#mode-tab-publish").click();
+  const ok = approver.page.waitForResponse((r) => r.url().endsWith("/api/approve"));
+  await approver.page.getByRole("button", { name: "承認 (Data Contract 確認)" }).first().click();
+  await approver.page.locator("dialog[open]").getByRole("button", { name: "承認する" }).click();
+  result.approve = (await ok).status();
+  await approver.browser.close();
+  await page.reload();
+  await page.locator("#mode-tab-publish").click();
+  await page.getByRole("button", { name: "ローカル公開" }).first().click();
+  const pub = page.waitForResponse((r) => r.url().endsWith("/api/publish"));
+  await page.locator("dialog[open]").getByRole("button", { name: "公開する" }).click();
+  result.publish = (await pub).status();
+  const link = page.getByRole("link", { name: "公開中のフォームを新しいタブで開く" });
+  await link.waitFor();
+  const url = await link.getAttribute("href");
+  result.url = url;
+
+  // ---- Customer on the published release
+  const ctx = await admin.browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const c = await ctx.newPage();
+  const submits = [];
+  const bodies = [];
+  const cErrors = [];
+  c.on("pageerror", (e) => cErrors.push(e.message));
+  c.on("request", (r) => r.url().endsWith("/api/submit") && bodies.push(r.postData()));
+  c.on("response", (r) => r.url().endsWith("/api/submit") && submits.push(r.status()));
+  await c.goto(url);
+  await c.locator("#app h1").waitFor();
+  const step1 = await c.locator("#app [data-display], #app .field label, #app fieldset legend").evaluateAll((els) =>
+    els.map((e) => e.dataset.display || "field:" + e.textContent.trim().split("\n")[0]),
+  );
+  await c.getByLabel("ニックネーム").fill("合成ユーザー");
+  await c.getByRole("radio", { name: "はい" }).check();
+  await c.getByLabel("メールアドレス").fill("synthetic@example.com");
+  const dynamic = await c.locator('[data-display="fieldValue"]').innerText();
+  await c.screenshot({ path: OUT + "/final-A-customer-step1.png", fullPage: true });
+  await c.getByRole("button", { name: "次へ", exact: true }).click();
+  await c.getByLabel("商品名").fill("合成ギター");
+  for (let i = 0; i < 4 && !(await c.locator('[data-display="summary"]').count()); i++) {
+    await c.getByRole("button", { name: "次へ", exact: true }).click();
+    await c.waitForTimeout(200);
+  }
+  await c.locator('[data-display="summary"]').waitFor();
+  const review = await c.locator("#app").innerText();
+  await c.screenshot({ path: OUT + "/final-B-customer-review.png", fullPage: true });
+  result.B = {
+    reviewOrder: await c.locator("#app [data-display]").evaluateAll((els) => els.map((e) => e.dataset.display)),
+    products: await c.locator('[data-display="groupSummary"]').innerText(),
+    maskedEmail: await c.locator('[data-display="fieldValue"]').innerText(),
+    rawJson: /[{[]\s*"/.test(review),
+    submitsBeforeConfirm: submits.length,
+  };
+  await c.getByRole("button", { name: "ローカル模擬受付", exact: true }).click();
+  await c.locator(".request-reference strong").waitFor();
+  const done = await c.locator("#app").innerText();
+  const receipt = await c.locator(".request-reference strong").innerText();
+  await c.screenshot({ path: OUT + "/final-C-customer-completion.png", fullPage: true });
+  result.A.customer = { step1, dynamic };
+  result.C = {
+    order: await c.locator("#app [data-display]").evaluateAll((els) => els.map((e) => e.dataset.display)),
+    receipt,
+    links: await c.locator("a.display-cta").evaluateAll((els) => els.map((a) => a.getAttribute("href"))),
+    image: await c.locator('[data-display="image"] svg[role="img"]').count(),
+    emailShown: done.includes("synthetic@example.com"),
+    nicknameShown: done.includes("合成ユーザー"),
+  };
+  // Direct Go API checks from the customer origin: replay, key reuse, invalid data.
+  const uiSubmits = submits.length;
+  const sent = JSON.parse(bodies[0]);
+  const post = (body) =>
+    c.evaluate(async ([u, b]) => {
+      const r = await fetch(u, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) });
+      return { status: r.status, body: await r.json() };
+    }, [new URL("api/submit", url).href, body]);
+  result.api = {
+    first: submits[0],
+    replay: await post(sent),
+    keyReuse: await post({ payload: { ...sent.payload, nickname: "別の値" }, idempotencyKey: sent.idempotencyKey }),
+    invalid: await post({
+      payload: Object.fromEntries(Object.entries(sent.payload).map(([k, v]) => [k, typeof v === "string" && v.includes("@") ? "not-an-email" : v])),
+      idempotencyKey: "final-invalid-" + Date.now(),
+    }),
+  };
+  result.api.payloadKeys = Object.keys(sent.payload);
+  // CTA restart does not resubmit.
+  await c.getByRole("button", { name: "新しく申し込む" }).click();
+  await c.getByLabel("ニックネーム").waitFor();
+  result.C.restartFresh = (await c.getByLabel("ニックネーム").inputValue()) === "";
+  result.C.uiSubmitCount = uiSubmits;
+  result.C.submitsAfterRestart = submits.length - uiSubmits - 3;
+  result.C.customerErrors = cErrors;
+  if (submits[0] !== 200 || uiSubmits !== 1 || result.C.submitsAfterRestart !== 0) throw Error("submit " + submits);
+  if (result.api.replay.body.receipt !== receipt) throw Error("replay");
+  if (result.api.invalid.status !== 422) throw Error("invalid " + result.api.invalid.status);
+  if (result.C.emailShown || result.C.nicknameShown || result.B.rawJson) throw Error("leak");
+} finally {
+  result.errors = admin.errors;
+  writeFileSync(OUT + "/final-abc.json", JSON.stringify(result, null, 1));
+  console.log(JSON.stringify(result, null, 1));
+  await admin.browser.close();
+}

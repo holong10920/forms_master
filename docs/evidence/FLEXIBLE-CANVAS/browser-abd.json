@@ -1,0 +1,119 @@
+{
+ "form": "frm_ac53ccaa62ea4bda928d23c7405c8ab6",
+ "A": {
+  "order": [
+   "display:dsp_c3005c739973",
+   "display:dsp_6fb8a28251fa",
+   "$local:fld_b0a1444598c6",
+   "$local:fld_ec582f534720"
+  ],
+  "heading": true,
+  "paragraph": true
+ },
+ "B": {
+  "before": [
+   "1\nSTEP 1",
+   "2\nSTEP 2",
+   "3\nSTEP 3",
+   "4\nSTEP 4",
+   "5\nSTEP 5",
+   "6\nSTEP 6",
+   "7\nSTEP 7",
+   "8\nSTEP 8",
+   "9\nSTEP 9",
+   "10\nSTEP 10",
+   "確認画面",
+   "完了画面"
+  ],
+  "after": [
+   "1\nSTEP 1",
+   "2\nSTEP 2",
+   "3\nSTEP 3",
+   "4\nSTEP 4",
+   "5\nSTEP 5",
+   "6\nSTEP 6",
+   "7\nSTEP 7",
+   "8\nSTEP 10",
+   "9\nSTEP 8",
+   "10\nSTEP 9",
+   "確認画面",
+   "完了画面"
+  ],
+  "duplicated": [
+   "1\nSTEP 1",
+   "2\nSTEP 1（コピー）",
+   "3\nSTEP 2",
+   "4\nSTEP 3",
+   "5\nSTEP 4",
+   "6\nSTEP 5",
+   "7\nSTEP 6",
+   "8\nSTEP 7",
+   "9\nSTEP 10",
+   "10\nSTEP 8",
+   "11\nSTEP 9",
+   "確認画面",
+   "完了画面"
+  ],
+  "uniqueIds": true,
+  "diagnostics": "",
+  "reloaded": [
+   "1\nSTEP 1",
+   "2\nSTEP 1（コピー）",
+   "3\nSTEP 2",
+   "4\nSTEP 3",
+   "5\nSTEP 4",
+   "6\nSTEP 5",
+   "7\nSTEP 6",
+   "8\nSTEP 7",
+   "9\nSTEP 10",
+   "10\nSTEP 8",
+   "11\nSTEP 9",
+   "確認画面",
+   "完了画面"
+  ]
+ },
+ "D": {
+  "bindingOptions": [
+   "選択してください",
+   "ニックネーム（STEP 1）",
+   "プラン（STEP 1）",
+   "項目 2",
+   "項目 3",
+   "項目 4",
+   "項目 5",
+   "項目 6",
+   "項目 7",
+   "項目 8",
+   "項目 9",
+   "項目 10",
+   "ニックネーム（STEP 1（コピー））",
+   "プラン（STEP 1（コピー））"
+  ],
+  "canvas": "E2E 空白キャンバス\n入力内容の確認\nSTEP 1\nニックネーム、プラン、商品一覧\nSTEP 1（コピー）\nニックネーム、プラン\nSTEP 2\n項目 2\nSTEP 3\n項目 3\nSTEP 4\n項目 4\nSTEP 5\n項目 5\nSTEP 6\n項目 6\nSTEP 7\n項目 7\nSTEP 10\n項目 10\nSTEP 8\n項目 8\nSTEP 9\n項目 9\n入力値の表示\nプラン\n〈お客様の入力値〉\n商品一覧\n商品名\n〈1 件目の入力値〉\n商品名\n〈2 件目の入力値〉\n戻る\nローカル模擬受付",
+  "preview": {
+   "visited": [
+    "会員登録フォーム",
+    "会員登録フォーム",
+    "STEP 1（コピー）",
+    "STEP 2",
+    "STEP 3",
+    "STEP 4",
+    "STEP 5",
+    "STEP 6",
+    "STEP 7",
+    "STEP 10",
+    "STEP 8",
+    "STEP 9",
+    "入力内容の確認"
+   ],
+   "review": "合成データのみ\n\nSTEP 1\nSTEP 1（コピー）\nSTEP 2\nSTEP 3\nSTEP 4\nSTEP 5\nSTEP 6\nSTEP 7\nSTEP 10\nSTEP 8\nSTEP 9\n入力内容の確認\n入力内容の確認\nSTEP 1\nニックネーム\n合成ユーザー\nプラン\nはい\n商品一覧\n商品名\n合成ギター\nSTEP 1（コピー）\nニックネーム\n未入力\nプラン\n未入力\nSTEP 2\n項目 2\n未入力\nSTEP 3\n項目 3\n未入力\nSTEP 4\n項目 4\n未入力\nSTEP 5\n項目 5\n未入力\nSTEP 6\n項目 6\n未入力\nSTEP 7\n項目 7\n未入力\nSTEP 10\n項目 10\n未入力\nSTEP 8\n項目 8\n未入力\nSTEP 9\n項目 9\n未入力\nプラン\nはい\n商品一覧\n商品名\n合成ギター\n戻る\nローカル模擬受付",
+   "plan": "プラン\nはい",
+   "products": "商品一覧\n商品名\n合成ギター",
+   "sections": 11,
+   "rawJson": false
+  }
+ },
+ "preview": {
+  "first": "合成データのみ\n\nSTEP 1\nSTEP 1（コピー）\nSTEP 2\nSTEP 3\nSTEP 4\nSTEP 5\nSTEP 6\nSTEP 7\nSTEP 10\nSTEP 8\nSTEP 9\n入力内容の確認\n会員登録フォーム\n\n以下の項目を入力してください\n\nニックネーム任意\nプラン任意\nはい\nいいえ\n商品情報を入力\n商品名必須\n次へ"
+ }
+}
